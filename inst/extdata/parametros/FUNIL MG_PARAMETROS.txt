@@ -1,0 +1,20 @@
+9491.00                               'Área de drenagem Km²                           
+5       0.000 0.050 0.500 0.450 0.000 'Kt peso                                        
+125.00                                'Str                                            
+3.9                                   'K2t                                            
+100.00                                'Crec                                           
+2.00                                  'Ai                                             
+46.00                                 'Capc                                           
+135                                   'Kkt                                            
+10.0                                  'K2t2                                           
+200.00                                'H1 Altura para o segundo escoamento superficial
+200.00                                'H quarto reservatorio                          
+10.0                                  'K3t                                            
+10.0                                  'K1t                                            
+1.13                                  'Ecof                                           
+1.00                                  'Pcof                                           
+0.00                                  'Ecof2                                          
+1.20                                  'Limite superior ebin                           
+0.80                                  'Limite inferior ebin                           
+2.00                                  'Limite superior chuva                          
+0.50                                  'Limite inferior chuva                          
