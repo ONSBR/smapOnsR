@@ -22,7 +22,7 @@
 #' para o periodo de 2010 a 2021
 #'
 #' @format ## `historico_vazao`
-#' A data table com 239,742 linhas and 4 colunas:
+#' A data table com 486,513 linhas and 4 colunas:
 #' \describe{
 #'   \itemize{
 #'     \item{data}{data da observacao}
@@ -57,15 +57,13 @@
 #' Parametros das sub-bacias modeladas pelo SMAP/ONS
 #'
 #' @format ## `parametros`
-#' A data table com 110 linha and 83 colunas:
+#' A data table com 8910 linhas and 3 colunas:
 #' \describe{
 #'   \itemize{
 #'     \item{nome}{nome da sub-bacia}
-#'     \item{area}{area da sub-bacia}
-#'     \item{nKt}{número de kts}
-#'     \item{kt2}{valor do parametro kt+2}
-#'     \item{kt-60}{valor do parametro kt-60}
-#'      }
+#'     \item{parametros}{nome do parametros}
+#'     \item{valor}{valor do parametro}
+#'     }
 #' }
 #' @source ONS
 "parametros"

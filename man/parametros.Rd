@@ -7,14 +7,12 @@
 \format{
 \subsection{\code{parametros}}{
 
-A data table com 110 linha and 83 colunas:
+A data table com 8910 linhas and 3 colunas:
 \describe{
 \itemize{
 \item{nome}{nome da sub-bacia}
-\item{area}{area da sub-bacia}
-\item{nKt}{número de kts}
-\item{kt2}{valor do parametro kt+2}
-\item{kt-60}{valor do parametro kt-60}
+\item{parametros}{nome do parametros}
+\item{valor}{valor do parametro}
 }
 }
 }

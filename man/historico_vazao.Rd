@@ -7,7 +7,7 @@
 \format{
 \subsection{\code{historico_vazao}}{
 
-A data table com 239,742 linhas and 4 colunas:
+A data table com 486,513 linhas and 4 colunas:
 \describe{
 \itemize{
 \item{data}{data da observacao}
