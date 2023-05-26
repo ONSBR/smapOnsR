@@ -81,9 +81,9 @@ le_parametros <- function(arq) {
     
     aux <- strsplit(arq, split = "/")[[1]]
     sb <- strsplit(aux[length(aux)], split = "_")[[1]]
-    parametros_smap$nome <- sb[1]
+    parametros_smap$Nome <- sb[1]
     
-    parametros_smap$area <- as.numeric(parametros[1,1])
+    parametros_smap$Area <- as.numeric(parametros[1,1])
     parametros_smap$nKt <- as.numeric(substr(parametros[2,1],1,3))
     aux <- strsplit(trimws(substr(parametros[2,1],4,nchar(parametros[2,1]))),split = " ")
 
@@ -97,8 +97,13 @@ le_parametros <- function(arq) {
     for (iparametro in 67:80) {
         parametros_smap[1,iparametro] <- as.numeric(parametros[(iparametro - 64), 1])
     } 
-    parametros_smap[1,81] <- sum(parametros_smap[, 7:66] > 0)
-    parametros_smap[1,82] <- sum(parametros_smap[, 4:5] > 0)
+    parametros_smap[1, 81] <- sum(parametros_smap[, 7:66] > 0)
+    parametros_smap[1, 82] <- sum(parametros_smap[, 4:5] > 0)
+    parametros_smap[1, K_kts := 0.5 ^ (1 / K_kt)]
+    parametros_smap[1, K_1ts := 0.5 ^ (1 / K1t)]
+    parametros_smap[1, K_2ts := 0.5 ^ (1 / K2t)]
+    parametros_smap[1, K_2t2s := 0.5 ^ (1 / K2t2)]
+    parametros_smap[1, K_3ts := 0.5 ^ (1 / K3t)]
 
     parametros_smap
 }

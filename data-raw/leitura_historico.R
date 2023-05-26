@@ -1,4 +1,3 @@
-## PRECIPITACAO
 devtools::load_all()
 
 historico_precipitacao <- le_historico_verificado("inst/extdata/psat.csv")
@@ -9,5 +8,5 @@ usethis::use_data(historico_precipitacao, overwrite = TRUE)
 usethis::use_data(historico_vazao, overwrite = TRUE)
 usethis::use_data(historico_etp, overwrite = TRUE)
 
-historico <- merge(historico_etp, historico_vazao, by = c("posto", "data"))
-data.table::setorder(historico, id.y, data)
+# historico <- merge(historico_etp, historico_vazao, by = c("posto", "data"))
+# data.table::setorder(historico, id.y, data)
