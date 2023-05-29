@@ -22,7 +22,7 @@
 #' @return Matriz com a vazao calculada e os valores de estado e funcoes de transferencia
 #' @export
 
-smap_ons.previsao <- function(parametros, inicializacao, precipitacao, evapotranspiracao, Emarg, saidaAnterior, dataD = NULL){
+smap_ons.previsao <- function(parametros, inicializacao, precipitacao, evapotranspiracao, Emarg, saidaAnterior = matrix(nrow = 0, ncol = length(matrizSaida_nom)), dataD = NULL){
 
   #Param. Gerais SMAP
   Str <- parametros[parametro == "Str", valor]
@@ -138,16 +138,6 @@ smap_ons.previsao <- function(parametros, inicializacao, precipitacao, evapotran
   matrizSaida[1,13] <- Eb
   matrizSaida[1,14] <- Tu
 
-  if(!is.null(dataD)){
-    row.names(matrizSaida)<-as.character(dataD)
-  }
-
-  if(missing(saidaAnterior)){
-    return(matrizSaida)
-  }else{
-    matrizSaida <- rbind(saidaAnterior, matrizSaida)
-    return(matrizSaida)
-  }
-
+  matrizSaida <- rbind(saidaAnterior, matrizSaida)
   
 }
