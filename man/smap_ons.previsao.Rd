@@ -5,24 +5,22 @@
 \title{Rodada de um dia do SMAP}
 \usage{
 smap_ons.previsao(
-  parametrosSMAP,
+  parametros,
   inicializacao,
   precipitacao,
   evapotranspiracao,
   Emarg,
-  mRbind,
+  saidaAnterior = matrix(nrow = 0, ncol = length(matrizSaida_nom)),
   dataD = NULL
 )
 }
 \arguments{
-\item{parametrosSMAP}{data.table contendo n linhas and 83 colunas:
+\item{parametros}{data table com 8910 linhas and 3 colunas:
 \describe{
 \itemize{
 \item{nome}{nome da sub-bacia}
-\item{area}{area da sub-bacia}
-\item{nKt}{número de kts}
-\item{kt2}{valor do parametro kt+2}
-\item{kt-60}{valor do parametro kt-60}
+\item{parametros}{nome do parametros}
+\item{valor}{valor do parametro}
 }
 }}
 
@@ -34,7 +32,7 @@ smap_ons.previsao(
 
 \item{Emarg}{Valor da evaporacao final do dia do reservatorio de planicie (ja corrigido e/ou ponderado)}
 
-\item{mRbind}{Matriz com resultado da iteracao passada (primeira iteracao nao atribuir nenhum valor)}
+\item{saidaAnterior}{data table com resultado da iteracao passada (primeira iteracao nao atribuir nenhum valor)}
 
 \item{dataD}{Nomea a linha da matriz de saida com a data fornecida}
 }
