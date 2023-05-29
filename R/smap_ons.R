@@ -4,45 +4,41 @@
 
 #' Rodada de um dia do SMAP
 #'
-#' @param parametrosSMAP data.table contendo n linhas and 83 colunas:
+#' @param parametros data table com 8910 linhas and 3 colunas:
 #' \describe{
 #'   \itemize{
 #'     \item{nome}{nome da sub-bacia}
-#'     \item{area}{area da sub-bacia}
-#'     \item{nKt}{número de kts}
-#'     \item{kt2}{valor do parametro kt+2}
-#'     \item{kt-60}{valor do parametro kt-60}
-#'    }
+#'     \item{parametros}{nome do parametros}
+#'     \item{valor}{valor do parametro}
+#'     }
 #' }
 #' @param inicializacao  Objeto resultante da funcao smap.inicializacao
 #' @param precipitacao Valor de precipitacao final do dia (ja corrigido e/ou ponderado)
 #' @param evapotranspiracao Valor de ETo do final dia (ja corrigido e/ou ponderado)
 #' @param Emarg Valor da evaporacao final do dia do reservatorio de planicie (ja corrigido e/ou ponderado)
-#' @param mRbind Matriz com resultado da iteracao passada (primeira iteracao nao atribuir nenhum valor)
+#' @param saidaAnterior data table com resultado da iteracao passada (primeira iteracao nao atribuir nenhum valor)
 #' @param dataD Nomea a linha da matriz de saida com a data fornecida
 #'
 #' @return Matriz com a vazao calculada e os valores de estado e funcoes de transferencia
 #' @export
 
-smap_ons.previsao <- function(parametrosSMAP, inicializacao, precipitacao, evapotranspiracao, Emarg, mRbind, dataD = NULL){
-
-  rb_miss <- TRUE
+smap_ons.previsao <- function(parametros, inicializacao, precipitacao, evapotranspiracao, Emarg, saidaAnterior, dataD = NULL){
 
   #Param. Gerais SMAP
-  Str <- parametrosSMAP[1]
-  K2t <- parametrosSMAP[2]
-  Crec <- parametrosSMAP[3]
-  Capc <- parametrosSMAP[4]
-  K_kt <- parametrosSMAP[5]
-  H1 <- parametrosSMAP[6]
-  K2t2 <- parametrosSMAP[7]
-  Area <- parametrosSMAP[, Area]
-  Ai <- parametrosSMAP[, Ai]
+  Str <- parametros[parametro == "Str", valor]
+  K2t <- parametros[parametro == "K2t", valor]
+  Crec <- parametros[parametro == "Crec", valor]
+  Capc <- parametros[parametro == "Capc", valor]
+  K_kt <- parametros[parametro == "K_kt", valor]
+  H1 <- parametros[parametro == "H1", valor]
+  K2t2 <- parametros[parametro == "K2t2", valor]
+  area <- parametros[parametro == "Area", valor]
+  Ai <- parametros[parametro == "Ai", valor]
 
   #Param. 4 Reserv
-  H <- parametrosSMAP[8]
-  K1t <- parametrosSMAP[9]
-  K3t <- parametrosSMAP[10]
+  H <- parametros[parametro == "H", valor]
+  K1t <- parametros[parametro == "K1t", valor]
+  K3t <- parametros[parametro == "K3t", valor]
 
   #Param inicializacao
   EbInic <- inicializacao$EbInic
@@ -50,107 +46,142 @@ smap_ons.previsao <- function(parametrosSMAP, inicializacao, precipitacao, evapo
   Supin <- inicializacao$Supin
 
   #Coeficientes Ks
-  K_kts <- 0.5^(1/K_kt)
-  K_1ts <- 0.5^(1/K1t)
-  K_2ts <- 0.5^(1/K2t)
-  K_2t2s <- 0.5^(1/K2t2)
-  K_3ts <- 0.5^(1/K3t)
+  K_kts <- parametros[parametro == "K_kts", valor]
+  K_1ts <- parametros[parametro == "K_1ts", valor]
+  K_2ts <- parametros[parametro == "K_2ts", valor]
+  K_2t2s <- parametros[parametro == "K_2t2s", valor]
+  K_3ts <- parametros[parametro == "K_3ts", valor]
   
 
   #Se nao for fornecido nenhuma matriz no mRBind calcular os valores iniciais de Rsolo e Rsub
-  if(missing(mRbind)){
-    RsoloInic <- Str*TuInic
-    RsupInic <- (Supin/(1-K_2ts))*86.4/Area
-    Rsup2Inic <- inicializacao$Rsup2
-    RsubInic <- EbInic/(1-K_kts)*86.4/Area
+  if(missing(saidaAnterior)){
+    RsoloInic <- Str * inicializacao$TuInic
+    RsupInic <- (Supin / (1 - K_2ts)) * 86.4 / area
+    Rsup2Inic <- inicializacao$Rsup2Inic
+    RsubInic <- EbInic / (1 - K_kts) * 86.4 / area
   }else{
-    rb_miss = FALSE
-    tmp <- nrow(mRbind)
-    RsoloInic <- mRbind[tmp,"RSolo"]
-    RsupInic <- mRbind[tmp, "Rsup"]
-    Rsup2Inic <- mRbind[tmp, "Rsup2"]
-    RsubInic <- mRbind[tmp, "Rsub"]
+    rb_miss <- FALSE
+    tmp <- nrow(saidaAnterior)
+    RsoloInic <- saidaAnterior[tmp, RSolo]
+    RsupInic <- saidaAnterior[tmp, Rsup]
+    Rsup2Inic <- saidaAnterior[tmp, Rsup2]
+    RsubInic <- saidaAnterior[tmp, Rsub]
   }
 
   #Calculo das funções de transferencia ----
   #Eqs. Referentes ao Manual de Metodologia SMAP
-  Tu <- RsoloInic/Str #Eq.19 Manual
+  Tu <- RsoloInic / Str #Eq.19 Manual
 
-  if(precipitacao>Ai){
-    Es = ((precipitacao-Ai)^2)/(precipitacao-Ai+(Str-RsoloInic)) #Eq.11
+  if (precipitacao > Ai){
+    Es <- ((precipitacao - Ai) ^ 2) / (precipitacao - Ai + (Str - RsoloInic)) #Eq.11
   }else{
-    Es = 0
+    Es <- 0
   }
 
-  if((precipitacao-Es)>evapotranspiracao){
-    Er = evapotranspiracao
+  if((precipitacao - Es) > evapotranspiracao){
+    Er <- evapotranspiracao
   }else{
-    Er = (precipitacao-Es) + ( evapotranspiracao - ( precipitacao-Es ) )*Tu  #Eq.12
+    Er <- (precipitacao-Es) + (evapotranspiracao - (precipitacao - Es)) *Tu  #Eq.12
   }
 
-  Capc_tmp <- (Capc/100)*Str
+  Capc_tmp <- (Capc / 100) * Str
 
-  if(RsoloInic > Capc_tmp ){
-    Rec = ( Crec/100 )*Tu*( RsoloInic - Capc_tmp ) #Eq.13
+  if(RsoloInic > Capc_tmp){
+    Rec <- (Crec / 100) * Tu * (RsoloInic - Capc_tmp) #Eq.13
   }else{
-    Rec = 0
+    Rec <- 0
   }
 
   #4º Reservatorio
-  if(RsupInic > H){
-    Marg = (RsupInic - H)*(1-K_1ts) #Eq.14
+  if (RsupInic > H){
+    Marg <- (RsupInic - H) * (1 - K_1ts) #Eq.14
   }else{
-    Marg = 0
+    Marg <- 0
   }
 
-  Ed = min(c(RsupInic - Marg, H1) )*(1-K_2ts) #Eq.15
+  Ed <- min(c(RsupInic - Marg, H1)) * (1 - K_2ts) #Eq.15
 
-  Ed2 = Rsup2Inic * (1 - K_3ts) #Eq.17
+  Ed2 <- Rsup2Inic * (1 - K_3ts) #Eq.17
 
-  Ed3 = max(c(RsupInic - H1 - Marg, 0) )*(1-K_2t2s) #Eq.16
+  Ed3 <- max(c(RsupInic - H1 - Marg, 0)) * (1 - K_2t2s) #Eq.16
 
-  Eb = RsubInic * (1 - K_kts) #Eq.18
+  Eb <- RsubInic * (1 - K_kts) #Eq.18
 
   #Calculo das variaveis de estado ----
-  Rsolo = min(c((RsoloInic + precipitacao - Es - Er - Rec), Str))
-  Rsub = RsubInic + Rec - Eb
-  Rsup_tmp = ((RsoloInic + precipitacao - Es - Er - Rec) - Str)
-  Rsup = RsupInic + Es - Marg - Ed - Ed3 + max(c(0,Rsup_tmp))
-  Rsup2 = max(Rsup2Inic + Marg - Ed2 - Emarg,0)
+  Rsolo <- min(c((RsoloInic + precipitacao - Es - Er - Rec), Str))
+  Rsub <- RsubInic + Rec - Eb
+  Rsup_tmp <- ((RsoloInic + precipitacao - Es - Er - Rec) - Str)
+  Rsup <- RsupInic + Es - Marg - Ed - Ed3 + max(c(0, Rsup_tmp))
+  Rsup2 <- max(Rsup2Inic + Marg - Ed2 - Emarg, 0)
 
   #Calculo da vazão ----
-  Qcalc = (Ed + Ed2 + Ed3 + Eb) * Area / 86.4
+  Qcalc <- (Ed + Ed2 + Ed3 + Eb) * area / 86.4
 
   #Matriz de Saida ----
-  matrizSaida_nom <- c("Qcalc", "RSolo", "Rsup", "Rsup2", "Rsub",
+  matrizSaida_nom <- c("Qcalc", "Rsolo", "Rsup", "Rsup2", "Rsub",
                        "Es", "Er", "Rec", "Marg", "Ed", "Ed2", "Ed3",
                        "Eb", "Tu")
   matrizSaida <- matrix(nrow = 1, ncol = length(matrizSaida_nom))
-  matrizSaida[1,1]<-Qcalc
-  matrizSaida[1,2]<-Rsolo
-  matrizSaida[1,3]<-Rsup
-  matrizSaida[1,4]<-Rsup2
-  matrizSaida[1,5]<-Rsub
-  matrizSaida[1,6]<-Es
-  matrizSaida[1,7]<-Er
-  matrizSaida[1,8]<-Rec
-  matrizSaida[1,9]<-Marg
-  matrizSaida[1,10]<-Ed
-  matrizSaida[1,11]<-Ed2
-  matrizSaida[1,12]<-Ed3
-  matrizSaida[1,13]<-Eb
-  matrizSaida[1,14]<-Tu
-
   colnames(matrizSaida) <- matrizSaida_nom
+  matrizSaida[1,1] <- Qcalc
+  matrizSaida[1,2] <- Rsolo
+  matrizSaida[1,3] <- Rsup
+  matrizSaida[1,4] <- Rsup2
+  matrizSaida[1,5] <- Rsub
+  matrizSaida[1,6] <- Es
+  matrizSaida[1,7] <- Er
+  matrizSaida[1,8] <- Rec
+  matrizSaida[1,9] <- Marg
+  matrizSaida[1,10] <- Ed
+  matrizSaida[1,11] <- Ed2
+  matrizSaida[1,12] <- Ed3
+  matrizSaida[1,13] <- Eb
+  matrizSaida[1,14] <- Tu
 
   if(!is.null(dataD)){
     row.names(matrizSaida)<-as.character(dataD)
   }
 
-  if(rb_miss){
+  if(missing(saidaAnterior)){
     return(matrizSaida)
   }else{
-    m_f <- rbind(mRbind, matrizSaida)
-    return(m_f)
+    matrizSaida <- rbind(saidaAnterior, matrizSaida)
+    return(matrizSaida)
   }
+
+  
+}
+
+#' Valores iniciais SMAP
+#'
+#' Funcao para criar objeto com os valores iniciais de variaveis de estado para rodar o SMAP
+#'
+#' @param Supin Escoamento superficial inicial
+#' @param Rsup2Inic Escoamento superficial inicial referente ao reservatorio de planicie
+#' @param EbInic Escoamento Subterraneo inicial
+#' @param TuInic Taxa de umidade inicial do solo
+#'
+#' @return List com os parametros
+#' @export
+smap_ons.inic <- function(parametros, EbInic = 0, TuInic = 0.3, Supin = 100, Rsup2Inic = 0){
+  if(Supin<0){
+    stop("Supin deve ser >= 0")
+  }
+  
+  if((TuInic < 0) | (TuInic >1)){
+    stop("TuInic deve estar entre 0 e 1")
+  }
+  
+  if(Rsup2Inic < 0){
+    stop("Rsup2Inic deve ser positivo")
+  }
+  
+  RsoloInic <- parametros[parametro == "Str", valor] * TuInic
+  RsupInic <- (Supin / (1 - parametros[parametro == "K_2ts", valor])) * 86.4 / parametros[parametro == "Area", valor]
+  RsubInic <- EbInic / (1 - parametros[parametro == "K_kts", valor]) * 86.4 / parametros[parametro == "Area", valor]
+
+  inic <- list(EbInic, TuInic, Supin, Rsup2Inic, RsoloInic, RsupInic, RsubInic)
+  names(inic) <- c("EbInic", "TuInic", "Supin", "Rsup2Inic", "RsoloInic", "RsupInic", "RsubInic")
+  
+  return(inic)
 }
