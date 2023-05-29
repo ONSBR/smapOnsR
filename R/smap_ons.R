@@ -62,10 +62,10 @@ smap_ons.previsao <- function(parametros, inicializacao, precipitacao, evapotran
   }else{
     rb_miss <- FALSE
     tmp <- nrow(saidaAnterior)
-    RsoloInic <- saidaAnterior[tmp, RSolo]
-    RsupInic <- saidaAnterior[tmp, Rsup]
-    Rsup2Inic <- saidaAnterior[tmp, Rsup2]
-    RsubInic <- saidaAnterior[tmp, Rsub]
+    RsoloInic <- saidaAnterior[tmp, 2]
+    RsupInic <- saidaAnterior[tmp, 3]
+    Rsup2Inic <- saidaAnterior[tmp, 4]
+    RsubInic <- saidaAnterior[tmp, 5]
   }
 
   #Calculo das funções de transferencia ----
