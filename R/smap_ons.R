@@ -16,7 +16,7 @@
 #' @param precipitacao Valor de precipitacao final do dia (ja corrigido e/ou ponderado)
 #' @param evapotranspiracao Valor de ETo do final dia (ja corrigido e/ou ponderado)
 #' @param Emarg Valor da evaporacao final do dia do reservatorio de planicie (ja corrigido e/ou ponderado)
-#' @param saidaAnterior data table com resultado da iteracao passada (primeira iteracao nao atribuir nenhum valor)
+#' @param saidaAnterior matriz de saida da iteracao passada (primeira iteracao nao atribuir nenhum valor)
 #' @param dataD Nomea a linha da matriz de saida com a data fornecida
 #'
 #' @return Matriz com a vazao calculada e os valores de estado e funcoes de transferencia
@@ -40,11 +40,6 @@ smap_ons.previsao <- function(parametros, inicializacao, precipitacao, evapotran
   K1t <- parametros[parametro == "K1t", valor]
   K3t <- parametros[parametro == "K3t", valor]
 
-  #Param inicializacao
-  EbInic <- inicializacao$EbInic
-  TuInic <- inicializacao$TuInic
-  Supin <- inicializacao$Supin
-
   #Coeficientes Ks
   K_kts <- parametros[parametro == "K_kts", valor]
   K_1ts <- parametros[parametro == "K_1ts", valor]
@@ -55,10 +50,10 @@ smap_ons.previsao <- function(parametros, inicializacao, precipitacao, evapotran
 
   #Se nao for fornecido nenhuma matriz no mRBind calcular os valores iniciais de Rsolo e Rsub
   if(missing(saidaAnterior)){
-    RsoloInic <- Str * inicializacao$TuInic
-    RsupInic <- (Supin / (1 - K_2ts)) * 86.4 / area
+    RsoloInic <- inicializacao$RsoloInic
+    RsupInic <- inicializacao$RsupInic
     Rsup2Inic <- inicializacao$Rsup2Inic
-    RsubInic <- EbInic / (1 - K_kts) * 86.4 / area
+    RsubInic <- inicializacao$RsubInic
   }else{
     rb_miss <- FALSE
     tmp <- nrow(saidaAnterior)
