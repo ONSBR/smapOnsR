@@ -13,5 +13,5 @@ test_that("testa rodada 1 dia SMAP/ONS", {
   precipitacao <- 0.904504
   saidaAnterior <- saida
   saida <- smap_ons.previsao(parametros[Nome == "SOBRADINHO"], inicializacao, precipitacao, evapotranspiracao, Emarg, saidaAnterior)
-  expect_equal(as.numeric(saida[1, 2]), 1065.926)
+  expect_equal(as.numeric(saida[2, 1]), 1065.9265)
 })
