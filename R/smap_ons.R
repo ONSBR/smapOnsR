@@ -170,19 +170,19 @@ new_modelo_smap_ons <- function(parametros, inicializacao, precipitacao, evapotr
   #coeficiente temporal
   kt <- parametros[, valor][3:65]
   names(kt) <- parametros[, parametro][3:65]
+  n_kt <- parametros[parametro == "nKt", valor]
+  kt_min <-parametros[parametro == "ktmin", valor]
+  kt_max <-parametros[parametro == "ktmax", valor]
 
   #coeficientes de ponderacao
   pcof <- parametros[parametro == "Pcof", valor]
   ecof <- parametros[parametro == "Ecof", valor]
   ecof2 <- parametros[parametro == "Ecof2", valor]
 
-  #parametros auxiliares
-
-  n_kt <- parametros[parametro == "nKt", valor]
-
   modelo <- list(str = str, k2t = k2t, crec = crec, capc = capc, k_kt = k_kt,
   h1 = h1, k2t2 = k2t2, ai = ai, h = h, l1t = k1t, k3t = k3t, kt = kt,
-  n_kt = n_kt, pcof = pcof, ecof = ecof, ecof2 = ecof2)
+  n_kt = n_kt, kt_min = kt_min, kt_max = kt_max, pcof = pcof, 
+  ecof = ecof, ecof2 = ecof2)
 
   attr(modelo, "area") <- area
   attr(modelo, "precipitacao") <- precipitacao
