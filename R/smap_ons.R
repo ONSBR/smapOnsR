@@ -41,13 +41,12 @@ smap_ons.previsao <- function(parametros, inicializacao, precipitacao, evapotran
   K3t <- parametros[parametro == "K3t", valor]
 
   #Coeficientes Ks
-  K_kts <- parametros[parametro == "K_kts", valor]
-  K_1ts <- parametros[parametro == "K_1ts", valor]
-  K_2ts <- parametros[parametro == "K_2ts", valor]
-  K_2t2s <- parametros[parametro == "K_2t2s", valor]
-  K_3ts <- parametros[parametro == "K_3ts", valor]
+  K_kts <- 0.5 ^ (1 / K_kt)
+  K_1ts <- 0.5 ^ (1 / K1t)
+  K_2ts <- 0.5 ^ (1 / K2t)
+  K_2t2s <- 0.5 ^ (1 / K1t)
+  K_3ts <- 0.5 ^ (1 / K3t)
   
-
   #Se nao for fornecido nenhuma matriz no mRBind calcular os valores iniciais de Rsolo e Rsub
   if(missing(saidaAnterior)){
     RsoloInic <- inicializacao$RsoloInic
@@ -55,7 +54,6 @@ smap_ons.previsao <- function(parametros, inicializacao, precipitacao, evapotran
     Rsup2Inic <- inicializacao$Rsup2Inic
     RsubInic <- inicializacao$RsubInic
   }else{
-    rb_miss <- FALSE
     tmp <- nrow(saidaAnterior)
     RsoloInic <- saidaAnterior[tmp, 2]
     RsupInic <- saidaAnterior[tmp, 3]
@@ -135,4 +133,62 @@ smap_ons.previsao <- function(parametros, inicializacao, precipitacao, evapotran
 
   matrizSaida <- rbind(saidaAnterior, matrizSaida)
   
+}
+
+#' Construtor do modelo classe \code{smap_ons}
+#' 
+#' @param parametros data table com 8910 linhas and 3 colunas:
+#' \describe{
+#'   \itemize{
+#'     \item{nome}{nome da sub-bacia}
+#'     \item{parametros}{nome do parametros}
+#'     \item{valor}{valor do parametro}
+#'     }
+#' }
+#' @param evapotranspiracao vetor com a serie de evapotranspiracao
+#' @param precipitacao vetor com a serie de precipitacao diaria
+#' 
+#" @return objeto de classe \code{smap_ons}
+
+new_modelo_smap_ons <- function(parametros, inicializacao, precipitacao, evapotranspiracao){
+  #Param. Gerais SMAP
+  str <- parametros[parametro == "Str", valor]
+  k2t <- parametros[parametro == "K2t", valor]
+  crec <- parametros[parametro == "Crec", valor]
+  capc <- parametros[parametro == "Capc", valor]
+  k_kt <- parametros[parametro == "K_kt", valor]
+  h1 <- parametros[parametro == "H1", valor]
+  k2t2 <- parametros[parametro == "K2t2", valor]
+  area <- parametros[parametro == "Area", valor]
+  ai <- parametros[parametro == "Ai", valor]
+
+  #Param. 4 Reserv
+  h <- parametros[parametro == "H", valor]
+  k1t <- parametros[parametro == "K1t", valor]
+  k3t <- parametros[parametro == "K3t", valor]
+
+  #coeficiente temporal
+  kt <- parametros[, valor][3:65]
+  names(kt) <- parametros[, parametro][3:65]
+
+  #coeficientes de ponderacao
+  pcof <- parametros[parametro == "Pcof", valor]
+  ecof <- parametros[parametro == "Ecof", valor]
+  ecof2 <- parametros[parametro == "Ecof2", valor]
+
+  #parametros auxiliares
+
+  n_kt <- parametros[parametro == "nKt", valor]
+
+  modelo <- list(str = str, k2t = k2t, crec = crec, capc = capc, k_kt = k_kt,
+  h1 = h1, k2t2 = k2t2, ai = ai, h = h, l1t = k1t, k3t = k3t, kt = kt,
+  n_kt = n_kt, pcof = pcof, ecof = ecof, ecof2 = ecof2)
+
+  attr(modelo, "area") <- area
+  attr(modelo, "precipitacao") <- precipitacao
+  attr(modelo, "evapotranspiracao") <- evapotranspiracao
+  attr(modelo, "inicializacao") <- inicializacao
+
+  class(modelo) <- "smap_ons"
+  modelo
 }

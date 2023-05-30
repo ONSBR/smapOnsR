@@ -32,7 +32,7 @@ smap_ons.previsao(
 
 \item{Emarg}{Valor da evaporacao final do dia do reservatorio de planicie (ja corrigido e/ou ponderado)}
 
-\item{saidaAnterior}{data table com resultado da iteracao passada (primeira iteracao nao atribuir nenhum valor)}
+\item{saidaAnterior}{matriz de saida da iteracao passada (primeira iteracao nao atribuir nenhum valor)}
 
 \item{dataD}{Nomea a linha da matriz de saida com a data fornecida}
 }
