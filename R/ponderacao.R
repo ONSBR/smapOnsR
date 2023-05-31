@@ -23,7 +23,7 @@
 #'     \item{valor}{valor da variavel ponderada}
 #'     }
 #' @export
-poderacao_temporal<-function(serie_temporal, pesos, kt_min, kt_max, data_inicio, data_fim){
+poderacao_temporal <- function(serie_temporal, pesos, kt_min, kt_max, data_inicio, data_fim){
     
     if(serie_temporal[, min(data)] > (data_inicio - kt_min)){
         stop("Erro: Data de inicio da serie temporal a ser ponderada inferior ao necessario")

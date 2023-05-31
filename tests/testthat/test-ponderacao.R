@@ -4,7 +4,8 @@ test_that("Testa ponderacao temporal", {
   data_fim <- historico_precipitacao[, max(data) - 2]
   kt_min <- parametros[Nome == "AVERMELHA" & parametro == "ktMin", valor]
   kt_max <- parametros[Nome == "AVERMELHA" & parametro == "ktMax", valor]
-
+  pesos <- parametros[Nome == "AVERMELHA", valor][3:65]
+  
   saida <- poderacao_temporal(serie_temporal, pesos, kt_min, kt_max,
   data_inicio, data_fim)
   expect_equal(saida[, data], seq.Date(from = data_inicio, to = data_fim, by = "day"))

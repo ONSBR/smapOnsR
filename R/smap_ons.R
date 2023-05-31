@@ -22,7 +22,7 @@
 #' @return Matriz com a vazao calculada e os valores de estado e funcoes de transferencia
 #' @export
 
-smap_ons.previsao <- function(parametros, inicializacao, precipitacao, evapotranspiracao, Emarg, saidaAnterior = matrix(nrow = 0, ncol = length(matrizSaida_nom)), dataD = NULL){
+rodada_diaria <- function(parametros, inicializacao, precipitacao, evapotranspiracao, Emarg, saidaAnterior = matrix(nrow = 0, ncol = 14), dataD = NULL){
 
   #Param. Gerais SMAP
   Str <- parametros[parametro == "Str", valor]
@@ -48,18 +48,10 @@ smap_ons.previsao <- function(parametros, inicializacao, precipitacao, evapotran
   K_3ts <- 0.5 ^ (1 / K3t)
   
   #Se nao for fornecido nenhuma matriz no mRBind calcular os valores iniciais de Rsolo e Rsub
-  if(missing(saidaAnterior)){
-    RsoloInic <- inicializacao$RsoloInic
-    RsupInic <- inicializacao$RsupInic
-    Rsup2Inic <- inicializacao$Rsup2Inic
-    RsubInic <- inicializacao$RsubInic
-  }else{
-    tmp <- nrow(saidaAnterior)
-    RsoloInic <- saidaAnterior[tmp, 2]
-    RsupInic <- saidaAnterior[tmp, 3]
-    Rsup2Inic <- saidaAnterior[tmp, 4]
-    RsubInic <- saidaAnterior[tmp, 5]
-  }
+  RsoloInic <- inicializacao$RsoloInic
+  RsupInic <- inicializacao$RsupInic
+  RsubInic <- inicializacao$RsubInic
+  Rsup2Inic <- inicializacao$Rsup2Inic
 
   #Calculo das funções de transferencia ----
   #Eqs. Referentes ao Manual de Metodologia SMAP

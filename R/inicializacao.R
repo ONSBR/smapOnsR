@@ -21,11 +21,11 @@ smap_ons.inic <- function(parametros, EbInic = 0, TuInic = 0.3, Supin = 100, Rsu
   if(Rsup2Inic < 0){
     stop("Rsup2Inic deve ser positivo")
   }
-  
-  RsoloInic <- parametros[parametro == "Str", valor] * TuInic
-  RsupInic <- (Supin / (1 - parametros[parametro == "K_2ts", valor])) * 86.4 / parametros[parametro == "Area", valor]
-  RsubInic <- EbInic / (1 - parametros[parametro == "K_kts", valor]) * 86.4 / parametros[parametro == "Area", valor]
 
+  RsoloInic <- parametros[parametro == "Str", valor] * TuInic
+  RsupInic <- (Supin / (1 - (0.5 ^ (1 / K2t)))) * 86.4 / parametros[parametro == "Area", valor]
+  RsubInic <- EbInic / (1 - (0.5 ^ (1 / K_kt))) * 86.4 / parametros[parametro == "Area", valor]
+  Rsup2Inic <- 0
   inic <- list(EbInic, TuInic, Supin, Rsup2Inic, RsoloInic, RsupInic, RsubInic)
   names(inic) <- c("EbInic", "TuInic", "Supin", "Rsup2Inic", "RsoloInic", "RsupInic", "RsubInic")
   
