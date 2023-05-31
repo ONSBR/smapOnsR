@@ -31,7 +31,10 @@ poderacao_temporal <- function(serie_temporal, modelo, data_inicio, data_fim){
         stop("Erro: Data final  da serie temporal a ser ponderada inferior ao necessario")
     }
     
-    serie_temporal_ponderada <- serie_temporal
+    kt_min <- sum(modelo$kt[4:63] > 0)
+    kt_max <- sum(modelo$kt[1:2] > 0)
+
+    serie_temporal_ponderada = serie_temporal
     data.table::setkey(serie_temporal_ponderada, data)
 
     serie_temporal_ponderada[, c("inicio_idx", "fim_idx") := {
@@ -43,7 +46,7 @@ poderacao_temporal <- function(serie_temporal, modelo, data_inicio, data_fim){
 
     serie_temporal_ponderada[, media_ponderada := {
         result <- mapply(function(inicio, fim) {
-            sum(valor[inicio:fim] * modelo$kt[(modelo$kt_min + 3):(3 - modelo$kt_max)])
+            sum(valor[inicio:fim] * modelo$kt[(kt_min + 3):(3 - kt_max)])
         }, inicio_idx, fim_idx)
         
         result
@@ -53,7 +56,11 @@ poderacao_temporal <- function(serie_temporal, modelo, data_inicio, data_fim){
     serie_temporal_ponderada[, valor := NULL]
     serie_temporal_ponderada[, inicio_idx := NULL]
     serie_temporal_ponderada[, fim_idx := NULL]
+    serie_temporal[, inicio_idx := NULL]
+    serie_temporal[, fim_idx := NULL]
+    serie_temporal[, media_ponderada := NULL]
     colnames(serie_temporal_ponderada)[4] <- "valor"
+
     serie_temporal_ponderada
 }
 
