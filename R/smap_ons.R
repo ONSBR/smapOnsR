@@ -138,8 +138,6 @@ new_modelo_smap_ons <- function(parametros){
   #coeficiente temporal
   kt <- parametros[, valor][3:65]
   names(kt) <- parametros[, parametro][3:65]
-  kt_min <- parametros[parametro == "ktMin", valor]
-  kt_max <- parametros[parametro == "ktMax", valor]
 
   #coeficientes de ponderacao
   pcof <- parametros[parametro == "Pcof", valor]
@@ -147,12 +145,74 @@ new_modelo_smap_ons <- function(parametros){
   ecof2 <- parametros[parametro == "Ecof2", valor]
 
   modelo <- list(str = str, k2t = k2t, crec = crec, capc = capc, k_kt = k_kt,
-  h1 = h1, k2t2 = k2t2, ai = ai, h = h, l1t = k1t, k3t = k3t, kt = kt,
-  kt_min = kt_min, kt_max = kt_max, pcof = pcof,
+  h1 = h1, k2t2 = k2t2, ai = ai, h = h, l1t = k1t, k3t = k3t, kt = kt, pcof = pcof,
   ecof = ecof, ecof2 = ecof2)
 
+  attr(modelo, "nome") <- parametros[, Nome]
   attr(modelo, "area") <- area
-
+  
   class(modelo) <- "smap_ons"
   modelo
+}
+
+#' funcao objetivo de calibracao do SMAP/ONS
+#'
+#' @param modelo objeto de classe smap_ons
+#' @param inicializacao  Objeto resultante da funcao smap.inicializacao
+#' @param precipitacao data table com a precipitacao a ser ponderada com as colunas
+#'     \itemize{
+#'     \item{data}{data da observacao}
+#'     \item{posto}{nome do posto}
+#'     \item{id}{id do posto}
+#'     \item{valor}{valor da variavel}
+#'     }
+#' @param evapotranspiracao data table com a evapotranspiracao a ser ponderada com as colunas
+#'     \itemize{
+#'     \item{data}{data da observacao}
+#'     \item{posto}{nome do posto}
+#'     \item{id}{id do posto}
+#'     \item{valor}{valor da variavel}
+#'     }
+#' 
+#' @return Matriz com a vazao calculada e os valores de estado e funcoes de transferencia
+#' @export
+
+funcao_objetivo <- function(modelo, EbInic, TuInic, Supin, precipitacao, 
+      evapotranspiracao, vazao, data_inicio_objetivo, data_fim_objetivo){
+  
+  kt_min <- sum(modelo$kt[4:63] > 0)
+  kt_max <- sum(modelo$kt[1:2] > 0)
+
+  data_inicio <- precipitacao[, min(data)] + kt_min
+  data_fim <- precipitacao[, max(data)] + kt_max
+  numero_dias <- as.numeric(data_fim - data_inicio - 1)
+
+  inicializacao <- smap_ons.inic(modelo, EbInic, TuInic, Supin)
+
+  precipitacao_ponderada = precipitacao
+  precipitacao_ponderada[, valor := valor * modelo$pcof]
+  precipitacao_ponderada <- poderacao_temporal(precipitacao_ponderada, modelo, data_inicio, data_fim-2)
+
+  evapotranspiracao_ponderada <- evapotranspiracao
+  evapotranspiracao_ponderada[, valor := valor * modelo$ecof]
+  evapotranspiracao_planicie_ponderada <- evapotranspiracao_ponderada
+  evapotranspiracao_planicie_ponderada[, valor := valor * modelo$ecof]
+  
+  saida <- matrix(nrow = 0, ncol = 14)
+  for (idia in 1:numero_dias) {
+    saida <- rodada_diaria(modelo, inicializacao, precipitacao_ponderada[idia, valor], 
+    evapotranspiracao_ponderada[idia, valor], evapotranspiracao_planicie_ponderada[idia, valor],
+    saida, precipitacao_ponderada[idia, data])
+    
+    inicializacao$Rsup2Inic <- saida[idia, 2]
+    inicializacao$RsupInic <- saida[idia, 3]
+    inicializacao$Rsup2Inic <- saida[idia, 4]
+    inicializacao$RsubInic <- saida[idia, 5]
+  }
+  dat <- data.table(saida)
+  dat[ ,data := precipitacao_ponderada[, data]]
+
+  objetivo <- calcula_dm(dat[data >= data_inicio_objetivo & data <= data_fim_objetivo, Qcalc],
+                         as.numeric(vazao[data >= data_inicio_objetivo & data <= data_fim_objetivo, valor]))
+  objetivo
 }
