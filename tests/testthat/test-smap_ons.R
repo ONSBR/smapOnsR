@@ -1,9 +1,10 @@
 test_that("testa rodada 2 dias SMAP/ONS", {
-  inicializacao <- smap_ons.inic(parametros[Nome == "SOBRADINHO"], EbInic = 800, TuInic = 0.15, Supin = 300, Rsup2Inic = 0)
+  
+  modelo <- new_modelo_smap_ons(parametros[Nome == "SOBRADINHO"])
+  inicializacao <- smap_ons.inic(modelo, EbInic = 800, TuInic = 0.15, Supin = 300, Rsup2Inic = 0)
   precipitacao <- 0.846906
   evapotranspiracao <- 5.29 * 0.9
   Emarg <- 5.29
-  modelo <- new_modelo_smap_ons(parametros[Nome == "SOBRADINHO"])
   saida <- rodada_diaria(modelo, inicializacao, precipitacao, evapotranspiracao, Emarg)
 
   expect_equal(colnames(saida), c("Qcalc", "Rsolo", "Rsup", "Rsup2", "Rsub",

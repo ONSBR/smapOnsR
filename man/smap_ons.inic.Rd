@@ -4,9 +4,11 @@
 \alias{smap_ons.inic}
 \title{Valores iniciais SMAP}
 \usage{
-smap_ons.inic(parametros, EbInic = 0, TuInic = 0.3, Supin = 100, Rsup2Inic = 0)
+smap_ons.inic(modelo, EbInic = 0, TuInic = 0.3, Supin = 100, Rsup2Inic = 0)
 }
 \arguments{
+\item{modelo}{objeto de classe smap_ons}
+
 \item{EbInic}{Escoamento Subterraneo inicial}
 
 \item{TuInic}{Taxa de umidade inicial do solo}
@@ -16,7 +18,16 @@ smap_ons.inic(parametros, EbInic = 0, TuInic = 0.3, Supin = 100, Rsup2Inic = 0)
 \item{Rsup2Inic}{Escoamento superficial inicial referente ao reservatorio de planicie}
 }
 \value{
-List com os parametros
+List com os parametros:
+\itemize{
+\item{EbInic}{vazao de base inicial}
+\item{TuInic}{percentual de umidade do solo inicial}
+\item{Supin}{vazao superficial inicial}
+\item{Rsup2Inic}{valor do reservatorio de planicie inicial}
+\item{RsoloInic}{valor do reservatorio de solo inicial}
+\item{Rsup2Inic}{valor do reservatorio superficial inicial}
+\item{Rsup2Inic}{valor do reservatorio subterraneo inicial}
+}
 }
 \description{
 Funcao para criar objeto com os valores iniciais de variaveis de estado para rodar o SMAP

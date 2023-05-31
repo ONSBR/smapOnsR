@@ -2,14 +2,24 @@
 #'
 #' Funcao para criar objeto com os valores iniciais de variaveis de estado para rodar o SMAP
 #'
+#' @param modelo objeto de classe smap_ons
 #' @param Supin Escoamento superficial inicial
 #' @param Rsup2Inic Escoamento superficial inicial referente ao reservatorio de planicie
 #' @param EbInic Escoamento Subterraneo inicial
 #' @param TuInic Taxa de umidade inicial do solo
 #'
-#' @return List com os parametros
+#' @return List com os parametros:
+#'     \itemize{
+#'     \item{EbInic}{vazao de base inicial}
+#'     \item{TuInic}{percentual de umidade do solo inicial}
+#'     \item{Supin}{vazao superficial inicial}
+#'     \item{Rsup2Inic}{valor do reservatorio de planicie inicial}
+#'     \item{RsoloInic}{valor do reservatorio de solo inicial}
+#'     \item{Rsup2Inic}{valor do reservatorio superficial inicial}
+#'     \item{Rsup2Inic}{valor do reservatorio subterraneo inicial}
+#'     }
 #' @export
-smap_ons.inic <- function(parametros, EbInic = 0, TuInic = 0.3, Supin = 100, Rsup2Inic = 0){
+smap_ons.inic <- function(modelo, EbInic = 0, TuInic = 0.3, Supin = 100, Rsup2Inic = 0){
   if(Supin<0){
     stop("Supin deve ser >= 0")
   }
@@ -22,9 +32,9 @@ smap_ons.inic <- function(parametros, EbInic = 0, TuInic = 0.3, Supin = 100, Rsu
     stop("Rsup2Inic deve ser positivo")
   }
 
-  RsoloInic <- parametros[parametro == "Str", valor] * TuInic
-  RsupInic <- (Supin / (1 - (0.5 ^ (1 / parametros[parametro == "K2t", valor])))) * 86.4 / parametros[parametro == "Area", valor]
-  RsubInic <- EbInic / (1 - (0.5 ^ (1 / parametros[parametro == "K_kt", valor]))) * 86.4 / parametros[parametro == "Area", valor]
+  RsoloInic <- modelo$str * TuInic
+  RsupInic <- (Supin / (1 - (0.5 ^ (1 / modelo$k2t)))) * 86.4 / attributes(modelo)$area
+  RsubInic <- EbInic / (1 - (0.5 ^ (1 / modelo$k_kt))) * 86.4 / attributes(modelo)$area
   Rsup2Inic <- 0
   inic <- list(EbInic, TuInic, Supin, Rsup2Inic, RsoloInic, RsupInic, RsubInic)
   names(inic) <- c("EbInic", "TuInic", "Supin", "Rsup2Inic", "RsoloInic", "RsupInic", "RsubInic")
