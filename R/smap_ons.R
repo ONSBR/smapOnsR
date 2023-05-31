@@ -138,7 +138,6 @@ new_modelo_smap_ons <- function(parametros){
   #coeficiente temporal
   kt <- parametros[, valor][3:65]
   names(kt) <- parametros[, parametro][3:65]
-  n_kt <- parametros[parametro == "nKt", valor]
   kt_min <- parametros[parametro == "ktMin", valor]
   kt_max <- parametros[parametro == "ktMax", valor]
 
@@ -149,7 +148,7 @@ new_modelo_smap_ons <- function(parametros){
 
   modelo <- list(str = str, k2t = k2t, crec = crec, capc = capc, k_kt = k_kt,
   h1 = h1, k2t2 = k2t2, ai = ai, h = h, l1t = k1t, k3t = k3t, kt = kt,
-  n_kt = n_kt, kt_min = kt_min, kt_max = kt_max, pcof = pcof,
+  kt_min = kt_min, kt_max = kt_max, pcof = pcof,
   ecof = ecof, ecof2 = ecof2)
 
   attr(modelo, "area") <- area
