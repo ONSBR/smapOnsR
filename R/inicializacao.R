@@ -19,7 +19,7 @@
 #'     \item{Rsup2Inic}{valor do reservatorio subterraneo inicial}
 #'     }
 #' @export
-smap_ons.inic <- function(modelo, EbInic = 0, TuInic = 0.3, Supin = 100, Rsup2Inic = 0){
+smap_ons.inic <- function(modelo, EbInic = 0, TuInic = 0.3, Supin = 100){
   if(Supin<0){
     stop("Supin deve ser >= 0")
   }

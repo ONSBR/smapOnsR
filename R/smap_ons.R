@@ -158,7 +158,9 @@ new_modelo_smap_ons <- function(parametros){
 #' funcao objetivo de calibracao do SMAP/ONS
 #'
 #' @param modelo objeto de classe smap_ons
-#' @param inicializacao  Objeto resultante da funcao smap.inicializacao
+#' @param EbInic vazao de base inicial
+#' @param TuInic umidade do solo inicial
+#' @param Supin vazao superficial inicial
 #' @param precipitacao data table com a precipitacao a ser ponderada com as colunas
 #'     \itemize{
 #'     \item{data}{data da observacao}
@@ -173,8 +175,17 @@ new_modelo_smap_ons <- function(parametros){
 #'     \item{id}{id do posto}
 #'     \item{valor}{valor da variavel}
 #'     }
+#' @param vazao data table com a vazao a avaliada
+#'      \itemize{
+#'     \item{data}{data da observacao}
+#'     \item{posto}{nome do posto}
+#'     \item{id}{id do posto}
+#'     \item{valor}{valor da variavel}
+#'     }
 #' 
-#' @return Matriz com a vazao calculada e os valores de estado e funcoes de transferencia
+#' @param data_inicio_objetivo data inicial da avaliacao da funcao objetivo
+#' @param data_fim_objetivo data final da avaliacao da funcao objetivo
+#' @return objetivo valor da funcao objetivo 
 #' @export
 
 funcao_objetivo <- function(modelo, EbInic, TuInic, Supin, precipitacao, 
