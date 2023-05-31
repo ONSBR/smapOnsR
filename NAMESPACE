@@ -3,6 +3,7 @@
 export(calcula_dm)
 export(calcula_mape)
 export(calcula_nse)
+export(new_modelo_smap_ons)
 export(poderacao_temporal)
 export(rodada_diaria)
 export(smap_ons.inic)

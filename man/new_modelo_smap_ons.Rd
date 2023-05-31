@@ -4,7 +4,7 @@
 \alias{new_modelo_smap_ons}
 \title{Construtor do modelo classe \code{smap_ons}}
 \usage{
-new_modelo_smap_ons(parametros, inicializacao, precipitacao, evapotranspiracao)
+new_modelo_smap_ons(parametros)
 }
 \arguments{
 \item{parametros}{data table com 8910 linhas and 3 colunas:
@@ -15,10 +15,6 @@ new_modelo_smap_ons(parametros, inicializacao, precipitacao, evapotranspiracao)
 \item{valor}{valor do parametro}
 }
 }}
-
-\item{precipitacao}{vetor com a serie de precipitacao diaria}
-
-\item{evapotranspiracao}{vetor com a serie de evapotranspiracao}
 }
 \description{
 Construtor do modelo classe \code{smap_ons}

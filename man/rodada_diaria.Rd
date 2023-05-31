@@ -5,7 +5,7 @@
 \title{Rodada de um dia do SMAP}
 \usage{
 rodada_diaria(
-  parametros,
+  modelo,
   inicializacao,
   precipitacao,
   evapotranspiracao,
@@ -15,14 +15,7 @@ rodada_diaria(
 )
 }
 \arguments{
-\item{parametros}{data table com 8910 linhas and 3 colunas:
-\describe{
-\itemize{
-\item{nome}{nome da sub-bacia}
-\item{parametros}{nome do parametros}
-\item{valor}{valor do parametro}
-}
-}}
+\item{modelo}{objeto de classe smap_ons}
 
 \item{inicializacao}{Objeto resultante da funcao smap.inicializacao}
 

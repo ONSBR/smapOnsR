@@ -3,7 +3,8 @@ test_that("testa rodada 2 dias SMAP/ONS", {
   precipitacao <- 0.846906
   evapotranspiracao <- 5.29 * 0.9
   Emarg <- 5.29
-  saida <- rodada_diaria(parametros[Nome == "SOBRADINHO"], inicializacao, precipitacao, evapotranspiracao, Emarg)
+  modelo <- new_modelo_smap_ons(parametros[Nome == "SOBRADINHO"])
+  saida <- rodada_diaria(modelo, inicializacao, precipitacao, evapotranspiracao, Emarg)
 
   expect_equal(colnames(saida), c("Qcalc", "Rsolo", "Rsup", "Rsup2", "Rsub",
                        "Es", "Er", "Rec", "Marg", "Ed", "Ed2", "Ed3",
@@ -17,6 +18,6 @@ test_that("testa rodada 2 dias SMAP/ONS", {
   inicializacao$Rsup2Inic <- saidaAnterior[1, 4]
   inicializacao$RsubInic <- saidaAnterior[1, 5]
   
-  saida <- rodada_diaria(parametros[Nome == "SOBRADINHO"], inicializacao, precipitacao, evapotranspiracao, Emarg, saidaAnterior)
+  saida <- rodada_diaria(modelo, inicializacao, precipitacao, evapotranspiracao, Emarg, saidaAnterior)
   expect_equal(as.numeric(saida[2, 1]), 1065.9265)
 })

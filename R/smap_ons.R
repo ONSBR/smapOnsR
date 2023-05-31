@@ -4,14 +4,7 @@
 
 #' Rodada de um dia do SMAP
 #'
-#' @param parametros data table com 8910 linhas and 3 colunas:
-#' \describe{
-#'   \itemize{
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{parametros}{nome do parametros}
-#'     \item{valor}{valor do parametro}
-#'     }
-#' }
+#' @param modelo objeto de classe smap_ons
 #' @param inicializacao  Objeto resultante da funcao smap.inicializacao
 #' @param precipitacao Valor de precipitacao final do dia (ja corrigido e/ou ponderado)
 #' @param evapotranspiracao Valor de ETo do final dia (ja corrigido e/ou ponderado)
@@ -22,30 +15,14 @@
 #' @return Matriz com a vazao calculada e os valores de estado e funcoes de transferencia
 #' @export
 
-rodada_diaria <- function(parametros, inicializacao, precipitacao, evapotranspiracao, Emarg, saidaAnterior = matrix(nrow = 0, ncol = 14), dataD = NULL){
-
-  #Param. Gerais SMAP
-  Str <- parametros[parametro == "Str", valor]
-  K2t <- parametros[parametro == "K2t", valor]
-  Crec <- parametros[parametro == "Crec", valor]
-  Capc <- parametros[parametro == "Capc", valor]
-  K_kt <- parametros[parametro == "K_kt", valor]
-  H1 <- parametros[parametro == "H1", valor]
-  K2t2 <- parametros[parametro == "K2t2", valor]
-  area <- parametros[parametro == "Area", valor]
-  Ai <- parametros[parametro == "Ai", valor]
-
-  #Param. 4 Reserv
-  H <- parametros[parametro == "H", valor]
-  K1t <- parametros[parametro == "K1t", valor]
-  K3t <- parametros[parametro == "K3t", valor]
+rodada_diaria <- function(modelo, inicializacao, precipitacao, evapotranspiracao, Emarg, saidaAnterior = matrix(nrow = 0, ncol = 14), dataD = NULL){
 
   #Coeficientes Ks
-  K_kts <- 0.5 ^ (1 / K_kt)
-  K_1ts <- 0.5 ^ (1 / K1t)
-  K_2ts <- 0.5 ^ (1 / K2t)
-  K_2t2s <- 0.5 ^ (1 / K1t)
-  K_3ts <- 0.5 ^ (1 / K3t)
+  K_kts <- 0.5 ^ (1 / modelo$k_kt)
+  K_1ts <- 0.5 ^ (1 / modelo$k1t)
+  K_2ts <- 0.5 ^ (1 / modelo$k2t)
+  K_2t2s <- 0.5 ^ (1 / modelo$k2t2)
+  K_3ts <- 0.5 ^ (1 / modelo$k3t)
   
   #Se nao for fornecido nenhuma matriz no mRBind calcular os valores iniciais de Rsolo e Rsub
   RsoloInic <- inicializacao$RsoloInic
@@ -55,10 +32,10 @@ rodada_diaria <- function(parametros, inicializacao, precipitacao, evapotranspir
 
   #Calculo das funções de transferencia ----
   #Eqs. Referentes ao Manual de Metodologia SMAP
-  Tu <- RsoloInic / Str #Eq.19 Manual
+  Tu <- RsoloInic / modelo$str #Eq.19 Manual
 
-  if (precipitacao > Ai){
-    Es <- ((precipitacao - Ai) ^ 2) / (precipitacao - Ai + (Str - RsoloInic)) #Eq.11
+  if (precipitacao > modelo$ai){
+    Es <- ((precipitacao - modelo$ai) ^ 2) / (precipitacao - modelo$ai + (modelo$str - RsoloInic)) #Eq.11
   }else{
     Es <- 0
   }
@@ -69,38 +46,38 @@ rodada_diaria <- function(parametros, inicializacao, precipitacao, evapotranspir
     Er <- (precipitacao-Es) + (evapotranspiracao - (precipitacao - Es)) *Tu  #Eq.12
   }
 
-  Capc_tmp <- (Capc / 100) * Str
+  Capc_tmp <- (modelo$capc / 100) * modelo$str
 
   if(RsoloInic > Capc_tmp){
-    Rec <- (Crec / 100) * Tu * (RsoloInic - Capc_tmp) #Eq.13
+    Rec <- (modelo$crec / 100) * Tu * (RsoloInic - Capc_tmp) #Eq.13
   }else{
     Rec <- 0
   }
 
   #4º Reservatorio
-  if (RsupInic > H){
-    Marg <- (RsupInic - H) * (1 - K_1ts) #Eq.14
+  if (RsupInic > modelo$h){
+    Marg <- (RsupInic - modelo$h) * (1 - K_1ts) #Eq.14
   }else{
     Marg <- 0
   }
 
-  Ed <- min(c(RsupInic - Marg, H1)) * (1 - K_2ts) #Eq.15
+  Ed <- min(c(RsupInic - Marg, modelo$h1)) * (1 - K_2ts) #Eq.15
 
   Ed2 <- Rsup2Inic * (1 - K_3ts) #Eq.17
 
-  Ed3 <- max(c(RsupInic - H1 - Marg, 0)) * (1 - K_2t2s) #Eq.16
+  Ed3 <- max(c(RsupInic - modelo$h1 - Marg, 0)) * (1 - K_2t2s) #Eq.16
 
   Eb <- RsubInic * (1 - K_kts) #Eq.18
 
   #Calculo das variaveis de estado ----
-  Rsolo <- min(c((RsoloInic + precipitacao - Es - Er - Rec), Str))
+  Rsolo <- min(c((RsoloInic + precipitacao - Es - Er - Rec), modelo$str))
   Rsub <- RsubInic + Rec - Eb
-  Rsup_tmp <- ((RsoloInic + precipitacao - Es - Er - Rec) - Str)
+  Rsup_tmp <- ((RsoloInic + precipitacao - Es - Er - Rec) - modelo$str)
   Rsup <- RsupInic + Es - Marg - Ed - Ed3 + max(c(0, Rsup_tmp))
   Rsup2 <- max(Rsup2Inic + Marg - Ed2 - Emarg, 0)
 
   #Calculo da vazão ----
-  Qcalc <- (Ed + Ed2 + Ed3 + Eb) * area / 86.4
+  Qcalc <- (Ed + Ed2 + Ed3 + Eb) * attributes(modelo)$area / 86.4
 
   #Matriz de Saida ----
   matrizSaida_nom <- c("Qcalc", "Rsolo", "Rsup", "Rsup2", "Rsub",
@@ -137,12 +114,11 @@ rodada_diaria <- function(parametros, inicializacao, precipitacao, evapotranspir
 #'     \item{valor}{valor do parametro}
 #'     }
 #' }
-#' @param evapotranspiracao vetor com a serie de evapotranspiracao
-#' @param precipitacao vetor com a serie de precipitacao diaria
 #' 
 #" @return objeto de classe \code{smap_ons}
+#' @export
 
-new_modelo_smap_ons <- function(parametros, inicializacao, precipitacao, evapotranspiracao){
+new_modelo_smap_ons <- function(parametros){
   #Param. Gerais SMAP
   str <- parametros[parametro == "Str", valor]
   k2t <- parametros[parametro == "K2t", valor]
@@ -163,8 +139,8 @@ new_modelo_smap_ons <- function(parametros, inicializacao, precipitacao, evapotr
   kt <- parametros[, valor][3:65]
   names(kt) <- parametros[, parametro][3:65]
   n_kt <- parametros[parametro == "nKt", valor]
-  kt_min <-parametros[parametro == "ktmin", valor]
-  kt_max <-parametros[parametro == "ktmax", valor]
+  kt_min <- parametros[parametro == "ktMin", valor]
+  kt_max <- parametros[parametro == "ktMax", valor]
 
   #coeficientes de ponderacao
   pcof <- parametros[parametro == "Pcof", valor]
@@ -173,13 +149,10 @@ new_modelo_smap_ons <- function(parametros, inicializacao, precipitacao, evapotr
 
   modelo <- list(str = str, k2t = k2t, crec = crec, capc = capc, k_kt = k_kt,
   h1 = h1, k2t2 = k2t2, ai = ai, h = h, l1t = k1t, k3t = k3t, kt = kt,
-  n_kt = n_kt, kt_min = kt_min, kt_max = kt_max, pcof = pcof, 
+  n_kt = n_kt, kt_min = kt_min, kt_max = kt_max, pcof = pcof,
   ecof = ecof, ecof2 = ecof2)
 
   attr(modelo, "area") <- area
-  attr(modelo, "precipitacao") <- precipitacao
-  attr(modelo, "evapotranspiracao") <- evapotranspiracao
-  attr(modelo, "inicializacao") <- inicializacao
 
   class(modelo) <- "smap_ons"
   modelo
