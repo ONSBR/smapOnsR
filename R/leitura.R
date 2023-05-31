@@ -73,11 +73,11 @@ le_historico_verificado <- function(arq) {
 le_parametros <- function(arq) {
     parametros <- read.csv(arq, sep = "'", header = FALSE)
 
-    parametros_smap <- array(rep(0, 87), c(1, 87))
+    parametros_smap <- array(rep(0, 82), c(1, 82))
     parametros_smap <- data.table::data.table(parametros_smap)
     colnames(parametros_smap) <- c("Nome", "Area", "nKt", paste0("Kt", 2:-60),
     "Str", "K2t", "Crec", "Ai", "Capc", "K_kt", "K2t2", "H1", "H", "K3t", "K1t",
-    "Ecof", "Pcof", "Ecof2", "ktMin", "ktMax", "K_kts", "K_1ts", "K_2ts", "K_2t2s", "K_3ts")
+    "Ecof", "Pcof", "Ecof2", "ktMin", "ktMax")
     
     aux <- strsplit(arq, split = "/")[[1]]
     sb <- strsplit(aux[length(aux)], split = "_")[[1]]
@@ -99,11 +99,6 @@ le_parametros <- function(arq) {
     } 
     parametros_smap[1, 81] <- sum(parametros_smap[, 7:66] > 0)
     parametros_smap[1, 82] <- sum(parametros_smap[, 4:5] > 0)
-    parametros_smap$K_kts = 0.5 ^ (1 / K_kt)
-    parametros_smap$K_1ts = 0.5 ^ (1 / K1t)
-    parametros_smap$K_2ts = 0.5 ^ (1 / K2t)
-    parametros_smap$K_2t2s = 0.5 ^ (1 / K2t2)
-    parametros_smap$K_3ts = 0.5 ^ (1 / K3t)
 
     parametros_smap
 }
