@@ -215,7 +215,7 @@ funcao_objetivo <- function(modelo, EbInic, TuInic, Supin, precipitacao,
     evapotranspiracao_ponderada[idia, valor], evapotranspiracao_planicie_ponderada[idia, valor],
     saida, precipitacao_ponderada[idia, data])
     
-    inicializacao$Rsup2Inic <- saida[idia, 2]
+    inicializacao$RsoloInic <- saida[idia, 2]
     inicializacao$RsupInic <- saida[idia, 3]
     inicializacao$Rsup2Inic <- saida[idia, 4]
     inicializacao$RsubInic <- saida[idia, 5]
