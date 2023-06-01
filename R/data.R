@@ -28,7 +28,7 @@
 #'     \item{data}{data da observacao}
 #'     \item{posto}{nome do posto}
 #'     \item{id}{id do posto}
-#'     \item{prec}{valor de vazao observada}
+#'     \item{valor}{valor de vazao observada}
 #'  }
 #' }
 #' @source ONS
@@ -46,7 +46,7 @@
 #'     \item{data}{data da observacao}
 #'     \item{posto}{nome do posto}
 #'     \item{id}{id do posto}
-#'     \item{prec}{valor de evapotranspiracao potencial observada}
+#'     \item{valor}{valor de evapotranspiracao potencial observada}
 #'  }
 #' }
 #' @source ONS
@@ -67,3 +67,21 @@
 #' }
 #' @source ONS
 "parametros"
+
+#' Historico de Normais Climatologicas de etp
+#'
+#' Historico de Normais Climatologicas de de evapotranspiracao potencial 
+#' utilizados oficialmente no SMAP/ONS
+#'
+#' @format ## `historico_etp`
+#' Data table com 1,320 linhas and 4 colunas:
+#' \describe{
+#'   \itemize{
+#'     \item{mes}{data da observacao}
+#'     \item{posto}{nome do posto}
+#'     \item{id}{id do posto}
+#'     \item{valor}{valor de evapotranspiracao potencial observada}
+#'  }
+#' }
+#' @source ONS
+"historico_etp_NC"

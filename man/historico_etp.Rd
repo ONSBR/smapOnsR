@@ -13,7 +13,7 @@ A data table com 163,632 linhas and 4 colunas:
 \item{data}{data da observacao}
 \item{posto}{nome do posto}
 \item{id}{id do posto}
-\item{prec}{valor de evapotranspiracao potencial observada}
+\item{valor}{valor de evapotranspiracao potencial observada}
 }
 }
 }

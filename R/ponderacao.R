@@ -23,24 +23,24 @@
 #' @export
 poderacao_temporal <- function(serie_temporal, modelo, data_inicio, data_fim){
     
-    if(serie_temporal[, min(data)] > (data_inicio - modelo$kt_min)){
+    kt_min <- sum(modelo$kt[4:63] > 0)
+    kt_max <- sum(modelo$kt[1:2] > 0)
+
+    if(serie_temporal[, min(data)] > (data_inicio - kt_min)){
         stop("Erro: Data de inicio da serie temporal a ser ponderada inferior ao necessario")
     }
 
-    if(serie_temporal[, max(data)] < (data_fim + modelo$kt_max)){
+    if(serie_temporal[, max(data)] < (data_fim + kt_max)){
         stop("Erro: Data final  da serie temporal a ser ponderada inferior ao necessario")
     }
-    
-    kt_min <- sum(modelo$kt[4:63] > 0)
-    kt_max <- sum(modelo$kt[1:2] > 0)
 
     serie_temporal_ponderada = serie_temporal
     data.table::setkey(serie_temporal_ponderada, data)
 
     serie_temporal_ponderada[, c("inicio_idx", "fim_idx") := {
         idx <- 1:.N
-        inicio_idx <- pmax(1, idx - modelo$kt_min)
-        fim_idx <- pmin(.N, idx + modelo$kt_max)
+        inicio_idx <- pmax(1, idx - kt_min)
+        fim_idx <- pmin(.N, idx + kt_max)
         .(inicio_idx, fim_idx)
     }]
 

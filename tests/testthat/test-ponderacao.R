@@ -2,7 +2,7 @@ test_that("Testa ponderacao temporal", {
   serie_temporal <- historico_precipitacao[id == 1 & data >= max(data) - 100]
   data_inicio <- historico_precipitacao[, max(data) - 30]
   data_fim <- historico_precipitacao[, max(data) - 2]
-  modelo <- new_modelo_smap_ons(parametros[Nome == "AVERMELHA"])
+  modelo <- new_modelo_smap_ons(parametros[Nome == "avermelha"])
 
   saida <- poderacao_temporal(serie_temporal, modelo, data_inicio, data_fim)
   expect_equal(saida[, data], seq.Date(from = data_inicio, to = data_fim, by = "day"))

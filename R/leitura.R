@@ -25,6 +25,7 @@
 #'     \item{id}{id do posto}
 #'     \item{valor}{valor da precipitacao observada}
 #'     }
+#' @export 
 
 le_historico_verificado <- function(arq) {
 
@@ -39,10 +40,11 @@ le_historico_verificado <- function(arq) {
 
     data.table::setorder(dat, posto, data)
     data.table::setcolorder(dat, c("data", "posto", "id", "valor"))
+    dat[, posto := tolower(posto)]
     return(dat)
 }
 
-# LEITURA DE ARQUIVOS DE ENTRADA SMAP
+# LEITURA DE ARQUIVOS DE ENTRADA SMAP---------------------------------
 
 #' Leitor de arquivo de parametros
 #' 
@@ -70,6 +72,7 @@ le_historico_verificado <- function(arq) {
 #'     \item{id}{id do posto}
 #'     \item{valor}{valor da precipitacao observada}
 #'     }
+#' @export 
 le_parametros <- function(arq) {
     parametros <- read.csv(arq, sep = "'", header = FALSE)
 
@@ -81,7 +84,7 @@ le_parametros <- function(arq) {
     
     aux <- strsplit(arq, split = "/")[[1]]
     sb <- strsplit(aux[length(aux)], split = "_")[[1]]
-    parametros_smap$Nome <- sb[1]
+    parametros_smap$Nome <- tolower(sb[1])
     
     parametros_smap$Area <- as.numeric(parametros[1, 1])
     parametros_smap$nKt <- as.numeric(substr(parametros[2,1], 1, 3))
@@ -96,9 +99,35 @@ le_parametros <- function(arq) {
     }
     for (iparametro in 67:80) {
         parametros_smap[1,iparametro] <- as.numeric(parametros[(iparametro - 64), 1])
-    } 
+    }
     parametros_smap[1, 81] <- sum(parametros_smap[, 7:66] > 0)
     parametros_smap[1, 82] <- sum(parametros_smap[, 4:5] > 0)
 
     parametros_smap
+}
+
+#' Leitor de arquivo de normal climatologica de evapotranspiracao
+#' 
+#' Le arquivo evapotranspiracao utilizado no aplicativo SMAP/ONS
+#' 
+#' @param arq o arquivo do tipo "subbacia_EVAPOTRANSPIRACAO.txt"
+#' @importFrom  data.table data.table
+#' @return data.table evapotranspiracao com as colunas
+#'     \itemize{
+#'     \item{mes}{mes da NC}
+#'     \item{posto}{nome do posto}
+#'     \item{id}{id do posto}
+#'     \item{valor}{valor da NC de evapotranspiracao observada}
+#'     }
+#' @export 
+le_evapotranspiracao <- function(arq) {
+    dat <- data.table::fread(arq)
+    aux <- strsplit(arq, split = "/")[[1]]
+    sb <- strsplit(aux[length(aux)], split = "_")[[1]]
+    dat$posto <- tolower(sb[1])
+
+    colnames(dat) <- c("mes", "valor", "posto")
+    data.table::setcolorder(dat, c("mes", "posto", "valor"))
+
+    dat
 }

@@ -15,21 +15,21 @@
 #'     \item{Supin}{vazao superficial inicial}
 #'     \item{Rsup2Inic}{valor do reservatorio de planicie inicial}
 #'     \item{RsoloInic}{valor do reservatorio de solo inicial}
-#'     \item{Rsup2Inic}{valor do reservatorio superficial inicial}
-#'     \item{Rsup2Inic}{valor do reservatorio subterraneo inicial}
+#'     \item{RsupInic}{valor do reservatorio superficial inicial}
+#'     \item{RsubInic}{valor do reservatorio subterraneo inicial}
 #'     }
 #' @export
 smap_ons.inic <- function(modelo, EbInic = 0, TuInic = 0.3, Supin = 100){
   if(Supin<0){
-    stop("Supin deve ser >= 0")
+    stop("Supin deve ser ser positivo")
   }
   
   if((TuInic < 0) | (TuInic >1)){
     stop("TuInic deve estar entre 0 e 1")
   }
   
-  if(Rsup2Inic < 0){
-    stop("Rsup2Inic deve ser positivo")
+  if(EbInic < 0){
+    stop("EbInic deve ser positivo")
   }
 
   RsoloInic <- modelo$str * TuInic
