@@ -23,8 +23,8 @@
 #' @export
 poderacao_temporal <- function(serie_temporal, kt, data_inicio, data_fim){
     
-    kt_min <- sum(kt[1:2] > 0)
-    kt_max <- sum(kt[4:63] > 0)
+    kt_min <- sum(kt[4:63] > 0)
+    kt_max <- sum(kt[1:2] > 0)
 
     if(serie_temporal[, min(data)] > (data_inicio - kt_min)){
         stop("Erro: Data de inicio da serie temporal a ser ponderada inferior ao necessario")
@@ -64,3 +64,31 @@ poderacao_temporal <- function(serie_temporal, kt, data_inicio, data_fim){
     serie_temporal_ponderada
 }
 
+#' Realiza a ponderacao temporal de variaveis
+#'
+#' @param serie_temporal vetor com a variavel a ser ponderada 
+#' @param kt vetor de kts
+#' @return serie_temporal_ponderada: data table com a variavel ponderada com as colunas
+#'     \itemize{
+#'     \item{data}{data da observacao}
+#'     \item{posto}{nome do posto}
+#'     \item{id}{id do posto}
+#'     \item{valor}{valor da variavel ponderada}
+#'     }
+#' @export
+ponderacao_temporal2 <- function(serie_temporal, kt) {
+  
+  kt_min <- sum(kt[4:63] > 0)
+  kt_max <- sum(kt[1:2] > 0)
+  id_min <- kt_min + 1
+  id_max <- length(serie_temporal) - kt_max
+  serie_temporal_ponderada <- serie_temporal[id_min:id_max]
+
+  for (i in id_min:id_max) {
+    inicio <- i - kt_min
+    fim <- i + kt_max
+    serie_temporal_ponderada[i - kt_min] <- sum(serie_temporal[inicio:fim] * kt[(kt_min + 3):(3 - kt_max)])
+  }
+
+  serie_temporal_ponderada
+}

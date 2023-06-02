@@ -38,8 +38,8 @@ funcao_objetivo <- function(modelo, area, EbInic, TuInic, Supin, precipitacao,
       evapotranspiracao, vazao, data_inicio_objetivo, data_fim_objetivo){
   
   kt <- modelo[12:74]
-  kt_min <- sum(kt[1:2] > 0)
-  kt_max <- sum(kt[4:63] > 0)
+  kt_max <- sum(kt[1:2] > 0)
+  kt_min <- sum(kt[4:63] > 0)
 
   data_inicio <- precipitacao[, min(data)] + kt_min
   data_fim <- precipitacao[, max(data)] - kt_max
@@ -47,7 +47,7 @@ funcao_objetivo <- function(modelo, area, EbInic, TuInic, Supin, precipitacao,
 
   inicializacao <- smap_ons.inic(modelo, area, EbInic, TuInic, Supin)
 
-  precipitacao_ponderada <- precipitacao
+  precipitacao_ponderada <- data.table::data.table(precipitacao)
   precipitacao_ponderada[, valor := valor * modelo[75]]
   precipitacao_ponderada <- poderacao_temporal(precipitacao_ponderada, kt, data_inicio, data_fim)
 
@@ -122,7 +122,6 @@ calibracao <- function(modelo, area, EbInic, TuInic, Supin, precipitacao,
               vazao = vazao,
               data_inicio_objetivo = data_inicio_objetivo,
               data_fim_objetivo = data_fim_objetivo,
-              
-              control = list(fnscale = -1))
-  parametros <- ajuste$par
+              control = list(fnscale = 1))
+  ajuste
 }

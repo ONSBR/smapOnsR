@@ -10,6 +10,18 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// ponderacao_temporal_cpp
+NumericVector ponderacao_temporal_cpp(NumericVector serie_temporal, NumericVector kt);
+RcppExport SEXP _smapOnsR_ponderacao_temporal_cpp(SEXP serie_temporalSEXP, SEXP ktSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type serie_temporal(serie_temporalSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type kt(ktSEXP);
+    rcpp_result_gen = Rcpp::wrap(ponderacao_temporal_cpp(serie_temporal, kt));
+    return rcpp_result_gen;
+END_RCPP
+}
 // rodada_varios_dias_cpp
 NumericMatrix rodada_varios_dias_cpp(NumericVector modelo, NumericVector inicializacao, double area, NumericVector precipitacao, NumericVector evapotranspiracao, NumericVector Emarg, int numero_dias);
 RcppExport SEXP _smapOnsR_rodada_varios_dias_cpp(SEXP modeloSEXP, SEXP inicializacaoSEXP, SEXP areaSEXP, SEXP precipitacaoSEXP, SEXP evapotranspiracaoSEXP, SEXP EmargSEXP, SEXP numero_diasSEXP) {
@@ -29,6 +41,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_smapOnsR_ponderacao_temporal_cpp", (DL_FUNC) &_smapOnsR_ponderacao_temporal_cpp, 2},
     {"_smapOnsR_rodada_varios_dias_cpp", (DL_FUNC) &_smapOnsR_rodada_varios_dias_cpp, 7},
     {NULL, NULL, 0}
 };

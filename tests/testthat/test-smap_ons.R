@@ -1,6 +1,7 @@
 test_that("testa rodada 2 dias SMAP/ONS", {
   
   modelo <- new_modelo_smap_ons(parametros[Nome == "sobradinho"])
+  area <- attributes(modelo)$area
   inicializacao <- smap_ons.inic(unlist(modelo), area, EbInic = 800, TuInic = 0.15, Supin = 300)
   precipitacao <- 0.846906
   evapotranspiracao <- 5.29 * 0.9
@@ -26,6 +27,7 @@ test_that("testa rodada 2 dias SMAP/ONS", {
 test_that("testa rodada 2 dias SMAP/ONS", {
   
   modelo <- new_modelo_smap_ons(parametros[Nome == "sobradinho"])
+  area <- attributes(modelo)$area
   inicializacao <- smap_ons.inic(unlist(modelo), area, EbInic = 800, TuInic = 0.15, Supin = 300)
   precipitacao <- c(0.846906, 0.904504)
   evapotranspiracao <- c(5.29 * 0.9, 5.29 * 0.9)
@@ -71,29 +73,43 @@ test_that("testa rodada 2 dias SMAP/ONS rotina cpp", {
 #            evapotranspiracao, Emarg,  1000))
 
 
-#test_that("testa rodada 2 dias SMAP/ONS", {
-  
-#  modelo <- new_modelo_smap_ons(parametros[Nome == "avermelha"])
-#  EbInic <- 100
-#  TuInic <- 0.15
-#  Supin <- 300
-#  precipitacao = historico_precipitacao[id == 1]
-#  evapotranspiracao = historico_etp[id == 1]
-#  evapotranspiracao[, valor := lubridate::month(data)]
-#  vazao = historico_vazao[posto == "avermelha"]
-#  data_inicio_objetivo <- "2011-01-01"
-#  kt_max <- sum(modelo$kt[1:2] > 0)
-#  data_fim_objetivo <- evapotranspiracao[, max(data) - kt_max]
-#})
 
-#test_that("testa rodada 2 dias SMAP/ONS", {
-#      aux <- parametros[Nome == "avermelha"]
-#      aux[, valor := valor * 0.5]
-#      limite_inferior <- aux
-#      limite_inferior <- new_modelo_smap_ons(limite_inferior)
+  modelo <- new_modelo_smap_ons(parametros[Nome == "avermelha"])
+  EbInic <- 50
+  TuInic <- 0.15
+  Supin <- 250
+  precipitacao = historico_precipitacao[id == 1]
+  evapotranspiracao = historico_etp[id == 1]
+  vazao = historico_vazao[posto == "avermelha"]
+  data_inicio_objetivo <- "2011-01-01"
+  kt_max <- sum(modelo$kt[1:2] > 0)
+  kt_min <- 2
+  kt_max <- 60
+  data_fim_objetivo <- precipitacao[, max(data) - kt_max]
 
-#      aux <- parametros[Nome == "avermelha"]
-#      aux[, valor := valor * 1.5]
-#      limite_superior <- aux
-#      limite_superior <- new_modelo_smap_ons(limite_superior)
-#})
+  aux <- parametros[Nome == "avermelha"]
+  aux[, valor := valor * 0.5]
+  limite_inferior <- aux
+  limite_inferior <- new_modelo_smap_ons(limite_inferior)
+  limite_inferior <- unlist(limite_inferior)
+  limite_inferior[12:74] = 0
+  limite_inferior[77] <- 0
+
+  aux <- parametros[Nome == "avermelha"]
+  aux[, valor := valor * 1.5]
+  limite_superior <- aux
+  limite_superior <- new_modelo_smap_ons(limite_superior)
+  limite_superior <- unlist(limite_superior)
+  area <- attributes(modelo)$area
+  modelo <- unlist(modelo)
+  limite_superior[12:74] = 1
+  limite_superior[77] = 1
+
+      
+
+  fo <- funcao_objetivo(modelo, area, EbInic, TuInic, Supin, precipitacao,
+      evapotranspiracao, vazao, data_inicio_objetivo, data_fim_objetivo)
+
+  par <- calibracao(modelo, area, EbInic, TuInic, Supin, precipitacao,
+      evapotranspiracao, vazao, data_inicio_objetivo, data_fim_objetivo,
+      limite_inferior, limite_superior)
