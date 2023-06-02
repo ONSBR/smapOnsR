@@ -9,7 +9,7 @@
 #'     \item{id}{id do posto}
 #'     \item{valor}{valor da variavel}
 #'     }
-#' @param modelo objeto de classe smap_ons
+#' @param kt vetor de kts
 #' @param data_inicio data de inicio da construcao da serie temporal ponderada
 #' @param data_fim data de inicio da construcao da serie temporal ponderada
 #' @importFrom data.table setkey
@@ -21,10 +21,10 @@
 #'     \item{valor}{valor da variavel ponderada}
 #'     }
 #' @export
-poderacao_temporal <- function(serie_temporal, modelo, data_inicio, data_fim){
+poderacao_temporal <- function(serie_temporal, kt, data_inicio, data_fim){
     
-    kt_min <- sum(modelo$kt[4:63] > 0)
-    kt_max <- sum(modelo$kt[1:2] > 0)
+    kt_min <- sum(kt[1:2] > 0)
+    kt_max <- sum(kt[4:63] > 0)
 
     if(serie_temporal[, min(data)] > (data_inicio - kt_min)){
         stop("Erro: Data de inicio da serie temporal a ser ponderada inferior ao necessario")
@@ -46,7 +46,7 @@ poderacao_temporal <- function(serie_temporal, modelo, data_inicio, data_fim){
 
     serie_temporal_ponderada[, media_ponderada := {
         result <- mapply(function(inicio, fim) {
-            sum(valor[inicio:fim] * modelo$kt[(kt_min + 3):(3 - kt_max)])
+            sum(valor[inicio:fim] * kt[(kt_min + 3):(3 - kt_max)])
         }, inicio_idx, fim_idx)
         
         result
