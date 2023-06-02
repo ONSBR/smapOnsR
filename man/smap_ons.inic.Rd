@@ -4,10 +4,12 @@
 \alias{smap_ons.inic}
 \title{Valores iniciais SMAP}
 \usage{
-smap_ons.inic(modelo, EbInic = 0, TuInic = 0.3, Supin = 100)
+smap_ons.inic(modelo, area, EbInic = 0, TuInic = 0.3, Supin = 100)
 }
 \arguments{
-\item{modelo}{objeto de classe smap_ons}
+\item{modelo}{vetor resultante unlist do objeto de classe smap_ons}
+
+\item{area}{area da sub-bacia}
 
 \item{EbInic}{Escoamento Subterraneo inicial}
 

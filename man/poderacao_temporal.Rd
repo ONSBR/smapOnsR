@@ -4,7 +4,7 @@
 \alias{poderacao_temporal}
 \title{Realiza a ponderacao temporal de variaveis}
 \usage{
-poderacao_temporal(serie_temporal, modelo, data_inicio, data_fim)
+poderacao_temporal(serie_temporal, kt, data_inicio, data_fim)
 }
 \arguments{
 \item{serie_temporal}{data table com a variavel a ser ponderada com as colunas
@@ -15,7 +15,7 @@ poderacao_temporal(serie_temporal, modelo, data_inicio, data_fim)
 \item{valor}{valor da variavel}
 }}
 
-\item{modelo}{objeto de classe smap_ons}
+\item{kt}{vetor de kts}
 
 \item{data_inicio}{data de inicio da construcao da serie temporal ponderada}
 
