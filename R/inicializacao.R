@@ -2,7 +2,8 @@
 #'
 #' Funcao para criar objeto com os valores iniciais de variaveis de estado para rodar o SMAP
 #'
-#' @param modelo objeto de classe smap_ons
+#' @param modelo vetor resultante unlist do objeto de classe smap_ons
+#' @param area area da sub-bacia
 #' @param Supin Escoamento superficial inicial
 #' @param Rsup2Inic Escoamento superficial inicial referente ao reservatorio de planicie
 #' @param EbInic Escoamento Subterraneo inicial
@@ -19,7 +20,7 @@
 #'     \item{RsubInic}{valor do reservatorio subterraneo inicial}
 #'     }
 #' @export
-smap_ons.inic <- function(modelo, EbInic = 0, TuInic = 0.3, Supin = 100){
+smap_ons.inic <- function(modelo, area, EbInic = 0, TuInic = 0.3, Supin = 100){
   if(Supin<0){
     stop("Supin deve ser ser positivo")
   }
@@ -32,9 +33,9 @@ smap_ons.inic <- function(modelo, EbInic = 0, TuInic = 0.3, Supin = 100){
     stop("EbInic deve ser positivo")
   }
 
-  RsoloInic <- modelo$str * TuInic
-  RsupInic <- (Supin / (1 - (0.5 ^ (1 / modelo$k2t)))) * 86.4 / attributes(modelo)$area
-  RsubInic <- EbInic / (1 - (0.5 ^ (1 / modelo$k_kt))) * 86.4 / attributes(modelo)$area
+  RsoloInic <- modelo[1] * TuInic
+  RsupInic <- (Supin / (1 - (0.5 ^ (1 / modelo[2])))) * 86.4 / area
+  RsubInic <- EbInic / (1 - (0.5 ^ (1 / modelo[5]))) * 86.4 / area
   Rsup2Inic <- 0
   inic <- list(EbInic, TuInic, Supin, Rsup2Inic, RsoloInic, RsupInic, RsubInic)
   names(inic) <- c("EbInic", "TuInic", "Supin", "Rsup2Inic", "RsoloInic", "RsupInic", "RsubInic")
