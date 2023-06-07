@@ -13,7 +13,8 @@ Depends:
     R (>= 2.10)
 Imports:
     Rcpp,
-    data.table
+    data.table,
+    lubridate
 LazyData: true
 Suggests: 
     testthat (>= 3.0.0)
