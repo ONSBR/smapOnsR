@@ -15,7 +15,7 @@ data.table com as colunas
 \item{data}{data da observacao}
 \item{posto}{nome do posto}
 \item{id}{id do posto}
-\item{valor}{valor da precipitacao observada}
+\item{valor}{valor da serie temporal}
 }
 }
 \description{
