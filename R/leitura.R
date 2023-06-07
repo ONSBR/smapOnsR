@@ -146,8 +146,8 @@ le_evapotranspiracao <- function(arq) {
 #'     \item{id}{id do posto}
 #'     \item{valor}{valor da NC de evapotranspiracao observada}
 #'     }
-#' @importFrom  data.table data.table
-#'              lubridate month
+#' @importFrom data.table data.table
+#' @importFrom lubridate month
 #' @return data.table com as colunas
 #'     \itemize{
 #'     \item{data}{data da observacao}
