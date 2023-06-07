@@ -46,9 +46,9 @@ funcao_objetivo <- function(modelo, area, EbInic, TuInic, Supin, precipitacao,
 
   inicializacao <- smap_ons.inic(modelo, area, EbInic, TuInic, Supin)
 
-  precipitacao_ponderada <- data.table::data.table(precipitacao)
+  precipitacao_ponderada <- data.table::data.table(precipitacao[data >= data_inicio & data <= data_fim])
   precipitacao_ponderada[, valor := valor * modelo[75]]
-  precipitacao_ponderada <- poderacao_temporal(precipitacao_ponderada, kt, data_inicio, data_fim)
+  precipitacao_ponderada <- ponderacao_temporal2(precipitacao_ponderada, kt)
 
   evapotranspiracao_ponderada <- data.table::data.table(evapotranspiracao[data >= data_inicio & data <= data_fim])
   evapotranspiracao_ponderada[, valor := valor * modelo[76]]

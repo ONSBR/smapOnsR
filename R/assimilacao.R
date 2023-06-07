@@ -48,15 +48,13 @@
 
 assimilacao_oficial <- function(vetorModelo, area, EbInic, TuInic, Supin, precipitacao,
       evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias, 
-      limite_prec = c(0.5, 2), limite_ebin = c(0.8, 1.2), 
+      limite_prec = c(0.5, 2), limite_ebin = c(0.8, 1.2),
       limite_supin = c(0, 2), data_rodada){
     
     kt <- vetorModelo[12:74]
     precipitacao_ponderada <- data.table::data.table(precipitacao)
     precipitacao_ponderada[, valor := valor * vetorModelo[75]]
-    precipitacao_ponderada <- poderacao_temporal(precipitacao_ponderada, kt, 
-    (data_rodada - numero_dias), (data_rodada - 1))
-    precipitacao_ponderada <- precipitacao_ponderada[, valor]
+    precipitacao_ponderada <- ponderacao_temporal2(precipitacao_ponderada[, valor], kt)
 
     pesos <- rep(1,numero_dias)
 
@@ -69,7 +67,7 @@ assimilacao_oficial <- function(vetorModelo, area, EbInic, TuInic, Supin, precip
               lower = limite_inferior, upper = limite_superior,
               fn = funcao_objetivo_assimilacao,
               vetorModelo = vetorModelo,
-              TuInic = TuInic, 
+              TuInic = TuInic,
               area = area,
               precipitacao_ponderada = precipitacao_ponderada,
               evapotranspiracao = evapotranspiracao,

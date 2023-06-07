@@ -24,9 +24,7 @@ test_that("multiplication works", {
   kt <- vetorModelo[12:74]
   precipitacao_ponderada <- data.table::data.table(precipitacao)
   precipitacao_ponderada[, valor := valor * vetorModelo[75]]
-  precipitacao_ponderada <- poderacao_temporal(precipitacao_ponderada, kt, 
-  (data_rodada - numero_dias), (data_rodada - 1))
-  precipitacao_ponderada <- precipitacao_ponderada[, valor]
+  precipitacao_ponderada <- ponderacao_temporal2(precipitacao_ponderada[, valor], kt)
 
   pesos <- rep(1,numero_dias)
 
