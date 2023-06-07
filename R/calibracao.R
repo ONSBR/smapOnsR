@@ -1,4 +1,3 @@
-
 #' funcao objetivo de calibracao do SMAP/ONS
 #'
 #' @param modelo vetor resultante de unlist do objeto de classe smap_ons
@@ -51,7 +50,7 @@ funcao_objetivo <- function(modelo, area, EbInic, TuInic, Supin, precipitacao,
   precipitacao_ponderada[, valor := valor * modelo[75]]
   precipitacao_ponderada <- poderacao_temporal(precipitacao_ponderada, kt, data_inicio, data_fim)
 
-  evapotranspiracao_ponderada <- data.table::data.table(evapotranspiracao)
+  evapotranspiracao_ponderada <- data.table::data.table(evapotranspiracao[data >= data_inicio & data <= data_fim])
   evapotranspiracao_ponderada[, valor := valor * modelo[76]]
   evapotranspiracao_planicie_ponderada <- data.table::data.table(evapotranspiracao)
   evapotranspiracao_planicie_ponderada[, valor := valor * modelo[77]]
@@ -67,7 +66,7 @@ funcao_objetivo <- function(modelo, area, EbInic, TuInic, Supin, precipitacao,
   dat[ ,data := precipitacao_ponderada[, data]]
 
   objetivo <- calcula_dm(dat[data >= data_inicio_objetivo & data <= data_fim_objetivo, Qcalc],
-                         as.numeric(vazao[data >= data_inicio_objetivo & data <= data_fim_objetivo, valor]))
+                         vazao[data >= data_inicio_objetivo & data <= data_fim_objetivo, valor])
   objetivo
 }
 
@@ -111,7 +110,7 @@ funcao_objetivo <- function(modelo, area, EbInic, TuInic, Supin, precipitacao,
 calibracao <- function(modelo, area, EbInic, TuInic, Supin, precipitacao,
       evapotranspiracao, vazao, data_inicio_objetivo, data_fim_objetivo,
       limite_inferior, limite_superior){
-
+  
   ajuste <- stats::optim(par = modelo, method = "L-BFGS-B",
               lower = limite_inferior, upper = limite_superior,
               fn = funcao_objetivo,
@@ -123,5 +122,19 @@ calibracao <- function(modelo, area, EbInic, TuInic, Supin, precipitacao,
               data_inicio_objetivo = data_inicio_objetivo,
               data_fim_objetivo = data_fim_objetivo,
               control = list(fnscale = 1))
+
+  ajuste <- pso::psoptim(par = modelo,
+              lower = limite_inferior, upper = limite_superior,
+              fn = funcao_objetivo,
+              area = area,
+              EbInic = EbInic, TuInic = TuInic, Supin = Supin,
+              precipitacao = precipitacao,
+              evapotranspiracao = evapotranspiracao,
+              vazao = vazao,
+              data_inicio_objetivo = data_inicio_objetivo,
+              data_fim_objetivo = data_fim_objetivo,
+              control = list(fnscale = 1))
+
+  ajuste$par
   ajuste
 }
