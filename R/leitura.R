@@ -70,7 +70,7 @@ le_historico_verificado <- function(arq) {
 #'     \item{data}{data da observacao}
 #'     \item{posto}{nome do posto}
 #'     \item{id}{id do posto}
-#'     \item{valor}{valor da precipitacao observada}
+#'     \item{valor}{valor da serie temporal}
 #'     }
 #' @export 
 le_parametros <- function(arq) {
@@ -130,4 +130,42 @@ le_evapotranspiracao <- function(arq) {
     data.table::setcolorder(dat, c("mes", "posto", "valor"))
 
     dat
+}
+
+# FUNCOES DE COMPATIBILIZACAO DE DADOS---------------------------------
+
+#
+#' transforma normal climatologica de evapotranspiracao em uma serie temporal
+#' 
+#' 
+#' @param serie_temporal serie temporal a ser utilizada como espelho
+#' @param normal_climatologica data.table  com NC de evapotranspiracao com as colunas
+#'     \itemize{
+#'     \item{mes}{mes da NC}
+#'     \item{posto}{nome do posto}
+#'     \item{id}{id do posto}
+#'     \item{valor}{valor da NC de evapotranspiracao observada}
+#'     }
+#' @importFrom  data.table data.table
+#'              lubridate month
+#' @return data.table com as colunas
+#'     \itemize{
+#'     \item{data}{data da observacao}
+#'     \item{posto}{nome do posto}
+#'     \item{id}{id do posto}
+#'     \item{valor}{valor da serie temporal}
+#'     }
+#' @export 
+transforma_NC_serie <- function(serie_temporal, normal_climatologica) {
+    serie_temporal_etp <- data.table::data.table(serie_temporal)
+    serie_temporal_etp[, mes := lubridate::month(data)]
+    serie_temporal_etp <- merge(serie_temporal_etp, normal_climatologica, by = "mes")
+    serie_temporal_etp[, posto.x := NULL]
+    serie_temporal_etp[, id.x := NULL]
+    serie_temporal_etp[, valor.x := NULL]
+    serie_temporal_etp[, mes := NULL]
+
+    colnames(serie_temporal_etp) <- c("data", "posto", "id", "valor")
+    
+    serie_temporal_etp
 }
