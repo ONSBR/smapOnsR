@@ -2,6 +2,7 @@ test_that("multiplication works", {
   
   data_rodada <- as.Date('2020/01/01')
   dias_assimilacao <- 31
+  numero_dias <- dias_assimilacao
   EbInic <- historico_vazao[data == (data_rodada - dias_assimilacao + 1) & posto == "baixoig", valor] / 2
   Supin <- historico_vazao[data == (data_rodada - dias_assimilacao + 1) & posto == "baixoig", valor] / 2
   TuInic <- 0.5
@@ -27,6 +28,9 @@ test_that("multiplication works", {
   precipitacao_ponderada <- ponderacao_temporal2(precipitacao_ponderada[, valor], kt)
 
   pesos <- rep(1,numero_dias)
+  limite_prec <- c(0.5, 2)
+  limite_ebin <- c(0.8, 1.2)
+  limite_supin <- c(0, 2)
 
   limite_inferior = c(rep(limite_prec[1],numero_dias), limite_ebin[1], limite_supin[1])
   limite_superior = c(rep(limite_prec[2],numero_dias), limite_ebin[2], limite_supin[2])
@@ -34,7 +38,8 @@ test_that("multiplication works", {
   vetorParametros <- c(pesos, EbInic, Supin)
 
   fo <- funcao_objetivo_assimilacao(vetorParametros, vetorModelo, TuInic, 
-      precipitacao_ponderada, evapotranspiracao, evapotranspiracao_planicie, vazao, area)
+      precipitacao_ponderada, evapotranspiracao, evapotranspiracao_planicie, vazao, area,
+      numero_dias)
 
   ajuste <- assimilacao_oficial(vetorModelo, area, EbInic, TuInic, Supin, precipitacao,
       evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias = dias_assimilacao,

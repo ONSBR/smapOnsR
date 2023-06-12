@@ -56,7 +56,7 @@ assimilacao_oficial <- function(vetorModelo, area, EbInic, TuInic, Supin, precip
     precipitacao_ponderada[, valor := valor * vetorModelo[75]]
     precipitacao_ponderada <- ponderacao_temporal2(precipitacao_ponderada[, valor], kt)
 
-    pesos <- rep(1,numero_dias)
+    pesos <- rep(1, numero_dias)
 
     limite_inferior = c(rep(limite_prec[1],numero_dias), limite_ebin[1], limite_supin[1])
     limite_superior = c(rep(limite_prec[2],numero_dias), limite_ebin[2], limite_supin[2])
@@ -73,6 +73,7 @@ assimilacao_oficial <- function(vetorModelo, area, EbInic, TuInic, Supin, precip
               evapotranspiracao = evapotranspiracao,
               evapotranspiracao_planicie = evapotranspiracao_planicie,
               vazao = vazao,
+              numero_dias = numero_dias,
               control = list(fnscale = 1))
     ajuste
 }
@@ -106,20 +107,21 @@ assimilacao_oficial <- function(vetorModelo, area, EbInic, TuInic, Supin, precip
 #' @return objetivo valor da funcao objetivo
 #' @export
 
-funcao_objetivo_assimilacao <- function(vetorParametros, vetorModelo, TuInic, 
-      precipitacao_ponderada, evapotranspiracao, evapotranspiracao_planicie, vazao, area){
+funcao_objetivo_assimilacao <- function(vetorParametros, vetorModelo, TuInic,
+      precipitacao_ponderada, evapotranspiracao, evapotranspiracao_planicie, vazao, area,
+      numero_dias){
 
-  EbInic <- vetorParametros[(length(vetorParametros)-1)]
+  EbInic <- vetorParametros[(length(vetorParametros) - 1)]
   Supin <- vetorParametros[length(vetorParametros)]
   inicializacao <- smap_ons.inic(vetorModelo, area, EbInic, TuInic, Supin)
   vetorInicializacao <- unlist(inicializacao)
 
-  precipitacao_ponderada <- precipitacao_ponderada * vetorParametros[1:(length(vetorParametros)-2)]
+  precipitacao_ponderada <- precipitacao_ponderada * vetorParametros[1:(length(vetorParametros) - 2)]
 
   simulacao <- rodada_varios_dias_cpp(vetorModelo,
             vetorInicializacao, area, precipitacao_ponderada,
             evapotranspiracao, evapotranspiracao_planicie, numero_dias)
 
-  objetivo <- calcula_dm(simulacao[,1], vazao)
+  objetivo <- calcula_dm(simulacao[, 1], vazao)
   objetivo
 }
