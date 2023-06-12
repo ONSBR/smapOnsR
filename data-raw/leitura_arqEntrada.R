@@ -20,5 +20,5 @@ for (arq in arquivos){
 }
 historico_etp_NC[, id := match(historico_etp_NC$posto, unique(historico_etp_NC$posto))]
 data.table::setcolorder(historico_etp_NC, c("mes", "posto", "id", "valor"))
-
+data.table::setorder(dat, posto, data)
 usethis::use_data(historico_etp_NC, overwrite = TRUE)

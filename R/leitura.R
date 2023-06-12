@@ -166,6 +166,6 @@ transforma_NC_serie <- function(serie_temporal, normal_climatologica) {
     serie_temporal_etp[, mes := NULL]
 
     colnames(serie_temporal_etp) <- c("data", "posto", "id", "valor")
-    
+    data.table::setorder(serie_temporal_etp, posto, data)
     serie_temporal_etp
 }
