@@ -50,29 +50,16 @@ le_historico_verificado <- function(arq) {
 #' 
 #' Leitor de arquivo de parametros
 #' 
-#' Le arquivo de dados verificados, espera uma certa estrutura.
+#' Le arquivo de parametros "sub-bacia_PARAMAETROS.txt".
 #' 
-#' Esta funcao espera um arquivo da forma
-#' 
-#' | data | POSTO1 | POSTO2 | ... | POSTON |
-#' | --- | --- | --- | --- | --- |
-#' | 01/01/2020 | XXX | XXX | ... | XXX |
-#' | 02/01/2020 | XXX | XXX | ... | XXX |
-#' | 02/01/2020 | XXX | XXX | ... | XXX |
-#' 
-#' O nome da primeira coluna e irrelevante, pois sera trocado para "data" internamente. 
-#' Os demais serao utilizados como identificadores de cada registro
-#' 
-#' @param arq o arquivo do tipo "subbacia_PARAMETROS.txt"
+#' @param arq o arquivo do tipo "sub-bacia_PARAMETROS.txt"
 #' @importFrom  data.table data.table
-#' @importFrom stats complete.cases
 #' @importFrom utils read.csv
 #' @return data.table com as colunas
 #'     \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{id}{id do posto}
-#'     \item{valor}{valor da serie temporal}
+#'     \item{Nome}{Nome da sub-bacia}
+#'     \item{parametro}{nome do parametro}
+#'     \item{valor}{valor do parametro}
 #'     }
 #' @export 
 le_parametros <- function(arq) {

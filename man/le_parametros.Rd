@@ -7,31 +7,19 @@
 le_parametros(arq)
 }
 \arguments{
-\item{arq}{o arquivo do tipo "subbacia_PARAMETROS.txt"}
+\item{arq}{o arquivo do tipo "sub-bacia_PARAMETROS.txt"}
 }
 \value{
 data.table com as colunas
 \itemize{
-\item{data}{data da observacao}
-\item{posto}{nome do posto}
-\item{id}{id do posto}
-\item{valor}{valor da serie temporal}
+\item{Nome}{Nome da sub-bacia}
+\item{parametro}{nome do parametro}
+\item{valor}{valor do parametro}
 }
 }
 \description{
 Leitor de arquivo de parametros
 }
 \details{
-Le arquivo de dados verificados, espera uma certa estrutura.
-
-Esta funcao espera um arquivo da forma\tabular{lllll}{
-   data \tab POSTO1 \tab POSTO2 \tab ... \tab POSTON \cr
-   01/01/2020 \tab XXX \tab XXX \tab ... \tab XXX \cr
-   02/01/2020 \tab XXX \tab XXX \tab ... \tab XXX \cr
-   02/01/2020 \tab XXX \tab XXX \tab ... \tab XXX \cr
-}
-
-
-O nome da primeira coluna e irrelevante, pois sera trocado para "data" internamente.
-Os demais serao utilizados como identificadores de cada registro
+Le arquivo de parametros "sub-bacia_PARAMAETROS.txt".
 }
