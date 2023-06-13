@@ -6,7 +6,7 @@
 Realiza a assimilacao de dados com a metodologia oficial}
 \usage{
 assimilacao_oficial(
-  vetorModelo,
+  vetor_modelo,
   area,
   EbInic,
   TuInic,
@@ -23,7 +23,7 @@ assimilacao_oficial(
 )
 }
 \arguments{
-\item{vetorModelo}{objeto de classe smap_ons}
+\item{vetor_modelo}{objeto de classe smap_ons}
 
 \item{area}{area da sub-bacia}
 

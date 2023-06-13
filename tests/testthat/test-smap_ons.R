@@ -14,13 +14,13 @@ test_that("testa rodada 2 dias SMAP/ONS", {
   expect_equal(as.numeric(saida[1, 1]), 1100)
 
   precipitacao <- 0.904504
-  saidaAnterior <- saida
-  inicializacao$RsoloInic <- saidaAnterior[1, 2]
-  inicializacao$RsupInic <- saidaAnterior[1, 3]
-  inicializacao$Rsup2Inic <- saidaAnterior[1, 4]
-  inicializacao$RsubInic <- saidaAnterior[1, 5]
+  saida_anterior <- saida
+  inicializacao$RsoloInic <- saida_anterior[1, 2]
+  inicializacao$RsupInic <- saida_anterior[1, 3]
+  inicializacao$Rsup2Inic <- saida_anterior[1, 4]
+  inicializacao$RsubInic <- saida_anterior[1, 5]
   
-  saida <- rodada_diaria(modelo, inicializacao, precipitacao, evapotranspiracao, Emarg, saidaAnterior)
+  saida <- rodada_diaria(modelo, inicializacao, precipitacao, evapotranspiracao, Emarg, saida_anterior)
   expect_equal(as.numeric(saida[2, 1]), 1065.9265)
 })
 

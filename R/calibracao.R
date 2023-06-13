@@ -49,7 +49,7 @@ funcao_objetivo <- function(modelo, kt_min, kt_max, area, EbInic, TuInic, Supin,
 
   precipitacao_ponderada <- data.table::data.table(precipitacao)
   precipitacao_ponderada[, valor := valor * modelo[12]]
-  precipitacao_ponderada <- ponderacao_temporal2(precipitacao_ponderada[, valor], kt, kt_max, kt_min)
+  precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada[, valor], kt, kt_max, kt_min)
 
   evapotranspiracao_ponderada <- data.table::data.table(evapotranspiracao)
   evapotranspiracao_ponderada[, valor := valor * modelo[13]]

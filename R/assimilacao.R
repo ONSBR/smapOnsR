@@ -56,7 +56,7 @@ assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, preci
     kt_min <- sum(kt[4:63] > 0)
     precipitacao_ponderada <- data.table::data.table(precipitacao)
     precipitacao_ponderada[, valor := valor * vetor_modelo[75]]
-    precipitacao_ponderada <- ponderacao_temporal2(precipitacao_ponderada[, valor], kt,
+    precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada[, valor], kt,
                                                     kt_max, kt_min)
 
     pesos <- rep(1, numero_dias)
@@ -119,12 +119,12 @@ funcao_objetivo_assimilacao <- function(vetor_parametros, vetor_modelo, TuInic,
   EbInic <- vetor_parametros[(length(vetor_parametros) - 1)]
   Supin <- vetor_parametros[length(vetor_parametros)]
   inicializacao <- smap_ons.inic(vetor_modelo, area, EbInic, TuInic, Supin)
-  vetorInicializacao <- unlist(inicializacao)
+  vetor_inicializacao <- unlist(inicializacao)
 
   precipitacao_ponderada <- precipitacao_ponderada * vetor_parametros[1:(length(vetor_parametros) - 2)]
 
   simulacao <- rodada_varios_dias_cpp(vetor_modelo,
-            vetorInicializacao, area, precipitacao_ponderada,
+            vetor_inicializacao, area, precipitacao_ponderada,
             evapotranspiracao, evapotranspiracao_planicie, numero_dias)
 
   objetivo <- calcula_dm(simulacao[, 1], vazao, pesos_funcao_objetivo)

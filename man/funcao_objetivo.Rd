@@ -6,6 +6,8 @@
 \usage{
 funcao_objetivo(
   modelo,
+  kt_min,
+  kt_max,
   area,
   EbInic,
   TuInic,

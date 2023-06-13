@@ -6,6 +6,8 @@
 \usage{
 calibracao(
   modelo,
+  kt_min,
+  kt_max,
   area,
   EbInic,
   TuInic,

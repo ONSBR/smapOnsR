@@ -5,25 +5,27 @@
 \title{funcao objetivo de assimilacao do SMAP/ONS}
 \usage{
 funcao_objetivo_assimilacao(
-  vetorParametros,
-  vetorModelo,
+  vetor_parametros,
+  vetor_modelo,
   TuInic,
   precipitacao_ponderada,
   evapotranspiracao,
   evapotranspiracao_planicie,
   vazao,
-  area
+  area,
+  numero_dias,
+  pesos_funcao_objetivo = rep(1/length(numero_dias), length(numero_dias))
 )
 }
 \arguments{
-\item{vetorParametros}{vetor com os parametros:
+\item{vetor_parametros}{vetor com os parametros:
 \itemize{
 \item{pesos}{pesos da ponderacao da precipitacao}
 \item{Ebin}{vazao de base inicial}
 \item{Supin}{vazao superficial inicial}
 }}
 
-\item{vetorModelo}{vetor resultante de unlist do objeto de classe smap_ons}
+\item{vetor_modelo}{vetor resultante de unlist do objeto de classe smap_ons}
 
 \item{TuInic}{umidade do solo inicial}
 
@@ -39,15 +41,11 @@ funcao_objetivo_assimilacao(
 
 \item{area}{area da sub-bacia}
 
-\item{pesos}{vetor de pesos a serem utilizados para a ponderacao da prec na assimilacao}
+\item{numero_dias}{numero de dias da assimilacao}
 
-\item{EbInic}{vazao de base inicial}
-
-\item{Supin}{vazao superficial inicial}
+\item{pesos_funcao_objetivo}{vetor de pesos da funcao objetivo}
 
 \item{precipitacao}{Vetor de precipitacao final (ja corrigido e/ou ponderado)}
-
-\item{numero_dias}{numero de dias da assimilacao}
 }
 \value{
 objetivo valor da funcao objetivo

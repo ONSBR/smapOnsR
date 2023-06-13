@@ -25,9 +25,9 @@ test_that("multiplication works", {
   kt <- vetorModelo[12:74]
   precipitacao_ponderada <- data.table::data.table(precipitacao)
   precipitacao_ponderada[, valor := valor * vetorModelo[75]]
-  precipitacao_ponderada <- ponderacao_temporal2(precipitacao_ponderada[, valor], kt, kt_max, kt_min)
+  precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada[, valor], kt, kt_max, kt_min)
 
-  pesos <- rep(1,numero_dias)
+  pesos <- rep(1, numero_dias)
   limite_prec <- c(0.5, 2)
   limite_ebin <- c(0.8, 1.2)
   limite_supin <- c(0, 2)
@@ -35,9 +35,9 @@ test_that("multiplication works", {
   limite_inferior = c(rep(limite_prec[1],numero_dias), limite_ebin[1], limite_supin[1])
   limite_superior = c(rep(limite_prec[2],numero_dias), limite_ebin[2], limite_supin[2])
 
-  vetorParametros <- c(pesos, EbInic, Supin)
+  vetor_parametros <- c(pesos, EbInic, Supin)
 
-  fo <- funcao_objetivo_assimilacao(vetorParametros, vetorModelo, TuInic, 
+  fo <- funcao_objetivo_assimilacao(vetor_parametros, vetorModelo, TuInic, 
       precipitacao_ponderada, evapotranspiracao, evapotranspiracao_planicie, vazao, area,
       numero_dias)
 
