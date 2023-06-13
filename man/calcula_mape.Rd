@@ -2,7 +2,7 @@
 % Please edit documentation in R/metricas.R
 \name{calcula_mape}
 \alias{calcula_mape}
-\title{Realiza o calculo do MAPE}
+\title{Calcula MAPE}
 \usage{
 calcula_mape(
   simulacao,

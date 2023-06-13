@@ -3,7 +3,7 @@
 \name{calcula_nse}
 \alias{calcula_nse}
 \title{FUNCOES PARA CALCULO DE METRICA DE AVALIACAO DO MODELO
-Realiza o calculo do NSE}
+Calcula NSE}
 \usage{
 calcula_nse(
   simulacao,
@@ -22,6 +22,5 @@ calcula_nse(
 nse
 }
 \description{
-FUNCOES PARA CALCULO DE METRICA DE AVALIACAO DO MODELO
 Realiza o calculo do NSE
 }

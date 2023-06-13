@@ -2,7 +2,7 @@
 % Please edit documentation in R/leitura.R
 \name{le_evapotranspiracao}
 \alias{le_evapotranspiracao}
-\title{Leitor de arquivo de normal climatologica de evapotranspiracao}
+\title{le_evapotranspiracao}
 \usage{
 le_evapotranspiracao(arq)
 }
@@ -19,5 +19,8 @@ data.table evapotranspiracao com as colunas
 }
 }
 \description{
+Leitor de arquivo de normal climatologica de evapotranspiracao
+}
+\details{
 Le arquivo evapotranspiracao utilizado no aplicativo SMAP/ONS
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/leitura.R
 \name{transforma_NC_serie}
 \alias{transforma_NC_serie}
-\title{transforma normal climatologica de evapotranspiracao em uma serie temporal}
+\title{transforma_NC_serie}
 \usage{
 transforma_NC_serie(serie_temporal, normal_climatologica)
 }

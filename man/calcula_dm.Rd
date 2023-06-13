@@ -2,7 +2,7 @@
 % Please edit documentation in R/metricas.R
 \name{calcula_dm}
 \alias{calcula_dm}
-\title{Realiza o calculo da DM}
+\title{Calcula DM}
 \usage{
 calcula_dm(
   simulacao,

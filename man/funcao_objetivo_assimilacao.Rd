@@ -2,10 +2,10 @@
 % Please edit documentation in R/assimilacao.R
 \name{funcao_objetivo_assimilacao}
 \alias{funcao_objetivo_assimilacao}
-\title{funcao objetivo de assimilacao do SMAP/ONS}
+\title{Funcao objetivo da assimilacao}
 \usage{
 funcao_objetivo_assimilacao(
-  vetor_parametros,
+  vetor_variaveis,
   vetor_modelo,
   TuInic,
   precipitacao_ponderada,
@@ -18,7 +18,7 @@ funcao_objetivo_assimilacao(
 )
 }
 \arguments{
-\item{vetor_parametros}{vetor com os parametros:
+\item{vetor_variaveis}{vetor com os parametros:
 \itemize{
 \item{pesos}{pesos da ponderacao da precipitacao}
 \item{Ebin}{vazao de base inicial}
@@ -51,5 +51,5 @@ funcao_objetivo_assimilacao(
 objetivo valor da funcao objetivo
 }
 \description{
-funcao objetivo de assimilacao do SMAP/ONS
+Funcao objetivo de assimilacao do SMAP/ONS
 }

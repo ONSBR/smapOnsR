@@ -2,7 +2,7 @@
 % Please edit documentation in R/leitura.R
 \name{le_parametros}
 \alias{le_parametros}
-\title{Leitor de arquivo de parametros}
+\title{le_parametros}
 \usage{
 le_parametros(arq)
 }
@@ -19,9 +19,11 @@ data.table com as colunas
 }
 }
 \description{
-Le arquivo de dados verificados, espera uma certa estrutura.
+Leitor de arquivo de parametros
 }
 \details{
+Le arquivo de dados verificados, espera uma certa estrutura.
+
 Esta funcao espera um arquivo da forma\tabular{lllll}{
    data \tab POSTO1 \tab POSTO2 \tab ... \tab POSTON \cr
    01/01/2020 \tab XXX \tab XXX \tab ... \tab XXX \cr

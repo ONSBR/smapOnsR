@@ -2,7 +2,7 @@
 % Please edit documentation in R/ponderacao.R
 \name{ponderacao_temporal}
 \alias{ponderacao_temporal}
-\title{Realiza a ponderacao temporal de variaveis}
+\title{Funcao de ponderacao temporal}
 \usage{
 ponderacao_temporal(serie_temporal, kt, kt_max, kt_min)
 }
@@ -25,5 +25,5 @@ serie_temporal_ponderada: data table com a variavel ponderada com as colunas
 }
 }
 \description{
-Realiza a ponderacao temporal de variaveis
+Realiza a ponderacao temporal de variaveis atraves dos pesos kt
 }

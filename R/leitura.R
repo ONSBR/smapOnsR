@@ -1,6 +1,6 @@
 # LEITURA DO DADO VERIFICADO --------------------------------------------------------
 
-#' Leitor De Arquivo De Dados Verificados
+#' le_historico_verificado
 #' 
 #' Le arquivo de dados verificados, espera uma certa estrutura.
 #' 
@@ -46,6 +46,8 @@ le_historico_verificado <- function(arq) {
 
 # LEITURA DE ARQUIVOS DE ENTRADA SMAP---------------------------------
 
+#' le_parametros
+#' 
 #' Leitor de arquivo de parametros
 #' 
 #' Le arquivo de dados verificados, espera uma certa estrutura.
@@ -106,6 +108,8 @@ le_parametros <- function(arq) {
     parametros_smap
 }
 
+#' le_evapotranspiracao
+#' 
 #' Leitor de arquivo de normal climatologica de evapotranspiracao
 #' 
 #' Le arquivo evapotranspiracao utilizado no aplicativo SMAP/ONS
@@ -134,7 +138,8 @@ le_evapotranspiracao <- function(arq) {
 
 # FUNCOES DE COMPATIBILIZACAO DE DADOS---------------------------------
 
-#
+#' transforma_NC_serie
+#' 
 #' transforma normal climatologica de evapotranspiracao em uma serie temporal
 #' 
 #' 

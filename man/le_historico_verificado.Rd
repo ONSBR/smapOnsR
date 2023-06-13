@@ -2,7 +2,7 @@
 % Please edit documentation in R/leitura.R
 \name{le_historico_verificado}
 \alias{le_historico_verificado}
-\title{Leitor De Arquivo De Dados Verificados}
+\title{le_historico_verificado}
 \usage{
 le_historico_verificado(arq)
 }

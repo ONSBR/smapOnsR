@@ -2,8 +2,7 @@
 % Please edit documentation in R/assimilacao.R
 \name{assimilacao_oficial}
 \alias{assimilacao_oficial}
-\title{Assimilacao oficial
-Realiza a assimilacao de dados com a metodologia oficial}
+\title{Assimilacao oficial}
 \usage{
 assimilacao_oficial(
   vetor_modelo,
@@ -79,6 +78,5 @@ ajuste lista contendo
 }
 }
 \description{
-Assimilacao oficial
 Realiza a assimilacao de dados com a metodologia oficial
 }

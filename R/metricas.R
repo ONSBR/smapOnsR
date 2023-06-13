@@ -1,12 +1,14 @@
 #' FUNCOES PARA CALCULO DE METRICA DE AVALIACAO DO MODELO
 
+#' Calcula NSE
+#' 
 #' Realiza o calculo do NSE
 #'
 #' @param simulacao vetor com os valores da serie simulada
 #' @param observacao vetor com os valores da serie simulada
 #' @param pesos pesos a serem utilizados para cada data
 #' @return nse
-#' @export 
+#' @export
 
 calcula_nse <- function(simulacao, observacao, pesos = rep(1 /length(observacao), length(observacao))){
     erro_previsao <- sum((observacao - simulacao) ^ 2 * pesos)
@@ -15,19 +17,23 @@ calcula_nse <- function(simulacao, observacao, pesos = rep(1 /length(observacao)
     nse
 }
 
+#' Calcula MAPE
+#' 
 #' Realiza o calculo do MAPE
 #'
 #' @param simulacao vetor com os valores da serie simulada
 #' @param observacao vetor com os valores da serie simulada
 #' @param pesos pesos a serem utilizados para cada data
 #' @return mape
-#' @export 
+#' @export
 
 calcula_mape <- function(simulacao, observacao, pesos = rep(1 /length(observacao), length(observacao))){
     mape <- sum(abs((observacao - simulacao) / observacao) * pesos)
     mape
 }
 
+#' Calcula DM
+#' 
 #' Realiza o calculo da DM
 #'
 #' @param simulacao vetor com os valores da serie simulada

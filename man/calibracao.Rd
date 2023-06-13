@@ -2,10 +2,10 @@
 % Please edit documentation in R/calibracao.R
 \name{calibracao}
 \alias{calibracao}
-\title{funcao de calibracao do SMAP/ONS}
+\title{Funcao de calibracao do modelo SMAP/ONS}
 \usage{
 calibracao(
-  modelo,
+  vetor_modelo,
   kt_min,
   kt_max,
   area,
@@ -22,7 +22,7 @@ calibracao(
 )
 }
 \arguments{
-\item{modelo}{vetor resultante de unlist do objeto de classe smap_ons}
+\item{vetor_modelo}{vetor resultante de unlist do objeto de classe smap_ons}
 
 \item{area}{area da sub-bacia}
 
@@ -68,5 +68,5 @@ calibracao(
 objetivo valor da funcao objetivo
 }
 \description{
-funcao de calibracao do SMAP/ONS
+Raliza a calibracao de calibracao do SMAP/ONS dado um vetor inicial de pearametros e seus limites superiores e inferiores
 }
