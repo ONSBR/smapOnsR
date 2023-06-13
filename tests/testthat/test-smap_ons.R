@@ -3,32 +3,6 @@ test_that("testa rodada 2 dias SMAP/ONS", {
   modelo <- new_modelo_smap_ons(parametros[Nome == "sobradinho"])
   area <- attributes(modelo)$area
   inicializacao <- inicializacao_smap(unlist(modelo), area, EbInic = 800, TuInic = 0.15, Supin = 300)
-  precipitacao <- 0.846906
-  evapotranspiracao <- 5.29 * 0.9
-  Emarg <- 5.29
-  saida <- rodada_diaria(modelo, inicializacao, precipitacao, evapotranspiracao, Emarg)
-
-  expect_equal(colnames(saida), c("Qcalc", "Rsolo", "Rsup", "Rsup2", "Rsub",
-                       "Es", "Er", "Rec", "Marg", "Ed", "Ed2", "Ed3",
-                       "Eb", "Tu"))
-  expect_equal(as.numeric(saida[1, 1]), 1100)
-
-  precipitacao <- 0.904504
-  saida_anterior <- saida
-  inicializacao$RsoloInic <- saida_anterior[1, 2]
-  inicializacao$RsupInic <- saida_anterior[1, 3]
-  inicializacao$Rsup2Inic <- saida_anterior[1, 4]
-  inicializacao$RsubInic <- saida_anterior[1, 5]
-  
-  saida <- rodada_diaria(modelo, inicializacao, precipitacao, evapotranspiracao, Emarg, saida_anterior)
-  expect_equal(as.numeric(saida[2, 1]), 1065.9265)
-})
-
-test_that("testa rodada 2 dias SMAP/ONS", {
-  
-  modelo <- new_modelo_smap_ons(parametros[Nome == "sobradinho"])
-  area <- attributes(modelo)$area
-  inicializacao <- inicializacao_smap(unlist(modelo), area, EbInic = 800, TuInic = 0.15, Supin = 300)
   precipitacao <- c(0.846906, 0.904504)
   evapotranspiracao <- c(5.29 * 0.9, 5.29 * 0.9)
   Emarg <- c(5.29, 5.29)
