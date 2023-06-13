@@ -2,7 +2,7 @@ test_that("testa rodada 2 dias SMAP/ONS", {
   
   modelo <- new_modelo_smap_ons(parametros[Nome == "sobradinho"])
   area <- attributes(modelo)$area
-  inicializacao <- smap_ons.inic(unlist(modelo), area, EbInic = 800, TuInic = 0.15, Supin = 300)
+  inicializacao <- inicializacao_smap(unlist(modelo), area, EbInic = 800, TuInic = 0.15, Supin = 300)
   precipitacao <- 0.846906
   evapotranspiracao <- 5.29 * 0.9
   Emarg <- 5.29
@@ -28,7 +28,7 @@ test_that("testa rodada 2 dias SMAP/ONS", {
   
   modelo <- new_modelo_smap_ons(parametros[Nome == "sobradinho"])
   area <- attributes(modelo)$area
-  inicializacao <- smap_ons.inic(unlist(modelo), area, EbInic = 800, TuInic = 0.15, Supin = 300)
+  inicializacao <- inicializacao_smap(unlist(modelo), area, EbInic = 800, TuInic = 0.15, Supin = 300)
   precipitacao <- c(0.846906, 0.904504)
   evapotranspiracao <- c(5.29 * 0.9, 5.29 * 0.9)
   Emarg <- c(5.29, 5.29)
@@ -45,7 +45,7 @@ test_that("testa rodada 2 dias SMAP/ONS rotina cpp", {
   
   modelo <- new_modelo_smap_ons(parametros[Nome == "sobradinho"])
   area <- attributes(modelo)$area
-  inicializacao <- smap_ons.inic(unlist(modelo), area, EbInic = 800, TuInic = 0.15, Supin = 300)
+  inicializacao <- inicializacao_smap(unlist(modelo), area, EbInic = 800, TuInic = 0.15, Supin = 300)
   precipitacao <- c(0.846906, 0.904504)
   evapotranspiracao <- c(5.29 * 0.9, 5.29 * 0.9)
   Emarg <- c(5.29, 5.29)
@@ -65,7 +65,7 @@ test_that("testa rodada 2 dias SMAP/ONS rotina cpp", {
   #evapotranspiracao <- precipitacao
   #Emarg <- evapotranspiracao
   #vetor1 <- unlist(modelo)
-  #inicializacao <- smap_ons.inic(unlist(modelo), area, EbInic = 800, TuInic = 0.15, Supin = 300)
+  #inicializacao <- inicializacao_smap(unlist(modelo), area, EbInic = 800, TuInic = 0.15, Supin = 300)
   #vetor2 <- unlist(inicializacao)
   #area <- attributes(modelo)$area
   #bnch <- bench::mark(rodada_varios_dias_cpp(vetor1,

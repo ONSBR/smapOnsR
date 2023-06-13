@@ -26,12 +26,12 @@ test_that("multiplication works", {
   limite_superior[15:16] <- 10
   limite_superior[14] <- 0.0000001
 
-  fo <- funcao_objetivo(vetor_modelo, kt_min, kt_max, area, EbInic, TuInic, Supin, precipitacao,
+  fo <- funcao_objetivo_calibracao(vetor_modelo, kt_min, kt_max, area, EbInic, TuInic, Supin, precipitacao,
       evapotranspiracao, vazao, data_inicio_objetivo, data_fim_objetivo)
 
   par <- calibracao(vetor_modelo,  kt_min, kt_max, area, EbInic, TuInic, Supin, precipitacao,
       evapotranspiracao, vazao, data_inicio_objetivo, data_fim_objetivo,
       limite_inferior, limite_superior)
-      
+
   expect_equal((ajuste$value < fo), TRUE)
 })

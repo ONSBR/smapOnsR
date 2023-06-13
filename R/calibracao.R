@@ -1,4 +1,6 @@
 #' funcao objetivo de calibracao do SMAP/ONS
+#' 
+#' Realiza o calculo da funcao objetivo para a calibracao do SMAP/ONS
 #'
 #' @param vetor_modelo vetor resultante de unlist do objeto de classe smap_ons
 #' @param area area da sub-bacia
@@ -34,18 +36,14 @@
 #' @return objetivo valor da funcao objetivo
 #' @export
 
-funcao_objetivo <- function(vetor_modelo, kt_min, kt_max, area, EbInic, TuInic, Supin, 
+funcao_objetivo_calibracao <- function(vetor_modelo, kt_min, kt_max, area, EbInic, TuInic, Supin, 
       precipitacao, evapotranspiracao, vazao, data_inicio_objetivo, data_fim_objetivo){
 
-  numero_kts <- kt_max + kt_min + 1
-  quantis <- seq((1 / (numero_kts + 2)), 1, (1 / numero_kts))
-  aux <- stats::dbeta(quantis, shape1 = vetor_modelo[15], shape2 = vetor_modelo[16])
-  kt <- rep(0, 63)
-  kt[(3 - kt_max):(3 + kt_min)] <- aux / sum(aux)
+  kt <- cria_kt(kt_max, kt_min, vetor_modelo[15], vetor_modelo[16])
 
   numero_dias <- nrow(evapotranspiracao)
 
-  inicializacao <- smap_ons.inic(vetor_modelo, area, EbInic, TuInic, Supin)
+  inicializacao <- inicializacao_smap(vetor_modelo, area, EbInic, TuInic, Supin)
 
   precipitacao_ponderada <- data.table::data.table(precipitacao)
   precipitacao_ponderada[, valor := valor * vetor_modelo[12]]
@@ -70,7 +68,32 @@ funcao_objetivo <- function(vetor_modelo, kt_min, kt_max, area, EbInic, TuInic, 
   objetivo
 }
 
-#' funcao de calibracao do SMAP/ONS
+#' Funcao de criacao de vetor de kts
+#' 
+#' funcao para a geracao do vetor de kt atraves de uma distribuicao beta
+#'
+#' @param kt_max valor do maximo lag positivo
+#' @param kt_min valor do maximo lag maximo negativo
+#' @param alfa parametro alfa da distribuicao beta
+#' @param beta parametro beta da distribuicao beta
+#' @importFrom stats dbeta
+#' @return kt vetor de kts
+#' @export
+cria_kt <- function(kt_max, kt_min, alfa, beta){
+  numero_kts <- kt_max + kt_min + 1
+  quantis <- seq((1 / (numero_kts + 2)), 1, (1 / numero_kts))
+
+  aux <- stats::dbeta(quantis, shape1 = alfa, shape2 = beta)
+
+  kt <- rep(0, 63)
+  kt[(3 - kt_max):(3 + kt_min)] <- aux / sum(aux)
+
+  kt
+}
+
+#' Funcao de calibracao do modelo SMAP/ONS
+#' 
+#' Raliza a calibracao de calibracao do SMAP/ONS dado um vetor inicial de pearametros e seus limites superiores e inferiores
 #'
 #' @param vetor_modelo vetor resultante de unlist do objeto de classe smap_ons
 #' @param area area da sub-bacia
@@ -117,7 +140,7 @@ calibracao <- function(vetor_modelo, kt_min, kt_max, area, EbInic, TuInic, Supin
   
   ajuste <- stats::optim(par = vetor_modelo, method = "L-BFGS-B",
               lower = limite_inferior, upper = limite_superior,
-              fn = funcao_objetivo,
+              fn = funcao_objetivo_calibracao,
               kt_min = kt_min,
               kt_max = kt_max,
               area = area,

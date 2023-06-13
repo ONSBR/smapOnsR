@@ -1,6 +1,7 @@
 # FUNCES DE ASSIMILACAO DE DADOS
 
 #' Assimilacao oficial
+#' 
 #' Realiza a assimilacao de dados com a metodologia oficial
 #'
 #' @param vetor_modelo objeto de classe smap_ons
@@ -64,12 +65,12 @@ assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, preci
     limite_superior <- c(rep(limite_prec[2],numero_dias), limite_ebin[2], limite_supin[2])
     limite_inferior[numero_dias] <- 0.9999999999
     limite_superior[numero_dias] <- 1.0000000001
-    vetor_parametros <- c(pesos, EbInic, Supin)
+    vetor_variaveis <- c(pesos, EbInic, Supin)
 
     idia <- numero_dias:1
     pesos_funcao_objetivo <- (log(idia + 1) - log(idia)) / log(numero_dias + 1)
     
-    ajuste <- stats::optim(par = vetor_parametros, method = "L-BFGS-B",
+    ajuste <- stats::optim(par = vetor_variaveis, method = "L-BFGS-B",
               lower = limite_inferior, upper = limite_superior,
               fn = funcao_objetivo_assimilacao,
               vetor_modelo = vetor_modelo,
@@ -85,10 +86,11 @@ assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, preci
     ajuste
 }
 
-#' funcao objetivo de assimilacao do SMAP/ONS
-
+#' Funcao objetivo da assimilacao
+#' 
+#' Funcao objetivo de assimilacao do SMAP/ONS
 #' @param vetor_modelo vetor resultante de unlist do objeto de classe smap_ons
-#' @param vetor_parametros vetor com os parametros:
+#' @param vetor_variaveis vetor com os parametros:
 #' \itemize{
 #'     \item{pesos}{pesos da ponderacao da precipitacao}
 #'     \item{Ebin}{vazao de base inicial}
@@ -112,16 +114,16 @@ assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, preci
 #' @return objetivo valor da funcao objetivo
 #' @export
 
-funcao_objetivo_assimilacao <- function(vetor_parametros, vetor_modelo, TuInic,
+funcao_objetivo_assimilacao <- function(vetor_variaveis, vetor_modelo, TuInic,
       precipitacao_ponderada, evapotranspiracao, evapotranspiracao_planicie, vazao, area,
       numero_dias, pesos_funcao_objetivo = rep(1 /length(numero_dias), length(numero_dias))){
 
-  EbInic <- vetor_parametros[(length(vetor_parametros) - 1)]
-  Supin <- vetor_parametros[length(vetor_parametros)]
-  inicializacao <- smap_ons.inic(vetor_modelo, area, EbInic, TuInic, Supin)
+  EbInic <- vetor_variaveis[(length(vetor_variaveis) - 1)]
+  Supin <- vetor_variaveis[length(vetor_variaveis)]
+  inicializacao <- inicializacao_smap(vetor_modelo, area, EbInic, TuInic, Supin)
   vetor_inicializacao <- unlist(inicializacao)
 
-  precipitacao_ponderada <- precipitacao_ponderada * vetor_parametros[1:(length(vetor_parametros) - 2)]
+  precipitacao_ponderada <- precipitacao_ponderada * vetor_variaveis[1:(length(vetor_variaveis) - 2)]
 
   simulacao <- rodada_varios_dias_cpp(vetor_modelo,
             vetor_inicializacao, area, precipitacao_ponderada,

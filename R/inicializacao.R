@@ -1,4 +1,6 @@
-#' Valores iniciais SMAP
+#' Funcao de calculo dos valores inicias
+#' 
+#' Realiza o calculo dos Valores iniciais para rodada do SMAP/ONS
 #'
 #' Funcao para criar objeto com os valores iniciais de variaveis de estado para rodar o SMAP
 #'
@@ -20,12 +22,12 @@
 #'     \item{RsubInic}{valor do reservatorio subterraneo inicial}
 #'     }
 #' @export
-smap_ons.inic <- function(modelo, area, EbInic = 0, TuInic = 0.3, Supin = 100){
-  if(Supin<0){
+inicializacao_smap <- function(modelo, area, EbInic = 0, TuInic = 0.3, Supin = 100){
+  if(Supin < 0){
     stop("Supin deve ser ser positivo")
   }
   
-  if((TuInic < 0) | (TuInic >1)){
+  if((TuInic < 0) | (TuInic > 1)){
     stop("TuInic deve estar entre 0 e 1")
   }
   
