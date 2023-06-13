@@ -76,7 +76,7 @@ le_entrada_evapotranspiracao <- function(pasta_entrada, nome_subbacia) {
         stop("forneca o nome da sub-bacia para a leitura do arquivo 'sub-bacia_EVAPOTRANSPIRACAO.txt'")
     }
 
-    arq <- arq <- file.path(pasta_entrada, paste0(nome_subbacia, "_evapotranspiracao.txt"))
+    arq <- file.path(pasta_entrada, paste0(nome_subbacia, "_evapotranspiracao.txt"))
 
     if (!file.exists(arq)) {
         stop(paste0("nao existe o arquivo ", arq))
@@ -108,7 +108,9 @@ le_entrada_caso <- function(pasta_entrada) {
 
     arq <- file.path(pasta_entrada, "caso.txt")
 
-    if (!file.exists(arq)) stop("nao existe o arquivo do tipo caso.txt")
+    if (!file.exists(arq)) {
+        stop("nao existe o arquivo do tipo caso.txt")
+    }
     
     dat <- data.table::fread(arq)
     numero_subbacias <- as.numeric(dat[1])
@@ -120,4 +122,86 @@ le_entrada_caso <- function(pasta_entrada) {
 
     caso <- list(numero_subbacias = numero_subbacias, nome_subbacia = nome_subbacia)
     caso
+}
+
+#' Leitor de arquivo de inicializacao do smap
+#' 
+#' Le arquivo "sub-bacia_inicializacao.txt" utilizado no aplicativo SMAP/ONS
+#' 
+#' @param pasta_entrada caminho da pasta  "arq_entrada"
+#' @param nome_subbacia nome da sub-bacia
+#' @importFrom  data.table fread setcolorder
+#' @return data.table entrada_inicializacao com as colunas
+#'     \itemize{
+#'     \item{valor}{valor do parametro}
+#'     \item{parametro}{nome do parametros}
+#'     }
+#' @export
+le_entrada_inicializacao <- function(pasta_entrada, nome_subbacia) {
+
+    if (missing("nome_subbacia")) {
+        stop("forneca o nome da sub-bacia para a leitura do arquivo 'sub-bacia_inicializacao.txt'")
+    }
+
+    arq <- file.path(pasta_entrada, paste0(nome_subbacia, "_inicializacao.txt"))
+
+    if (!file.exists(arq)) {
+        stop(paste0("nao existe o arquivo ", arq))
+    }
+
+    dat <- data.table::fread(arq, sep = "'", header = FALSE)
+
+    colnames(dat) <- c("valor", "parametro")
+
+    data.table::setcolorder(dat, c("parametro", "valor"))
+    dat$parametro[1] <- "data_rodada"
+    dat$parametro[2] <- "numero_dias_assimilacao"
+    dat$parametro[3] <- "numero_dias_previsao"
+
+    dat
+}
+
+#' Leitor de arquivo de vazao observada do smap/ons
+#' 
+#' Le arquivo "sub-bacia_inicializacao.txt" utilizado no aplicativo SMAP/ONS
+#' 
+#' @param pasta_entrada caminho da pasta  "arq_entrada"
+#' @param nome_subbacia nome da sub-bacia
+#' @importFrom  data.table fread setcolorder
+#' @return data.table vazao com as colunas
+#'     \itemize{
+#'     \item{data}{data da observacao}
+#'     \item{posto}{nome do posto}
+#'     \item{valor}{valor da precipitacao observada}
+#'     }
+#' @export
+le_entrada_vazao <- function(pasta_entrada, nome_subbacia) {
+
+    if (missing("nome_subbacia")) {
+        stop("forneca o nome da sub-bacia para a leitura do arquivo 'sub-bacia.txt'")
+    }
+
+    arq <- file.path(pasta_entrada, paste0(nome_subbacia, ".txt"))
+
+    if (!file.exists(arq)) {
+        stop(paste0("nao existe o arquivo ", arq))
+    }
+
+    vazao <- data.table::fread(arq, header = FALSE)
+
+    vazao[, V1 := NULL]
+    vazao[, V2 := NULL]
+    vazao[, V3 := NULL]
+    vazao[, V4 := NULL]
+
+    colnames(vazao) <- c("data", "valor")
+    vazao[, data := as.Date(data)]
+    vazao[, valor := as.numeric(valor)]
+    
+    vazao <- na.omit(vazao)
+
+    vazao[, posto := nome_subbacia]
+    vazao <- data.table::setcolorder(vazao, c("data", "posto", "valor"))
+
+    vazao
 }
