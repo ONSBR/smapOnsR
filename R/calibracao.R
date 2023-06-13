@@ -30,43 +30,43 @@
 #' @param data_inicio_objetivo data inicial da avaliacao da funcao objetivo
 #' @param data_fim_objetivo data final da avaliacao da funcao objetivo
 #' @importFrom data.table data.table
+#' @importFrom stats dbeta
 #' @return objetivo valor da funcao objetivo
 #' @export
 
-funcao_objetivo <- function(modelo, area, EbInic, TuInic, Supin, precipitacao,
-      evapotranspiracao, vazao, data_inicio_objetivo, data_fim_objetivo){
-  
-  kt <- modelo[12:74]
-  kt_max <- sum(kt[1:2] > 0)
-  kt_min <- sum(kt[4:63] > 0)
+funcao_objetivo <- function(modelo, kt_min, kt_max, area, EbInic, TuInic, Supin, 
+      precipitacao, evapotranspiracao, vazao, data_inicio_objetivo, data_fim_objetivo){
 
-  data_inicio <- precipitacao[, min(data)] + kt_min
-  data_fim <- precipitacao[, max(data)] - kt_max
-  numero_dias <- as.numeric(data_fim - data_inicio + 1)
+  numero_kts <- kt_max + kt_min + 1
+  quantis <- seq((1 / (numero_kts + 2)), 1, (1 / numero_kts))
+  aux <- stats::dbeta(quantis, shape1 = modelo[15], shape2 = modelo[16])
+  kt <- rep(0, 63)
+  kt[(3 - kt_max):(3 + kt_min)] <- aux / sum(aux)
+
+  numero_dias <- nrow(evapotranspiracao)
 
   inicializacao <- smap_ons.inic(modelo, area, EbInic, TuInic, Supin)
 
-  precipitacao_ponderada <- data.table::data.table(precipitacao[data >= data_inicio & data <= data_fim])
-  precipitacao_ponderada[, valor := valor * modelo[75]]
-  precipitacao_ponderada <- ponderacao_temporal2(precipitacao_ponderada, kt)
+  precipitacao_ponderada <- data.table::data.table(precipitacao)
+  precipitacao_ponderada[, valor := valor * modelo[12]]
+  precipitacao_ponderada <- ponderacao_temporal2(precipitacao_ponderada[, valor], kt, kt_max, kt_min)
 
-  evapotranspiracao_ponderada <- data.table::data.table(evapotranspiracao[data >= data_inicio & data <= data_fim])
-  evapotranspiracao_ponderada[, valor := valor * modelo[76]]
+  evapotranspiracao_ponderada <- data.table::data.table(evapotranspiracao)
+  evapotranspiracao_ponderada[, valor := valor * modelo[13]]
   evapotranspiracao_planicie_ponderada <- data.table::data.table(evapotranspiracao)
-  evapotranspiracao_planicie_ponderada[, valor := valor * modelo[77]]
-  
-  saida <- matrix(nrow = numero_dias, ncol = 14)
+  evapotranspiracao_planicie_ponderada[, valor := valor * modelo[14]]
+
   vetorInicializacao <- unlist(inicializacao)
 
   saida <- rodada_varios_dias_cpp(modelo,
-            vetorInicializacao, area, precipitacao_ponderada[, valor],
+            vetorInicializacao, area, precipitacao_ponderada,
             evapotranspiracao_ponderada[, valor], evapotranspiracao_planicie_ponderada[, valor], numero_dias)
   
   dat <- data.table::data.table(saida)
-  dat[ ,data := precipitacao_ponderada[, data]]
+  dat[, data := evapotranspiracao_ponderada[, data]]
 
   objetivo <- calcula_dm(dat[data >= data_inicio_objetivo & data <= data_fim_objetivo, Qcalc],
-                         vazao[data >= data_inicio_objetivo & data <= data_fim_objetivo, valor])
+                         vazao[, valor])
   objetivo
 }
 
@@ -107,13 +107,15 @@ funcao_objetivo <- function(modelo, area, EbInic, TuInic, Supin, precipitacao,
 #' @return objetivo valor da funcao objetivo
 #' @export
 #' 
-calibracao <- function(modelo, area, EbInic, TuInic, Supin, precipitacao,
+calibracao <- function(modelo, kt_min, kt_max, area, EbInic, TuInic, Supin, precipitacao,
       evapotranspiracao, vazao, data_inicio_objetivo, data_fim_objetivo,
       limite_inferior, limite_superior){
   
   ajuste <- stats::optim(par = modelo, method = "L-BFGS-B",
               lower = limite_inferior, upper = limite_superior,
               fn = funcao_objetivo,
+              kt_min = kt_min,
+              kt_max = kt_max,
               area = area,
               EbInic = EbInic, TuInic = TuInic, Supin = Supin,
               precipitacao = precipitacao,
@@ -122,19 +124,5 @@ calibracao <- function(modelo, area, EbInic, TuInic, Supin, precipitacao,
               data_inicio_objetivo = data_inicio_objetivo,
               data_fim_objetivo = data_fim_objetivo,
               control = list(fnscale = 1))
-
-  ajuste <- pso::psoptim(par = modelo,
-              lower = limite_inferior, upper = limite_superior,
-              fn = funcao_objetivo,
-              area = area,
-              EbInic = EbInic, TuInic = TuInic, Supin = Supin,
-              precipitacao = precipitacao,
-              evapotranspiracao = evapotranspiracao,
-              vazao = vazao,
-              data_inicio_objetivo = data_inicio_objetivo,
-              data_fim_objetivo = data_fim_objetivo,
-              control = list(fnscale = 1))
-
-  ajuste$par
   ajuste
 }
