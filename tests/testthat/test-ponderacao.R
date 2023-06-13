@@ -20,7 +20,7 @@ test_that("Testa ponderacao temporal 2", {
 
   serie_temporal <- historico_precipitacao[id == 1 &  data >= data_inicio - kt_min & data <= data_fim + kt_max, valor]
 
-  saida <- ponderacao_temporal2(serie_temporal, kt)
+  saida <- ponderacao_temporal2(serie_temporal, kt, kt_max, kt_min)
   expect_equal(saida[29], 4.9405)
 })
 

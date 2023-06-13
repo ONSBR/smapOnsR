@@ -68,6 +68,8 @@ poderacao_temporal <- function(serie_temporal, kt, data_inicio, data_fim){
 #'
 #' @param serie_temporal vetor com a variavel a ser ponderada 
 #' @param kt vetor de kts
+#' @param kt_max valor do maximo lag positivo
+#' @param kt_min valor do maximo lag maximo negativo
 #' @return serie_temporal_ponderada: data table com a variavel ponderada com as colunas
 #'     \itemize{
 #'     \item{data}{data da observacao}
@@ -76,10 +78,8 @@ poderacao_temporal <- function(serie_temporal, kt, data_inicio, data_fim){
 #'     \item{valor}{valor da variavel ponderada}
 #'     }
 #' @export
-ponderacao_temporal2 <- function(serie_temporal, kt) {
+ponderacao_temporal2 <- function(serie_temporal, kt, kt_max, kt_min) {
   
-  kt_min <- sum(kt[4:63] > 0)
-  kt_max <- sum(kt[1:2] > 0)
   id_min <- kt_min + 1
   id_max <- length(serie_temporal) - kt_max
   serie_temporal_ponderada <- serie_temporal[id_min:id_max]

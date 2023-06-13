@@ -52,9 +52,12 @@ assimilacao_oficial <- function(vetorModelo, area, EbInic, TuInic, Supin, precip
       limite_supin = c(0, 2), data_rodada){
     
     kt <- vetorModelo[12:74]
+    kt_max <- sum(kt[1:2] > 0)
+    kt_min <- sum(kt[4:63] > 0)
     precipitacao_ponderada <- data.table::data.table(precipitacao)
     precipitacao_ponderada[, valor := valor * vetorModelo[75]]
-    precipitacao_ponderada <- ponderacao_temporal2(precipitacao_ponderada[, valor], kt)
+    precipitacao_ponderada <- ponderacao_temporal2(precipitacao_ponderada[, valor], kt,
+                                                    kt_max, kt_min)
 
     pesos <- rep(1, numero_dias)
 
