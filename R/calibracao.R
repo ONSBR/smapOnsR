@@ -111,7 +111,7 @@ calibracao <- function(vetor_modelo, kt_min, kt_max, area, EbInic, TuInic, Supin
       evapotranspiracao, vazao, data_inicio_objetivo, data_fim_objetivo,
       limite_inferior, limite_superior){
   
-  if(limite_inferior == limite_superior){
+  if(length(unique(limite_inferior == limite_superior)) == 2){
     limite_superior[limite_inferior == limite_superior] <- limite_superior[limite_inferior == limite_superior] + 0.000001
   }
   
