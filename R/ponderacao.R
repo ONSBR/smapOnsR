@@ -1,4 +1,6 @@
-#' Realiza a ponderacao temporal de variaveis
+#' Funcao de ponderacao temporal 
+#' 
+#' Realiza a ponderacao temporal de variaveis atraves dos pesos kt
 #'
 #' @param serie_temporal vetor com a variavel a ser ponderada 
 #' @param kt vetor de kts
@@ -13,16 +15,8 @@
 #'     }
 #' @export
 ponderacao_temporal <- function(serie_temporal, kt, kt_max, kt_min) {
-  
-  id_min <- kt_min + 1
-  id_max <- length(serie_temporal) - kt_max
-  serie_temporal_ponderada <- serie_temporal[id_min:id_max]
 
-  for (i in id_min:id_max) {
-    inicio <- i - kt_min
-    fim <- i + kt_max
-    serie_temporal_ponderada[i - kt_min] <- sum(serie_temporal[inicio:fim] * kt[(kt_min + 3):(3 - kt_max)])
-  }
+  serie_temporal_ponderada <- rowSums(embed(serie_temporal, kt_min + kt_max + 1) * kt[(3 - kt_max):(3 + kt_min)])
 
   serie_temporal_ponderada
 }
