@@ -24,6 +24,10 @@ calibracao(
 \arguments{
 \item{vetor_modelo}{vetor resultante de unlist do objeto de classe smap_ons}
 
+\item{kt_min}{valor do maximo lag maximo negativo}
+
+\item{kt_max}{valor do maximo lag positivo}
+
 \item{area}{area da sub-bacia}
 
 \item{EbInic}{vazao de base inicial}

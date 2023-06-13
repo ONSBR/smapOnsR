@@ -7,7 +7,6 @@
 #' @param vetor_modelo objeto de classe smap_ons
 #' @param area area da sub-bacia
 #' @param Supin Escoamento superficial inicial
-#' @param Rsup2Inic Escoamento superficial inicial referente ao reservatorio de planicie
 #' @param EbInic Escoamento Subterraneo inicial
 #' @param TuInic Taxa de umidade inicial do solo
 #' @param precipitacao data table com a precipitacao a ser ponderada com as colunas
@@ -17,20 +16,9 @@
 #'     \item{id}{id do posto}
 #'     \item{valor}{valor da variavel}
 #'     }
-#' @param evapotranspiracao data table com a evapotranspiracao a ser ponderada com as colunas
-#'     \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{id}{id do posto}
-#'     \item{valor}{valor da variavel}
-#'     }
-#' @param vazao data table com a vazao a avaliada
-#'      \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{id}{id do posto}
-#'     \item{valor}{valor da variavel}
-#'     }
+#' @param evapotranspiracao vetor de evapotranspiracao
+#' @param evapotranspiracao_planicie vetor de evapotranspiracao do reservatorio de planicie
+#' @param vazao vetor de vazao observada
 #' @param numero_dias numero de dias da assimilacao
 #' @param limite_prec limites mínimo e máximo dos pesos utilizados para ponderar a precipitacao durante a etapa de assimilacao
 #' @param limite_ebin limites mínimo e máximo da vazao de base inicial
@@ -48,7 +36,7 @@
 #' 
 
 assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao,
-      evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias, 
+      evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias,
       limite_prec = c(0.5, 2), limite_ebin = c(0.8, 1.2),
       limite_supin = c(0, 2), data_rodada){
     
@@ -98,16 +86,10 @@ assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, preci
 #' }
 #' @param pesos_funcao_objetivo vetor de pesos da funcao objetivo
 #' @param TuInic umidade do solo inicial
-#' @param precipitacao Vetor de precipitacao final (ja corrigido e/ou ponderado)
+#' @param precipitacao_ponderada Vetor de precipitacao final (ja corrigido e/ou ponderado)
 #' @param evapotranspiracao Vetor de ETo do final(ja corrigido e/ou ponderado)
-#' @param vazao data table com a vazao a avaliada
-#'      \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{id}{id do posto}
-#'     \item{valor}{valor da variavel}
-#'     }
-#' 
+#' @param evapotranspiracao_planicie Vetor de ETo de planicie do final(ja corrigido e/ou ponderado)
+#' @param vazao vetor de vazao observada
 #' @param numero_dias numero de dias da assimilacao
 #' @param area area da sub-bacia
 #' @importFrom data.table data.table

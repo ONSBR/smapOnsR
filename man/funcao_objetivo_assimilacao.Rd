@@ -29,23 +29,19 @@ funcao_objetivo_assimilacao(
 
 \item{TuInic}{umidade do solo inicial}
 
+\item{precipitacao_ponderada}{Vetor de precipitacao final (ja corrigido e/ou ponderado)}
+
 \item{evapotranspiracao}{Vetor de ETo do final(ja corrigido e/ou ponderado)}
 
-\item{vazao}{data table com a vazao a avaliada
-\itemize{
-\item{data}{data da observacao}
-\item{posto}{nome do posto}
-\item{id}{id do posto}
-\item{valor}{valor da variavel}
-}}
+\item{evapotranspiracao_planicie}{Vetor de ETo de planicie do final(ja corrigido e/ou ponderado)}
+
+\item{vazao}{vetor de vazao observada}
 
 \item{area}{area da sub-bacia}
 
 \item{numero_dias}{numero de dias da assimilacao}
 
 \item{pesos_funcao_objetivo}{vetor de pesos da funcao objetivo}
-
-\item{precipitacao}{Vetor de precipitacao final (ja corrigido e/ou ponderado)}
 }
 \value{
 objetivo valor da funcao objetivo

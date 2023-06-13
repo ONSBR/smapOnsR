@@ -40,21 +40,11 @@ assimilacao_oficial(
 \item{valor}{valor da variavel}
 }}
 
-\item{evapotranspiracao}{data table com a evapotranspiracao a ser ponderada com as colunas
-\itemize{
-\item{data}{data da observacao}
-\item{posto}{nome do posto}
-\item{id}{id do posto}
-\item{valor}{valor da variavel}
-}}
+\item{evapotranspiracao}{vetor de evapotranspiracao}
 
-\item{vazao}{data table com a vazao a avaliada
-\itemize{
-\item{data}{data da observacao}
-\item{posto}{nome do posto}
-\item{id}{id do posto}
-\item{valor}{valor da variavel}
-}}
+\item{evapotranspiracao_planicie}{vetor de evapotranspiracao do reservatorio de planicie}
+
+\item{vazao}{vetor de vazao observada}
 
 \item{numero_dias}{numero de dias da assimilacao}
 
@@ -65,8 +55,6 @@ assimilacao_oficial(
 \item{limite_supin}{limites mínimo e máximo da vazao superficial inicial}
 
 \item{data_rodada}{data da rodada}
-
-\item{Rsup2Inic}{Escoamento superficial inicial referente ao reservatorio de planicie}
 }
 \value{
 ajuste lista contendo

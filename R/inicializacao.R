@@ -22,7 +22,7 @@
 #'     \item{RsubInic}{valor do reservatorio subterraneo inicial}
 #'     }
 #' @export
-inicializacao_smap <- function(modelo, area, EbInic = 0, TuInic = 0.3, Supin = 100){
+inicializacao_smap <- function(modelo, area, EbInic = 0, TuInic = 0.3, Supin = 100, Rsup2Inic = 0){
   if(Supin < 0){
     stop("Supin deve ser ser positivo")
   }

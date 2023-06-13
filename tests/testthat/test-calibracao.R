@@ -1,4 +1,4 @@
-test_that("multiplication works", {
+test_that("Testa a funcao de calibracao", {
   modelo <- new_modelo_smap_ons(parametros[Nome == "baixoig"])
   kt_max <- sum(modelo$kt[1:2] > 0)
   kt_min <- sum(modelo$kt[4:63] > 0)
@@ -33,5 +33,5 @@ test_that("multiplication works", {
       evapotranspiracao, vazao, data_inicio_objetivo, data_fim_objetivo,
       limite_inferior, limite_superior)
 
-  expect_equal((ajuste$value < fo), TRUE)
+  expect_equal((par$value < fo), TRUE)
 })

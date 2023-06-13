@@ -1,6 +1,7 @@
 ## PARAMETROS
 devtools::load_all()
 
+unzip("inst//extdata//dados.zip")
 arquivos <- list.files("inst/extdata/parametros")
 
 parametros <- data.table::data.table()
@@ -22,3 +23,9 @@ historico_etp_NC[, id := match(historico_etp_NC$posto, unique(historico_etp_NC$p
 data.table::setcolorder(historico_etp_NC, c("mes", "posto", "id", "valor"))
 
 usethis::use_data(historico_etp_NC, overwrite = TRUE)
+
+unlink("inst//extdata//etp", recursive = TRUE)
+unlink("inst//extdata//parametros", recursive = TRUE)
+unlink("inst//extdata//etp.csv")
+unlink("inst//extdata//PSAT.csv")
+unlink("inst//extdata//vazoes.csv")

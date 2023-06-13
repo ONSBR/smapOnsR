@@ -3,6 +3,8 @@
 #' Realiza o calculo da funcao objetivo para a calibracao do SMAP/ONS
 #'
 #' @param vetor_modelo vetor resultante de unlist do objeto de classe smap_ons
+#' @param kt_max valor do maximo lag positivo
+#' @param kt_min valor do maximo lag maximo negativo
 #' @param area area da sub-bacia
 #' @param EbInic vazao de base inicial
 #' @param TuInic umidade do solo inicial
@@ -96,6 +98,8 @@ cria_kt <- function(kt_max, kt_min, alfa, beta){
 #' Raliza a calibracao de calibracao do SMAP/ONS dado um vetor inicial de pearametros e seus limites superiores e inferiores
 #'
 #' @param vetor_modelo vetor resultante de unlist do objeto de classe smap_ons
+#' @param kt_max valor do maximo lag positivo
+#' @param kt_min valor do maximo lag maximo negativo
 #' @param area area da sub-bacia
 #' @param EbInic vazao de base inicial
 #' @param TuInic umidade do solo inicial

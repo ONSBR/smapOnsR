@@ -16,13 +16,7 @@ ponderacao_temporal(serie_temporal, kt, kt_max, kt_min)
 \item{kt_min}{valor do maximo lag maximo negativo}
 }
 \value{
-serie_temporal_ponderada: data table com a variavel ponderada com as colunas
-\itemize{
-\item{data}{data da observacao}
-\item{posto}{nome do posto}
-\item{id}{id do posto}
-\item{valor}{valor da variavel ponderada}
-}
+serie_temporal_ponderada: vetor com a serie temporal ponderada pelos kts
 }
 \description{
 Realiza a ponderacao temporal de variaveis atraves dos pesos kt

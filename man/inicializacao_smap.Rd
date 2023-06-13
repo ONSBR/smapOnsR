@@ -4,7 +4,14 @@
 \alias{inicializacao_smap}
 \title{Funcao de calculo dos valores inicias}
 \usage{
-inicializacao_smap(modelo, area, EbInic = 0, TuInic = 0.3, Supin = 100)
+inicializacao_smap(
+  modelo,
+  area,
+  EbInic = 0,
+  TuInic = 0.3,
+  Supin = 100,
+  Rsup2Inic = 0
+)
 }
 \arguments{
 \item{modelo}{vetor resultante unlist do objeto de classe smap_ons}
