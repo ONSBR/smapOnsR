@@ -9,7 +9,8 @@ test_that("Testa a funcao de calibracao", {
   Supin <- 300
 
   normal_climatologica <- historico_etp_NC[posto == nome]
-  precipitacao <- historico_precipitacao[posto == postos_plu[sub_bacia == nome, posto]]
+  nome2 <- "baixoig"
+  precipitacao <- historico_precipitacao[posto == postos_plu[nome == nome2, posto]]
   data_inicio_objetivo <- "2011-01-01"
   data_fim_objetivo <- "2011-12-31"
   evapotranspiracao <- transforma_NC_serie(precipitacao[data >= min(data) + kt_min & data <= data_fim_objetivo], normal_climatologica)
