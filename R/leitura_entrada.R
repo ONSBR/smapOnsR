@@ -233,11 +233,12 @@ le_entrada_posto_plu <- function(pasta_entrada, nome_subbacia) {
     }
 
     postos_plu <- data.table::fread(arq, header = FALSE)
-    postos_plu[, posto := nome_subbacia]
-    colnames(postos_plu)[1:2] <- c("psat", "valor")
-    
-    postos_plu <- data.table::setcolorder(postos_plu, c("posto", "psat", "valor"))
-    postos_plu[substr(psat, 1, 1) == "0", psat := substr(psat, 2, 8)]
+    postos_plu[, sub_bacia := nome_subbacia]
+    colnames(postos_plu)[1:2] <- c("posto", "valor")
+
+    postos_plu <- data.table::setcolorder(postos_plu, c("sub_bacia", "posto", "valor"))
+    postos_plu[, posto := tolower(posto)]
+    postos_plu[substr(posto, 1, 1) == "0", posto := substr(posto, 2, 8)]
 
     postos_plu
 }
