@@ -71,7 +71,7 @@ le_parametros <- function(arq) {
     "Str", "K2t", "Crec", "Ai", "Capc", "K_kt", "K2t2", "H1", "H", "K3t", "K1t",
     "Ecof", "Pcof", "Ecof2", "ktMin", "ktMax")
     
-    parametros_smap$Nome <- sub(".*/", "", sub("_PARAMETROS.txt", "", arq))
+    parametros_smap$Nome <- tolower(sub(".*/", "", sub("_PARAMETROS.txt", "", arq)))
     
     parametros_smap$Area <- as.numeric(parametros[1, 1])
     parametros_smap$nKt <- as.numeric(substr(parametros[2,1], 1, 3))

@@ -30,6 +30,7 @@ usethis::use_data(historico_etp_NC, overwrite = TRUE)
 
 unlink("inst//extdata//etp", recursive = TRUE)
 unlink("inst//extdata//parametros", recursive = TRUE)
+unlink("inst//extdata//postos_plu", recursive = TRUE)
 unlink("inst//extdata//etp.csv")
 unlink("inst//extdata//PSAT.csv")
 unlink("inst//extdata//vazoes.csv")
