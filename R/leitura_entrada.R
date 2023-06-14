@@ -216,14 +216,15 @@ le_entrada_vazao <- function(pasta_entrada, nome_subbacia) {
 #' @importFrom  data.table fread setcolorder
 #' @return data.table postos_plu com as colunas
 #'     \itemize{
-#'     \item{psat}{nome do psat}
-#'     \item{valor}{peso do psat}
+#'     \item{nome}{nome da sub_bacia}
+#'     \item{posto}{nome do posto plu}
+#'     \item{valor}{peso do posto plu}
 #'     }
 #' @export
 le_entrada_posto_plu <- function(pasta_entrada, nome_subbacia) {
 
     if (missing("nome_subbacia")) {
-        stop("forneca o nome da sub-bacia para a leitura do arquivo 'sub-bacia.txt'")
+        stop("forneca o nome da sub-bacia para a leitura do arquivo '_postos_plu.txt'")
     }
 
     arq <- file.path(pasta_entrada, paste0(nome_subbacia, "_postos_plu.txt"))
@@ -233,10 +234,10 @@ le_entrada_posto_plu <- function(pasta_entrada, nome_subbacia) {
     }
 
     postos_plu <- data.table::fread(arq, header = FALSE)
-    postos_plu[, sub_bacia := nome_subbacia]
+    postos_plu[, nome := nome_subbacia]
     colnames(postos_plu)[1:2] <- c("posto", "valor")
 
-    postos_plu <- data.table::setcolorder(postos_plu, c("sub_bacia", "posto", "valor"))
+    postos_plu <- data.table::setcolorder(postos_plu, c("nome", "posto", "valor"))
     postos_plu[, posto := tolower(posto)]
     postos_plu[substr(posto, 1, 1) == "0", posto := substr(posto, 2, 8)]
 
