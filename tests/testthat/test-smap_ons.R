@@ -1,6 +1,6 @@
 test_that("testa rodada 2 dias SMAP/ONS", {
-  
-  modelo <- new_modelo_smap_ons(parametros[Nome == "sobradinho"])
+  sub_bacia <- "sobradinho"
+  modelo <- new_modelo_smap_ons(parametros[Nome == sub_bacia], postos_plu[posto == sub_bacia])
   area <- attributes(modelo)$area
   inicializacao <- inicializacao_smap(unlist(modelo), area, EbInic = 800, TuInic = 0.15, Supin = 300)
   precipitacao <- c(0.846906, 0.904504)
@@ -16,8 +16,8 @@ test_that("testa rodada 2 dias SMAP/ONS", {
 })
 
 test_that("testa rodada 2 dias SMAP/ONS rotina cpp", {
-  
-  modelo <- new_modelo_smap_ons(parametros[Nome == "sobradinho"])
+  sub_bacia <- "sobradinho"
+  modelo <- new_modelo_smap_ons(parametros[Nome == sub_bacia], postos_plu[posto == sub_bacia])
   area <- attributes(modelo)$area
   inicializacao <- inicializacao_smap(unlist(modelo), area, EbInic = 800, TuInic = 0.15, Supin = 300)
   precipitacao <- c(0.846906, 0.904504)
@@ -35,8 +35,8 @@ test_that("testa rodada 2 dias SMAP/ONS rotina cpp", {
 })
 
 test_that("testa rodada 2 dias e 2 cenarios SMAP/ONS rotina cpp", {
-  
-  modelo <- new_modelo_smap_ons(parametros[Nome == "sobradinho"])
+  sub_bacia <- "sobradinho"
+  modelo <- new_modelo_smap_ons(parametros[Nome == sub_bacia], postos_plu[posto == sub_bacia])
   vetor_modelo <- unlist(modelo)
   numero_cenarios <- 2
   area <- attributes(modelo)$area
@@ -58,7 +58,7 @@ test_that("testa rodada 2 dias e 2 cenarios SMAP/ONS rotina cpp", {
   expect_equal(as.numeric(saida[[2]][2, 1]), 1065.9265)
 })
 
-  #modelo <- new_modelo_smap_ons(parametros[Nome == "sobradinho"])
+  #modelo <- new_modelo_smap_ons(parametros[Nome == sub_bacia], postos_plu[posto == sub_bacia])
   #precipitacao <- rep(5,1000)
   #evapotranspiracao <- precipitacao
   #Emarg <- evapotranspiracao

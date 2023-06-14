@@ -1,5 +1,6 @@
 test_that("Testa ponderacao temporal", {
-  modelo <- new_modelo_smap_ons(parametros[Nome == "avermelha"])
+  sub_bacia <- "avermelha"
+  modelo <- new_modelo_smap_ons(parametros[Nome == sub_bacia], postos_plu[posto == sub_bacia])
   kt <- unlist(modelo)[12:74]
   kt_min <- sum(kt[4:63] > 0)
   kt_max <- sum(kt[1:2] > 0)

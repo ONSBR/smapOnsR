@@ -1,19 +1,19 @@
 test_that("testa a assimilacao de dados oficial", {
-  
+  sub_bacia <- "baixoig"
   data_rodada <- as.Date('2020/01/01')
   dias_assimilacao <- 31
   numero_dias <- dias_assimilacao
-  EbInic <- historico_vazao[data == (data_rodada - dias_assimilacao + 1) & posto == "baixoig", valor] / 2
-  Supin <- historico_vazao[data == (data_rodada - dias_assimilacao + 1) & posto == "baixoig", valor] / 2
+  EbInic <- historico_vazao[data == (data_rodada - dias_assimilacao + 1) & posto == sub_bacia, valor] / 2
+  Supin <- historico_vazao[data == (data_rodada - dias_assimilacao + 1) & posto == sub_bacia, valor] / 2
   TuInic <- 0.5
 
-  modelo <- new_modelo_smap_ons(parametros[Nome == "baixoig"])
+  modelo <- new_modelo_smap_ons(parametros[Nome == sub_bacia], postos_plu[posto == sub_bacia])
   vetorModelo <- unlist(modelo)
   area <- attributes(modelo)$area
 
   vazao <- historico_vazao[data < data_rodada & data >= (data_rodada - dias_assimilacao) 
-                          & posto == "baixoig", valor]
-  normal_climatologica <- historico_etp_NC[posto == 'baixoig']
+                          & posto == sub_bacia, valor]
+  normal_climatologica <- historico_etp_NC[posto == sub_bacia]
 
   kt_max <- sum(modelo$kt[1:2] > 0)
   kt_min <- sum(modelo$kt[4:63] > 0)
@@ -48,27 +48,27 @@ test_that("testa a assimilacao de dados oficial", {
   expect_equal((ajuste$value < fo), TRUE)
 })
 
-test_that("testa a assimilacao de dados oficial", {
-
+test_that("testa a assimilacao de dados com evapotranspiracao", {
+  sub_bacia <- "baixoig"
   data_rodada <- as.Date('2020/01/01')
   dias_assimilacao <- 31
   numero_dias <- dias_assimilacao
-  EbInic <- historico_vazao[data == (data_rodada - dias_assimilacao + 1) & posto == "baixoig", valor] / 2
-  Supin <- historico_vazao[data == (data_rodada - dias_assimilacao + 1) & posto == "baixoig", valor] / 2
+  EbInic <- historico_vazao[data == (data_rodada - dias_assimilacao + 1) & posto == sub_bacia, valor] / 2
+  Supin <- historico_vazao[data == (data_rodada - dias_assimilacao + 1) & posto == sub_bacia, valor] / 2
   TuInic <- 0.5
 
-  modelo <- new_modelo_smap_ons(parametros[Nome == "baixoig"])
+  modelo <- new_modelo_smap_ons(parametros[Nome == sub_bacia], postos_plu[posto == sub_bacia])
   vetorModelo <- unlist(modelo)
   area <- attributes(modelo)$area
 
   vazao <- historico_vazao[data < data_rodada & data >= (data_rodada - dias_assimilacao) 
-                          & posto == "baixoig", valor]
-  normal_climatologica <- historico_etp_NC[posto == 'baixoig']
+                          & posto == sub_bacia, valor]
+  normal_climatologica <- historico_etp_NC[posto == sub_bacia]
 
   kt_max <- sum(modelo$kt[1:2] > 0)
   kt_min <- sum(modelo$kt[4:63] > 0)
   precipitacao <- historico_precipitacao[data < (data_rodada + kt_max) & data >= (data_rodada - dias_assimilacao - kt_min) & posto == 'psatbigu']
-  evapotranspiracao <- historico_etp[data < data_rodada & data >= (data_rodada - dias_assimilacao) & posto == "baixoig"]
+  evapotranspiracao <- historico_etp[data < data_rodada & data >= (data_rodada - dias_assimilacao) & posto == sub_bacia]
   evapotranspiracao_planicie <- evapotranspiracao[, valor] * vetorModelo[77]
   evapotranspiracao <- evapotranspiracao[, valor] * vetorModelo[76]
 

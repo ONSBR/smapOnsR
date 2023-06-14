@@ -108,7 +108,7 @@ rodada_varios_dias <- function(modelo, inicializacao, precipitacao, evapotranspi
 #" @return objeto de classe \code{smap_ons}
 #' @export
 
-new_modelo_smap_ons <- function(parametros){
+new_modelo_smap_ons <- function(parametros, postos_plu){
   #Param. Gerais SMAP
   str <- parametros[parametro == "Str", valor]
   k2t <- parametros[parametro == "K2t", valor]
@@ -140,7 +140,8 @@ new_modelo_smap_ons <- function(parametros){
 
   attr(modelo, "nome") <- parametros[, unique(Nome)]
   attr(modelo, "area") <- area
-  
+  attr(modelo, "postos_plu") <- postos_plu
+
   class(modelo) <- "smap_ons"
   modelo
 }
