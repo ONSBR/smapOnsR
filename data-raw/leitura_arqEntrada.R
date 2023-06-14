@@ -5,13 +5,17 @@ unzip("inst//extdata//dados.zip")
 arquivos <- list.files("inst/extdata/parametros")
 
 parametros <- data.table::data.table()
+postos_plu <- data.table::data.table()
 for (arq in arquivos){
     saida <- le_parametros(paste0("inst/extdata/parametros/", arq))
     parametros <- rbind(parametros, saida)
+    saida <- le_entrada_posto_plu("inst/extdata/postos_plu/", saida$Nome)
+    postos_plu <- rbind(postos_plu, saida)
 }
 parametros <- data.table::melt(parametros, id.vars = "Nome", variable.name = "parametro",
            value.name = "valor")
 usethis::use_data(parametros, overwrite = TRUE)
+usethis::use_data(postos_plu, overwrite = TRUE)
 
 arquivos <- list.files("inst/extdata/etp")
 historico_etp_NC <- data.table::data.table()

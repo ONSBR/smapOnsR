@@ -168,6 +168,7 @@ le_entrada_inicializacao <- function(pasta_entrada, nome_subbacia) {
 #' @param pasta_entrada caminho da pasta  "arq_entrada"
 #' @param nome_subbacia nome da sub-bacia
 #' @importFrom  data.table fread setcolorder
+#' @importFrom stats na.omit
 #' @return data.table vazao com as colunas
 #'     \itemize{
 #'     \item{data}{data da observacao}
@@ -198,10 +199,44 @@ le_entrada_vazao <- function(pasta_entrada, nome_subbacia) {
     vazao[, data := as.Date(data)]
     vazao[, valor := as.numeric(valor)]
     
-    vazao <- na.omit(vazao)
+    vazao <- stats::na.omit(vazao)
 
     vazao[, posto := nome_subbacia]
     vazao <- data.table::setcolorder(vazao, c("data", "posto", "valor"))
 
     vazao
+}
+
+#' Leitor de arquivo de com os postos plu da sub_bacia
+#' 
+#' Le arquivo "sub-bacia_postos_plu.txt" utilizado no aplicativo SMAP/ONS
+#' 
+#' @param pasta_entrada caminho da pasta  "arq_entrada"
+#' @param nome_subbacia nome da sub-bacia
+#' @importFrom  data.table fread setcolorder
+#' @return data.table postos_plu com as colunas
+#'     \itemize{
+#'     \item{psat}{nome do psat}
+#'     \item{valor}{peso do psat}
+#'     }
+#' @export
+le_entrada_posto_plu <- function(pasta_entrada, nome_subbacia) {
+
+    if (missing("nome_subbacia")) {
+        stop("forneca o nome da sub-bacia para a leitura do arquivo 'sub-bacia.txt'")
+    }
+
+    arq <- file.path(pasta_entrada, paste0(nome_subbacia, "_postos_plu.txt"))
+
+    if (!file.exists(arq)) {
+        stop(paste0("nao existe o arquivo ", arq))
+    }
+
+    postos_plu <- data.table::fread(arq, header = FALSE)
+    postos_plu[, posto := nome_subbacia]
+    colnames(postos_plu)[1:2] <- c("psat", "valor")
+    postos_plu <- data.table::setcolorder(postos_plu, c("posto", "psat", "valor"))
+    postos_plu[substr(psat, 1, 1) == "0", psat := substr(psat, 2, 8)]
+    
+    postos_plu
 }
