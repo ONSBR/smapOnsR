@@ -34,6 +34,30 @@ test_that("testa rodada 2 dias SMAP/ONS rotina cpp", {
   expect_equal(as.numeric(saida[2, 1]), 1065.9265)
 })
 
+test_that("testa rodada 2 dias e 2 cenarios SMAP/ONS rotina cpp", {
+  
+  modelo <- new_modelo_smap_ons(parametros[Nome == "sobradinho"])
+  vetor_modelo <- unlist(modelo)
+  numero_cenarios <- 2
+  area <- attributes(modelo)$area
+  inicializacao <- inicializacao_smap(vetor_modelo, area, EbInic = 800, TuInic = 0.15, Supin = 300)
+  vetor_inicializacao <- t(array(rep(unlist(inicializacao), numero_cenarios), c(7, numero_cenarios)))
+  
+  precipitacao <- t(array(rep(c(0.846906, 0.904504), numero_cenarios), c(2, numero_cenarios)))
+  evapotranspiracao <- t(array(rep(c(5.29 * 0.9, 5.29 * 0.9), numero_cenarios), c(2, numero_cenarios)))
+  Emarg <- t(array(rep(c(5.29, 5.29), numero_cenarios), c(2, numero_cenarios)))
+
+  saida <- rodada_cenarios_dias_cpp(vetor_modelo,
+            vetor_inicializacao, area, precipitacao,
+            evapotranspiracao, Emarg,  numero_dias = 2, numero_cenarios)
+
+  expect_equal(colnames(saida[[1]]), c("Qcalc", "Rsolo", "Rsup", "Rsup2", "Rsub",
+                       "Es", "Er", "Rec", "Marg", "Ed", "Ed2", "Ed3",
+                       "Eb", "Tu"))
+  expect_equal(as.numeric(saida[[1]][1, 1]), 1100)
+  expect_equal(as.numeric(saida[[2]][2, 1]), 1065.9265)
+})
+
   #modelo <- new_modelo_smap_ons(parametros[Nome == "sobradinho"])
   #precipitacao <- rep(5,1000)
   #evapotranspiracao <- precipitacao

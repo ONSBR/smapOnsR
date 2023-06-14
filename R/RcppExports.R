@@ -5,3 +5,7 @@ rodada_varios_dias_cpp <- function(modelo, inicializacao, area, precipitacao, ev
     .Call(`_smapOnsR_rodada_varios_dias_cpp`, modelo, inicializacao, area, precipitacao, evapotranspiracao, Emarg, numero_dias)
 }
 
+rodada_cenarios_dias_cpp <- function(modelo, inicializacao, area, precipitacao, evapotranspiracao, Emarg, numero_dias, numero_cenarios) {
+    .Call(`_smapOnsR_rodada_cenarios_dias_cpp`, modelo, inicializacao, area, precipitacao, evapotranspiracao, Emarg, numero_dias, numero_cenarios)
+}
+

@@ -27,9 +27,28 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// rodada_cenarios_dias_cpp
+List rodada_cenarios_dias_cpp(NumericVector modelo, NumericMatrix inicializacao, double area, NumericMatrix precipitacao, NumericMatrix evapotranspiracao, NumericMatrix Emarg, int numero_dias, int numero_cenarios);
+RcppExport SEXP _smapOnsR_rodada_cenarios_dias_cpp(SEXP modeloSEXP, SEXP inicializacaoSEXP, SEXP areaSEXP, SEXP precipitacaoSEXP, SEXP evapotranspiracaoSEXP, SEXP EmargSEXP, SEXP numero_diasSEXP, SEXP numero_cenariosSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type modelo(modeloSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type inicializacao(inicializacaoSEXP);
+    Rcpp::traits::input_parameter< double >::type area(areaSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type precipitacao(precipitacaoSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type evapotranspiracao(evapotranspiracaoSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type Emarg(EmargSEXP);
+    Rcpp::traits::input_parameter< int >::type numero_dias(numero_diasSEXP);
+    Rcpp::traits::input_parameter< int >::type numero_cenarios(numero_cenariosSEXP);
+    rcpp_result_gen = Rcpp::wrap(rodada_cenarios_dias_cpp(modelo, inicializacao, area, precipitacao, evapotranspiracao, Emarg, numero_dias, numero_cenarios));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_smapOnsR_rodada_varios_dias_cpp", (DL_FUNC) &_smapOnsR_rodada_varios_dias_cpp, 7},
+    {"_smapOnsR_rodada_cenarios_dias_cpp", (DL_FUNC) &_smapOnsR_rodada_cenarios_dias_cpp, 8},
     {NULL, NULL, 0}
 };
 
