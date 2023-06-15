@@ -4,7 +4,7 @@
 \alias{new_modelo_smap_ons}
 \title{Construtor do modelo classe \code{smap_ons}}
 \usage{
-new_modelo_smap_ons(parametros)
+new_modelo_smap_ons(parametros, postos_plu)
 }
 \arguments{
 \item{parametros}{data table com 8910 linhas and 3 colunas:

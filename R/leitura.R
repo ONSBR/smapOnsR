@@ -121,6 +121,57 @@ le_evapotranspiracao <- function(arq) {
     dat
 }
 
+
+#' Le csv com dados de inicializacao do caso
+#' 
+#' Realiza a leitura do csv 'inicializacao.csv' com os dados iniciais
+#' 
+#' @param arq nome do arquivo "inicializacao.csv"
+#' @importFrom  data.table data.table
+#' @return data.table evapotranspiracao com as colunas
+#'     \itemize{
+#'     \item{nome}{nome da sub_bacia}
+#'     \item{Ebin}{vazao de base inicial}
+#'     \item{Supin}{vazao superficial inicial}
+#'     \item{Yuin}{umidade do solo inicial}
+#'     }
+#' @export 
+le_inicializacao <- function(arq) {
+    dat <- data.table::fread(arq)
+
+    if (any(colnames(dat) != c("nome", "Ebin", "Supin", "Tuin"))) {
+        stop("o arquivos deve possuir colunas 'nome', 'Ebin', 'Supin', 'Tuin'")
+    }
+
+    dat
+}
+
+#' Le csv com dados de datas de execucao do caso
+#' 
+#' Realiza a leitura do csv 'datasRodadas.csv' com as datas e o horizonte de previsao
+#' 
+#' @param arq nome do arquivo "inicializacao.csv"
+#' @importFrom  data.table data.table
+#' @return data.table evapotranspiracao com as colunas
+#'     \itemize{
+#'     \item{mes}{mes da NC}
+#'     \item{posto}{nome do posto}
+#'     \item{id}{id do posto}
+#'     \item{valor}{valor da NC de evapotranspiracao observada}
+#'     }
+#' @export 
+le_datas_rodada <- function(arq) {
+    dat <- data.table::fread(arq)
+
+    if (any(colnames(dat) != c("data", "numero_dias_previsao"))) {
+        stop("o arquivos deve deve possuir colunas 'data' e 'numero_dias_previsao'")
+    }
+
+    dat[, datas := as.Date(datas)]
+
+    dat
+}
+
 # FUNCOES DE COMPATIBILIZACAO DE DADOS---------------------------------
 
 #' transforma_NC_serie

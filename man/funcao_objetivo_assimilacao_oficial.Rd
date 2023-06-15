@@ -14,7 +14,7 @@ funcao_objetivo_assimilacao_oficial(
   vazao,
   area,
   numero_dias,
-  pesos_funcao_objetivo = rep(1/length(numero_dias), length(numero_dias))
+  pesos_funcao_objetivo = rep((1/numero_dias), numero_dias)
 )
 }
 \arguments{
