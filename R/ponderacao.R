@@ -15,3 +15,44 @@ ponderacao_temporal <- function(serie_temporal, kt, kt_max, kt_min) {
 
   serie_temporal_ponderada
 }
+
+#' Funcao de ponderacao espacial 
+#' 
+#' Realiza a ponderacao espacial de precipitacao atraves dos pesos de cada sub_bacia
+#'
+#' @param historico_precipitacao data table com a precipitacao a ser ponderada com as colunas
+#'     \itemize{
+#'     \item{data}{data da observacao}
+#'     \item{posto}{nome do posto plu}
+#'     \item{id}{id do posto}
+#'     \item{valor}{valor da variavel}
+#'     }
+#' @param postos_plu data.table postos_plu com as colunas
+#'     \itemize{
+#'     \item{posto}{nome da sub_bacia}
+#'     \item{psat}{nome do posto plu}
+#'     \item{valor}{peso do posto plu}
+#'     }
+#' @importFrom data.table setcolorder
+#' @return precipitacao data table com a precipitacao a ser ponderada com as colunas
+#'     \itemize{
+#'     \item{data}{data da observacao}
+#'     \item{sub_bacia}{nome da sub_bacia}
+#'     \item{id}{id da sub_bacia}
+#'     \item{valor}{valor da precipitacao ponderada}
+#'     }
+#' @export
+ponderacao_espacial <- function(historico_precipitacao, postos_plu) {
+
+  precipitacao <- historico_precipitacao[posto %in% postos_plu[, posto]]
+  precipitacao <- merge(precipitacao, postos_plu, "posto")
+  precipitacao <- precipitacao[, valor := sum(valor.x * valor.y), by = data]
+  precipitacao <- unique(precipitacao, by = "data")
+  precipitacao[, valor.x := NULL]
+  precipitacao[, valor.y := NULL]
+  precipitacao[, posto := NULL]
+  colnames(precipitacao)[3] <- "posto"
+  precipitacao <- data.table::setcolorder(precipitacao, c("data", "posto", "id", "valor"))
+
+  precipitacao
+}
