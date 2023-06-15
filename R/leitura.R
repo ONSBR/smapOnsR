@@ -255,7 +255,7 @@ transforma_historico_previsao <- function(serie_temporal, datas_rodadas) {
         data_rodada <- datas_rodadas$data[i]
         numero_dias_previsao <- datas_rodadas$numero_dias_previsao[i]
 
-        for (j in 1:numero_dias_previsao + 2){
+        for (j in 1:(numero_dias_previsao + 2)){
             data_previsao <- serie_temporal[data == (data_rodada + j), data]
             aux <- serie_temporal[data %in% data_previsao, ]
             colnames(aux)[1] <- "data_previsao"
