@@ -159,3 +159,64 @@ transforma_NC_serie <- function(serie_temporal, normal_climatologica) {
     data.table::setorder(serie_temporal_etp, posto, data)
     serie_temporal_etp
 }
+
+
+#' Transforma historico de serie temporal em data table de previsao
+#'
+#' Transforma historico de serie temporal em data table de previsao
+#'
+#' @param serie_temporal data.table com as colunas
+#'     \itemize{
+#'     \item{data}{data da observacao}
+#'     \item{posto}{nome do posto}
+#'     \item{id}{id do posto}
+#'     \item{valor}{valor da serie_temporal observada}
+#'     }
+#' @param datas_rodadas data.table com as colunas
+#'     \itemize{
+#'     \item{data}{data da rodada}
+#'     \item{numero_dias_previsao}{numero de dias de previsao}
+#'      }
+#' @importFrom data.table data.table setcolorder setorder
+#' @return data.table com as colunas
+#'     \itemize{
+#'     \item{data_rodada}{data da rodada}
+#'     \item{data_previsao}{data da previsao}
+#'     \item{cenario}{nome do cenario}
+#'     \item{posto}{nome do posto}
+#'     \item{id}{id do posto}
+#'     \item{valor}{valor da previsao}
+#'     }
+#' @export
+transforma_historico_previsao <- function(serie_temporal, datas_rodadas) {
+
+    if (colnames(datas_rodadas) != c("data", "numero_dias_previsao")) {
+        stop("data table datas_rodadas deve possuir colunas 'data' e 'numero_dias_previsao'")
+    }
+
+    if (!inherits(datas_rodadas[, data], "Date")) {
+        stop("data table datas_rodadas deve ter sua primeira coluna com classe 'Date'")
+    }
+
+    previsao <- data.table::data.table()
+
+    for (i in 1:nrow(datas_rodadas)) {
+        data_rodada <- datas_rodadas$data[i]
+        numero_dias_previsao <- datas_rodadas$numero_dias_previsao[i]
+
+        for (j in 1:numero_dias_previsao){
+            data_previsao <- serie_temporal[data == (data_rodada + j), data]
+            aux <- serie_temporal[data %in% data_previsao, ]
+            colnames(aux)[1] <- "data_previsao"
+            aux[, data_rodada := data_rodada]
+            aux[, cenario := "historico"]
+            data.table::setcolorder(aux, c("data_rodada", "data_previsao", "cenario", "posto", "id", "valor") )
+
+            previsao <- rbind(previsao, aux)
+        }
+    }
+
+    data.table::setorder(previsao, data_rodada, id, data_previsao)
+    return(previsao)
+
+}
