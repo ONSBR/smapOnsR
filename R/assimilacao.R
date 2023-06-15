@@ -23,7 +23,6 @@
 #' @param limite_prec limites mínimo e máximo dos pesos utilizados para ponderar a precipitacao durante a etapa de assimilacao
 #' @param limite_ebin limites mínimo e máximo da vazao de base inicial
 #' @param limite_supin limites mínimo e máximo da vazao superficial inicial
-#' @param data_rodada data da rodada
 #'
 #' @return ajuste lista contendo
 #' \itemize{
@@ -38,7 +37,7 @@
 assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao,
       evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias,
       limite_prec = c(0.5, 2), limite_ebin = c(0.8, 1.2),
-      limite_supin = c(0, 2), data_rodada){
+      limite_supin = c(0, 2)){
     
     kt <- vetor_modelo[12:74]
     kt_max <- sum(kt[1:2] > 0)
@@ -82,7 +81,9 @@ assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, preci
   simulacao <- rodada_varios_dias_cpp(vetor_modelo,
             vetor_inicializacao, area, precipitacao_ponderada,
             evapotranspiracao, evapotranspiracao_planicie, numero_dias)
-  
+
+  simulacao <- data.table::data.table(simulacao)
+
   saida <- list(ajuste = ajuste, simulacao = simulacao)
   saida
 }
@@ -154,7 +155,6 @@ funcao_objetivo_assimilacao_oficial <- function(vetor_variaveis, vetor_modelo, T
 #' @param limite_etp limites mínimo e máximo dos pesos utilizados para ponderar a precipitacao durante a etapa de assimilacao
 #' @param limite_ebin limites mínimo e máximo da vazao de base inicial
 #' @param limite_supin limites mínimo e máximo da vazao superficial inicial
-#' @param data_rodada data da rodada
 #'
 #' @return ajuste lista contendo
 #' \itemize{
@@ -169,7 +169,7 @@ funcao_objetivo_assimilacao_oficial <- function(vetor_variaveis, vetor_modelo, T
 assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao,
       evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias,
       limite_prec = c(0.5, 2), limite_etp = c(0.5, 2), limite_ebin = c(0.8, 1.2),
-      limite_supin = c(0, 2), data_rodada){
+      limite_supin = c(0, 2)){
     
     kt <- vetor_modelo[12:74]
     kt_max <- sum(kt[1:2] > 0)

@@ -18,8 +18,7 @@ assimilacao_evapotranspiracao(
   limite_prec = c(0.5, 2),
   limite_etp = c(0.5, 2),
   limite_ebin = c(0.8, 1.2),
-  limite_supin = c(0, 2),
-  data_rodada
+  limite_supin = c(0, 2)
 )
 }
 \arguments{
@@ -56,8 +55,6 @@ assimilacao_evapotranspiracao(
 \item{limite_ebin}{limites mínimo e máximo da vazao de base inicial}
 
 \item{limite_supin}{limites mínimo e máximo da vazao superficial inicial}
-
-\item{data_rodada}{data da rodada}
 }
 \value{
 ajuste lista contendo
