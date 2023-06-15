@@ -41,11 +41,11 @@ test_that("testa a assimilacao de dados oficial", {
       precipitacao_ponderada, evapotranspiracao, evapotranspiracao_planicie, vazao, area,
       numero_dias)
 
-  ajuste <- assimilacao_oficial(vetorModelo, area, EbInic, TuInic, Supin, precipitacao,
+  saida <- assimilacao_oficial(vetorModelo, area, EbInic, TuInic, Supin, precipitacao,
       evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias = dias_assimilacao,
       data_rodada = data_rodada)
   
-  expect_equal((ajuste$value < fo), TRUE)
+  expect_equal((saida$ajuste$value < fo), TRUE)
 })
 
 test_that("testa a assimilacao de dados com evapotranspiracao", {

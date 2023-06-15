@@ -71,7 +71,20 @@ assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, preci
               numero_dias = numero_dias,
               pesos_funcao_objetivo = pesos_funcao_objetivo,
               control = list(fnscale = 1))
-    ajuste
+
+  EbInic <- EbInic * ajuste$par[numero_dias + 1]
+  Supin <- Supin * ajuste$par[numero_dias + 2]
+  inicializacao <- inicializacao_smap(vetor_modelo, area, EbInic, TuInic, Supin)
+  vetor_inicializacao <- unlist(inicializacao)
+
+  precipitacao_ponderada <- precipitacao_ponderada * ajuste$par[1:numero_dias]
+
+  simulacao <- rodada_varios_dias_cpp(vetor_modelo,
+            vetor_inicializacao, area, precipitacao_ponderada,
+            evapotranspiracao, evapotranspiracao_planicie, numero_dias)
+  
+  saida <- list(ajuste = ajuste, simulacao = simulacao)
+  saida
 }
 
 #' Funcao objetivo da assimilacao oficial
