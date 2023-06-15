@@ -241,7 +241,7 @@ transforma_NC_serie <- function(serie_temporal, normal_climatologica) {
 #' @export
 transforma_historico_previsao <- function(serie_temporal, datas_rodadas) {
 
-    if (colnames(datas_rodadas) != c("data", "numero_dias_previsao")) {
+    if (any(colnames(datas_rodadas) != c("data", "numero_dias_previsao"))) {
         stop("data table datas_rodadas deve possuir colunas 'data' e 'numero_dias_previsao'")
     }
 
