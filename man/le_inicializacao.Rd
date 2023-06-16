@@ -10,7 +10,7 @@ le_inicializacao(arq)
 \item{arq}{nome do arquivo "inicializacao.csv"}
 }
 \value{
-data.table evapotranspiracao com as colunas
+data.table com a inicializacao com as colunas
 \itemize{
 \item{nome}{nome da sub_bacia}
 \item{Ebin}{vazao de base inicial}

@@ -131,7 +131,7 @@ transforma_historico_previsao <- function(serie_temporal, datas_rodadas) {
 combina_observacao_previsao <- function(observado, previsto){
 
     result <- lapply(unique(previsto$cenario), function(cenario) {
-        dt <- copy(observado)
+        dt <- data.table::copy(observado)
         dt[, cenario := cenario]
         return(dt)
     })

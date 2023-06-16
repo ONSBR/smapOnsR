@@ -128,7 +128,7 @@ le_evapotranspiracao <- function(arq) {
 #' 
 #' @param arq nome do arquivo "inicializacao.csv"
 #' @importFrom  data.table data.table
-#' @return data.table evapotranspiracao com as colunas
+#' @return data.table com a inicializacao com as colunas
 #'     \itemize{
 #'     \item{nome}{nome da sub_bacia}
 #'     \item{Ebin}{vazao de base inicial}
@@ -151,13 +151,11 @@ le_inicializacao <- function(arq) {
 #' Realiza a leitura do csv 'datasRodadas.csv' com as datas e o horizonte de previsao
 #' 
 #' @param arq nome do arquivo "inicializacao.csv"
-#' @importFrom  data.table data.table
-#' @return data.table evapotranspiracao com as colunas
+#' @importFrom  data.table fread
+#' @return data table contendo as datas dos casos a serem executados e seus respectivos horizontes:
 #'     \itemize{
-#'     \item{mes}{mes da NC}
-#'     \item{posto}{nome do posto}
-#'     \item{id}{id do posto}
-#'     \item{valor}{valor da NC de evapotranspiracao observada}
+#'     \item{data}{data do caso}
+#'     \item{numero_dias_previsao}{horizonte do caso}
 #'     }
 #' @export 
 le_datas_rodada <- function(arq) {

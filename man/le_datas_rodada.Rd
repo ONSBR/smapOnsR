@@ -10,12 +10,10 @@ le_datas_rodada(arq)
 \item{arq}{nome do arquivo "inicializacao.csv"}
 }
 \value{
-data.table evapotranspiracao com as colunas
+data table contendo as datas dos casos a serem executados e seus respectivos horizontes:
 \itemize{
-\item{mes}{mes da NC}
-\item{posto}{nome do posto}
-\item{id}{id do posto}
-\item{valor}{valor da NC de evapotranspiracao observada}
+\item{data}{data do caso}
+\item{numero_dias_previsao}{horizonte do caso}
 }
 }
 \description{
