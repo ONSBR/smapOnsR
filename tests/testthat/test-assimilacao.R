@@ -32,8 +32,8 @@ test_that("testa a assimilacao de dados oficial", {
   limite_ebin <- c(0.8, 1.2)
   limite_supin <- c(0, 2)
 
-  limite_inferior = c(rep(limite_prec[1],numero_dias), limite_ebin[1], limite_supin[1])
-  limite_superior = c(rep(limite_prec[2],numero_dias), limite_ebin[2], limite_supin[2])
+  limite_inferior = c(rep(limite_prec[1],numero_dias), limite_ebin[1] * EbInic, limite_supin[1] * Supin)
+  limite_superior = c(rep(limite_prec[2],numero_dias), limite_ebin[2] * EbInic, limite_supin[2] * Supin)
 
   vetor_parametros <- c(pesos, EbInic, Supin)
 
