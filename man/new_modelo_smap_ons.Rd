@@ -15,6 +15,16 @@ new_modelo_smap_ons(parametros, postos_plu)
 \item{valor}{valor do parametro}
 }
 }}
+
+\item{postos_plu}{data.table  com as colunas
+\itemize{
+\item{nome}{nome da sub_bacia}
+\item{posto}{nome do posto plu}
+\item{valor}{peso do posto plu}
+}}
+}
+\value{
+objeto de classe \code{smap_ons}
 }
 \description{
 Construtor do modelo classe \code{smap_ons}

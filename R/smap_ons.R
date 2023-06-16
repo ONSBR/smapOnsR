@@ -104,8 +104,13 @@ rodada_varios_dias <- function(modelo, inicializacao, precipitacao, evapotranspi
 #'     \item{valor}{valor do parametro}
 #'     }
 #' }
-#' 
-#" @return objeto de classe \code{smap_ons}
+#' @param postos_plu data.table  com as colunas
+#'     \itemize{
+#'     \item{nome}{nome da sub_bacia}
+#'     \item{posto}{nome do posto plu}
+#'     \item{valor}{peso do posto plu}
+#'     }
+#' @return objeto de classe \code{smap_ons}
 #' @export
 
 new_modelo_smap_ons <- function(parametros, postos_plu){
