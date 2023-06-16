@@ -85,3 +85,18 @@
 #' }
 #' @source ONS
 "historico_etp_NC"
+
+
+#' Postos plu
+#' 
+#' Relacao de posto plu por sub-bacia
+#' 
+#' @format ## 'postos_plu'
+#' data table com as colunas
+#'     \itemize{
+#'     \item{nome}{nome da sub_bacia}
+#'     \item{posto}{nome do posto plu}
+#'     \item{valor}{peso do posto plu}
+#'     }
+#' @source ONS
+"postos_plu"
