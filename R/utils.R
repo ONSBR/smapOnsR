@@ -140,5 +140,6 @@ combina_observacao_previsao <- function(observado, previsto){
 
     serie_temporal <- rbind(serie_temporal, previsto)
 
+    data.table::setorder(serie_temporal, data_rodada, cenario, data_previsao, id)
     serie_temporal
 }
