@@ -312,3 +312,39 @@ le_entrada_precipitadao <- function(pasta_entrada, postos_plu) {
 
     precipitacao
 }
+
+#' Leitor de arquivo de modelos de previsao de precipitacao do smap/ons
+#' 
+#' Le arquivo "modelos_precipitacao.txt" utilizado no aplicativo SMAP/ONS
+#' 
+#' @param pasta_entrada caminho da pasta  "arq_entrada"
+#' @importFrom  data.table fread
+#' @return modelos_precipitacao lista contendo os seguintes parametros
+#'     \itemize{
+#'     \item{nome_cenario}{nome dos cenarios de precipitacao considerados o caso}
+#'     \item{numero_cenario}{numero de cenarios do caso}
+#'     }
+#' @export
+le_entrada_modelos_precipitacao <- function(pasta_entrada) {
+
+    if (missing("pasta_entrada")) stop("forneca o caminho da pasta 'arq_entrada' a leitura do caso")
+
+    arq <- file.path(pasta_entrada, "modelos_precipitacao.txt")
+
+    if (!file.exists(arq)) {
+        stop("nao existe o arquivo do tipo modelos_precipitacao.txt")
+    }
+
+    dat <- data.table::fread(arq)
+    numero_cenarios <- as.numeric(dat[1])
+
+    nome_cenario <- ""
+    for (icenario in 2:nrow(dat)){
+        nome_cenario[icenario - 1] <- tolower(as.character(dat[icenario]))
+    }
+
+    nome_cenario <- unique(unlist(strsplit(nome_cenario, split = "_"))[2 * (1:numero_cenarios) - 1])
+
+    modelos_precipitacao <- list(numero_cenarios = numero_cenarios, nome_cenario = nome_cenario)
+    modelos_precipitacao
+}
