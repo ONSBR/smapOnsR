@@ -112,12 +112,12 @@ le_entrada_caso <- function(pasta_entrada) {
         stop("nao existe o arquivo do tipo caso.txt")
     }
     
-    dat <- data.table::fread(arq)
-    numero_subbacias <- as.numeric(dat[1])
+    dat <- data.table::fread(arq, sep = "'")
+    numero_subbacias <- as.numeric(dat[1, V1])
     
     nome_subbacia <- ""
     for (ibacia in 2: nrow(dat)){
-        nome_subbacia[ibacia - 1] <- tolower(as.character(dat[ibacia]))
+        nome_subbacia[ibacia - 1] <- tolower(as.character(dat[ibacia, V1]))
     }
 
     caso <- list(numero_subbacias = numero_subbacias, nome_subbacia = nome_subbacia)
@@ -166,7 +166,7 @@ le_entrada_inicializacao <- function(pasta_entrada, nome_subbacia) {
         stop(paste0(" variavel ", inicializacao[valor < 0, variavel]," negativa para a sub-bacia ", nome_subbacia))
     }
 
-    datas_rodadas <- data.table::data.table(data = dat[1, valor], numero_dias_previsao = dat[3, valor])
+    datas_rodadas <- data.table::data.table(data = as.Date(dat[1, V1], format = "%d/%m/%Y"), numero_dias_previsao = as.numeric(dat[3, V1]))
 
     saida <- list(inicializacao = inicializacao, datas_rodadas = datas_rodadas)
     saida
@@ -281,7 +281,8 @@ le_entrada_posto_plu <- function(pasta_entrada, nome_subbacia) {
 #' @export
 le_entrada_precipitadao <- function(pasta_entrada, postos_plu) {
 
-    for (iposto in seq_len(postos_plu)){
+    precipitacao <- data.table::data.table()
+    for (iposto in seq_along(postos_plu)){
         arq <- file.path(pasta_entrada, paste0(postos_plu[iposto, posto], "_c.txt"))
 
         if (!file.exists(arq)) {
@@ -291,24 +292,26 @@ le_entrada_precipitadao <- function(pasta_entrada, postos_plu) {
             }
         }
 
-        precipitacao <- data.table::fread(arq, header = FALSE)
+        precipitacao_aux <- data.table::fread(arq, header = FALSE)
 
-        precipitacao[, V1 := NULL]
-        precipitacao[, V3 := NULL]
+        precipitacao_aux[, V1 := NULL]
+        precipitacao_aux[, V3 := NULL]
 
-        colnames(precipitacao) <- c("data", "valor")
-        precipitacao[, data := as.Date(data, format = "%d/%m/%Y")]
-        precipitacao[, valor := as.numeric(valor)]
+        colnames(precipitacao_aux) <- c("data", "valor")
+        precipitacao_aux[, data := as.Date(data, format = "%d/%m/%Y")]
+        precipitacao_aux[, valor := as.numeric(valor)]
         
-        precipitacao <- stats::na.omit(precipitacao)
+        precipitacao_aux <- stats::na.omit(precipitacao_aux)
 
-        precipitacao[, posto := postos_plu[iposto, posto]]
-        precipitacao <- data.table::setcolorder(precipitacao, c("data", "posto", "valor"))
+        precipitacao_aux[, posto := postos_plu[iposto, posto]]
 
-        if (any(precipitacao[, valor] < 0)) {
-            stop(paste0(" precipitacao observada da data ", precipitacao[valor < 0, data]," negativa para a sub-bacia ", nome_subbacia))
+        if (any(precipitacao_aux[, valor] < 0)) {
+            stop(paste0(" precipitacao observada da data ", precipitacao_aux[valor < 0, data]," negativa para a sub-bacia ", nome_subbacia))
         }
+
+        precipitacao <- rbind(precipitacao, precipitacao_aux)
     }
+    precipitacao <- data.table::setcolorder(precipitacao, c("data", "posto", "valor"))
 
     precipitacao
 }
@@ -435,7 +438,7 @@ le_entrada_bat_conf <- function(pasta_entrada) {
     if (length(dat[V1 == "arqPrev", V1]) == 0) {
         formato_previsao <- 0
     } else {
-        formato_previsao <- dat[V1 == "arqPrev", V1]
+        formato_previsao <- as.numeric(dat[V1 == "arqPrev", V2])
     }
 
     formato_previsao
@@ -444,50 +447,72 @@ le_entrada_bat_conf <- function(pasta_entrada) {
 #' Leitor de arquivo de previsao de precipitacao do smap/ons
 #' 
 #' Le arquivo "'nome_cenario'_p_'data_caso'_'data_previsao'.txt" utilizado no aplicativo SMAP/ONS
-#' 
+#'
 #' @param pasta_entrada caminho da pasta  "arq_entrada"
-#' @param posto_plus data.table postos_plu com as colunas
+#' @param pontos_grade data.table com as colunas
 #'     \itemize{
 #'     \item{nome}{nome da sub_bacia}
-#'     \item{posto}{nome do posto plu}
-#'     \item{valor}{peso do posto plu}
+#'     \item{nome_cenario_1}{primeira parte do nome dos cenarios de precipitacao considerados o caso}
+#'     \item{nome_cenario_2}{segunda parte do nome dos cenarios de precipitacao considerados o caso}
+#'     \item{latitude}{latitude do ponto de grade do cenário}
+#'     \item{longitude}{longitude do ponto de grade do cenário}
 #'     }
-#' @importFrom  data.table fread setcolorder
-#' @importFrom stats na.omit
-#' @return data.table vazao com as colunas
+#' @param datas_rodadas data table com as colunas
 #'     \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{valor}{valor da precipitacao observada}
+#'     \item{data}{data da rodada}
+#'     \item{numero_dias_previsao}{numero de dias de previsão}
+#'     }
+#' @importFrom  data.table fread setcolorder setorder
+#' @importFrom stats na.omit
+#' @return previsao_precipitacao data.table com as colunas
+#'     \itemize{
+#'     \item{data_rodada}{data da rodada}
+#'     \item{data_previsao}{data da previsao}
+#'     \item{cenario}{nome do cenario}
+#'     \item{nome}{nome da sub-bacia}
+#'     \item{valor}{valor da previsao}
 #'     }
 #' @export
-le_entrada_previsao_precipitacao_0 <- function(pasta_entrada, data_caso, data_previsao,
- pontos_grade) {
+le_entrada_previsao_precipitacao_2 <- function(pasta_entrada, datas_rodadas, pontos_grade) {
 
-    arq <- file.path(pasta_entrada, paste0(postos_plu[iposto, posto], "_c.txt"))
+    arq <- file.path(pasta_entrada, paste0("precipitacao_prevista_p", substr(datas_rodadas$data,9,10), substr(datas_rodadas$data,6,7), substr(datas_rodadas$data,3,4), ".dat"))
 
     if (!file.exists(arq)) {
-        arq <- file.path(pasta_entrada, paste0("0", postos_plu[iposto, posto], "_c.txt"))
-        if (!file.exists(arq)) {
-            stop(paste0("nao existe o arquivo ", arq))
-        }
+        stop(paste0("nao existe o arquivo ", arq))
     }
 
-    precipitacao <- data.table::fread(arq, header = FALSE)
-
-    precipitacao[, V1 := NULL]
-    precipitacao[, V3 := NULL]
-
-    colnames(precipitacao) <- c("data", "valor")
-    precipitacao[, data := as.Date(data, format = "%d/%m/%Y")]
-    precipitacao[, valor := as.numeric(valor)]
+    previsao_precipitacao <- data.table::fread(arq, header = FALSE)
+    colnames(previsao_precipitacao)[1:3] <- c("cenario", "longitude", "latitude")
+    previsao_precipitacao[, cenario := tolower(cenario)]
+    colnames(previsao_precipitacao)[4:ncol(previsao_precipitacao)] <- as.character(seq.Date(datas_rodadas$data + 1, datas_rodadas$data + ncol(previsao_precipitacao) - 3, 1))
+    previsao_precipitacao[, nome_cenario_1 := strsplit(cenario, split = "_")[[1]][1]]
+    previsao_precipitacao[, nome_cenario_2 := strsplit(cenario, split = "_")[[1]][2]]
     
-    precipitacao <- stats::na.omit(precipitacao)
+    previsao_precipitacao <- merge(previsao_precipitacao, pontos_grade, by = c("latitude", "longitude", "nome_cenario_1", "nome_cenario_2"))
 
-    precipitacao[, posto := postos_plu[iposto, posto]]
-    precipitacao <- data.table::setcolorder(precipitacao, c("data", "posto", "valor"))
+    previsao_precipitacao[, nome_cenario_1 := NULL]
+    previsao_precipitacao[, nome_cenario_2 := NULL]
+    previsao_precipitacao[, latitude := NULL]
+    previsao_precipitacao[, longitude := NULL]
 
-    if (any(precipitacao[, valor] < 0)) {
-        stop(paste0(" precipitacao observada da data ", precipitacao[valor < 0, data]," negativa para a sub-bacia ", nome_subbacia))
+    previsao_precipitacao <- data.table::melt(previsao_precipitacao, id.vars = c("nome", "cenario"), variable.name = "data_previsao",
+           value.name = "valor")
+
+    previsao_precipitacao[, data_rodada := datas_rodadas$data]
+
+    previsao_precipitacao[, data_rodada := as.Date(data_rodada)]
+    previsao_precipitacao[, data_previsao := as.Date(data_previsao)]
+    previsao_precipitacao[, valor := as.numeric(valor)]
+    
+    previsao_precipitacao <- stats::na.omit(previsao_precipitacao)
+
+    previsao_precipitacao <- data.table::setcolorder(previsao_precipitacao, c("data_rodada","data_previsao", "cenario", "nome", "valor"))
+
+    data.table::setorder(previsao_precipitacao, nome, data_rodada, data_previsao, cenario)
+
+    if (any(previsao_precipitacao[, valor] < 0)) {
+        stop(paste0(" previsao de precipitacao da data ", previsao_precipitacao[valor < 0, data_previsao]," negativa para a sub-bacia ", previsao_precipitacao[valor < 0, nome]))
     }
+
+    previsao_precipitacao
 }
