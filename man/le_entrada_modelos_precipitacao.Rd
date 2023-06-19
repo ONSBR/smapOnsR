@@ -12,8 +12,12 @@ le_entrada_modelos_precipitacao(pasta_entrada)
 \value{
 modelos_precipitacao lista contendo os seguintes parametros
 \itemize{
-\item{nome_cenario}{nome dos cenarios de precipitacao considerados o caso}
 \item{numero_cenario}{numero de cenarios do caso}
+\item{nome_cenario}{data table contendo os seguintes parametros}
+\itemize{
+\item{primeira parte do nome dos cenarios de precipitacao considerados o caso}
+\item{nome_cenario_2}{segunda parte do nome dos cenarios de precipitacao considerados o caso}
+}
 }
 }
 \description{

@@ -321,8 +321,12 @@ le_entrada_precipitadao <- function(pasta_entrada, postos_plu) {
 #' @importFrom  data.table fread
 #' @return modelos_precipitacao lista contendo os seguintes parametros
 #'     \itemize{
-#'     \item{nome_cenario}{nome dos cenarios de precipitacao considerados o caso}
 #'     \item{numero_cenario}{numero de cenarios do caso}
+#'     \item{nome_cenario}{data table contendo os seguintes parametros}
+#'     \itemize{
+#'     \item{primeira parte do nome dos cenarios de precipitacao considerados o caso}
+#'     \item{nome_cenario_2}{segunda parte do nome dos cenarios de precipitacao considerados o caso}
+#'      }
 #'     }
 #' @export
 le_entrada_modelos_precipitacao <- function(pasta_entrada) {
@@ -343,9 +347,11 @@ le_entrada_modelos_precipitacao <- function(pasta_entrada) {
         nome_cenario[icenario - 1] <- tolower(as.character(dat[icenario]))
     }
 
-    nome_cenario <- unique(unlist(strsplit(nome_cenario, split = "_"))[2 * (1:numero_cenarios) - 1])
-
+    nome_cenario_1 <- unlist(strsplit(nome_cenario, split = "_"))[2 * (1:numero_cenarios) - 1]
+    nome_cenario_2 <- unlist(strsplit(nome_cenario, split = "_"))[2 * (1:numero_cenarios)]
+    nome_cenario <- data.table::data.table(nome_cenario_1 = nome_cenario_1, nome_cenario_2 = nome_cenario_2)
     modelos_precipitacao <- list(numero_cenarios = numero_cenarios, nome_cenario = nome_cenario)
+    
     modelos_precipitacao
 }
 
@@ -357,14 +363,16 @@ le_entrada_modelos_precipitacao <- function(pasta_entrada) {
 #' @param nome_subbacia nome da sub-bacia
 #' @param modelos_precipitacao lista contendo os seguintes parametros
 #'     \itemize{
-#'     \item{nome_cenario}{nome dos cenarios de precipitacao considerados o caso}
+#'     \item{nome_cenario_1}{primeira parte do nome dos cenarios de precipitacao considerados o caso}
+#'     \item{nome_cenario_2}{segunda parte do nome dos cenarios de precipitacao considerados o caso}
 #'     \item{numero_cenario}{numero de cenarios do caso}
 #'     }
 #' @importFrom  data.table fread setcolorder data.table
 #' @return data.table pontos_grade com as colunas
 #'     \itemize{
 #'     \item{nome}{nome da sub_bacia}
-#'     \item{nome_cenario}{nome nome dos cenarios de precipitacao considerados o caso}
+#'     \item{nome_cenario_1}{primeira parte do nome dos cenarios de precipitacao considerados o caso}
+#'     \item{nome_cenario_2}{segunda parte do nome dos cenarios de precipitacao considerados o caso}
 #'     \item{latitude}{latitude do ponto de grade do cenário}
 #'     \item{longitude}{longitude do ponto de grade do cenário}
 #'     }
@@ -375,7 +383,8 @@ le_entrada_pontos_grade <- function(pasta_entrada, nome_subbacia, modelos_precip
         stop("forneca o nome da sub-bacia para a leitura do arquivo de pontos de grade")
     }
 
-    for (cenario in modelos_precipitacao$nome_cenario){
+    pontos_grade <- data.table::data.table()
+    for (cenario in unique(modelos_precipitacao$nome_cenario[, nome_cenario_1])){
         arq <- file.path(pasta_entrada, paste0(nome_subbacia, "_", cenario, ".txt"))
 
         if (!file.exists(arq)) {
@@ -383,20 +392,102 @@ le_entrada_pontos_grade <- function(pasta_entrada, nome_subbacia, modelos_precip
         }
 
         aux <- data.table::fread(arq)
-        pontos_grade <- data.table::data.table()
-        pontos_grade[, latitude := aux[iponto, "1"]]
-        pontos_grade[, longitude := aux[iponto, V1]]
-        pontos_grade[, nome := nome_subbacia]
-        pontos_grade[, nome_cenario := nome_cenario]
+        aux_pontos_grade <- modelos_precipitacao$nome_cenario
+        aux_pontos_grade[, latitude := aux[1, "1"]]
+        aux_pontos_grade[, longitude := aux[1, V1]]
+        aux_pontos_grade[, nome := nome_subbacia]
         
-        if (colnames(aux)[2] > 1){
+        if (colnames(aux)[2] > 1) {
             for (iponto in 2:colnames(aux)[2]) {
-            pontos_grade[iponto, latitude := aux[iponto, "1"]]
-            pontos_grade[iponto, longitude := aux[iponto, V1]]
-            pontos_grade[iponto, nome := nome_subbacia]
+                aux_pontos_grade2 <- modelos_precipitacao$nome_cenario
+                aux_pontos_grade2[, latitude := aux[iponto, "1"]]
+                aux_pontos_grade2[, longitude := aux[iponto, V1]]
+                aux_pontos_grade2[, nome := nome_subbacia]
+                rbind(aux_pontos_grade, aux_pontos_grade2)
             }
         }
-        pontos_grade <- data.table::setcolorder(pontos_grade, c("nome", "nome_cenario", "latitude", "longitude"))
+        pontos_grade <- rbind(pontos_grade, aux_pontos_grade)
     }
+    pontos_grade <- data.table::setcolorder(pontos_grade, c("nome", "nome_cenario_1", "nome_cenario_2", "latitude", "longitude"))
+    
     pontos_grade
+}
+
+#' Le arquivo bat.conf
+#'
+#' Leitor do arquivo de entrada bat.txt contendo para receber qual padrão de arquivo de previsao está 
+#' @param pasta_entrada o arquivo do tipo "caso.txt"
+#' @importFrom  data.table fread
+#' @return formato_previsao numero do tipo de arquivo de previsao
+#' @export
+le_entrada_bat_conf <- function(pasta_entrada) {
+
+    if (missing("pasta_entrada")) stop("forneca o caminho da pasta 'arq_entrada' a leitura do caso")
+
+    arq <- file.path(pasta_entrada, "bat.conf")
+
+    if (!file.exists(arq)) {
+        stop("nao existe o arquivo do tipo bat.conf")
+    }
+    
+    dat <- data.table::fread(arq, sep = "=")
+    
+    if (length(dat[V1 == "arqPrev", V1]) == 0) {
+        formato_previsao <- 0
+    } else {
+        formato_previsao <- dat[V1 == "arqPrev", V1]
+    }
+
+    formato_previsao
+}
+
+#' Leitor de arquivo de previsao de precipitacao do smap/ons
+#' 
+#' Le arquivo "'nome_cenario'_p_'data_caso'_'data_previsao'.txt" utilizado no aplicativo SMAP/ONS
+#' 
+#' @param pasta_entrada caminho da pasta  "arq_entrada"
+#' @param posto_plus data.table postos_plu com as colunas
+#'     \itemize{
+#'     \item{nome}{nome da sub_bacia}
+#'     \item{posto}{nome do posto plu}
+#'     \item{valor}{peso do posto plu}
+#'     }
+#' @importFrom  data.table fread setcolorder
+#' @importFrom stats na.omit
+#' @return data.table vazao com as colunas
+#'     \itemize{
+#'     \item{data}{data da observacao}
+#'     \item{posto}{nome do posto}
+#'     \item{valor}{valor da precipitacao observada}
+#'     }
+#' @export
+le_entrada_previsao_precipitacao_0 <- function(pasta_entrada, data_caso, data_previsao,
+ pontos_grade) {
+
+    arq <- file.path(pasta_entrada, paste0(postos_plu[iposto, posto], "_c.txt"))
+
+    if (!file.exists(arq)) {
+        arq <- file.path(pasta_entrada, paste0("0", postos_plu[iposto, posto], "_c.txt"))
+        if (!file.exists(arq)) {
+            stop(paste0("nao existe o arquivo ", arq))
+        }
+    }
+
+    precipitacao <- data.table::fread(arq, header = FALSE)
+
+    precipitacao[, V1 := NULL]
+    precipitacao[, V3 := NULL]
+
+    colnames(precipitacao) <- c("data", "valor")
+    precipitacao[, data := as.Date(data, format = "%d/%m/%Y")]
+    precipitacao[, valor := as.numeric(valor)]
+    
+    precipitacao <- stats::na.omit(precipitacao)
+
+    precipitacao[, posto := postos_plu[iposto, posto]]
+    precipitacao <- data.table::setcolorder(precipitacao, c("data", "posto", "valor"))
+
+    if (any(precipitacao[, valor] < 0)) {
+        stop(paste0(" precipitacao observada da data ", precipitacao[valor < 0, data]," negativa para a sub-bacia ", nome_subbacia))
+    }
 }

@@ -13,7 +13,8 @@ le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao)
 
 \item{modelos_precipitacao}{lista contendo os seguintes parametros
 \itemize{
-\item{nome_cenario}{nome dos cenarios de precipitacao considerados o caso}
+\item{nome_cenario_1}{primeira parte do nome dos cenarios de precipitacao considerados o caso}
+\item{nome_cenario_2}{segunda parte do nome dos cenarios de precipitacao considerados o caso}
 \item{numero_cenario}{numero de cenarios do caso}
 }}
 }
@@ -21,7 +22,8 @@ le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao)
 data.table pontos_grade com as colunas
 \itemize{
 \item{nome}{nome da sub_bacia}
-\item{nome_cenario}{nome nome dos cenarios de precipitacao considerados o caso}
+\item{nome_cenario_1}{primeira parte do nome dos cenarios de precipitacao considerados o caso}
+\item{nome_cenario_2}{segunda parte do nome dos cenarios de precipitacao considerados o caso}
 \item{latitude}{latitude do ponto de grade do cenário}
 \item{longitude}{longitude do ponto de grade do cenário}
 }
