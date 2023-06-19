@@ -348,3 +348,55 @@ le_entrada_modelos_precipitacao <- function(pasta_entrada) {
     modelos_precipitacao <- list(numero_cenarios = numero_cenarios, nome_cenario = nome_cenario)
     modelos_precipitacao
 }
+
+#' Leitor de arquivo de com os pontos de grade de previsao da sub_bacia
+#' 
+#' Le arquivo "sub-bacia_nome_cenario.txt" utilizado no aplicativo SMAP/ONS
+#' 
+#' @param pasta_entrada caminho da pasta  "arq_entrada"
+#' @param nome_subbacia nome da sub-bacia
+#' @param modelos_precipitacao lista contendo os seguintes parametros
+#'     \itemize{
+#'     \item{nome_cenario}{nome dos cenarios de precipitacao considerados o caso}
+#'     \item{numero_cenario}{numero de cenarios do caso}
+#'     }
+#' @importFrom  data.table fread setcolorder data.table
+#' @return data.table pontos_grade com as colunas
+#'     \itemize{
+#'     \item{nome}{nome da sub_bacia}
+#'     \item{nome_cenario}{nome nome dos cenarios de precipitacao considerados o caso}
+#'     \item{latitude}{latitude do ponto de grade do cenário}
+#'     \item{longitude}{longitude do ponto de grade do cenário}
+#'     }
+#' @export
+le_entrada_pontos_grade <- function(pasta_entrada, nome_subbacia, modelos_precipitacao) {
+
+    if (missing("nome_subbacia")) {
+        stop("forneca o nome da sub-bacia para a leitura do arquivo de pontos de grade")
+    }
+
+    for (cenario in modelos_precipitacao$nome_cenario){
+        arq <- file.path(pasta_entrada, paste0(nome_subbacia, "_", cenario, ".txt"))
+
+        if (!file.exists(arq)) {
+            stop(paste0("nao existe o arquivo ", arq))
+        }
+
+        aux <- data.table::fread(arq)
+        pontos_grade <- data.table::data.table()
+        pontos_grade[, latitude := aux[iponto, "1"]]
+        pontos_grade[, longitude := aux[iponto, V1]]
+        pontos_grade[, nome := nome_subbacia]
+        pontos_grade[, nome_cenario := nome_cenario]
+        
+        if (colnames(aux)[2] > 1){
+            for (iponto in 2:colnames(aux)[2]) {
+            pontos_grade[iponto, latitude := aux[iponto, "1"]]
+            pontos_grade[iponto, longitude := aux[iponto, V1]]
+            pontos_grade[iponto, nome := nome_subbacia]
+            }
+        }
+        pontos_grade <- data.table::setcolorder(pontos_grade, c("nome", "nome_cenario", "latitude", "longitude"))
+    }
+    pontos_grade
+}
