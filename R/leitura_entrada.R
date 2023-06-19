@@ -69,7 +69,7 @@ le_entrada_parametros <- function(pasta_entrada, nome_subbacia) {
 #'     \item{id}{id do posto}
 #'     \item{valor}{valor da NC de evapotranspiracao observada}
 #'     }
-#' @export 
+#' @export
 le_entrada_evapotranspiracao <- function(pasta_entrada, nome_subbacia) {
 
     if (missing("nome_subbacia")) {
@@ -131,10 +131,16 @@ le_entrada_caso <- function(pasta_entrada) {
 #' @param pasta_entrada caminho da pasta  "arq_entrada"
 #' @param nome_subbacia nome da sub-bacia
 #' @importFrom  data.table fread setcolorder
-#' @return data.table entrada_inicializacao com as colunas
+#' @return lista com o data.table inicializacao com as colunas
 #'     \itemize{
-#'     \item{valor}{valor do parametro}
-#'     \item{parametro}{nome do parametros}
+#'     \item{nome}{nome da sub-bacia}
+#'     \item{variavel}{nome da variavel}
+#'     \item{valor}{valor da variavel}
+#'     }
+#' e data table datas_rodadas com as colunas
+#'     \itemize{
+#'     \item{data}{data da rodada}
+#'     \item{numero_dias_previsao}{numero de dias de previsão}
 #'     }
 #' @export
 le_entrada_inicializacao <- function(pasta_entrada, nome_subbacia) {
@@ -151,14 +157,19 @@ le_entrada_inicializacao <- function(pasta_entrada, nome_subbacia) {
 
     dat <- data.table::fread(arq, sep = "'", header = FALSE)
 
-    colnames(dat) <- c("valor", "parametro")
+    inicializacao <- data.table::data.table(nome = nome_subbacia, Ebin = dat[4, V1], Supin = dat[5, V1], Tuin = dat[6, V1], numero_dias_assimilacao = (as.numeric(dat[2, V1]) - 1))
+    inicializacao <- data.table::melt(inicializacao, id.vars = "nome", variable.name = "variavel",
+           value.name = "valor")
+    inicializacao[, valor := as.numeric(valor)]
 
-    data.table::setcolorder(dat, c("parametro", "valor"))
-    dat$parametro[1] <- "data_rodada"
-    dat$parametro[2] <- "numero_dias_assimilacao"
-    dat$parametro[3] <- "numero_dias_previsao"
+    if (any(inicializacao[, valor] < 0)) {
+        stop(paste0(" variavel ", inicializacao[valor < 0, variavel]," negativa para a sub-bacia ", nome_subbacia))
+    }
 
-    dat
+    datas_rodadas <- data.table::data.table(data = dat[1, valor], numero_dias_previsao = dat[3, valor])
+
+    saida <- list(inicializacao = inicializacao, datas_rodadas = datas_rodadas)
+    saida
 }
 
 #' Leitor de arquivo de vazao observada do smap/ons
@@ -204,6 +215,10 @@ le_entrada_vazao <- function(pasta_entrada, nome_subbacia) {
     vazao[, posto := nome_subbacia]
     vazao <- data.table::setcolorder(vazao, c("data", "posto", "valor"))
 
+    if (any(vazao[, valor] < 0)) {
+        stop(paste0(" vazao observada da data ", vazao[valor < 0, data]," negativa para a sub-bacia ", nome_subbacia))
+    }
+
     vazao
 }
 
@@ -242,4 +257,58 @@ le_entrada_posto_plu <- function(pasta_entrada, nome_subbacia) {
     postos_plu[substr(posto, 1, 1) == "0", posto := substr(posto, 2, 8)]
 
     postos_plu
+}
+
+#' Leitor de arquivo de precipitacao observada do smap/ons
+#' 
+#' Le arquivo "nome_posto_plu_c.txt" utilizado no aplicativo SMAP/ONS
+#' 
+#' @param pasta_entrada caminho da pasta  "arq_entrada"
+#' @param posto_plus data.table postos_plu com as colunas
+#'     \itemize{
+#'     \item{nome}{nome da sub_bacia}
+#'     \item{posto}{nome do posto plu}
+#'     \item{valor}{peso do posto plu}
+#'     }
+#' @importFrom  data.table fread setcolorder
+#' @importFrom stats na.omit
+#' @return data.table vazao com as colunas
+#'     \itemize{
+#'     \item{data}{data da observacao}
+#'     \item{posto}{nome do posto}
+#'     \item{valor}{valor da precipitacao observada}
+#'     }
+#' @export
+le_entrada_precipitadao <- function(pasta_entrada, postos_plu) {
+
+    for (iposto in seq_len(postos_plu)){
+        arq <- file.path(pasta_entrada, paste0(postos_plu[iposto, posto], "_c.txt"))
+
+        if (!file.exists(arq)) {
+            arq <- file.path(pasta_entrada, paste0("0", postos_plu[iposto, posto], "_c.txt"))
+            if (!file.exists(arq)) {
+                stop(paste0("nao existe o arquivo ", arq))
+            }
+        }
+
+        precipitacao <- data.table::fread(arq, header = FALSE)
+
+        precipitacao[, V1 := NULL]
+        precipitacao[, V3 := NULL]
+
+        colnames(precipitacao) <- c("data", "valor")
+        precipitacao[, data := as.Date(data, format = "%d/%m/%Y")]
+        precipitacao[, valor := as.numeric(valor)]
+        
+        precipitacao <- stats::na.omit(precipitacao)
+
+        precipitacao[, posto := postos_plu[iposto, posto]]
+        precipitacao <- data.table::setcolorder(precipitacao, c("data", "posto", "valor"))
+
+        if (any(precipitacao[, valor] < 0)) {
+            stop(paste0(" precipitacao observada da data ", precipitacao[valor < 0, data]," negativa para a sub-bacia ", nome_subbacia))
+        }
+    }
+
+    precipitacao
 }
