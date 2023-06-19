@@ -12,10 +12,16 @@ le_entrada_inicializacao(pasta_entrada, nome_subbacia)
 \item{nome_subbacia}{nome da sub-bacia}
 }
 \value{
-data.table entrada_inicializacao com as colunas
+lista com o data.table inicializacao com as colunas
 \itemize{
-\item{valor}{valor do parametro}
-\item{parametro}{nome do parametros}
+\item{nome}{nome da sub-bacia}
+\item{variavel}{nome da variavel}
+\item{valor}{valor da variavel}
+}
+e data table datas_rodadas com as colunas
+\itemize{
+\item{data}{data da rodada}
+\item{numero_dias_previsao}{numero de dias de previsão}
 }
 }
 \description{
