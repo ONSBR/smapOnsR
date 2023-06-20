@@ -12,9 +12,8 @@
 #' @param inicializacao data.table com a inicializacao com as colunas:
 #'     \itemize{
 #'     \item{nome}{nome da sub_bacia}
-#'     \item{Ebin}{vazao de base inicial}
-#'     \item{Supin}{vazao superficial inicial}
-#'     \item{Yuin}{umidade do solo inicial}
+#'     \item{variavel}{vazao de base inicial}
+#'     \item{valor}{valor da variavel}
 #'     }
 #' @param historico_precipitacao data table com o historico de precipitacao com as colunas:
 #'     \itemize{
@@ -70,7 +69,7 @@
 #' 
 rodada_encadeada_oficial <- function(parametros, inicializacao, historico_precipitacao, 
     previsao_precipitacao, historico_etp_NC, historico_vazao, postos_plu, datas_rodadas, 
-    numero_dias_assimilacao, numero_cenarios, sub_bacias) {
+    numero_cenarios, sub_bacias) {
     
     numero_sub_bacias <- length(sub_bacias)
     numero_datas <- nrow(datas_rodadas)
@@ -81,10 +80,10 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, historico_precip
 
         sub_bacia <- sub_bacias[ibacia]
 
-        EbInic <- inicializacao[nome == sub_bacia, Ebin]
-        Supin <- inicializacao[nome == sub_bacia, Supin]
-        TuInic <- inicializacao[nome == sub_bacia, Tuin]
-
+        EbInic <- inicializacao[nome == sub_bacia & variavel == "Ebin", valor]
+        Supin <- inicializacao[nome == sub_bacia & variavel == "Supin", valor]
+        TuInic <- inicializacao[nome == sub_bacia & variavel == "Tuin", valor]
+        numero_dias_assimilacao <- inicializacao[nome == sub_bacia & variavel == "numero_dias_assimilacao", valor]
         vetor_inicializacao <- array(rep(0, numero_cenarios * 7), c(numero_cenarios, 7))
 
         modelo <- new_modelo_smap_ons(parametros[Nome == sub_bacia], postos_plu[nome %in% sub_bacia])

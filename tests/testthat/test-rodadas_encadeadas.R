@@ -19,11 +19,12 @@ test_that("testa rodadas encadeadas", {
     vazao <- historico_vazao[posto %in% sub_bacias]
     evapotranspiracao <- historico_etp_NC[nome %in% sub_bacias]
 
-    inicializacao <- data.table::data.table(nome = c("avermelha", "ssimao2"), Ebin = c(218.71, 441.67), Supin = c(46.69, 256.98), Tuin = c(0.2891, 0.3141))
+    inicializacao <- data.table::data.table(nome = c(rep("avermelha", 4), rep("ssimao2", 4)), variavel = rep(c("Ebin", "Supin", "Tuin", "numero_dias_assimilacao"),2), 
+    valor = c(218.71, 46.69, 0.2891, 31, 441.67, 256.98, 0.3141, 31))
     
     saida <- rodada_encadeada_oficial(parametros[Nome %in% sub_bacias],
     inicializacao, precipitacao, previsao_precipitacao, evapotranspiracao, vazao,
-    postos_plu, datas_rodadas, numero_dias_assimilacao, numero_cenarios, sub_bacias)
+    postos_plu, datas_rodadas, numero_cenarios, sub_bacias)
 
     expect_equal(saida[data_previsao == "2020-05-05" & cenario == "cenario2", valor], 
                 saida[data_previsao == "2020-05-05" & cenario == "historico", valor])
