@@ -14,7 +14,6 @@ data.table com as colunas
 \itemize{
 \item{data}{data da observacao}
 \item{posto}{nome do posto}
-\item{id}{id do posto}
 \item{valor}{valor da precipitacao observada}
 }
 }

@@ -38,7 +38,6 @@ rodada_encadeada_oficial(
 \itemize{
 \item{data}{data da observacao}
 \item{posto}{nome do posto}
-\item{id}{id do posto}
 \item{valor}{valor da variavel}
 }}
 
@@ -48,7 +47,6 @@ rodada_encadeada_oficial(
 \item{data_previsao}{data da previsao}
 \item{cenario}{nome do cenario}
 \item{posto}{nome do posto}
-\item{id}{id do posto}
 \item{valor}{valor da previsao}
 }}
 
@@ -56,7 +54,6 @@ rodada_encadeada_oficial(
 \itemize{
 \item{mes}{mes da NC}
 \item{posto}{nome do posto}
-\item{id}{id do posto}
 \item{valor}{valor da NC de evapotranspiracao observada}
 }}
 
@@ -64,7 +61,6 @@ rodada_encadeada_oficial(
 \itemize{
 \item{data}{data da observacao}
 \item{posto}{nome do posto}
-\item{id}{id do posto}
 \item{valor}{valor da variavel}
 }}
 

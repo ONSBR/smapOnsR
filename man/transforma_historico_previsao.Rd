@@ -27,8 +27,7 @@ data.table com as colunas
 \item{data_rodada}{data da rodada}
 \item{data_previsao}{data da previsao}
 \item{cenario}{nome do cenario}
-\item{posto}{nome do posto}
-\item{id}{id do posto}
+\item{nome}{nome da sub-bacia}
 \item{valor}{valor da previsao}
 }
 }

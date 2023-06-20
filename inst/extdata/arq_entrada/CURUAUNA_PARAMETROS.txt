@@ -1,0 +1,20 @@
+16226.00                              'Área de drenagem Km²                           
+11      0.002 0.002 0.004 0.004 0.004 0.004 0.008 0.300 0.300 0.300 0.072 'Kt peso                                        
+295.30                                                                    'Str                                            
+10.0                                                                      'K2t                                            
+4.10                                                                      'Crec                                           
+1.00                                                                      'Ai                                             
+60.00                                                                     'Capc                                           
+134                                                                       'Kkt                                            
+10.0                                                                      'K2t2                                           
+200.00                                                                    'H1 Altura para o segundo escoamento superficial
+32.90                                                                     'H quarto reservatorio                          
+30.0                                                                      'K3t                                            
+0.1                                                                       'K1t                                            
+0.90                                                                      'Ecof                                           
+1.00                                                                      'Pcof                                           
+0.32                                                                      'Ecof2                                          
+1.20                                                                      'Limite superior ebin                           
+0.80                                                                      'Limite inferior ebin                           
+2.00                                                                      'Limite superior chuva                          
+0.50                                                                      'Limite inferior chuva                          

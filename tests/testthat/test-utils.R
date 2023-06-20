@@ -1,6 +1,8 @@
 test_that("transformacao de NC em serie temporal", {
-  normal_climatologica <- historico_etp_NC[posto == 'baixoig']
-  serie_temporal <- historico_precipitacao[posto == 'psatbigu']
+  nome2 <- "baixoig"
+  normal_climatologica <- historico_etp_NC[nome == nome2]
+  serie_temporal <- historico_precipitacao[posto == postos_plu[nome == nome2, posto]]
+  serie_temporal <- ponderacao_espacial(serie_temporal, postos_plu[nome == nome2])
   serie_temporal_NC <- transforma_NC_serie(serie_temporal, normal_climatologica)
 
   expect_equal(serie_temporal_NC[data == "2019/05/23", valor], normal_climatologica[mes == 5, valor])
@@ -8,8 +10,10 @@ test_that("transformacao de NC em serie temporal", {
 
 test_that("transformacao de NC em serie temporal para vetor com apenas 1 mes", {
   data_rodada <- as.Date('2020/01/01')
-  normal_climatologica <- historico_etp_NC[posto == 'baixoig']
-  precipitacao <- historico_precipitacao[data < data_rodada & data >= (data_rodada - 30) & posto == 'psatbigu']
+  nome2 <- "baixoig"
+  normal_climatologica <- historico_etp_NC[nome == nome2]
+  precipitacao <- historico_precipitacao[data < data_rodada & data >= (data_rodada - 30) & posto == postos_plu[nome == nome2, posto]]
+  precipitacao <- ponderacao_espacial(precipitacao, postos_plu[nome == nome2])
   evapotranspiracao <- transforma_NC_serie(precipitacao, normal_climatologica)
 
   expect_equal(evapotranspiracao[1, valor], normal_climatologica[mes == 12, valor])
@@ -18,7 +22,7 @@ test_that("transformacao de NC em serie temporal para vetor com apenas 1 mes", {
 test_that("transformacao historico em previsao", {
   sub_bacia <- "avermelha"
   precipitacao <- historico_precipitacao[posto %in% postos_plu[nome == sub_bacia, posto]]
-
+  precipitacao <- ponderacao_espacial(precipitacao, postos_plu[nome == sub_bacia])
   datas_rodadas <- data.table(
     data = as.Date(c("2020-05-01", "2020-05-08")),
     numero_dias_previsao = c(15, 20)

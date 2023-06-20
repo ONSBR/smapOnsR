@@ -1,4 +1,3 @@
-
 #' transforma_NC_serie
 #' 
 #' transforma normal climatologica de evapotranspiracao em uma serie temporal
@@ -26,13 +25,12 @@ transforma_NC_serie <- function(serie_temporal, normal_climatologica) {
     serie_temporal_etp <- data.table::data.table(serie_temporal)
     serie_temporal_etp[, mes := lubridate::month(data)]
     serie_temporal_etp <- merge(serie_temporal_etp, normal_climatologica, by = "mes")
-    serie_temporal_etp[, posto.x := NULL]
-    serie_temporal_etp[, id.x := NULL]
+    serie_temporal_etp[, nome.x := NULL]
     serie_temporal_etp[, valor.x := NULL]
     serie_temporal_etp[, mes := NULL]
 
-    colnames(serie_temporal_etp) <- c("data", "posto", "id", "valor")
-    data.table::setorder(serie_temporal_etp, posto, data)
+    colnames(serie_temporal_etp) <- c("data", "nome", "valor")
+    data.table::setorder(serie_temporal_etp, nome, data)
     serie_temporal_etp
 }
 
@@ -59,8 +57,7 @@ transforma_NC_serie <- function(serie_temporal, normal_climatologica) {
 #'     \item{data_rodada}{data da rodada}
 #'     \item{data_previsao}{data da previsao}
 #'     \item{cenario}{nome do cenario}
-#'     \item{posto}{nome do posto}
-#'     \item{id}{id do posto}
+#'     \item{nome}{nome da sub-bacia}
 #'     \item{valor}{valor da previsao}
 #'     }
 #' @export
@@ -86,13 +83,13 @@ transforma_historico_previsao <- function(serie_temporal, datas_rodadas) {
             colnames(aux)[1] <- "data_previsao"
             aux[, data_rodada := data_rodada]
             aux[, cenario := "historico"]
-            data.table::setcolorder(aux, c("data_rodada", "data_previsao", "cenario", "posto", "id", "valor") )
+            data.table::setcolorder(aux, c("data_rodada", "data_previsao", "cenario", "nome", "valor") )
 
             previsao <- rbind(previsao, aux)
         }
     }
 
-    data.table::setorder(previsao, data_rodada, id, data_previsao)
+    data.table::setorder(previsao, data_rodada, nome, data_previsao)
     return(previsao)
 
 }
@@ -140,6 +137,6 @@ combina_observacao_previsao <- function(observado, previsto){
 
     serie_temporal <- rbind(serie_temporal, previsto)
 
-    data.table::setorder(serie_temporal, data_rodada, cenario, data_previsao, id)
+    data.table::setorder(serie_temporal, data_rodada, cenario, data_previsao)
     serie_temporal
 }

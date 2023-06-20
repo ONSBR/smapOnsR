@@ -22,7 +22,6 @@
 #'     \itemize{
 #'     \item{data}{data da observacao}
 #'     \item{posto}{nome do posto}
-#'     \item{id}{id do posto}
 #'     \item{valor}{valor da precipitacao observada}
 #'     }
 #' @export 
@@ -34,12 +33,11 @@ le_historico_verificado <- function(arq) {
     dat[, data := as.Date(data, format = "%d/%m/%Y")]
     
     dat <- data.table::melt(dat, id.vars = "data", variable.name = "posto",
-           value.name = "valor")
-    dat[, id := match(dat$posto, unique(dat$posto))]
+          value.name = "valor")
     colnames(dat)[1] <- "data"
 
     data.table::setorder(dat, posto, data)
-    data.table::setcolorder(dat, c("data", "posto", "id", "valor"))
+    data.table::setcolorder(dat, c("data", "posto", "valor"))
     dat[, posto := tolower(posto)]
     return(dat)
 }
@@ -104,19 +102,18 @@ le_parametros <- function(arq) {
 #' @return data.table evapotranspiracao com as colunas
 #'     \itemize{
 #'     \item{mes}{mes da NC}
-#'     \item{posto}{nome do posto}
-#'     \item{id}{id do posto}
+#'     \item{nome}{nome do posto}
 #'     \item{valor}{valor da NC de evapotranspiracao observada}
 #'     }
-#' @export 
+#' @export
 le_evapotranspiracao <- function(arq) {
     dat <- data.table::fread(arq)
     aux <- strsplit(arq, split = "/")[[1]]
     sb <- strsplit(aux[length(aux)], split = "_")[[1]]
     dat$posto <- tolower(sb[1])
 
-    colnames(dat) <- c("mes", "valor", "posto")
-    data.table::setcolorder(dat, c("mes", "posto", "valor"))
+    colnames(dat) <- c("mes", "valor", "nome")
+    data.table::setcolorder(dat, c("mes", "nome", "valor"))
 
     dat
 }

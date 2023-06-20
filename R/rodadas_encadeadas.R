@@ -20,7 +20,6 @@
 #'     \itemize{
 #'     \item{data}{data da observacao}
 #'     \item{posto}{nome do posto}
-#'     \item{id}{id do posto}
 #'     \item{valor}{valor da variavel}
 #'     }
 #' @param previsao_precipitacao data.table com a previsao de precipitacao com as colunas:
@@ -29,21 +28,18 @@
 #'     \item{data_previsao}{data da previsao}
 #'     \item{cenario}{nome do cenario}
 #'     \item{posto}{nome do posto}
-#'     \item{id}{id do posto}
 #'     \item{valor}{valor da previsao}
 #'     }
 #' @param historico_etp_NC data.table com o historico de NC deevapotranspiracao com as colunas:
 #'     \itemize{
 #'     \item{mes}{mes da NC}
 #'     \item{posto}{nome do posto}
-#'     \item{id}{id do posto}
 #'     \item{valor}{valor da NC de evapotranspiracao observada}
 #'     }
 #' @param historico_vazao data table com o historico de vazao com as colunas:
 #'     \itemize{
 #'     \item{data}{data da observacao}
 #'     \item{posto}{nome do posto}
-#'     \item{id}{id do posto}
 #'     \item{valor}{valor da variavel}
 #'     }
 #' @param postos_plu data table contendo a relacao sub-bacia x postos_plu com as colunas:
@@ -91,7 +87,7 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, historico_precip
 
         vetor_inicializacao <- array(rep(0, numero_cenarios * 7), c(numero_cenarios, 7))
 
-        modelo <- new_modelo_smap_ons(parametros[Nome == sub_bacia], postos_plu[posto == sub_bacia])
+        modelo <- new_modelo_smap_ons(parametros[Nome == sub_bacia], postos_plu[nome %in% sub_bacia])
         kt <- modelo$kt
         kt_max <- sum(modelo$kt[1:2] > 0)
         kt_min <- sum(modelo$kt[4:63] > 0)
@@ -107,23 +103,21 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, historico_precip
             vazao <- historico_vazao[data < dataRodada & data >= (dataRodada - numero_dias_assimilacao) 
                           & posto == sub_bacia, valor]
                           
-            normal_climatologica <- historico_etp_NC[posto == sub_bacia]
+            normal_climatologica <- historico_etp_NC[nome == sub_bacia]
 
-            precipitacao_observada <- historico_precipitacao[posto %in% postos_plu[nome %in% sub_bacia] &
+            precipitacao_observada <- historico_precipitacao[nome == sub_bacia &
             data <= dataRodada & data >= (dataRodada - numero_dias_assimilacao - kt_min)]
-            previsao_rodada <- previsao_precipitacao[posto %in% postos_plu[nome %in% sub_bacia] & data_rodada == dataRodada]
+            previsao_rodada <- previsao_precipitacao[nome == sub_bacia & data_rodada == dataRodada]
 
             precipitacao <- data.table::data.table(precipitacao_observada)
             precipitacao[, data_rodada := dataRodada]
             precipitacao <- combina_observacao_previsao(precipitacao, previsao_rodada)
 
-            precipitacao_assimilacao <- data.table::data.table(precipitacao)
+            precipitacao_assimilacao <- data.table::data.table(precipitacao[data_previsao < (dataRodada + kt_max) & 
+                data_previsao >= (dataRodada - numero_dias_assimilacao - kt_min) & cenario == unique(cenario)[1]])
             colnames(precipitacao_assimilacao)[1] <- "data"
             precipitacao_assimilacao[, cenario := NULL]
             precipitacao_assimilacao[, data_rodada := NULL]
-
-            precipitacao_assimilacao <- ponderacao_espacial(precipitacao_assimilacao[data < (dataRodada + kt_max) & 
-            data >= (dataRodada - numero_dias_assimilacao - kt_min)], postos_plu[nome %in% sub_bacia])
 
             evapotranspiracao <- transforma_NC_serie(precipitacao_assimilacao[data < dataRodada & data >= (dataRodada - numero_dias_assimilacao)], normal_climatologica) 
             evapotranspiracao_planicie <- evapotranspiracao[, valor] * vetor_modelo[77]

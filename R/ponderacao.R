@@ -51,8 +51,8 @@ ponderacao_espacial <- function(historico_precipitacao, postos_plu) {
   precipitacao[, valor.x := NULL]
   precipitacao[, valor.y := NULL]
   precipitacao[, posto := NULL]
-  colnames(precipitacao)[3] <- "posto"
-  precipitacao <- data.table::setcolorder(precipitacao, c("data", "posto", "id", "valor"))
+  colnames(precipitacao)[2] <- "nome"
+  precipitacao <- data.table::setcolorder(precipitacao, c("data", "nome", "valor"))
 
   precipitacao
 }

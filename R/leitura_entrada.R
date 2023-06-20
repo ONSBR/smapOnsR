@@ -282,7 +282,7 @@ le_entrada_posto_plu <- function(pasta_entrada, nome_subbacia) {
 le_entrada_precipitadao <- function(pasta_entrada, postos_plu) {
 
     precipitacao <- data.table::data.table()
-    for (iposto in seq_along(postos_plu)){
+    for (iposto in 1:nrow(postos_plu)){
         arq <- file.path(pasta_entrada, paste0(postos_plu[iposto, posto], "_c.txt"))
 
         if (!file.exists(arq)) {
@@ -515,4 +515,68 @@ le_entrada_previsao_precipitacao_2 <- function(pasta_entrada, datas_rodadas, pon
     }
 
     previsao_precipitacao
+}
+
+
+#' Leitor de arquivo de previsao de precipitacao do smap/ons
+#' 
+#' Le arquivo "'nome_cenario'_p_'data_caso'_'data_previsao'.txt" utilizado no aplicativo SMAP/ONS
+#'
+#' @param pasta_entrada caminho da pasta  "arq_entrada"
+#' @importFrom  data.table rbindlist
+#' @return saida lista com os data.tables: vazao
+#'     \itemize{
+#'     \item{data_rodada}{data da rodada}
+#'     \item{data_previsao}{data da previsao}
+#'     \item{cenario}{nome do cenario}
+#'     \item{nome}{nome da sub-bacia}
+#'     \item{valor}{valor da previsao}
+#'     }
+#' @export
+le_arq_entrada <- function(pasta_entrada) {
+
+    caso <- le_entrada_caso(pasta_entrada)
+    tipo_previsao <- le_entrada_bat_conf(pasta_entrada)
+    modelos_precipitacao <- le_entrada_modelos_precipitacao(pasta_entrada)
+
+    evapotranspiracao <- data.table::rbindlist(lapply(caso$nome_subbacia, function(sub_bacia) {
+  le_entrada_evapotranspiracao(pasta_entrada, sub_bacia)
+        }))
+
+    inicializacao <- data.table::rbindlist(lapply(caso$nome_subbacia, function(sub_bacia) {
+  result <- le_entrada_inicializacao(pasta_entrada, sub_bacia)
+  result[[1]]
+        }))
+
+    datas_rodadas <- data.table::rbindlist(lapply(caso$nome_subbacia, function(sub_bacia) {
+  result <- le_entrada_inicializacao(pasta_entrada, sub_bacia)
+  result[[2]]
+        }))
+
+    datas_rodadas <- unique(datas_rodadas)
+    
+    vazao <- data.table::rbindlist(lapply(caso$nome_subbacia, function(sub_bacia) {
+  le_entrada_vazao(pasta_entrada, sub_bacia)
+        }))
+    
+    postos_plu <- data.table::rbindlist(lapply(caso$nome_subbacia, function(sub_bacia) {
+  le_entrada_posto_plu(pasta_entrada, sub_bacia)
+        }))
+    
+    precipitacao <- data.table::rbindlist(lapply(caso$nome_subbacia, function(sub_bacia) {
+  le_entrada_precipitadao(pasta_entrada, postos_plu[nome %in% sub_bacia])
+        }))
+
+    precipitacao <- data.table::rbindlist(lapply(caso$nome_subbacia, function(sub_bacia) {
+  ponderacao_espacial(precipitacao, postos_plu[nome %in% sub_bacia])
+        }))
+
+    pontos_grade <- data.table::rbindlist(lapply(caso$nome_subbacia, function(sub_bacia) {
+  le_entrada_pontos_grade(pasta_entrada, sub_bacia, modelos_precipitacao)
+        }))
+
+    previsao_precipitacao <- le_entrada_previsao_precipitacao_2(pasta_entrada, datas_rodadas, pontos_grade)
+
+    saida <- list(vazao = vazao, precipitacao = precipitacao, evapotranspiracao = evapotranspiracao, 
+        previsao_precipitacao = previsao_precipitacao, postos_plu = postos_plu, inicializacao = inicializacao)
 }

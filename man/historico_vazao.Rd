@@ -12,7 +12,6 @@ A data table com 486,513 linhas and 4 colunas:
 \itemize{
 \item{data}{data da observacao}
 \item{posto}{nome do posto}
-\item{id}{id do posto}
 \item{valor}{valor de vazao observada}
 }
 }

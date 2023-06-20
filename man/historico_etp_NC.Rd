@@ -11,8 +11,7 @@ Data table com 1,320 linhas and 4 colunas:
 \describe{
 \itemize{
 \item{mes}{data da observacao}
-\item{posto}{nome do posto}
-\item{id}{id do posto}
+\item{nome}{nome do posto}
 \item{valor}{valor de evapotranspiracao potencial observada}
 }
 }

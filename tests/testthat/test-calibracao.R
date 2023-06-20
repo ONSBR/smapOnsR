@@ -1,6 +1,6 @@
 test_that("Testa a funcao de calibracao", {
-  nome <- "baixoig"
-  modelo <- new_modelo_smap_ons(parametros[Nome == nome], postos_plu[posto == nome])
+  nome2 <- "baixoig"
+  modelo <- new_modelo_smap_ons(parametros[Nome == nome2], postos_plu[nome == nome2])
   kt_max <- sum(modelo$kt[1:2] > 0)
   kt_min <- sum(modelo$kt[4:63] > 0)
 
@@ -8,13 +8,13 @@ test_that("Testa a funcao de calibracao", {
   TuInic <- 0.8
   Supin <- 300
 
-  normal_climatologica <- historico_etp_NC[posto == nome]
-  nome2 <- "baixoig"
+  normal_climatologica <- historico_etp_NC[nome == nome2]
   precipitacao <- historico_precipitacao[posto == postos_plu[nome == nome2, posto]]
+  precipitacao <- ponderacao_espacial(precipitacao, postos_plu[nome == nome2])
   data_inicio_objetivo <- "2011-01-01"
   data_fim_objetivo <- "2011-12-31"
   evapotranspiracao <- transforma_NC_serie(precipitacao[data >= min(data) + kt_min & data <= data_fim_objetivo], normal_climatologica)
-  vazao <- historico_vazao[data >= data_inicio_objetivo & data <= data_fim_objetivo & posto == nome]
+  vazao <- historico_vazao[data >= data_inicio_objetivo & data <= data_fim_objetivo & posto == nome2]
 
   area <- attributes(modelo)$area
   vetor_modelo <- unlist(modelo)

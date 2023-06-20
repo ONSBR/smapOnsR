@@ -9,7 +9,6 @@
 #'   \itemize{
 #'     \item{data}{data da observacao}
 #'     \item{posto}{nome do posto}
-#'     \item{id}{id do posto}
 #'     \item{valor}{valor de precipitacao observada}
 #'  }
 #' }
@@ -27,7 +26,6 @@
 #'   \itemize{
 #'     \item{data}{data da observacao}
 #'     \item{posto}{nome do posto}
-#'     \item{id}{id do posto}
 #'     \item{valor}{valor de vazao observada}
 #'  }
 #' }
@@ -44,8 +42,7 @@
 #' \describe{
 #'   \itemize{
 #'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{id}{id do posto}
+#'     \item{nome}{nome do posto}
 #'     \item{valor}{valor de evapotranspiracao potencial observada}
 #'  }
 #' }
@@ -78,8 +75,7 @@
 #' \describe{
 #'   \itemize{
 #'     \item{mes}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{id}{id do posto}
+#'     \item{nome}{nome do posto}
 #'     \item{valor}{valor de evapotranspiracao potencial observada}
 #'  }
 #' }

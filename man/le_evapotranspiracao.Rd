@@ -13,8 +13,7 @@ le_evapotranspiracao(arq)
 data.table evapotranspiracao com as colunas
 \itemize{
 \item{mes}{mes da NC}
-\item{posto}{nome do posto}
-\item{id}{id do posto}
+\item{nome}{nome do posto}
 \item{valor}{valor da NC de evapotranspiracao observada}
 }
 }
