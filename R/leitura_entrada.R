@@ -31,7 +31,7 @@ le_entrada_parametros <- function(pasta_entrada, nome_subbacia) {
     
     aux <- strsplit(arq, split = "/")[[1]]
     sb <- strsplit(aux[length(aux)], split = "_")[[1]]
-    parametros_smap$Nome <- tolower(sb[1])
+    parametros_smap$Nome <- tolower(sub(".*/", "", sub("_parametros.txt", "", arq)))
     
     parametros_smap$Area <- as.numeric(parametros[1, 1])
     parametros_smap$nKt <- as.numeric(substr(parametros[2,1], 1, 3))
@@ -66,7 +66,6 @@ le_entrada_parametros <- function(pasta_entrada, nome_subbacia) {
 #'     \itemize{
 #'     \item{mes}{mes da NC}
 #'     \item{posto}{nome do posto}
-#'     \item{id}{id do posto}
 #'     \item{valor}{valor da NC de evapotranspiracao observada}
 #'     }
 #' @export
@@ -85,8 +84,8 @@ le_entrada_evapotranspiracao <- function(pasta_entrada, nome_subbacia) {
     dat <- data.table::fread(arq)
     dat$posto <- tolower(nome_subbacia)
 
-    colnames(dat) <- c("mes", "valor", "posto")
-    data.table::setcolorder(dat, c("mes", "posto", "valor"))
+    colnames(dat) <- c("mes", "valor", "nome")
+    data.table::setcolorder(dat, c("mes", "nome", "valor"))
 
     dat
 }
@@ -161,6 +160,7 @@ le_entrada_inicializacao <- function(pasta_entrada, nome_subbacia) {
     inicializacao <- data.table::melt(inicializacao, id.vars = "nome", variable.name = "variavel",
            value.name = "valor")
     inicializacao[, valor := as.numeric(valor)]
+    inicializacao[variavel == "Tuin", valor := valor / 100]
 
     if (any(inicializacao[, valor] < 0)) {
         stop(paste0(" variavel ", inicializacao[valor < 0, variavel]," negativa para a sub-bacia ", nome_subbacia))
@@ -539,6 +539,12 @@ le_arq_entrada <- function(pasta_entrada) {
     tipo_previsao <- le_entrada_bat_conf(pasta_entrada)
     modelos_precipitacao <- le_entrada_modelos_precipitacao(pasta_entrada)
 
+    parametros <- data.table::rbindlist(lapply(caso$nome_subbacia, function(sub_bacia) {
+  le_entrada_parametros(pasta_entrada, sub_bacia)
+        }))
+    parametros <- data.table::melt(parametros, id.vars = "Nome", variable.name = "parametro",
+           value.name = "valor")
+
     evapotranspiracao <- data.table::rbindlist(lapply(caso$nome_subbacia, function(sub_bacia) {
   le_entrada_evapotranspiracao(pasta_entrada, sub_bacia)
         }))
@@ -576,7 +582,33 @@ le_arq_entrada <- function(pasta_entrada) {
         }))
 
     previsao_precipitacao <- le_entrada_previsao_precipitacao_2(pasta_entrada, datas_rodadas, pontos_grade)
+    #if(previsao_precipitacao[, unique(max(data_previsao))] < datas_rodadas$data + 2){
+    #    previsao_precipitacao[data >]
+    #}
 
-    saida <- list(vazao = vazao, precipitacao = precipitacao, evapotranspiracao = evapotranspiracao, 
-        previsao_precipitacao = previsao_precipitacao, postos_plu = postos_plu, inicializacao = inicializacao)
+    saida <- list(parametros = parametros, vazao = vazao, precipitacao = precipitacao, evapotranspiracao = evapotranspiracao, 
+        previsao_precipitacao = previsao_precipitacao, postos_plu = postos_plu, inicializacao = inicializacao,
+        datas_rodadas = datas_rodadas, caso = caso)
+
+    saida
 }
+
+
+
+
+
+
+#saida <- rodada_encadeada_oficial(entrada$parametros,
+#    entrada$inicializacao, entrada$precipitacao, entrada$previsao_precipitacao, entrada$evapotranspiracao, entrada$vazao,
+#    entrada$postos_plu, entrada$datas_rodadas, length(unique(entrada$previsao_precipitacao[, cenario])), entrada$caso$nome_subbacia)
+#
+#parametros = entrada$parametros
+# inicializacao = entrada$inicializacao
+# historico_precipitacao = entrada$precipitacao
+#    previsao_precipitacao = entrada$previsao_precipitacao
+#     historico_etp_NC =entrada$evapotranspiracao
+#      historico_vazao = entrada$vazao
+#      postos_plu = entrada$postos_plu
+#      datas_rodadas = entrada$datas_rodadas
+#    numero_cenarios = length(unique(entrada$previsao_precipitacao[, cenario]))
+#     sub_bacias = entrada$caso$nome_subbacia
