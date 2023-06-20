@@ -73,6 +73,7 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, historico_precip
     
     numero_sub_bacias <- length(sub_bacias)
     numero_datas <- nrow(datas_rodadas)
+    numero_dias_previsao <- datas_rodadas$numero_dias_previsao
     nome_cenario <- unique(previsao_precipitacao[, cenario])
 
     saida <- data.table::data.table()
