@@ -98,6 +98,8 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, historico_precip
             dataRodada <- datas_rodadas[idata, data]
             numero_dias_previsao <- datas_rodadas[data == dataRodada, numero_dias_previsao]
             matriz_precipitacao <- array(rep(0, numero_cenarios * numero_dias_previsao), c(numero_cenarios, numero_dias_previsao))
+            matriz_evapotranspiracao <- array(rep(0, numero_cenarios * numero_dias_previsao), c(numero_cenarios, numero_dias_previsao))
+            matriz_evapotranspiracao_planicie <- array(rep(0, numero_cenarios * numero_dias_previsao), c(numero_cenarios, numero_dias_previsao))
 
             vazao <- historico_vazao[data < dataRodada & data >= (dataRodada - numero_dias_assimilacao) 
                           & posto == sub_bacia, valor]
@@ -145,9 +147,11 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, historico_precip
             precipitacao <- precipitacao[cenario == unique(cenario)[1]]
             precipitacao[, data_rodada := NULL]
             precipitacao[, cenario := NULL]
-            evapotranspiracao <- transforma_NC_serie(precipitacao[data >= dataRodada], normal_climatologica)
-            matriz_evapotranspiracao_planicie <- array(rep(evapotranspiracao[, valor] * vetor_modelo[77], numero_cenarios), c(numero_cenarios, numero_dias_previsao))
-            matriz_evapotranspiracao <- array(rep(evapotranspiracao[, valor] * vetor_modelo[76], numero_cenarios), c(numero_cenarios, numero_dias_previsao))
+            evapotranspiracao <- transforma_NC_serie(precipitacao[data <= dataRodada + numero_dias_previsao - 1 & data >= dataRodada], normal_climatologica)
+            for (icenario in 1:numero_cenarios){
+                matriz_evapotranspiracao_planicie[icenario,] <- evapotranspiracao[, valor] * vetor_modelo[77]
+                matriz_evapotranspiracao[icenario,] <- evapotranspiracao[, valor] * vetor_modelo[76]
+            }
 
             vetor_inicializacao[, 4] <- ajuste$simulacao[numero_dias_assimilacao, Rsup2]
             vetor_inicializacao[, 5] <- ajuste$simulacao[numero_dias_assimilacao, Rsolo]
