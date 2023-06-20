@@ -13,7 +13,6 @@ rodada_encadeada_oficial(
   historico_vazao,
   postos_plu,
   datas_rodadas,
-  numero_dias_assimilacao,
   numero_cenarios,
   sub_bacias
 )
@@ -29,9 +28,8 @@ rodada_encadeada_oficial(
 \item{inicializacao}{data.table com a inicializacao com as colunas:
 \itemize{
 \item{nome}{nome da sub_bacia}
-\item{Ebin}{vazao de base inicial}
-\item{Supin}{vazao superficial inicial}
-\item{Yuin}{umidade do solo inicial}
+\item{variavel}{vazao de base inicial}
+\item{valor}{valor da variavel}
 }}
 
 \item{historico_precipitacao}{data table com o historico de precipitacao com as colunas:
@@ -77,11 +75,11 @@ rodada_encadeada_oficial(
 \item{numero_dias_previsao}{horizonte do caso}
 }}
 
-\item{numero_dias_assimilacao}{numero de dias para o processo de assimilação de dados}
-
 \item{numero_cenarios}{numero de cenarios a serem gerados}
 
 \item{sub_bacias}{vetor com o nome das sub-bacias a serem consideradas}
+
+\item{numero_dias_assimilacao}{numero de dias para o processo de assimilação de dados}
 }
 \value{
 saida data table contendo as seguintes colunas:

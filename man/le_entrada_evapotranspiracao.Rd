@@ -16,7 +16,6 @@ data.table evapotranspiracao com as colunas
 \itemize{
 \item{mes}{mes da NC}
 \item{posto}{nome do posto}
-\item{id}{id do posto}
 \item{valor}{valor da NC de evapotranspiracao observada}
 }
 }

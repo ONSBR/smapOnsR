@@ -11,7 +11,10 @@
 #' @export
 ponderacao_temporal <- function(serie_temporal, kt, kt_max, kt_min) {
 
-  serie_temporal_ponderada <- rowSums(embed(serie_temporal, kt_min + kt_max + 1) * kt[(3 - kt_max):(3 + kt_min)])
+  aux <- embed(serie_temporal, kt_min + kt_max + 1)
+  kts <- t(array(rep(kt[(3 - kt_max):(3 + kt_min)]), c(ncol(aux), nrow(aux))))
+
+  serie_temporal_ponderada <- rowSums(aux * kts)
 
   serie_temporal_ponderada
 }

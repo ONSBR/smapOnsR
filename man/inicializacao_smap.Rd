@@ -5,7 +5,7 @@
 \title{Funcao de calculo dos valores inicias}
 \usage{
 inicializacao_smap(
-  modelo,
+  vetor_modelo,
   area,
   EbInic = 0,
   TuInic = 0.3,
@@ -14,7 +14,7 @@ inicializacao_smap(
 )
 }
 \arguments{
-\item{modelo}{vetor resultante unlist do objeto de classe smap_ons}
+\item{vetor_modelo}{vetor resultante unlist do objeto de classe smap_ons}
 
 \item{area}{area da sub-bacia}
 
