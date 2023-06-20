@@ -2,7 +2,7 @@
 % Please edit documentation in R/rodadas_encadeadas.R
 \name{rodada_encadeada_oficial}
 \alias{rodada_encadeada_oficial}
-\title{Funcao de calibracao do modelo SMAP/ONS}
+\title{Funcao para realizar rodadas encadeadas do SMAP/ONS}
 \usage{
 rodada_encadeada_oficial(
   parametros,
@@ -78,8 +78,6 @@ rodada_encadeada_oficial(
 \item{numero_cenarios}{numero de cenarios a serem gerados}
 
 \item{sub_bacias}{vetor com o nome das sub-bacias a serem consideradas}
-
-\item{numero_dias_assimilacao}{numero de dias para o processo de assimilação de dados}
 }
 \value{
 saida data table contendo as seguintes colunas:

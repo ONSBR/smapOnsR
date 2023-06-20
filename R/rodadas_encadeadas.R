@@ -1,5 +1,5 @@
 
-#' Funcao de calibracao do modelo SMAP/ONS
+#' Funcao para realizar rodadas encadeadas do SMAP/ONS
 #' 
 #' Raliza a calibracao de calibracao do SMAP/ONS dado um vetor inicial de pearametros e seus limites superiores e inferiores
 #'
@@ -52,7 +52,6 @@
 #'     \item{data}{data do caso}
 #'     \item{numero_dias_previsao}{horizonte do caso}
 #'     }
-#' @param numero_dias_assimilacao numero de dias para o processo de assimilação de dados
 #' @param numero_cenarios numero de cenarios a serem gerados
 #' @param sub_bacias vetor com o nome das sub-bacias a serem consideradas
 #' @importFrom data.table data.table
