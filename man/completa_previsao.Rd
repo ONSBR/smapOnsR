@@ -21,6 +21,8 @@ completa_previsao(previsao_precipitacao, datas_rodadas, numero_dias = 2)
 \item{data}{data da rodada}
 \item{numero_dias_previsao}{numero de dias de previsão}
 }}
+
+\item{numero_dias}{numero de dias alem da data final da previsao a ser verificado}
 }
 \value{
 previsao_precipitacao data.table com as colunas

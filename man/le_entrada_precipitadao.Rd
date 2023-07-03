@@ -9,7 +9,7 @@ le_entrada_precipitadao(pasta_entrada, postos_plu)
 \arguments{
 \item{pasta_entrada}{caminho da pasta  "arq_entrada"}
 
-\item{posto_plus}{data.table postos_plu com as colunas
+\item{posto_plu}{data.table postos_plu com as colunas
 \itemize{
 \item{nome}{nome da sub_bacia}
 \item{posto}{nome do posto plu}

@@ -1,0 +1,6 @@
+23/06/2022 ' data da rodada                               
+32         ' dia de inicialização do aquecimento do modelo
+60 '
+137.90     ' ebin                                         
+33.45      ' supin                                        
+16.75      ' tuin                                         

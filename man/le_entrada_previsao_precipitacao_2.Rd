@@ -35,5 +35,5 @@ previsao_precipitacao data.table com as colunas
 }
 }
 \description{
-Le arquivo "'nome_cenario'\emph{p}'data_caso'_'data_previsao'.txt" utilizado no aplicativo SMAP/ONS
+Le arquivo "precipitacao_prevista_p_'data_caso'.txt" utilizado no aplicativo SMAP/ONS
 }

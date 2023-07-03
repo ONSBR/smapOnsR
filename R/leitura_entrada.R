@@ -157,9 +157,12 @@ le_entrada_inicializacao <- function(pasta_entrada, nome_subbacia) {
     dat <- data.table::fread(arq, sep = "'", header = FALSE)
 
     inicializacao <- data.table::data.table(nome = nome_subbacia, Ebin = dat[4, V1], Supin = dat[5, V1], Tuin = dat[6, V1], numero_dias_assimilacao = (as.numeric(dat[2, V1]) - 1))
+    inicializacao[, Ebin := as.numeric(Ebin)]
+    inicializacao[, Supin := as.numeric(Supin)]
+    inicializacao[, Tuin := as.numeric(Tuin)]
+    inicializacao[, numero_dias_assimilacao := as.numeric(numero_dias_assimilacao)]
     inicializacao <- data.table::melt(inicializacao, id.vars = "nome", variable.name = "variavel",
            value.name = "valor")
-    inicializacao[, valor := as.numeric(valor)]
     inicializacao[variavel == "Tuin", valor := valor / 100]
 
     if (any(inicializacao[, valor] < 0)) {
@@ -264,7 +267,7 @@ le_entrada_posto_plu <- function(pasta_entrada, nome_subbacia) {
 #' Le arquivo "nome_posto_plu_c.txt" utilizado no aplicativo SMAP/ONS
 #' 
 #' @param pasta_entrada caminho da pasta  "arq_entrada"
-#' @param posto_plus data.table postos_plu com as colunas
+#' @param posto_plu data.table postos_plu com as colunas
 #'     \itemize{
 #'     \item{nome}{nome da sub_bacia}
 #'     \item{posto}{nome do posto plu}
@@ -446,7 +449,7 @@ le_entrada_bat_conf <- function(pasta_entrada) {
 
 #' Leitor de arquivo de previsao de precipitacao do smap/ons
 #' 
-#' Le arquivo "'nome_cenario'_p_'data_caso'_'data_previsao'.txt" utilizado no aplicativo SMAP/ONS
+#' Le arquivo "precipitacao_prevista_p_'data_caso'.txt" utilizado no aplicativo SMAP/ONS
 #'
 #' @param pasta_entrada caminho da pasta  "arq_entrada"
 #' @param pontos_grade data.table com as colunas
@@ -517,6 +520,83 @@ le_entrada_previsao_precipitacao_2 <- function(pasta_entrada, datas_rodadas, pon
     previsao_precipitacao
 }
 
+#' Leitor de arquivo de previsao de precipitacao do smap/ons
+#' 
+#' Le arquivo "'nome_cenario'_p_'data_caso'a'data_previsao'.txt" utilizado no aplicativo SMAP/ONS
+#'
+#' @param pasta_entrada caminho da pasta  "arq_entrada"
+#' @param pontos_grade data.table com as colunas
+#'     \itemize{
+#'     \item{nome}{nome da sub_bacia}
+#'     \item{nome_cenario_1}{primeira parte do nome dos cenarios de precipitacao considerados o caso}
+#'     \item{nome_cenario_2}{segunda parte do nome dos cenarios de precipitacao considerados o caso}
+#'     \item{latitude}{latitude do ponto de grade do cenário}
+#'     \item{longitude}{longitude do ponto de grade do cenário}
+#'     }
+#' @param datas_rodadas data table com as colunas
+#'     \itemize{
+#'     \item{data}{data da rodada}
+#'     \item{numero_dias_previsao}{numero de dias de previsão}
+#'     }
+#' @param nome_cenario nome do cenario a ser simulado
+#' @importFrom  data.table fread setcolorder setorder
+#' @importFrom stats na.omit
+#' @return previsao_precipitacao data.table com as colunas
+#'     \itemize{
+#'     \item{data_rodada}{data da rodada}
+#'     \item{data_previsao}{data da previsao}
+#'     \item{cenario}{nome do cenario}
+#'     \item{nome}{nome da sub-bacia}
+#'     \item{valor}{valor da previsao}
+#'     }
+#' @export
+le_entrada_previsao_precipitacao_1 <- function(pasta_entrada, datas_rodadas, pontos_grade, nome_cenario) {
+
+    data_final <- as.character(datas_rodadas$data + datas_rodadas$numero_dias_previsao)
+    arq <- file.path(pasta_entrada, paste0(nome_cenario, "_p", substr(datas_rodadas$data,9,10), substr(datas_rodadas$data,6,7), substr(datas_rodadas$data,3,4),"a",
+     substr(data_final,9,10), substr(data_final,6,7), substr(data_final,3,4), ".dat"))
+
+    if (!file.exists(arq)) {
+        stop(paste0("nao existe o arquivo ", arq))
+    }
+
+    previsao_precipitacao <- data.table::fread(arq, header = FALSE)
+    colnames(previsao_precipitacao)[1:2] <- c("longitude", "latitude")
+    colnames(previsao_precipitacao)[3:ncol(previsao_precipitacao)] <- as.character(seq.Date(datas_rodadas$data + 1, datas_rodadas$data + ncol(previsao_precipitacao) - 2, 1))
+    previsao_precipitacao$cenario <- nome_cenario
+    previsao_precipitacao[, cenario := tolower(cenario)]
+    
+    nome_1 <- strsplit(nome_cenario, split = "_")[[1]][1]
+    nome_2 <- strsplit(nome_cenario, split = "_")[[1]][2]
+
+    previsao_precipitacao <- merge(previsao_precipitacao, pontos_grade[nome_cenario_1 == nome_1 & nome_cenario_2 == nome_2], by = c("latitude", "longitude"))
+
+    previsao_precipitacao[, nome_cenario_1 := NULL]
+    previsao_precipitacao[, nome_cenario_2 := NULL]
+    previsao_precipitacao[, latitude := NULL]
+    previsao_precipitacao[, longitude := NULL]
+
+    previsao_precipitacao <- data.table::melt(previsao_precipitacao, id.vars = c("nome", "cenario"), variable.name = "data_previsao",
+           value.name = "valor")
+
+    previsao_precipitacao[, data_rodada := datas_rodadas$data]
+
+    previsao_precipitacao[, data_rodada := as.Date(data_rodada)]
+    previsao_precipitacao[, data_previsao := as.Date(data_previsao)]
+    previsao_precipitacao[, valor := as.numeric(valor)]
+    
+    previsao_precipitacao <- stats::na.omit(previsao_precipitacao)
+
+    previsao_precipitacao <- data.table::setcolorder(previsao_precipitacao, c("data_rodada","data_previsao", "cenario", "nome", "valor"))
+
+    data.table::setorder(previsao_precipitacao, nome, data_rodada, data_previsao, cenario)
+
+    if (any(previsao_precipitacao[, valor] < 0)) {
+        stop(paste0(" previsao de precipitacao da data ", previsao_precipitacao[valor < 0, data_previsao]," negativa para a sub-bacia ", previsao_precipitacao[valor < 0, nome]))
+    }
+
+    previsao_precipitacao
+}
 
 #' Leitor de arquivo arquivos de entrada do modelo SMAP/ONS
 #' 
@@ -627,7 +707,16 @@ le_arq_entrada <- function(pasta_entrada) {
   le_entrada_pontos_grade(pasta_entrada, sub_bacia, modelos_precipitacao)
         }))
 
-    previsao_precipitacao <- le_entrada_previsao_precipitacao_2(pasta_entrada, datas_rodadas, pontos_grade)
+    if (tipo_previsao == 2){
+        previsao_precipitacao <- le_entrada_previsao_precipitacao_2(pasta_entrada, datas_rodadas, pontos_grade)
+    } else if (tipo_previsao == 1) {
+        cenarios <- data.table::as.data.table(paste0(unique(pontos_grade$nome_cenario_1),"_",unique(pontos_grade$nome_cenario_2)))
+        previsao_precipitacao <- data.table::rbindlist(lapply(cenarios$V1, function(nome_cenario) {
+            le_entrada_previsao_precipitacao_1(pasta_entrada, datas_rodadas, pontos_grade, nome_cenario)
+            }))
+
+    } 
+    
     previsao_precipitacao <- completa_previsao(previsao_precipitacao, datas_rodadas)
 
     saida <- list(parametros = parametros, vazao = vazao, precipitacao = precipitacao, evapotranspiracao = evapotranspiracao, 

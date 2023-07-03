@@ -159,7 +159,8 @@ combina_observacao_previsao <- function(observado, previsto){
 #'     \item{nome}{nome da sub-bacia}
 #'     \item{valor}{valor da previsao}
 #'     }
-#' @importFrom data.table data.table setcolorder setorder setnames
+#' @param numero_dias numero de dias alem da data final da previsao a ser verificado
+#' @importFrom data.table data.table setcolorder setorder setnames CJ
 #' @return previsao_precipitacao data.table com as colunas
 #'     \itemize{
 #'     \item{data_rodada}{data da rodada}
@@ -178,7 +179,7 @@ completa_previsao <- function(previsao_precipitacao, datas_rodadas, numero_dias 
     datas <- seq.Date(datas_rodadas$data + datas_rodadas$numero_dias_previsao + 1,
                     datas_rodadas$data + datas_rodadas$numero_dias_previsao + numero_dias, by = 1)
 
-    all_combinations <- CJ(nome = unique_combinations$nome, cenario = unique_combinations$cenario, data_previsao = datas)
+    all_combinations <- data.table::CJ(nome = unique_combinations$nome, cenario = unique_combinations$cenario, data_previsao = datas)
 
     missing_forecasts <- all_combinations[!previsao_precipitacao, on = c("nome", "cenario", "data_previsao")]
 
