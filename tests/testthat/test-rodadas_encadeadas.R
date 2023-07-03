@@ -26,6 +26,31 @@ test_that("testa rodadas encadeadas", {
     inicializacao, precipitacao, previsao_precipitacao, evapotranspiracao, vazao,
     postos_plu, datas_rodadas, numero_cenarios, sub_bacias)
 
-    expect_equal(saida[data_previsao == "2020-05-05" & cenario == "cenario2", valor], 
+    expect_equal(saida[data_previsao == "2020-05-05" & cenario == "cenario2", valor],
                 saida[data_previsao == "2020-05-05" & cenario == "historico", valor])
+})
+
+test_that("testa rodada ecmwf", {
+  pasta_entrada <- system.file("extdata", "Arq_entrada", package = "smapOnsR")
+  #pasta_entrada <- "inst//extdata//Arq_Entrada"
+
+  entrada <- le_arq_entrada(pasta_entrada)
+
+#  parametros <- entrada$parametros
+#  inicializacao <- entrada$inicializacao
+#  historico_precipitacao <- entrada$precipitacao
+#      previsao_precipitacao <- entrada$previsao_precipitacao
+#      historico_etp_NC <-entrada$evapotranspiracao
+#        historico_vazao <- entrada$vazao
+#        postos_plu <- entrada$postos_plu
+#        datas_rodadas <- entrada$datas_rodadas
+#      numero_cenarios <- length(unique(entrada$previsao_precipitacao[, cenario]))
+#      sub_bacias <- entrada$caso$nome_subbacia
+
+  set.seed(129852)
+  saida <- rodada_encadeada_oficial(entrada$parametros,
+      entrada$inicializacao, entrada$precipitacao, entrada$previsao_precipitacao, entrada$evapotranspiracao, entrada$vazao,
+      entrada$postos_plu, entrada$datas_rodadas, length(unique(entrada$previsao_precipitacao[, cenario])), entrada$caso$nome_subbacia)
+    
+  expect_equal(saida[nome == "pimentalt" & variavel == "Qcalc" & cenario == "ecmwf_1", valor][31], 9918.921)
 })
