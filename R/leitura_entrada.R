@@ -628,9 +628,7 @@ le_arq_entrada <- function(pasta_entrada) {
         }))
 
     previsao_precipitacao <- le_entrada_previsao_precipitacao_2(pasta_entrada, datas_rodadas, pontos_grade)
-    #if(previsao_precipitacao[, unique(max(data_previsao))] < datas_rodadas$data + 2){
-    #    previsao_precipitacao[data >]
-    #}
+    previsao_precipitacao <- completa_previsao(previsao_precipitacao, datas_rodadas)
 
     saida <- list(parametros = parametros, vazao = vazao, precipitacao = precipitacao, evapotranspiracao = evapotranspiracao, 
         previsao_precipitacao = previsao_precipitacao, postos_plu = postos_plu, inicializacao = inicializacao,
@@ -639,15 +637,13 @@ le_arq_entrada <- function(pasta_entrada) {
     saida
 }
 
-
-
-
-
-
 #saida <- rodada_encadeada_oficial(entrada$parametros,
 #    entrada$inicializacao, entrada$precipitacao, entrada$previsao_precipitacao, entrada$evapotranspiracao, entrada$vazao,
 #    entrada$postos_plu, entrada$datas_rodadas, length(unique(entrada$previsao_precipitacao[, cenario])), entrada$caso$nome_subbacia)
 #
+
+#pasta_entrada = "inst//extdata//Arq_Entrada"
+#entrada <- le_arq_entrada(pasta_entrada)
 #parametros = entrada$parametros
 # inicializacao = entrada$inicializacao
 # historico_precipitacao = entrada$precipitacao

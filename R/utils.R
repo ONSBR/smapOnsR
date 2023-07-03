@@ -140,3 +140,61 @@ combina_observacao_previsao <- function(observado, previsto){
     data.table::setorder(serie_temporal, data_rodada, cenario, data_previsao)
     serie_temporal
 }
+
+
+#' Completa as previsoes com mais n dias
+#'
+#' Completa o data table de precisoes com mais N dias, para a ponderacao temporal ate t+2
+#'
+#' @param datas_rodadas data table com as colunas
+#'     \itemize{
+#'     \item{data}{data da rodada}
+#'     \item{numero_dias_previsao}{numero de dias de previsão}
+#'     }
+#' @param previsao_precipitacao data.table com as colunas
+#'     \itemize{
+#'     \item{data_rodada}{data da rodada}
+#'     \item{data_previsao}{data da previsao}
+#'     \item{cenario}{nome do cenario}
+#'     \item{nome}{nome da sub-bacia}
+#'     \item{valor}{valor da previsao}
+#'     }
+#' @importFrom data.table data.table setcolorder setorder setnames
+#' @return previsao_precipitacao data.table com as colunas
+#'     \itemize{
+#'     \item{data_rodada}{data da rodada}
+#'     \item{data_previsao}{data da previsao}
+#'     \item{cenario}{nome do cenario}
+#'     \item{nome}{nome da sub-bacia}
+#'     \item{valor}{valor da previsao}
+#'     }
+#' @export
+completa_previsao <- function(previsao_precipitacao, datas_rodadas, numero_dias = 2){
+
+    mean_values <- previsao_precipitacao[, .(mean_valor = mean(valor)), by = .(nome, cenario)]
+
+    unique_combinations <- unique(previsao_precipitacao[, .(nome, cenario)])
+
+    datas <- seq.Date(datas_rodadas$data + datas_rodadas$numero_dias_previsao + 1,
+                    datas_rodadas$data + datas_rodadas$numero_dias_previsao + numero_dias, by = 1)
+
+    all_combinations <- CJ(nome = unique_combinations$nome, cenario = unique_combinations$cenario, data_previsao = datas)
+
+    missing_forecasts <- all_combinations[!previsao_precipitacao, on = c("nome", "cenario", "data_previsao")]
+
+    missing_forecasts <- mean_values[missing_forecasts, on = .(nome, cenario)]
+
+    missing_forecasts[, data_rodada := datas_rodadas$data]
+
+    data.table::setnames(missing_forecasts, "mean_valor", "valor")
+
+    missing_forecasts <- unique(missing_forecasts)
+
+    data.table::setcolorder(missing_forecasts, c("data_rodada", "data_previsao", "cenario", "nome", "valor"))
+
+    previsao_precipitacao <- data.table::rbindlist(list(previsao_precipitacao, missing_forecasts))
+
+    data.table::setorder(previsao_precipitacao, nome, data_rodada, data_previsao, cenario)
+    
+    previsao_precipitacao
+}
