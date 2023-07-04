@@ -27,7 +27,7 @@ test_that("testa rodadas encadeadas", {
     postos_plu, datas_rodadas, numero_cenarios, sub_bacias)
 
     expect_equal(saida$previsao[data_previsao == "2020-05-05" & cenario == "cenario2", valor],
-                saida[data_previsao == "2020-05-05" & cenario == "historico", valor])
+                saida$previsao[data_previsao == "2020-05-05" & cenario == "historico", valor])
 })
 
 test_that("testa rodada ecmwf", {
