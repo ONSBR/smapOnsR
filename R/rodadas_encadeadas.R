@@ -76,8 +76,10 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, historico_precip
     nome_cenario <- unique(previsao_precipitacao[, cenario])
 
     saida <- data.table::data.table()
+    saida_ajuste_otimizacao <- data.table::data.table()
+    saida_ajuste_assimilacao <- data.table::data.table()
+    saida_precipitacao <- data.table::data.table()
     for (ibacia in 1:numero_sub_bacias){
-
         sub_bacia <- sub_bacias[ibacia]
 
         EbInic <- inicializacao[nome == sub_bacia & variavel == "Ebin", valor]
@@ -95,6 +97,8 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, historico_precip
 
         for (idata in 1:numero_datas){
             saida_bacia_aux <- data.table::data.table()
+            saida_ajuste_otimizacao_aux <- data.table::data.table()
+            saida_ajuste_assimilacao_aux <- data.table::data.table()
             dataRodada <- datas_rodadas[idata, data]
             numero_dias_previsao <- datas_rodadas[data == dataRodada, numero_dias_previsao]
             matriz_precipitacao <- array(rep(0, numero_cenarios * numero_dias_previsao), c(numero_cenarios, numero_dias_previsao))
@@ -137,6 +141,8 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, historico_precip
                 TuInic <- ajuste$simulacao[data == inicio_proxima_assimilacao, Tu]
             }
 
+            saida_precipitacao <- rbind(saida_precipitacao, precipitacao)
+
             precipitacao[, valor := valor * vetor_modelo[75]]
             for (icenario in 1:length(unique(precipitacao[, cenario]))){
                 matriz_precipitacao[icenario,] <- ponderacao_temporal(precipitacao[data_previsao < (dataRodada + numero_dias_previsao+ kt_max) & 
@@ -171,9 +177,24 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, historico_precip
             saida_bacia_aux[, cenario := rep(nome_cenario, each = numero_dias_previsao)]
             saida_bacia_aux[, data_previsao := rep(seq.Date(dataRodada, dataRodada + numero_dias_previsao - 1, by = 1), numero_cenarios)]
             saida <- rbind(saida, saida_bacia_aux)
+
+            saida_ajuste_otimizacao_aux <- rbind(saida_ajuste_otimizacao_aux, ajuste$ajuste$par)
+            colnames(saida_ajuste_otimizacao_aux) <- "otimizacao"
+            saida_ajuste_otimizacao_aux[, nome := sub_bacia]
+            saida_ajuste_otimizacao_aux[, data_caso := dataRodada]
+            saida_ajuste_otimizacao <- rbind(saida_ajuste_otimizacao, saida_ajuste_otimizacao_aux)
+            
+            saida_ajuste_assimilacao_aux <- rbind(saida_ajuste_assimilacao_aux, ajuste$simulacao)
+            saida_ajuste_assimilacao_aux[, nome := sub_bacia]
+            saida_ajuste_assimilacao_aux[, data_caso := dataRodada]
+            saida_ajuste_assimilacao_aux[, data_assimilacao := seq.Date(dataRodada - numero_dias_assimilacao, dataRodada -1, by = 1)]
+            saida_ajuste_assimilacao <- rbind(saida_ajuste_assimilacao, saida_ajuste_assimilacao_aux)
         }
     }
     saida <- melt(saida, id.vars = c("data_caso", "data_previsao", "cenario", "nome"), variable.name = "variavel",
            value.name = "valor")
+    saida_ajuste_assimilacao <- melt(saida_ajuste_assimilacao, id.vars = c("data_caso", "data_assimilacao", "nome"), variable.name = "variavel",
+           value.name = "valor")
+    saida <- list(previsao = saida, otimizacao = saida_ajuste_otimizacao, assimilacao = saida_ajuste_assimilacao, precipitacao = saida_precipitacao)
     saida
 }

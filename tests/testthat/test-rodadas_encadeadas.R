@@ -26,7 +26,7 @@ test_that("testa rodadas encadeadas", {
     inicializacao, precipitacao, previsao_precipitacao, evapotranspiracao, vazao,
     postos_plu, datas_rodadas, numero_cenarios, sub_bacias)
 
-    expect_equal(saida[data_previsao == "2020-05-05" & cenario == "cenario2", valor],
+    expect_equal(saida$previsao[data_previsao == "2020-05-05" & cenario == "cenario2", valor],
                 saida[data_previsao == "2020-05-05" & cenario == "historico", valor])
 })
 
@@ -52,7 +52,7 @@ test_that("testa rodada ecmwf", {
       entrada$inicializacao, entrada$precipitacao, entrada$previsao_precipitacao, entrada$evapotranspiracao, entrada$vazao,
       entrada$postos_plu, entrada$datas_rodadas, length(unique(entrada$previsao_precipitacao[, cenario])), entrada$caso$nome_subbacia)
     
-  expect_equal(saida[nome == "pimentalt" & variavel == "Qcalc" & cenario == "ecmwf_1", valor][31], 10164.954)
+  expect_equal(saida$previsao[nome == "pimentalt" & variavel == "Qcalc" & cenario == "ecmwf_1", valor][31], 10164.954)
 })
 
 test_that("testa rodada ecmwf formato oficial", {
@@ -65,7 +65,7 @@ test_that("testa rodada ecmwf formato oficial", {
       entrada$inicializacao, entrada$precipitacao, entrada$previsao_precipitacao, entrada$evapotranspiracao, entrada$vazao,
       entrada$postos_plu, entrada$datas_rodadas, length(unique(entrada$previsao_precipitacao[, cenario])), entrada$caso$nome_subbacia)
     
-  expect_equal(saida[nome == "avermelha" & variavel == "Qcalc" & cenario == "ecmwf_ex42", valor][27], 202.088706)
+  expect_equal(saida$previsao[nome == "avermelha" & variavel == "Qcalc" & cenario == "ecmwf_ex42", valor][27], 202.088706)
 })
 
 test_that("testa rodada oficial", {
@@ -78,5 +78,5 @@ test_that("testa rodada oficial", {
       entrada$inicializacao, entrada$precipitacao, entrada$previsao_precipitacao, entrada$evapotranspiracao, entrada$vazao,
       entrada$postos_plu, entrada$datas_rodadas, length(unique(entrada$previsao_precipitacao[, cenario])), entrada$caso$nome_subbacia)
     
-  expect_equal(saida[nome == "ssimao2" & variavel == "Qcalc", valor][17], 1210.44864)
+  expect_equal(saida$previsao[nome == "ssimao2" & variavel == "Qcalc", valor][17], 1210.44864)
 })
