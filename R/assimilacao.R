@@ -129,7 +129,7 @@ funcao_objetivo_assimilacao_oficial <- function(vetor_variaveis, vetor_modelo, T
   objetivo
 }
 
-# FUNCOES DE ASSIMILACAO DE DADOS COM EVAPTRANSPIRACAO
+# FUNCOES DE ASSIMILACAO DE DADOS COM EVAPOTRANSPIRACAO
 
 #' Assimilacao com evapotranspiracao
 #'
@@ -158,7 +158,7 @@ funcao_objetivo_assimilacao_oficial <- function(vetor_variaveis, vetor_modelo, T
 #'
 #' @return ajuste lista contendo
 #' \itemize{
-#'     \item{par}{parametros otimizados send}
+#'     \item{par}{parametros otimizados}
 #'     \item{value}{valor da funcao objetivo utilizado}
 #'     \item{id}{id do posto}
 #'     \item{valor}{valor da variavel}
@@ -181,8 +181,8 @@ assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Su
 
     pesos_prec <- rep(1, numero_dias)
     pesos_etp <- rep(1, numero_dias)
-    limite_inferior <- c(rep(limite_prec[1],numero_dias), rep(limite_etp[1],numero_dias), limite_ebin[1], limite_supin[1])
-    limite_superior <- c(rep(limite_prec[2],numero_dias), rep(limite_etp[2],numero_dias), limite_ebin[2], limite_supin[2])
+    limite_inferior <- c(rep(limite_prec[1],numero_dias), rep(limite_etp[1],numero_dias), limite_ebin[1] * EbInic, limite_supin[1] * Supin)
+    limite_superior <- c(rep(limite_prec[2],numero_dias), rep(limite_etp[2],numero_dias), limite_ebin[2] * EbInic, limite_supin[2] * Supin)
     limite_inferior[numero_dias] <- 0.9999999999
     limite_superior[numero_dias] <- 1.0000000001
     vetor_variaveis <- c(pesos_prec, pesos_etp, EbInic, Supin)
@@ -203,7 +203,24 @@ assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Su
               numero_dias = numero_dias,
               pesos_funcao_objetivo = pesos_funcao_objetivo,
               control = list(fnscale = 1))
-    ajuste
+    
+    EbInic <- ajuste$par[numero_dias * 2 + 1]
+    Supin <- ajuste$par[numero_dias * 2 + 2]
+    inicializacao <- inicializacao_smap(vetor_modelo, area, EbInic, TuInic, Supin)
+    vetor_inicializacao <- unlist(inicializacao)
+
+    precipitacao_ponderada <- precipitacao_ponderada * ajuste$par[1:numero_dias]
+    evapotranspiracao_ponderada <- evapotranspiracao * ajuste$par[(1:numero_dias) * 2]
+    evapotranspiracao_evapotranspiracao_planicie_ponderada <- evapotranspiracao_planicie * ajuste$par[(1:numero_dias) * 2]
+
+    simulacao <- rodada_varios_dias_cpp(vetor_modelo,
+              vetor_inicializacao, area, precipitacao_ponderada,
+              evapotranspiracao_ponderada, evapotranspiracao_evapotranspiracao_planicie_ponderada, numero_dias)
+
+    simulacao <- data.table::data.table(simulacao)
+
+    saida <- list(ajuste = ajuste, simulacao = simulacao)
+    saida
 }
 
 #' Funcao objetivo da assimilacao com evaptranspiracao
