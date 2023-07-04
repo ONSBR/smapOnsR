@@ -59,7 +59,7 @@ assimilacao_evapotranspiracao(
 \value{
 ajuste lista contendo
 \itemize{
-\item{par}{parametros otimizados send}
+\item{par}{parametros otimizados}
 \item{value}{valor da funcao objetivo utilizado}
 \item{id}{id do posto}
 \item{valor}{valor da variavel}
