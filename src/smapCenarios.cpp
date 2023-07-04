@@ -1,21 +1,14 @@
 #include <Rcpp.h>
 using namespace Rcpp;
 
-// C++ implementation of rodada_varios_dias function
 // [[Rcpp::export]]
 List rodada_cenarios_dias_cpp(NumericVector modelo, NumericMatrix inicializacao, double area,
                                  NumericMatrix precipitacao, NumericMatrix evapotranspiracao,
                                  NumericMatrix Emarg, int numero_dias, int numero_cenarios) {
 
-  int ncols = 14; // Number of columns in the output matrix
+  int ncols = 14; 
 
-  // Create the output matrix
   List listaSaida(numero_cenarios);
-
-  NumericMatrix matrizSaida(numero_dias, ncols);
-  colnames(matrizSaida) = CharacterVector::create("Qcalc", "Rsolo", "Rsup", "Rsup2", "Rsub",
-                                                  "Es", "Er", "Rec", "Marg", "Ed", "Ed2", "Ed3",
-                                                  "Eb", "Tu");
 
   double Capc_tmp = (modelo(3) / 100) * modelo(0);
   double Rsup_tmp = 0;
@@ -27,12 +20,12 @@ List rodada_cenarios_dias_cpp(NumericVector modelo, NumericMatrix inicializacao,
   double K_3ts = pow(0.5, 1.0 / modelo(10));
 
   for (int icenario = 0; icenario < numero_cenarios; icenario++){
+    NumericMatrix matrizSaida(numero_dias, ncols);
+    colnames(matrizSaida) = CharacterVector::create("Qcalc", "Rsolo", "Rsup", "Rsup2", "Rsub",
+                                                  "Es", "Er", "Rec", "Marg", "Ed", "Ed2", "Ed3",
+                                                  "Eb", "Tu");
     for (int idia = 0; idia < numero_dias; idia++) {
 
-        // If no matrix is provided in inicializacao, calculate initial values of Rsolo and Rsub
-        
-
-        // Calculation of transfer functions
         matrizSaida(idia, 13) = inicializacao(icenario, 4) / modelo(0); // Eq.19 Manual
 
         if (precipitacao(icenario, idia) > modelo(7)) {
@@ -56,7 +49,6 @@ List rodada_cenarios_dias_cpp(NumericVector modelo, NumericMatrix inicializacao,
         matrizSaida(idia, 7) = 0;
         }
 
-        // 4th Reservoir
         if (inicializacao(icenario, 5) > modelo(8)) {
         matrizSaida(idia, 8) = (inicializacao(icenario, 5) - modelo(8)) * (1 - K_1ts); // Eq.14
         } else {
@@ -69,10 +61,7 @@ List rodada_cenarios_dias_cpp(NumericVector modelo, NumericMatrix inicializacao,
 
         matrizSaida(idia, 11) = std::max(inicializacao(icenario, 5) - modelo(5) - matrizSaida(idia, 8), 0.0) * (1 - K_2t2s); // Eq.16
 
-        matrizSaida(idia, 12) = inicializacao(icenario, 6) * (1 - K_kts); // Eq.18
-
-        // Calculation of state variables
-        
+        matrizSaida(idia, 12) = inicializacao(icenario, 6) * (1 - K_kts); // Eq.18       
 
         matrizSaida(idia, 1) = std::min(inicializacao(icenario, 4) + precipitacao(icenario, idia) - matrizSaida(idia, 5) - matrizSaida(idia, 6) - matrizSaida(idia, 7),
                                         modelo(0));

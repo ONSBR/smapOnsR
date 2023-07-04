@@ -161,7 +161,7 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, historico_precip
             simulacao <- rodada_cenarios_dias_cpp(vetor_modelo,
             vetor_inicializacao, area, matriz_precipitacao,
             matriz_evapotranspiracao, matriz_evapotranspiracao_planicie, numero_dias_previsao, numero_cenarios)
-            
+
             for (icenario in 1: numero_cenarios){
                 saida_bacia_aux <- rbind(saida_bacia_aux, simulacao[[icenario]])
             }
