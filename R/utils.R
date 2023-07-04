@@ -176,7 +176,7 @@ completa_previsao <- function(previsao_precipitacao, datas_rodadas, numero_dias 
 
     unique_combinations <- unique(previsao_precipitacao[, .(nome, cenario)])
 
-    datas <- seq.Date(datas_rodadas$data + datas_rodadas$numero_dias_previsao + 1,
+    datas <- seq.Date(datas_rodadas$data + 1,
                     datas_rodadas$data + datas_rodadas$numero_dias_previsao + numero_dias, by = 1)
 
     all_combinations <- data.table::CJ(nome = unique_combinations$nome, cenario = unique_combinations$cenario, data_previsao = datas)
