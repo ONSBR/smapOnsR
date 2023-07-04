@@ -80,10 +80,34 @@ rodada_encadeada_oficial(
 \item{sub_bacias}{vetor com o nome das sub-bacias a serem consideradas}
 }
 \value{
-saida data table contendo as seguintes colunas:
+saida lista com o data.table previsao contendo as seguintes colunas:
 \itemize{
-\item{data_rodada}{data da rodada}
+\item{data_caso}{data da rodada}
 \item{data_previsao}{data da previsao}
+\item{cenario}{nome do cenario}
+\item{nome}{nome da sub-bacia}
+\item{variavel}{nome da variavel}
+\item{valor}{valor da variavel}
+}
+otimizacao data table com as colunas:
+\itemize{
+\item{otimizacao}{valor das variaveis da otimizacao}
+\item{nome}{nome da sub-bacia}
+\item{data_caso}{data do caso}
+}
+assimilacao data table com as colunas:
+\itemize{
+\item{data_caso}{data da rodada}
+\item{data_assimilacao}{data da assimilacao}
+\item{cenario}{nome do cenario}
+\item{nome}{nome da sub-bacia}
+\item{variavel}{nome da variavel}
+\item{valor}{valor da variavel}
+}
+precipitacao data table contendo precipitacao observada e previsata com as colunas:
+\itemize{
+\item{data_previsao}{data da precipitacao}
+\item{data_rodada}{data da rodada}
 \item{cenario}{nome do cenario}
 \item{nome}{nome da sub-bacia}
 \item{variavel}{nome da variavel}
