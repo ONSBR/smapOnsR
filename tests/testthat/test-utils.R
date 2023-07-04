@@ -45,4 +45,29 @@ test_that("transformacao historico em previsao", {
     numero_dias_previsao = c(15, 20)
   )
   expect_error(transforma_historico_previsao(precipitacao, datas_rodadas))
+
+  evapotranspiracao <- historico_etp[posto == sub_bacia]
+  datas_rodadas <- data.table(
+    data = as.Date(c("2020-05-01", "2020-05-08")),
+    numero_dias_previsao = c(15, 20)
+  )
+
+  colnames(evapotranspiracao)[2] <- "nome"
+  previsao <- transforma_historico_previsao(evapotranspiracao, datas_rodadas)
+
+  expect_equal(previsao[data_previsao == "2020-05-05", valor], evapotranspiracao[data  == "2020-05-05", valor] )
+  expect_equal(previsao[data_previsao == "2020-05-10" & data_rodada == "2020-05-01" , valor], 
+              previsao[data_previsao == "2020-05-10" & data_rodada == "2020-05-08" , valor])
+
+  datas_rodadas <- data.table(
+    a = as.Date(c("2020-05-01", "2020-05-08")),
+    numero_dias_previsao = c(15, 20)
+  )        
+  expect_error(transforma_historico_previsao(precipitacao, datas_rodadas))
+
+  datas_rodadas <- data.table(
+    data = c("2020-05-01", "2020-05-08"),
+    numero_dias_previsao = c(15, 20)
+  )
+  expect_error(transforma_historico_previsao(precipitacao, datas_rodadas))
 })
