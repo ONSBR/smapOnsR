@@ -373,6 +373,7 @@ le_entrada_modelos_precipitacao <- function(pasta_entrada) {
 #'     \item{numero_cenario}{numero de cenarios do caso}
 #'     }
 #' @importFrom  data.table fread setcolorder data.table
+#' @importFrom utils read.table
 #' @return data.table pontos_grade com as colunas
 #'     \itemize{
 #'     \item{nome}{nome da sub_bacia}
