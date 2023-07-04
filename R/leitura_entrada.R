@@ -211,9 +211,8 @@ le_entrada_vazao <- function(pasta_entrada, nome_subbacia) {
 
     colnames(vazao) <- c("data", "valor")
     vazao[, data := as.Date(data)]
+    vazao <- vazao[!grepl("-", valor)]
     vazao[, valor := as.numeric(valor)]
-    
-    vazao <- stats::na.omit(vazao)
 
     vazao[, posto := nome_subbacia]
     vazao <- data.table::setcolorder(vazao, c("data", "posto", "valor"))
@@ -397,17 +396,18 @@ le_entrada_pontos_grade <- function(pasta_entrada, nome_subbacia, modelos_precip
             stop(paste0("nao existe o arquivo ", arq))
         }
 
-        aux <- data.table::fread(arq)
+        aux <- read.table(arq, header = FALSE, sep = ";")
+        
         aux_pontos_grade <- modelos_precipitacao$nome_cenario
-        aux_pontos_grade[, latitude := aux[1, "1"]]
-        aux_pontos_grade[, longitude := aux[1, V1]]
+        aux_pontos_grade[, longitude := as.numeric(substr(aux[2, ], 1, 6))]
+        aux_pontos_grade[, latitude := as.numeric(substr(aux[2, ], 8, 14))]
         aux_pontos_grade[, nome := nome_subbacia]
         
-        if (colnames(aux)[2] > 1) {
-            for (iponto in 2:colnames(aux)[2]) {
+        if (as.numeric(aux[1, ]) > 1) {
+            for (iponto in 3:as.numeric(aux[1,])) {
                 aux_pontos_grade2 <- modelos_precipitacao$nome_cenario
-                aux_pontos_grade2[, latitude := aux[iponto, "1"]]
-                aux_pontos_grade2[, longitude := aux[iponto, V1]]
+                aux_pontos_grade[, longitude := as.numeric(substr(aux[iponto, ], 1, 6))]
+                aux_pontos_grade[, latitude := as.numeric(substr(aux[iponto, ], 8, 14))]
                 aux_pontos_grade2[, nome := nome_subbacia]
                 rbind(aux_pontos_grade, aux_pontos_grade2)
             }
@@ -560,7 +560,7 @@ le_entrada_previsao_precipitacao_1 <- function(pasta_entrada, datas_rodadas, pon
         stop(paste0("nao existe o arquivo ", arq))
     }
 
-    previsao_precipitacao <- data.table::fread(arq, header = FALSE)
+    previsao_precipitacao <- data.table::fread(arq, header = FALSE, colClasses = "double")
     colnames(previsao_precipitacao)[1:2] <- c("longitude", "latitude")
     colnames(previsao_precipitacao)[3:ncol(previsao_precipitacao)] <- as.character(seq.Date(datas_rodadas$data + 1, datas_rodadas$data + ncol(previsao_precipitacao) - 2, 1))
     previsao_precipitacao$cenario <- nome_cenario
