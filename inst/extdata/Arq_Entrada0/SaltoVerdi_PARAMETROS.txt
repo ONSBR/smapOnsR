@@ -1,4 +1,4 @@
-11894                                                         'área de drenagem Km²
+11894                                                         'area de drenagem Km²
 6    0.145 0.145 0.146 0.146 0.209 0.209     'Kt peso
 151.00                                                      'Str
 3.0                                                            'K2t

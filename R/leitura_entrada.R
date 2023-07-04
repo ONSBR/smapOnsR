@@ -766,15 +766,15 @@ le_arq_entrada <- function(pasta_entrada) {
         }))
 
     datas_rodadas <- unique(datas_rodadas)
-    
+
     vazao <- data.table::rbindlist(lapply(caso$nome_subbacia, function(sub_bacia) {
   le_entrada_vazao(pasta_entrada, sub_bacia)
         }))
-    
+
     postos_plu <- data.table::rbindlist(lapply(caso$nome_subbacia, function(sub_bacia) {
   le_entrada_posto_plu(pasta_entrada, sub_bacia)
         }))
-    
+
     precipitacao <- data.table::rbindlist(lapply(caso$nome_subbacia, function(sub_bacia) {
   le_entrada_precipitadao(pasta_entrada, postos_plu[nome %in% sub_bacia])
         }))
