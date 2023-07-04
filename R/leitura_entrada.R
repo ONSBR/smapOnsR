@@ -267,7 +267,7 @@ le_entrada_posto_plu <- function(pasta_entrada, nome_subbacia) {
 #' Le arquivo "nome_posto_plu_c.txt" utilizado no aplicativo SMAP/ONS
 #' 
 #' @param pasta_entrada caminho da pasta  "arq_entrada"
-#' @param posto_plu data.table postos_plu com as colunas
+#' @param postos_plu data.table postos_plu com as colunas
 #'     \itemize{
 #'     \item{nome}{nome da sub_bacia}
 #'     \item{posto}{nome do posto plu}
@@ -282,7 +282,7 @@ le_entrada_posto_plu <- function(pasta_entrada, nome_subbacia) {
 #'     \item{valor}{valor da precipitacao observada}
 #'     }
 #' @export
-le_entrada_precipitadao <- function(pasta_entrada, postos_plu) {
+le_entrada_precipitacao <- function(pasta_entrada, postos_plu) {
 
     precipitacao <- data.table::data.table()
     for (iposto in 1:nrow(postos_plu)){
@@ -611,6 +611,7 @@ le_entrada_previsao_precipitacao_1 <- function(pasta_entrada, datas_rodadas, pon
 #'     \item{latitude}{latitude do ponto de grade do cenário}
 #'     \item{longitude}{longitude do ponto de grade do cenário}
 #'     }
+#' @param data_previsao data da previsao
 #' @param datas_rodadas data table com as colunas
 #'     \itemize{
 #'     \item{data}{data da rodada}
@@ -776,7 +777,7 @@ le_arq_entrada <- function(pasta_entrada) {
         }))
 
     precipitacao <- data.table::rbindlist(lapply(caso$nome_subbacia, function(sub_bacia) {
-  le_entrada_precipitadao(pasta_entrada, postos_plu[nome %in% sub_bacia])
+  le_entrada_precipitacao(pasta_entrada, postos_plu[nome %in% sub_bacia])
         }))
 
     precipitacao <- data.table::rbindlist(lapply(caso$nome_subbacia, function(sub_bacia) {

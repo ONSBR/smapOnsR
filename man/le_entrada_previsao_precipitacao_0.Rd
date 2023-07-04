@@ -21,6 +21,8 @@ le_entrada_previsao_precipitacao_0(
 \item{numero_dias_previsao}{numero de dias de previsão}
 }}
 
+\item{data_previsao}{data da previsao}
+
 \item{pontos_grade}{data.table com as colunas
 \itemize{
 \item{nome}{nome da sub_bacia}
