@@ -598,6 +598,86 @@ le_entrada_previsao_precipitacao_1 <- function(pasta_entrada, datas_rodadas, pon
     previsao_precipitacao
 }
 
+#' Leitor de arquivo de previsao de precipitacao do smap/ons
+#' 
+#' Le arquivo "'nome_cenario'_p_'data_caso'a'data_previsao'.txt" utilizado no aplicativo SMAP/ONS
+#'
+#' @param pasta_entrada caminho da pasta  "arq_entrada"
+#' @param pontos_grade data.table com as colunas
+#'     \itemize{
+#'     \item{nome}{nome da sub_bacia}
+#'     \item{nome_cenario_1}{primeira parte do nome dos cenarios de precipitacao considerados o caso}
+#'     \item{nome_cenario_2}{segunda parte do nome dos cenarios de precipitacao considerados o caso}
+#'     \item{latitude}{latitude do ponto de grade do cenário}
+#'     \item{longitude}{longitude do ponto de grade do cenário}
+#'     }
+#' @param datas_rodadas data table com as colunas
+#'     \itemize{
+#'     \item{data}{data da rodada}
+#'     \item{numero_dias_previsao}{numero de dias de previsão}
+#'     }
+#' @param nome_cenario nome do cenario a ser simulado
+#' @importFrom  data.table fread setcolorder setorder
+#' @importFrom stats na.omit
+#' @return previsao_precipitacao data.table com as colunas
+#'     \itemize{
+#'     \item{data_rodada}{data da rodada}
+#'     \item{data_previsao}{data da previsao}
+#'     \item{cenario}{nome do cenario}
+#'     \item{nome}{nome da sub-bacia}
+#'     \item{valor}{valor da previsao}
+#'     }
+#' @export
+le_entrada_previsao_precipitacao_0 <- function(pasta_entrada, datas_rodadas, data_previsao, pontos_grade, nome_cenario) {
+
+    arq <- file.path(pasta_entrada, paste0(nome_cenario, "_p", substr(datas_rodadas$data,9,10), substr(datas_rodadas$data,6,7), substr(datas_rodadas$data,3,4),"a",
+     substr(data_previsao,9,10), substr(data_previsao,6,7), substr(data_previsao,3,4), ".dat"))
+    
+    previsao_precipitacao <- data.table::data.table()
+    
+    if (!file.exists(arq)) {
+        paste0("nao existe o arquivo ", arq)
+    } else {
+
+        previsao_precipitacao <- data.table::fread(arq, header = FALSE)
+        colnames(previsao_precipitacao)[1:2] <- c("longitude", "latitude")
+        colnames(previsao_precipitacao)[3] <- as.character(data_previsao)
+        previsao_precipitacao$cenario <- nome_cenario
+        previsao_precipitacao[, cenario := tolower(cenario)]
+        
+        nome_1 <- strsplit(nome_cenario, split = "_")[[1]][1]
+        nome_2 <- strsplit(nome_cenario, split = "_")[[1]][2]
+
+        previsao_precipitacao <- merge(previsao_precipitacao, pontos_grade[nome_cenario_1 == nome_1 & nome_cenario_2 == nome_2], by = c("latitude", "longitude"))
+
+        previsao_precipitacao[, nome_cenario_1 := NULL]
+        previsao_precipitacao[, nome_cenario_2 := NULL]
+        previsao_precipitacao[, latitude := NULL]
+        previsao_precipitacao[, longitude := NULL]
+
+        previsao_precipitacao <- data.table::melt(previsao_precipitacao, id.vars = c("nome", "cenario"), variable.name = "data_previsao",
+            value.name = "valor")
+
+        previsao_precipitacao[, data_rodada := datas_rodadas$data]
+
+        previsao_precipitacao[, data_rodada := as.Date(data_rodada)]
+        previsao_precipitacao[, data_previsao := as.Date(data_previsao)]
+        previsao_precipitacao[, valor := as.numeric(valor)]
+        
+        previsao_precipitacao <- stats::na.omit(previsao_precipitacao)
+
+        previsao_precipitacao <- data.table::setcolorder(previsao_precipitacao, c("data_rodada","data_previsao", "cenario", "nome", "valor"))
+
+        data.table::setorder(previsao_precipitacao, nome, data_rodada, data_previsao, cenario)
+
+        if (any(previsao_precipitacao[, valor] < 0)) {
+            stop(paste0(" previsao de precipitacao da data ", previsao_precipitacao[valor < 0, data_previsao]," negativa para a sub-bacia ", previsao_precipitacao[valor < 0, nome]))
+        }
+    }
+
+    previsao_precipitacao
+}
+
 #' Leitor de arquivo arquivos de entrada do modelo SMAP/ONS
 #' 
 #' Le arquivo "'nome_cenario'_p_'data_caso'_'data_previsao'.txt" utilizado no aplicativo SMAP/ONS
@@ -707,19 +787,31 @@ le_arq_entrada <- function(pasta_entrada) {
   le_entrada_pontos_grade(pasta_entrada, sub_bacia, modelos_precipitacao)
         }))
 
-    if (tipo_previsao == 2){
+    if (tipo_previsao == 2) {
         previsao_precipitacao <- le_entrada_previsao_precipitacao_2(pasta_entrada, datas_rodadas, pontos_grade)
     } else if (tipo_previsao == 1) {
         cenarios <- data.table::as.data.table(paste0(unique(pontos_grade$nome_cenario_1),"_",unique(pontos_grade$nome_cenario_2)))
         previsao_precipitacao <- data.table::rbindlist(lapply(cenarios$V1, function(nome_cenario) {
             le_entrada_previsao_precipitacao_1(pasta_entrada, datas_rodadas, pontos_grade, nome_cenario)
             }))
-
-    } 
+    } else {
+        datas <- data.table::as.data.table(seq.Date(datas_rodadas$data + 1, datas_rodadas$data + datas_rodadas$numero_dias_previsao, 1))
+        cenarios <- data.table::as.data.table(paste0(unique(pontos_grade$nome_cenario_1),"_",unique(pontos_grade$nome_cenario_2)))
+        previsao_precipitacao <- data.table::data.table()
+        for (icenario in 1:nrow(cenarios)){
+            nome_cenario <- cenarios$V1[icenario]
+            for (idata in 1:nrow(datas)){
+                data_previsao <- datas$V1[idata]
+                aux <- data.table::data.table()
+                aux <- le_entrada_previsao_precipitacao_0(pasta_entrada, datas_rodadas, data_previsao, pontos_grade, nome_cenario)
+                previsao_precipitacao <- rbind(previsao_precipitacao, aux)
+            }
+        }
+    }
     
     previsao_precipitacao <- completa_previsao(previsao_precipitacao, datas_rodadas)
 
-    saida <- list(parametros = parametros, vazao = vazao, precipitacao = precipitacao, evapotranspiracao = evapotranspiracao, 
+    saida <- list(parametros = parametros, vazao = vazao, precipitacao = precipitacao, evapotranspiracao = evapotranspiracao,
         previsao_precipitacao = previsao_precipitacao, postos_plu = postos_plu, inicializacao = inicializacao,
         datas_rodadas = datas_rodadas, caso = caso)
 
