@@ -36,16 +36,16 @@ test_that("testa rodada ecmwf", {
 
   entrada <- le_arq_entrada(pasta_entrada)
 
-  parametros <- entrada$parametros
-  inicializacao <- entrada$inicializacao
-  historico_precipitacao <- entrada$precipitacao
-      previsao_precipitacao <- entrada$previsao_precipitacao
-      historico_etp_NC <-entrada$evapotranspiracao
-        historico_vazao <- entrada$vazao
-        postos_plu <- entrada$postos_plu
-        datas_rodadas <- entrada$datas_rodadas
-      numero_cenarios <- length(unique(entrada$previsao_precipitacao[, cenario]))
-      sub_bacias <- entrada$caso$nome_subbacia
+  #parametros <- entrada$parametros
+  #inicializacao <- entrada$inicializacao
+  #historico_precipitacao <- entrada$precipitacao
+  #    previsao_precipitacao <- entrada$previsao_precipitacao
+  #    historico_etp_NC <-entrada$evapotranspiracao
+  #      historico_vazao <- entrada$vazao
+  #      postos_plu <- entrada$postos_plu
+  #      datas_rodadas <- entrada$datas_rodadas
+  #    numero_cenarios <- length(unique(entrada$previsao_precipitacao[, cenario]))
+  #    sub_bacias <- entrada$caso$nome_subbacia
 
   set.seed(129852)
   saida <- rodada_encadeada_oficial(entrada$parametros,
