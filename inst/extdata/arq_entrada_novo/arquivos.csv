@@ -1,0 +1,9 @@
+﻿arquivo;nome_arquivo
+SUB_BACIAS;sub_bacias.csv
+PRECIPITACAO_OBSERVADA;psat.csv
+VAZAO_OBSERVADA;vazoes.csv
+EVAPOTRANSPIRACAO_OBSERVADA;etp.csv
+DATAS_RODADAS;datasRodadas.csv
+POSTOS_PLUVIOMETRICOS;postos_plu.csv
+PARAMETROS;parametros.csv
+INICIALIZACAO;inicializacao.csv
