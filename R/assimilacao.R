@@ -249,8 +249,8 @@ funcao_objetivo_assimilacao_evapotranspiracao <- function(vetor_variaveis, vetor
       precipitacao_ponderada, evapotranspiracao, evapotranspiracao_planicie, vazao, area,
       numero_dias, pesos_funcao_objetivo = rep((1 / numero_dias), numero_dias)){
 
-  EbInic <- vetor_variaveis[numero_dias + 1]
-  Supin <- vetor_variaveis[numero_dias + 2]
+  EbInic <- vetor_variaveis[numero_dias * 2 + 1]
+  Supin <- vetor_variaveis[numero_dias * 2 + 2]
   inicializacao <- inicializacao_smap(vetor_modelo, area, EbInic, TuInic, Supin)
   vetor_inicializacao <- unlist(inicializacao)
 
