@@ -80,3 +80,45 @@ test_that("testa rodada oficial", {
     
   expect_equal(saida$previsao[nome == "ssimao2" & variavel == "Qcalc", valor][17], 1210.44864)
 })
+
+test_that("testa rodada com serie temporal etp", {
+    numero_dias_assimilacao <- 31
+    
+    datas_rodadas<- data.table::data.table(data = as.Date(c("2020-05-01", "2020-05-08")), numero_dias_previsao = c(15, 20))
+
+    sub_bacias <- c("avermelha", "ssimao2")
+    
+    precipitacao_observada <- historico_precipitacao[posto %in% postos_plu[nome %in% sub_bacias, posto]]
+
+    precipitacao_observada <- data.table::rbindlist(lapply(sub_bacias, function(sub_bacia) {
+  ponderacao_espacial(precipitacao_observada, postos_plu[nome %in% sub_bacia])
+        }))
+    precipitacao_prevista <- transforma_historico_previsao(precipitacao_observada, datas_rodadas)
+    aux <- data.table::data.table(precipitacao_prevista)
+    aux[, cenario := "cenario2"]
+    precipitacao_prevista <- rbind(aux, precipitacao_prevista)
+
+    numero_cenarios <- length(unique(precipitacao_prevista[, cenario]))
+    vazao_observada <- historico_vazao[posto %in% sub_bacias]
+
+    evapotranspiracao_observada <- historico_etp[posto %in% sub_bacias]
+    colnames(evapotranspiracao_observada)[2] <- "nome"
+    datas_rodadas$numero_dias_previsao <- datas_rodadas$numero_dias_previsao - 2
+    evapotranspiracao_prevista <- transforma_historico_previsao(evapotranspiracao_observada, datas_rodadas)
+    aux <- data.table::data.table(evapotranspiracao_prevista)
+    aux[, cenario := "cenario2"]
+    evapotranspiracao_prevista <- rbind(aux, evapotranspiracao_prevista)
+
+    datas_rodadas$numero_dias_previsao <- datas_rodadas$numero_dias_previsao + 2
+
+    inicializacao <- data.table::data.table(nome = c(rep("avermelha", 4), rep("ssimao2", 4)), variavel = rep(c("Ebin", "Supin", "Tuin", "numero_dias_assimilacao"),2), 
+    valor = c(218.71, 46.69, 0.2891, 31, 441.67, 256.98, 0.3141, 31))
+    
+    saida <- rodada_encadeada_etp(parametros[Nome %in% sub_bacias],
+    inicializacao, precipitacao_observada, precipitacao_prevista, evapotranspiracao_observada, evapotranspiracao_prevista, vazao_observada,
+    postos_plu, datas_rodadas, numero_cenarios, sub_bacias)
+
+    expect_equal(saida$previsao[data_previsao == "2020-05-05" & cenario == "cenario2", valor],
+                saida$previsao[data_previsao == "2020-05-05" & cenario == "historico", valor])
+})
+
