@@ -205,11 +205,11 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, historico_precip
             saida_bacia_aux[, data_previsao := rep(seq.Date(dataRodada, dataRodada + numero_dias_previsao - 1, by = 1), numero_cenarios)]
             saida <- rbind(saida, saida_bacia_aux)
 
-            saida_ajuste_otimizacao_aux <- rbind(saida_ajuste_otimizacao_aux, ajuste$ajuste$par)
-            colnames(saida_ajuste_otimizacao_aux) <- "otimizacao"
-            saida_ajuste_otimizacao_aux[, nome := sub_bacia]
-            saida_ajuste_otimizacao_aux[, data_caso := dataRodada]
-            saida_ajuste_otimizacao <- rbind(saida_ajuste_otimizacao, saida_ajuste_otimizacao_aux)
+            ajuste$ajuste$par <- data.table::data.table(ajuste$ajuste$par)
+            colnames(ajuste$ajuste$par) <- "otimizacao"
+            ajuste$ajuste$par[, nome := sub_bacia]
+            ajuste$ajuste$par[, data_caso := dataRodada]
+            saida_ajuste_otimizacao <- data.table::rbindlist(list(saida_ajuste_otimizacao, ajuste$ajuste$par))
             
             saida_ajuste_assimilacao <- data.table::rbindlist(list(saida_ajuste_assimilacao, ajuste$simulacao))
 
@@ -434,11 +434,11 @@ rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observa
             saida_bacia_aux[, data_previsao := rep(seq.Date(dataRodada, dataRodada + numero_dias_previsao - 1, by = 1), numero_cenarios)]
             saida <- rbind(saida, saida_bacia_aux)
 
-            saida_ajuste_otimizacao_aux <- rbind(saida_ajuste_otimizacao_aux, ajuste$ajuste$par)
-            colnames(saida_ajuste_otimizacao_aux) <- "otimizacao"
-            saida_ajuste_otimizacao_aux[, nome := sub_bacia]
-            saida_ajuste_otimizacao_aux[, data_caso := dataRodada]
-            saida_ajuste_otimizacao <- rbind(saida_ajuste_otimizacao, saida_ajuste_otimizacao_aux)
+            ajuste$ajuste$par <- data.table::data.table(ajuste$ajuste$par)
+            colnames(ajuste$ajuste$par) <- "otimizacao"
+            ajuste$ajuste$par[, nome := sub_bacia]
+            ajuste$ajuste$par[, data_caso := dataRodada]
+            saida_ajuste_otimizacao <- data.table::rbindlist(list(saida_ajuste_otimizacao, ajuste$ajuste$par))
             
             saida_ajuste_assimilacao <- data.table::rbindlist(list(saida_ajuste_assimilacao, ajuste$simulacao))
         }
