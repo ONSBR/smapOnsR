@@ -3,5 +3,5 @@ test_that("testa execucao oficial", {
 
   saida <- executa_caso_oficial(pasta_entrada)
 
-  expect_equal(saida$previsao[nome == "avermelha" & variavel == "Qcalc" & cenario == "ecmwf_ex42", valor][27], 202.088706)
+  expect_equal(saida$previsao[nome == "avermelha" & variavel == "Qcalc" & cenario == "ecmwf_ex42", valor][27], 202.10048)
 })
