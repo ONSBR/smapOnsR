@@ -122,7 +122,6 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, historico_precip
         for (idata in 1:numero_datas){
             saida_bacia_aux <- data.table::data.table()
             saida_ajuste_otimizacao_aux <- data.table::data.table()
-            saida_ajuste_assimilacao_aux <- data.table::data.table()
             saida_ajuste_fo_aux <- data.table::data.table()
             
             dataRodada <- datas_rodadas[idata, data]
@@ -157,6 +156,8 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, historico_precip
             ajuste <- assimilacao_oficial(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao_assimilacao,
                         evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias = numero_dias_assimilacao)
             ajuste$simulacao[, data_assimilacao := seq.Date((dataRodada - numero_dias_assimilacao), dataRodada - 1, 1)]
+            ajuste$simulacao[, nome := sub_bacia]
+            ajuste$simulacao[, data_caso := dataRodada]
 
             if (idata < numero_datas) {
                 inicio_proxima_assimilacao <- datas_rodadas[idata + 1, data] - numero_dias_assimilacao - 1
@@ -210,10 +211,7 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, historico_precip
             saida_ajuste_otimizacao_aux[, data_caso := dataRodada]
             saida_ajuste_otimizacao <- rbind(saida_ajuste_otimizacao, saida_ajuste_otimizacao_aux)
             
-            saida_ajuste_assimilacao_aux <- rbind(saida_ajuste_assimilacao_aux, ajuste$simulacao)
-            saida_ajuste_assimilacao_aux[, nome := sub_bacia]
-            saida_ajuste_assimilacao_aux[, data_caso := dataRodada]
-            saida_ajuste_assimilacao <- rbind(saida_ajuste_assimilacao, saida_ajuste_assimilacao_aux)
+            saida_ajuste_assimilacao <- data.table::rbindlist(list(saida_ajuste_assimilacao, ajuste$simulacao))
 
             saida_ajuste_fo_aux <- rbind(saida_ajuste_fo_aux, ajuste$ajuste$value)
             colnames(saida_ajuste_fo_aux) <- "funcao_objetivo"
@@ -392,7 +390,9 @@ rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observa
             ajuste <- assimilacao_evapotranspiracao(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao_assimilacao,
                         evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias = numero_dias_assimilacao)
             ajuste$simulacao[, data_assimilacao := seq.Date((dataRodada - numero_dias_assimilacao), dataRodada - 1, 1)]
-
+            ajuste$simulacao[, nome := sub_bacia]
+            ajuste$simulacao[, data_caso := dataRodada]
+            
             if (idata < numero_datas) {
                 inicio_proxima_assimilacao <- datas_rodadas[idata + 1, data] - numero_dias_assimilacao - 1
                 EbInic <- ajuste$simulacao[data_assimilacao == inicio_proxima_assimilacao, Eb] * area / 86.4
@@ -440,10 +440,7 @@ rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observa
             saida_ajuste_otimizacao_aux[, data_caso := dataRodada]
             saida_ajuste_otimizacao <- rbind(saida_ajuste_otimizacao, saida_ajuste_otimizacao_aux)
             
-            saida_ajuste_assimilacao_aux <- rbind(saida_ajuste_assimilacao_aux, ajuste$simulacao)
-            saida_ajuste_assimilacao_aux[, nome := sub_bacia]
-            saida_ajuste_assimilacao_aux[, data_caso := dataRodada]
-            saida_ajuste_assimilacao <- rbind(saida_ajuste_assimilacao, saida_ajuste_assimilacao_aux)
+            saida_ajuste_assimilacao <- data.table::rbindlist(list(saida_ajuste_assimilacao, ajuste$simulacao))
         }
     }
     saida <- melt(saida, id.vars = c("data_caso", "data_previsao", "cenario", "nome"), variable.name = "variavel",
