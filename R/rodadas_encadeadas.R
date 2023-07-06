@@ -216,7 +216,7 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, historico_precip
             saida_ajuste_assimilacao <- rbind(saida_ajuste_assimilacao, saida_ajuste_assimilacao_aux)
 
             saida_ajuste_fo_aux <- rbind(saida_ajuste_fo_aux, ajuste$ajuste$value)
-            colnames(saida_ajuste_fo_aux) <- "otimizacao"
+            colnames(saida_ajuste_fo_aux) <- "funcao_objetivo"
             saida_ajuste_fo_aux[, nome := sub_bacia]
             saida_ajuste_fo_aux[, data_caso := dataRodada]
             saida_ajuste_fo <- rbind(saida_ajuste_fo, saida_ajuste_fo_aux)
@@ -386,8 +386,8 @@ rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observa
             precipitacao_assimilacao[, cenario := NULL]
             precipitacao_assimilacao[, data_rodada := NULL]
 
-            evapotranspiracao_planicie <- evapotranspiracao_observada[nome == sub_bacia & data < dataRodada & data >= (dataRodada - numero_dias_assimilacao), valor] * vetor_modelo[77]
-            evapotranspiracao <- evapotranspiracao_observada[nome == sub_bacia & data < dataRodada & data >= (dataRodada - numero_dias_assimilacao), valor] * vetor_modelo[76]
+            evapotranspiracao_planicie <- evapotranspiracao_observada[posto == sub_bacia & data < dataRodada & data >= (dataRodada - numero_dias_assimilacao), valor] * vetor_modelo[77]
+            evapotranspiracao <- evapotranspiracao_observada[posto == sub_bacia & data < dataRodada & data >= (dataRodada - numero_dias_assimilacao), valor] * vetor_modelo[76]
 
             ajuste <- assimilacao_evapotranspiracao(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao_assimilacao,
                         evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias = numero_dias_assimilacao)
