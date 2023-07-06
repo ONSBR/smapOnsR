@@ -45,34 +45,13 @@ le_evapotranspiracao <- function(arq) {
 #'     }
 #' @export 
 le_parametros <- function(arq) {
-    parametros <- read.csv(arq, sep = "'", header = FALSE)
+    dat <- data.table::fread(arq)
 
-    parametros_smap <- array(rep(0, 82), c(1, 82))
-    parametros_smap <- data.table::data.table(parametros_smap)
-    colnames(parametros_smap) <- c("Nome", "Area", "nKt", paste0("Kt", 2:-60),
-    "Str", "K2t", "Crec", "Ai", "Capc", "K_kt", "K2t2", "H1", "H", "K3t", "K1t",
-    "Ecof", "Pcof", "Ecof2", "ktMin", "ktMax")
-    
-    parametros_smap$Nome <- tolower(sub(".*/", "", sub("_PARAMETROS.txt", "", arq)))
-    
-    parametros_smap$Area <- as.numeric(parametros[1, 1])
-    parametros_smap$nKt <- as.numeric(substr(parametros[2,1], 1, 3))
-    aux <- strsplit(trimws(substr(parametros[2,1],4,nchar(parametros[2,1]))),split = " ")
-
-    for (ikt in 1:parametros_smap[, nKt]) {
-        if (parametros_smap[1, nKt] > 3) {
-            parametros_smap[1, (ikt + 3)] <- as.numeric(aux[[1]][(parametros_smap[1, nKt - ikt + 1])])
-        } else{
-            parametros_smap[1, (ikt + 4)] <- as.numeric(aux[[1]][(parametros_smap[1, nKt - ikt + 1])])
-        }
+    if (any(colnames(dat) != c("Nome", "parametro", "valor"))) {
+        stop("o arquivos deve deve possuir colunas 'Nome', 'parametro' e 'valor'")
     }
-    for (iparametro in 67:80) {
-        parametros_smap[1,iparametro] <- as.numeric(parametros[(iparametro - 64), 1])
-    }
-    parametros_smap[1, 81] <- sum(parametros_smap[, 7:66] > 0)
-    parametros_smap[1, 82] <- sum(parametros_smap[, 4:5] > 0)
 
-    parametros_smap
+    dat
 }
 
 #' le_historico_verificado
@@ -237,6 +216,8 @@ le_arq_entrada_novo <- function(pasta_entrada){
 
     sub_bacias <- data.table::fread(file.path(pasta_entrada,arquivos[arquivo == "SUB_BACIAS", nome_arquivo]))
 
+    parametros <- le_parametros(file.path(pasta_entrada,arquivos[arquivo == "PARAMETROS", nome_arquivo]))[Nome %in% sub_bacias$nome]
+
     vazao_observada <- le_historico_verificado(file.path(pasta_entrada,arquivos[arquivo == "VAZAO_OBSERVADA", nome_arquivo]))[posto %in% sub_bacias$nome]
 
     evapotranspiracao_observada <- le_historico_verificado(file.path(pasta_entrada,arquivos[arquivo == "EVAPOTRANSPIRACAO_OBSERVADA", nome_arquivo]))[posto %in% sub_bacias$nome]
@@ -252,7 +233,7 @@ le_arq_entrada_novo <- function(pasta_entrada){
     precipitacao_observada <- data.table::rbindlist(lapply(sub_bacias$nome, function(sub_bacia) {
   ponderacao_espacial(precipitacao_observada, postos_plu[nome %in% sub_bacia])
         }))
-        
+
     precipitacao_prevista <- data.table::copy(precipitacao_observada)
     colnames(precipitacao_prevista)[2] <- "nome"
     precipitacao_prevista <- transforma_historico_previsao(precipitacao_prevista, datas_rodadas)
@@ -265,7 +246,8 @@ le_arq_entrada_novo <- function(pasta_entrada){
 
     saida <- list(sub_bacias = sub_bacias, vazao_observada = vazao_observada, evapotranspiracao_observada = evapotranspiracao_observada,
     postos_plu = postos_plu, precipitacao_observada = precipitacao_observada, inicializacao = inicializacao,
-    datas_rodadas = datas_rodadas)
+    datas_rodadas = datas_rodadas, precipitacao_prevista = precipitacao_prevista, evapotranspiracao_prevista = evapotranspiracao_prevista,
+    parametros = parametros)
 
     saida
 }
