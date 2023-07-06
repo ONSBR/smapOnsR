@@ -204,15 +204,13 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, historico_precip
             vetor_inicializacao, area, matriz_precipitacao,
             matriz_evapotranspiracao, matriz_evapotranspiracao_planicie, numero_dias_previsao, numero_cenarios)
 
-            for (icenario in 1: numero_cenarios){
-                saida_bacia_aux <- rbind(saida_bacia_aux, simulacao[[icenario]])
-            }
+            saida_bacia_aux <- data.table::data.table(do.call(rbind, simulacao))
 
             saida_bacia_aux[, nome := sub_bacia]
             saida_bacia_aux[, data_caso := dataRodada]
             saida_bacia_aux[, cenario := rep(nome_cenario, each = numero_dias_previsao)]
             saida_bacia_aux[, data_previsao := rep(seq.Date(dataRodada, dataRodada + numero_dias_previsao - 1, by = 1), numero_cenarios)]
-            saida <- rbind(saida, saida_bacia_aux)
+            saida <- data.table::rbindlist(list(saida, saida_bacia_aux))
 
             saida_ajuste_otimizacao <- data.table::rbindlist(list(saida_ajuste_otimizacao, saida_ajuste_otimizacao_aux))
             
@@ -341,6 +339,7 @@ rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observa
     saida_ajuste_otimizacao <- data.table::data.table()
     saida_ajuste_assimilacao <- data.table::data.table()
     saida_precipitacao <- data.table::data.table()
+    saida_ajuste_fo <- data.table::data.table()
     for (ibacia in 1:numero_sub_bacias){
         sub_bacia <- sub_bacias[ibacia]
 
@@ -433,15 +432,13 @@ rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observa
             vetor_inicializacao, area, matriz_precipitacao,
             matriz_evapotranspiracao, matriz_evapotranspiracao_planicie, numero_dias_previsao, numero_cenarios)
 
-            for (icenario in 1: numero_cenarios){
-                saida_bacia_aux <- rbind(saida_bacia_aux, simulacao[[icenario]])
-            }
+            saida_bacia_aux <- data.table::data.table(do.call(rbind, simulacao))
 
             saida_bacia_aux[, nome := sub_bacia]
             saida_bacia_aux[, data_caso := dataRodada]
             saida_bacia_aux[, cenario := rep(nome_cenario, each = numero_dias_previsao)]
             saida_bacia_aux[, data_previsao := rep(seq.Date(dataRodada, dataRodada + numero_dias_previsao - 1, by = 1), numero_cenarios)]
-            saida <- rbind(saida, saida_bacia_aux)
+            saida <- data.table::rbindlist(list(saida, saida_bacia_aux))
 
             saida_ajuste_otimizacao <- data.table::rbindlist(list(saida_ajuste_otimizacao, saida_ajuste_otimizacao_aux))
             
