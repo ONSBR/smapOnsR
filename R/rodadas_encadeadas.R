@@ -167,7 +167,7 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, historico_precip
                 TuInic <- ajuste$simulacao[data_assimilacao == inicio_proxima_assimilacao, Tu]
             }
 
-            saida_precipitacao <- rbind(saida_precipitacao, precipitacao)
+            saida_precipitacao <- data.table::rbindlist(list(saida_precipitacao, precipitacao))
 
             precipitacao[, valor := valor * vetor_modelo[75]]
             for (icenario in 1:length(unique(precipitacao[, cenario]))){
@@ -402,7 +402,7 @@ rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observa
                 TuInic <- ajuste$simulacao[data_assimilacao == inicio_proxima_assimilacao, Tu]
             }
 
-            saida_precipitacao <- rbind(saida_precipitacao, precipitacao)
+            saida_precipitacao <- data.table::rbindlist(list(saida_precipitacao, precipitacao))
 
             precipitacao[, valor := valor * vetor_modelo[75]]
             for (icenario in 1:length(unique(precipitacao[, cenario]))){
