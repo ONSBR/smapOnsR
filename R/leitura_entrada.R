@@ -163,7 +163,7 @@ le_entrada_inicializacao <- function(pasta_entrada, nome_subbacia) {
     inicializacao[, numero_dias_assimilacao := as.numeric(numero_dias_assimilacao)]
     inicializacao <- data.table::melt(inicializacao, id.vars = "nome", variable.name = "variavel",
            value.name = "valor")
-    inicializacao[variavel == "Tuin", valor := valor / 100]
+    inicializacao[variavel == "Tuin", valor := valor]
 
     if (any(inicializacao[, valor] < 0)) {
         stop(paste0(" variavel ", inicializacao[valor < 0, variavel]," negativa para a sub-bacia ", nome_subbacia))

@@ -65,7 +65,7 @@ test_that("testa rodada ecmwf formato oficial", {
       entrada$inicializacao, entrada$precipitacao, entrada$previsao_precipitacao, entrada$evapotranspiracao, entrada$vazao,
       entrada$postos_plu, entrada$datas_rodadas, length(unique(entrada$previsao_precipitacao[, cenario])), entrada$caso$nome_subbacia)
     
-  expect_equal(saida$previsao[nome == "avermelha" & variavel == "Qcalc" & cenario == "ecmwf_ex42", valor][27], 202.10048)
+  expect_equal(saida$previsao[nome == "avermelha" & variavel == "Qcalc" & cenario == "ecmwf_ex42", valor][27], 202.088706)
 })
 
 test_that("testa rodada oficial", {
@@ -102,9 +102,10 @@ test_that("testa rodada com serie temporal etp", {
     vazao_observada <- historico_vazao[posto %in% sub_bacias]
 
     evapotranspiracao_observada <- historico_etp[posto %in% sub_bacias]
-    colnames(evapotranspiracao_observada)[2] <- "nome"
     datas_rodadas$numero_dias_previsao <- datas_rodadas$numero_dias_previsao - 2
-    evapotranspiracao_prevista <- transforma_historico_previsao(evapotranspiracao_observada, datas_rodadas)
+    evapotranspiracao_prevista <- data.table::copy(evapotranspiracao_observada)
+    colnames(evapotranspiracao_prevista)[2] <- "nome"
+    evapotranspiracao_prevista <- transforma_historico_previsao(evapotranspiracao_prevista, datas_rodadas)
     aux <- data.table::data.table(evapotranspiracao_prevista)
     aux[, cenario := "cenario2"]
     evapotranspiracao_prevista <- rbind(aux, evapotranspiracao_prevista)

@@ -27,14 +27,16 @@ inicializacao_smap <- function(vetor_modelo, area, EbInic = 0, TuInic = 0.3, Sup
     stop("Supin deve ser ser positivo")
   }
   
-  if((TuInic < 0) | (TuInic > 1)){
-    stop("TuInic deve estar entre 0 e 1")
+  if((TuInic < 0) | (TuInic > 100)){
+    stop("TuInic deve estar entre 0 e 100")
   }
   
   if(EbInic < 0){
     stop("EbInic deve ser positivo")
   }
 
+  TuInic <- TuInic / 100
+  
   RsoloInic <- vetor_modelo[1] * TuInic
   RsupInic <- (Supin / (1 - (0.5 ^ (1 / vetor_modelo[2])))) * 86.4 / area
   RsubInic <- EbInic / (1 - (0.5 ^ (1 / vetor_modelo[5]))) * 86.4 / area
