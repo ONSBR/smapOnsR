@@ -197,9 +197,9 @@ le_arquivos <- function(pasta_entrada) {
 
 #' Le csv com a relaca de postos plu x sub_bacia
 #' 
-#' Realiza a leitura do csv 'postos_plu.csv' csv com a relaca de postos plu x sub_bacia
+#' Realiza a leitura do csv 'postos_plu.csv' csv com a relacao de postos plu x sub_bacia
 #' 
-#' @param pasta_entrada caminho da pasta com os arquivos de entrada
+#' @param arq nome do arquivo contendo a relacao de postos plu x sub-bacia
 #' @importFrom  data.table fread
 #' @return data table contendo as datas dos casos a serem executados e seus respectivos horizontes:
 #'     \itemize{
@@ -207,9 +207,7 @@ le_arquivos <- function(pasta_entrada) {
 #'     \item{numero_dias_previsao}{horizonte do caso}
 #'     }
 #' @export 
-le_postos_plu <- function(pasta_entrada, arq) {
-
-    arq <- file.path(pasta_entrada, arq)
+le_postos_plu <- function(arq) {
 
     if (!file.exists(arq)) {
         stop("nao existe o arquivo do tipo arquivos.csv")
@@ -231,8 +229,9 @@ le_postos_plu <- function(pasta_entrada, arq) {
 #' Realiza a leitura dos arquivos de entrada em novo formato
 #' 
 #' @param pasta_entrada nome da pasta com os arquivos de entrada
-#' @return 
-#' @export saida
+#' @return saida lista contendo os seguintes data tables:
+#' 
+#' @export
 le_arq_entrada_novo <- function(pasta_entrada){
     arquivos <- le_arquivos(pasta_entrada)
 
@@ -242,7 +241,7 @@ le_arq_entrada_novo <- function(pasta_entrada){
 
     evapotranspiracao_observada <- le_historico_verificado(file.path(pasta_entrada,arquivos[arquivo == "EVAPOTRANSPIRACAO_OBSERVADA", nome_arquivo]))[posto %in% sub_bacias$nome]
 
-    postos_plu <- le_postos_plu(pasta_entrada, arquivos[arquivo == "POSTOS_PLUVIOMETRICOS", nome_arquivo])
+    postos_plu <- le_postos_plu(file.path(pasta_entrada, arquivos[arquivo == "POSTOS_PLUVIOMETRICOS", nome_arquivo]))
 
     precipitacao_observada <- le_historico_verificado(file.path(pasta_entrada,arquivos[arquivo == "PRECIPITACAO_OBSERVADA", nome_arquivo]))[posto %in% postos_plu$posto]
 

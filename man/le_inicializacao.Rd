@@ -13,9 +13,8 @@ le_inicializacao(arq)
 data.table com a inicializacao com as colunas
 \itemize{
 \item{nome}{nome da sub_bacia}
-\item{Ebin}{vazao de base inicial}
-\item{Supin}{vazao superficial inicial}
-\item{Yuin}{umidade do solo inicial}
+\item{variavel}{nome da variavel}
+\item{valor}{valor da variavel}
 }
 }
 \description{

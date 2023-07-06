@@ -7,11 +7,11 @@
 rodada_encadeada_etp(
   parametros,
   inicializacao,
-  historico_precipitacao,
-  previsao_precipitacao,
-  historico_etp,
-  previsao_etp,
-  historico_vazao,
+  precipitacao_observada,
+  precipitacao_prevista,
+  evapotranspiracao_observada,
+  evapotranspiracao_prevista,
+  vazao_observada,
   postos_plu,
   datas_rodadas,
   numero_cenarios,
@@ -33,14 +33,14 @@ rodada_encadeada_etp(
 \item{valor}{valor da variavel}
 }}
 
-\item{historico_precipitacao}{data table com o historico de precipitacao com as colunas:
+\item{precipitacao_observada}{data table com o historico de precipitacao com as colunas:
 \itemize{
 \item{data}{data da observacao}
 \item{posto}{nome do posto}
 \item{valor}{valor da variavel}
 }}
 
-\item{previsao_precipitacao}{data.table com a previsao de precipitacao com as colunas:
+\item{precipitacao_prevista}{data.table com a previsao de precipitacao com as colunas:
 \itemize{
 \item{data_rodada}{data da rodada}
 \item{data_previsao}{data da previsao}
@@ -49,14 +49,14 @@ rodada_encadeada_etp(
 \item{valor}{valor da previsao}
 }}
 
-\item{historico_etp}{data.table com o historico de evapotranspiracao com as colunas:
+\item{evapotranspiracao_observada}{data.table com o historico de evapotranspiracao com as colunas:
 \itemize{
 \item{data}{data da observacao}
 \item{posto}{nome do posto}
 \item{valor}{valor da variavel}
 }}
 
-\item{previsao_etp}{data.table com a previsao de evapotranspiracao com as colunas:
+\item{evapotranspiracao_prevista}{data.table com a previsao de evapotranspiracao com as colunas:
 \itemize{
 \item{data_rodada}{data da rodada}
 \item{data_previsao}{data da previsao}
@@ -65,7 +65,7 @@ rodada_encadeada_etp(
 \item{valor}{valor da previsao}
 }}
 
-\item{historico_vazao}{data table com o historico de vazao com as colunas:
+\item{vazao_observada}{data table com o historico de vazao com as colunas:
 \itemize{
 \item{data}{data da observacao}
 \item{posto}{nome do posto}
