@@ -101,6 +101,7 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, historico_precip
     saida <- data.table::data.table()
     saida_ajuste_otimizacao <- data.table::data.table()
     saida_ajuste_assimilacao <- data.table::data.table()
+    saida_ajuste_fo <- data.table::data.table()
     saida_precipitacao <- data.table::data.table()
     for (ibacia in 1:numero_sub_bacias){
         sub_bacia <- sub_bacias[ibacia]
@@ -122,6 +123,7 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, historico_precip
             saida_bacia_aux <- data.table::data.table()
             saida_ajuste_otimizacao_aux <- data.table::data.table()
             saida_ajuste_assimilacao_aux <- data.table::data.table()
+            saida_ajuste_fo_aux <- data.table::data.table()
             
             dataRodada <- datas_rodadas[idata, data]
             numero_dias_previsao <- datas_rodadas[data == dataRodada, numero_dias_previsao]
@@ -212,13 +214,19 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, historico_precip
             saida_ajuste_assimilacao_aux[, nome := sub_bacia]
             saida_ajuste_assimilacao_aux[, data_caso := dataRodada]
             saida_ajuste_assimilacao <- rbind(saida_ajuste_assimilacao, saida_ajuste_assimilacao_aux)
+
+            saida_ajuste_fo_aux <- rbind(saida_ajuste_fo_aux, ajuste$ajuste$value)
+            colnames(saida_ajuste_fo_aux) <- "otimizacao"
+            saida_ajuste_fo_aux[, nome := sub_bacia]
+            saida_ajuste_fo_aux[, data_caso := dataRodada]
+            saida_ajuste_fo <- rbind(saida_ajuste_fo, saida_ajuste_fo_aux)
         }
     }
     saida <- melt(saida, id.vars = c("data_caso", "data_previsao", "cenario", "nome"), variable.name = "variavel",
            value.name = "valor")
     saida_ajuste_assimilacao <- melt(saida_ajuste_assimilacao, id.vars = c("data_caso", "data_assimilacao", "nome"), variable.name = "variavel",
            value.name = "valor")
-    saida <- list(previsao = saida, otimizacao = saida_ajuste_otimizacao, assimilacao = saida_ajuste_assimilacao, precipitacao = saida_precipitacao)
+    saida <- list(previsao = saida, otimizacao = saida_ajuste_otimizacao, funcao_objetivo = saida_ajuste_fo, assimilacao = saida_ajuste_assimilacao, precipitacao = saida_precipitacao)
     saida
 }
 
