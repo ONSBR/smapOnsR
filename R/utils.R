@@ -72,26 +72,21 @@ transforma_historico_previsao <- function(serie_temporal, datas_rodadas) {
     }
 
     previsao <- data.table::data.table()
-
     for (i in 1:nrow(datas_rodadas)) {
         data_rodada <- datas_rodadas$data[i]
         numero_dias_previsao <- datas_rodadas$numero_dias_previsao[i]
 
-        for (j in 1:(numero_dias_previsao + 2)){
-            data_previsao <- serie_temporal[data == (data_rodada + j), data]
-            aux <- serie_temporal[data %in% data_previsao, ]
-            colnames(aux)[1] <- "data_previsao"
-            aux[, data_rodada := data_rodada]
-            aux[, cenario := "historico"]
-            data.table::setcolorder(aux, c("data_rodada", "data_previsao", "cenario", "nome", "valor") )
+        data_previsao <- serie_temporal[data %in% seq.Date(data_rodada + 1, data_rodada + numero_dias_previsao + 2, by = 1)]
+        aux <- serie_temporal[data %in% data_previsao[, data]]
+        colnames(aux)[1] <- "data_previsao"
+        aux[, data_rodada := data_rodada]
+        aux[, cenario := "historico"]
 
-            previsao <- rbind(previsao, aux)
-        }
+        previsao <- data.table::rbindlist(list(previsao, aux))
     }
-
+    data.table::setcolorder(aux, c("data_rodada", "data_previsao", "cenario", "nome", "valor"))
     data.table::setorder(previsao, data_rodada, nome, data_previsao)
     return(previsao)
-
 }
 
 #' Combina data table observado e previsto
