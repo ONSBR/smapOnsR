@@ -52,6 +52,8 @@ assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, preci
     limite_superior <- c(rep(limite_prec[2],numero_dias), limite_ebin[2] * EbInic, limite_supin[2] * Supin)
     limite_inferior[numero_dias] <- 0.9999999999
     limite_superior[numero_dias] <- 1.0000000001
+    limites_iguais <- limite_superior == limite_inferior
+    limite_superior[limites_iguais] <- limite_inferior[limites_iguais] + 0.00000001
     vetor_variaveis <- c(pesos, EbInic, Supin)
 
     idia <- numero_dias:1
@@ -182,10 +184,12 @@ assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Su
 
     pesos_prec <- rep(1, numero_dias)
     pesos_etp <- rep(1, numero_dias)
-    limite_inferior <- c(rep(limite_prec[1],numero_dias), rep(limite_etp[1],numero_dias), limite_ebin[1] * EbInic, limite_supin[1] * Supin)
-    limite_superior <- c(rep(limite_prec[2],numero_dias), rep(limite_etp[2],numero_dias), limite_ebin[2] * EbInic, limite_supin[2] * Supin)
+    limite_inferior <- c(rep(limite_prec[1], numero_dias), rep(limite_etp[1], numero_dias), limite_ebin[1] * EbInic, limite_supin[1] * Supin)
+    limite_superior <- c(rep(limite_prec[2], numero_dias), rep(limite_etp[2], numero_dias), limite_ebin[2] * EbInic, limite_supin[2] * Supin)
     limite_inferior[numero_dias] <- 0.9999999999
     limite_superior[numero_dias] <- 1.0000000001
+    limites_iguais <- limite_superior == limite_inferior
+    limite_superior[limites_iguais] <- limite_inferior[limites_iguais] + 0.00000001
     vetor_variaveis <- c(pesos_prec, pesos_etp, EbInic, Supin)
 
     idia <- numero_dias:1
