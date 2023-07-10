@@ -189,7 +189,7 @@ le_arquivos <- function(pasta_entrada) {
 le_postos_plu <- function(arq) {
 
     if (!file.exists(arq)) {
-        stop("nao existe o arquivo do tipo arquivos.csv")
+        stop(paste0("nao existe o arquivo ", arq))
     }
 
     dat <- data.table::fread(arq)
@@ -199,6 +199,34 @@ le_postos_plu <- function(arq) {
     }
 
     dat[, nome := tolower(nome)]
+
+    dat
+}
+
+#' Leitura de csv com NC de evapotranspiracao
+#' 
+#' Le arquivo csv contendo as normais climatologias evapotranspiracao utilizado no aplicativo SMAP/ONS
+#' 
+#' @param arq nome do arquivo contendo a relacao de postos plu x sub-bacia
+#' @importFrom  data.table fread setcolorder
+#' @return data.table evapotranspiracao com as colunas
+#'     \itemize{
+#'     \item{mes}{mes da NC}
+#'     \item{posto}{nome do posto}
+#'     \item{valor}{valor da NC de evapotranspiracao observada}
+#'     }
+#' @export
+le_evapotranspiracao_nc <- function(arq) {
+
+    if (missing("arq")) {
+        stop(paste0("nao existe o arquivo ", arq))
+    }
+
+    dat <- data.table::fread(arq)
+    dat
+
+    colnames(dat) <- c("mes", "valor", "nome")
+    data.table::setcolorder(dat, c("mes", "nome", "valor"))
 
     dat
 }
@@ -227,22 +255,41 @@ le_arq_entrada_novo <- function(pasta_entrada){
     precipitacao_observada <- le_historico_verificado(file.path(pasta_entrada,arquivos[arquivo == "PRECIPITACAO_OBSERVADA", nome_arquivo]))[posto %in% postos_plu$posto]
 
     inicializacao <-  le_inicializacao(file.path(pasta_entrada,arquivos[arquivo == "INICIALIZACAO", nome_arquivo]))[nome %in% sub_bacias$nome]
-
+    inicializacao[variavel == "Tuin", valor := valor / 100] 
+    
     datas_rodadas <- le_datas_rodada(file.path(pasta_entrada,arquivos[arquivo == "DATAS_RODADAS", nome_arquivo]))
 
     precipitacao_observada <- data.table::rbindlist(lapply(sub_bacias$nome, function(sub_bacia) {
   ponderacao_espacial(precipitacao_observada, postos_plu[nome %in% sub_bacia])
         }))
 
-    precipitacao_prevista <- data.table::copy(precipitacao_observada)
-    colnames(precipitacao_prevista)[2] <- "nome"
-    precipitacao_prevista <- transforma_historico_previsao(precipitacao_prevista, datas_rodadas)
+    bool_precipitacao_prevista <- any(arquivos[, arquivo] == "PRECIPITACAO_PREVISTA")
+    if (!bool_precipitacao_prevista){
+        print("nao existe arquivo de previsao de precipitacao, serao utilizados dados historicos")
 
-    datas_rodadas[, numero_dias_previsao := (numero_dias_previsao - 2)]
-    evapotranspiracao_prevista <- data.table::copy(evapotranspiracao_observada)
-    colnames(evapotranspiracao_prevista)[2] <- "nome"
-    evapotranspiracao_prevista <- transforma_historico_previsao(evapotranspiracao_prevista, datas_rodadas)
-    datas_rodadas[, numero_dias_previsao := (numero_dias_previsao + 2)]
+        precipitacao_prevista <- data.table::copy(precipitacao_observada)
+        colnames(precipitacao_prevista)[2] <- "nome"
+        precipitacao_prevista <- transforma_historico_previsao(precipitacao_prevista, datas_rodadas)
+    }
+
+    bool_nc_evapotranspiracao <- any(arquivos[, arquivo] == "EVAPOTRANSPIRACAO_NC")
+    bool_evapotranspiracao_prevista <- any(arquivos[, arquivo] == "EVAPOTRANSPIRACAO_PREVISTA")
+
+    if (bool_nc_evapotranspiracao) {
+
+    } else {
+        if (bool_evapotranspiracao_prevista) {
+
+        } else {
+            print("nao existe arquivo de previsao de evapotranspiracao, serao utilizados dados historicos")
+            
+            datas_rodadas[, numero_dias_previsao := (numero_dias_previsao - 2)]
+            evapotranspiracao_prevista <- data.table::copy(evapotranspiracao_observada)
+            colnames(evapotranspiracao_prevista)[2] <- "nome"
+            evapotranspiracao_prevista <- transforma_historico_previsao(evapotranspiracao_prevista, datas_rodadas)
+            datas_rodadas[, numero_dias_previsao := (numero_dias_previsao + 2)]
+        }
+    }
 
     saida <- list(sub_bacias = sub_bacias, vazao_observada = vazao_observada, evapotranspiracao_observada = evapotranspiracao_observada,
     postos_plu = postos_plu, precipitacao_observada = precipitacao_observada, inicializacao = inicializacao,

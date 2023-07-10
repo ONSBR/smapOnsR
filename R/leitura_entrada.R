@@ -761,7 +761,8 @@ le_arq_entrada <- function(pasta_entrada) {
   result <- le_entrada_inicializacao(pasta_entrada, sub_bacia)
   result[[1]]
         }))
-
+    inicializacao[variavel == "Tuin", valor := valor / 100] 
+    
     datas_rodadas <- data.table::rbindlist(lapply(caso$nome_subbacia, function(sub_bacia) {
   result <- le_entrada_inicializacao(pasta_entrada, sub_bacia)
   result[[2]]
