@@ -18,7 +18,7 @@ assimilacao_evapotranspiracao(
   limite_prec = c(0.5, 2),
   limite_etp = c(0.5, 2),
   limite_ebin = c(0.8, 1.2),
-  limite_supin = c(0, 2)
+  limite_supin = c(1e-06, 2)
 )
 }
 \arguments{
