@@ -12,7 +12,7 @@ test_that("testa rodada 2 dias SMAP/ONS", {
                        "Es", "Er", "Rec", "Marg", "Ed", "Ed2", "Ed3",
                        "Eb", "Tu"))
   expect_equal(as.numeric(saida[1, 1]), 1100)
-  expect_equal(as.numeric(saida[[2]][2, 1]), 1065.9265)
+  expect_equal(as.numeric(saida[2, 1]), 1065.9265)
 })
 
 test_that("testa rodada 2 dias SMAP/ONS rotina cpp", {
@@ -31,7 +31,7 @@ test_that("testa rodada 2 dias SMAP/ONS rotina cpp", {
                        "Es", "Er", "Rec", "Marg", "Ed", "Ed2", "Ed3",
                        "Eb", "Tu"))
   expect_equal(as.numeric(saida[1, 1]), 1100)
-  expect_equal(as.numeric(saida[[2]][2, 1]), 1065.9265)
+  expect_equal(as.numeric(saida[2, 1]), 1065.9265)
 })
 
 test_that("testa rodada 2 dias e 2 cenarios SMAP/ONS rotina cpp", {
