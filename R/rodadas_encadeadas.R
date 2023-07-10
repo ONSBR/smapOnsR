@@ -200,7 +200,7 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, historico_precip
             vetor_inicializacao[, 6] <- ajuste$simulacao[numero_dias_assimilacao, Rsup]
             vetor_inicializacao[, 7] <- ajuste$simulacao[numero_dias_assimilacao, Rsub]
             
-            simulacao <- rodada_cenarios_dias_cpp(vetor_modelo,
+            simulacao <- funcaoSmapCpp::rodada_cenarios_dias_cpp2(vetor_modelo,
             vetor_inicializacao, area, matriz_precipitacao,
             matriz_evapotranspiracao, matriz_evapotranspiracao_planicie, numero_dias_previsao, numero_cenarios)
 
@@ -428,7 +428,7 @@ rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observa
             vetor_inicializacao[, 6] <- ajuste$simulacao[numero_dias_assimilacao, Rsup]
             vetor_inicializacao[, 7] <- ajuste$simulacao[numero_dias_assimilacao, Rsub]
             
-            simulacao <- rodada_cenarios_dias_cpp(vetor_modelo,
+            simulacao <- funcaoSmapCpp::rodada_cenarios_dias_cpp2(vetor_modelo,
             vetor_inicializacao, area, matriz_precipitacao,
             matriz_evapotranspiracao, matriz_evapotranspiracao_planicie, numero_dias_previsao, numero_cenarios)
 
