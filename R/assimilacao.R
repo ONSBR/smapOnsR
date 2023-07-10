@@ -24,6 +24,7 @@
 #' @param limite_ebin limites mínimo e máximo da vazao de base inicial
 #' @param limite_supin limites mínimo e máximo da vazao superficial inicial
 #'
+#' @importFrom funcaoSmapCpp rodada_varios_dias_cpp2
 #' @return ajuste lista contendo
 #' \itemize{
 #'     \item{par}{parametros otimizados send}
@@ -76,12 +77,15 @@ assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, preci
 
   EbInic <- ajuste$par[numero_dias + 1]
   Supin <- ajuste$par[numero_dias + 2]
+  if (Supin < 0) { #L-BFGS-B as vezes fornece valor negativo próximo a 0 ('-1e-17')
+    Supin <- 0
+  }
   inicializacao <- inicializacao_smap(vetor_modelo, area, EbInic, TuInic, Supin)
   vetor_inicializacao <- unlist(inicializacao)
 
   precipitacao_ponderada <- precipitacao_ponderada * ajuste$par[1:numero_dias]
 
-  simulacao <- rodada_varios_dias_cpp(vetor_modelo,
+  simulacao <- funcaoSmapCpp::rodada_varios_dias_cpp2(vetor_modelo,
             vetor_inicializacao, area, precipitacao_ponderada,
             evapotranspiracao, evapotranspiracao_planicie, numero_dias)
 
@@ -119,12 +123,15 @@ funcao_objetivo_assimilacao_oficial <- function(vetor_variaveis, vetor_modelo, T
 
   EbInic <- vetor_variaveis[numero_dias + 1]
   Supin <- vetor_variaveis[numero_dias + 2]
+  if (Supin < 0) { #L-BFGS-B as vezes fornece valor negativo próximo a 0 ('-1e-17')
+    Supin <- 0
+  }
   inicializacao <- inicializacao_smap(vetor_modelo, area, EbInic, TuInic, Supin)
   vetor_inicializacao <- unlist(inicializacao)
 
   precipitacao_ponderada <- precipitacao_ponderada * vetor_variaveis[1:numero_dias]
 
-  simulacao <- rodada_varios_dias_cpp(vetor_modelo,
+  simulacao <- funcaoSmapCpp::rodada_varios_dias_cpp2(vetor_modelo,
             vetor_inicializacao, area, precipitacao_ponderada,
             evapotranspiracao, evapotranspiracao_planicie, numero_dias)
 
@@ -189,7 +196,7 @@ assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Su
     limite_inferior[numero_dias] <- 0.9999999999
     limite_superior[numero_dias] <- 1.0000000001
     limites_iguais <- limite_superior == limite_inferior
-    limite_superior[limites_iguais] <- limite_inferior[limites_iguais] + 0.00000001
+    limite_superior[limites_iguais] <- limite_inferior[limites_iguais] + 0.000001
     vetor_variaveis <- c(pesos_prec, pesos_etp, EbInic, Supin)
 
     idia <- numero_dias:1
@@ -212,6 +219,9 @@ assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Su
     
     EbInic <- ajuste$par[numero_dias * 2 + 1]
     Supin <- ajuste$par[numero_dias * 2 + 2]
+    if (Supin < 0) { #L-BFGS-B as vezes fornece valor negativo próximo a 0 ('-1e-17')
+      Supin <- 0
+    }
     inicializacao <- inicializacao_smap(vetor_modelo, area, EbInic, TuInic, Supin)
     vetor_inicializacao <- unlist(inicializacao)
 
@@ -219,7 +229,7 @@ assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Su
     evapotranspiracao_ponderada <- evapotranspiracao * ajuste$par[(1:numero_dias) * 2]
     evapotranspiracao_evapotranspiracao_planicie_ponderada <- evapotranspiracao_planicie * ajuste$par[(1:numero_dias) * 2]
 
-    simulacao <- rodada_varios_dias_cpp(vetor_modelo,
+    simulacao <- funcaoSmapCpp::rodada_varios_dias_cpp2(vetor_modelo,
               vetor_inicializacao, area, precipitacao_ponderada,
               evapotranspiracao_ponderada, evapotranspiracao_evapotranspiracao_planicie_ponderada, numero_dias)
 
@@ -257,6 +267,9 @@ funcao_objetivo_assimilacao_evapotranspiracao <- function(vetor_variaveis, vetor
 
   EbInic <- vetor_variaveis[numero_dias * 2 + 1]
   Supin <- vetor_variaveis[numero_dias * 2 + 2]
+  if (Supin < 0) { #L-BFGS-B as vezes fornece valor negativo próximo a 0 ('-1e-17')
+    Supin <- 0
+  }
   inicializacao <- inicializacao_smap(vetor_modelo, area, EbInic, TuInic, Supin)
   vetor_inicializacao <- unlist(inicializacao)
 
@@ -265,7 +278,7 @@ funcao_objetivo_assimilacao_evapotranspiracao <- function(vetor_variaveis, vetor
   evapotranspiracao <- evapotranspiracao * vetor_variaveis[2 * (1:numero_dias)]
   evapotranspiracao_planicie <- evapotranspiracao_planicie * vetor_variaveis[2 * (1:numero_dias)]
 
-  simulacao <- rodada_varios_dias_cpp(vetor_modelo,
+  simulacao <- funcaoSmapCpp::rodada_varios_dias_cpp2(vetor_modelo,
             vetor_inicializacao, area, precipitacao_ponderada,
             evapotranspiracao, evapotranspiracao_planicie, numero_dias)
 

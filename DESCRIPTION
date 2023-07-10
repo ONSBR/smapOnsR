@@ -14,7 +14,8 @@ Depends:
 Imports:
     Rcpp,
     data.table,
-    lubridate
+    lubridate,
+    funcaoSmapCpp
 LazyData: true
 Suggests: 
     testthat (>= 3.0.0)
