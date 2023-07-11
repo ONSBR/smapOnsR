@@ -41,8 +41,8 @@ assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, preci
       limite_supin = c(0, 2)){
     
     kt <- vetor_modelo[12:74]
-    kt_max <- sum(kt[1:2] > 0)
-    kt_min <- sum(kt[4:63] > 0)
+    kt_max <- max(which(kt[3:1] > 0)) - 1
+    kt_min <- max(which(kt[3:63] > 0)) - 1
     precipitacao_ponderada <- data.table::data.table(precipitacao)
     precipitacao_ponderada[, valor := valor * vetor_modelo[75]]
     precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada[, valor], kt,
@@ -182,8 +182,8 @@ assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Su
       limite_supin = c(0, 2)){
     
     kt <- vetor_modelo[12:74]
-    kt_max <- sum(kt[1:2] > 0)
-    kt_min <- sum(kt[4:63] > 0)
+    kt_max <- max(which(kt[3:1] > 0)) - 1
+    kt_min <- max(which(kt[3:63] > 0)) - 1
     precipitacao_ponderada <- data.table::data.table(precipitacao)
     precipitacao_ponderada[, valor := valor * vetor_modelo[75]]
     precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada[, valor], kt,

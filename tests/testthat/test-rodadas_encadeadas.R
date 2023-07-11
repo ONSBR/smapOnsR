@@ -38,10 +38,10 @@ test_that("testa rodada ecmwf", {
 
   #parametros <- entrada$parametros
   #inicializacao <- entrada$inicializacao
-  #historico_precipitacao <- entrada$precipitacao
-  #    previsao_precipitacao <- entrada$previsao_precipitacao
-  #    historico_etp_NC <-entrada$evapotranspiracao
-  #      historico_vazao <- entrada$vazao
+  #precipitacao_observada <- entrada$precipitacao
+  #    precipitacao_prevista <- entrada$previsao_precipitacao
+  #    evapotranspiracao_nc <-entrada$evapotranspiracao
+  #      vazao_observada <- entrada$vazao
   #      postos_plu <- entrada$postos_plu
   #      datas_rodadas <- entrada$datas_rodadas
   #    numero_cenarios <- length(unique(entrada$previsao_precipitacao[, cenario]))
