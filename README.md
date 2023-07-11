@@ -18,6 +18,14 @@ deve ser instalado diretamente a partir do repositorio utilizando:
 devtools::install_github("felipe-treistman/smapOnsR")
 ```
 
+Por questões de paralelismo a funcao principal está separada em um
+pacote a parte, sendo necessária a sua instalação:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("felipe-treistman/funcaoSmapCpp")
+```
+
 ## Exemplo
 
 Exemplo de como realizar o ajuste da transformação censurada latente
