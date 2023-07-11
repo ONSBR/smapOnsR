@@ -14,13 +14,13 @@
 #'     \item{variavel}{vazao de base inicial}
 #'     \item{valor}{valor da variavel}
 #'     }
-#' @param historico_precipitacao data table com o historico de precipitacao com as colunas:
+#' @param precipitacao_observada data table com o historico de precipitacao com as colunas:
 #'     \itemize{
 #'     \item{data}{data da observacao}
 #'     \item{posto}{nome do posto}
 #'     \item{valor}{valor da variavel}
 #'     }
-#' @param previsao_precipitacao data.table com a previsao de precipitacao com as colunas:
+#' @param precipitacao_prevista data.table com a previsao de precipitacao com as colunas:
 #'     \itemize{
 #'     \item{data_rodada}{data da rodada}
 #'     \item{data_previsao}{data da previsao}
@@ -28,13 +28,13 @@
 #'     \item{posto}{nome do posto}
 #'     \item{valor}{valor da previsao}
 #'     }
-#' @param historico_etp_NC data.table com o historico de NC deevapotranspiracao com as colunas:
+#' @param evapotranspiracao_nc data.table com o historico de NC deevapotranspiracao com as colunas:
 #'     \itemize{
 #'     \item{mes}{mes da NC}
 #'     \item{posto}{nome do posto}
 #'     \item{valor}{valor da NC de evapotranspiracao observada}
 #'     }
-#' @param historico_vazao data table com o historico de vazao com as colunas:
+#' @param vazao_observada data table com o historico de vazao com as colunas:
 #'     \itemize{
 #'     \item{data}{data da observacao}
 #'     \item{posto}{nome do posto}
@@ -89,14 +89,14 @@
 #'     }
 #' @export
 #' 
-rodada_encadeada_oficial <- function(parametros, inicializacao, historico_precipitacao, 
-    previsao_precipitacao, historico_etp_NC, historico_vazao, postos_plu, datas_rodadas, 
+rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_observada, 
+    precipitacao_prevista, evapotranspiracao_nc, vazao_observada, postos_plu, datas_rodadas, 
     numero_cenarios, sub_bacias) {
-    
+
     numero_sub_bacias <- length(sub_bacias)
     numero_datas <- nrow(datas_rodadas)
     numero_dias_previsao <- datas_rodadas$numero_dias_previsao
-    nome_cenario <- unique(previsao_precipitacao[, cenario])
+    nome_cenario <- unique(precipitacao_prevista[, cenario])
 
     saida <- data.table::data.table()
     saida_ajuste_otimizacao <- data.table::data.table()
@@ -128,16 +128,15 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, historico_precip
             matriz_evapotranspiracao <- array(rep(0, numero_cenarios * numero_dias_previsao), c(numero_cenarios, numero_dias_previsao))
             matriz_evapotranspiracao_planicie <- array(rep(0, numero_cenarios * numero_dias_previsao), c(numero_cenarios, numero_dias_previsao))
 
-            vazao <- historico_vazao[data < dataRodada & data >= (dataRodada - numero_dias_assimilacao) 
+            vazao <- vazao_observada[data < dataRodada & data >= (dataRodada - numero_dias_assimilacao) 
                           & posto == sub_bacia, valor]
                           
-            normal_climatologica <- historico_etp_NC[nome == sub_bacia]
+            normal_climatologica <- evapotranspiracao_nc[nome == sub_bacia]
 
-            precipitacao_observada <- historico_precipitacao[nome == sub_bacia &
-            data <= dataRodada & data >= (dataRodada - numero_dias_assimilacao - kt_min)]
-            previsao_rodada <- previsao_precipitacao[nome == sub_bacia & data_rodada == dataRodada]
+            precipitacao <- data.table::data.table(precipitacao_observada[nome == sub_bacia &
+            data <= dataRodada & data >= (dataRodada - numero_dias_assimilacao - kt_min)])
+            previsao_rodada <- precipitacao_prevista[nome == sub_bacia & data_rodada == dataRodada]
 
-            precipitacao <- data.table::data.table(precipitacao_observada)
             precipitacao[, data_rodada := dataRodada]
             precipitacao <- combina_observacao_previsao(precipitacao, previsao_rodada)
 
@@ -152,7 +151,7 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, historico_precip
             evapotranspiracao <- evapotranspiracao[, valor] * vetor_modelo[76]
 
             ajuste <- assimilacao_oficial(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao_assimilacao,
-                        evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias = numero_dias_assimilacao)
+                        evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias_assimilacao)
             
             ajuste$simulacao[, data_assimilacao := seq.Date((dataRodada - numero_dias_assimilacao), dataRodada - 1, 1)]
             ajuste$simulacao[, nome := sub_bacia]

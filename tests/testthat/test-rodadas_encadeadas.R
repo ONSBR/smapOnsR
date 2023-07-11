@@ -123,3 +123,19 @@ test_that("testa rodada com serie temporal etp", {
                 saida$previsao[data_previsao == "2020-05-05" & cenario == "historico", valor])
 })
 
+test_that("testa rodada com serie temporal etp", {
+    pasta_entrada <- system.file("extdata", "Arq_entrada_novo", package = "smapOnsR")
+
+    entrada <- le_arq_entrada_novo(pasta_entrada)
+    entrada$datas_rodadas <- entrada$datas_rodadas[1:3]
+    set.seed(129852)
+    sub_bacias = c("smesa", "avermelha")
+
+    saida <- rodada_encadeada_etp(entrada$parametros,
+    entrada$inicializacao, entrada$precipitacao_observada, entrada$precipitacao_prevista, entrada$evapotranspiracao_observada, 
+    entrada$evapotranspiracao_prevista, entrada$vazao_observada,
+    entrada$postos_plu, entrada$datas_rodadas, length(unique(entrada$precipitacao_prevista[, cenario])), sub_bacias)
+
+    expect_equal(saida$previsao[data_caso == "2011-01-15" & data_previsao == "2011-02-26"
+     & cenario == "historico" & variavel == "Qcalc" & nome == "smesa", valor], 1856.28992)
+})
