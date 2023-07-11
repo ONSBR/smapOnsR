@@ -225,7 +225,7 @@ le_evapotranspiracao_nc <- function(arq) {
     dat <- data.table::fread(arq)
     dat
 
-    colnames(dat) <- c("mes", "valor", "nome")
+    colnames(dat) <- c("mes", "nome", "valor")
     data.table::setcolorder(dat, c("mes", "nome", "valor"))
 
     dat
@@ -248,7 +248,21 @@ le_arq_entrada_novo <- function(pasta_entrada){
 
     vazao_observada <- le_historico_verificado(file.path(pasta_entrada,arquivos[arquivo == "VAZAO_OBSERVADA", nome_arquivo]))[posto %in% sub_bacias$nome]
 
-    evapotranspiracao_observada <- le_historico_verificado(file.path(pasta_entrada,arquivos[arquivo == "EVAPOTRANSPIRACAO_OBSERVADA", nome_arquivo]))[posto %in% sub_bacias$nome]
+    bool_nc_evapotranspiracao <- any(arquivos[, arquivo] == "EVAPOTRANSPIRACAO_NC")
+    evapotranspiracao_observada <- data.table::data.table()
+    evapotranspiracao_nc <- data.table::data.table()
+    evapotranspiracao_prevista <- data.table::data.table()
+    
+    if (bool_nc_evapotranspiracao) {
+        evapotranspiracao_observada <- data.table::data.table()
+        evapotranspiracao_nc <- le_evapotranspiracao_nc(file.path(pasta_entrada,arquivos[arquivo == "EVAPOTRANSPIRACAO_NC", nome_arquivo]))
+    }
+    
+    bool_evapotranspiracao_observada <- any(arquivos[, arquivo] == "EVAPOTRANSPIRACAO_OBSERVADA")
+
+    if (bool_evapotranspiracao_observada) {
+        evapotranspiracao_observada <- le_historico_verificado(file.path(pasta_entrada,arquivos[arquivo == "EVAPOTRANSPIRACAO_OBSERVADA", nome_arquivo]))[posto %in% sub_bacias$nome]
+    }
 
     postos_plu <- le_postos_plu(file.path(pasta_entrada, arquivos[arquivo == "POSTOS_PLUVIOMETRICOS", nome_arquivo]))
 
@@ -256,7 +270,7 @@ le_arq_entrada_novo <- function(pasta_entrada){
 
     inicializacao <-  le_inicializacao(file.path(pasta_entrada,arquivos[arquivo == "INICIALIZACAO", nome_arquivo]))[nome %in% sub_bacias$nome]
     inicializacao[variavel == "Tuin", valor := valor / 100] 
-    
+
     datas_rodadas <- le_datas_rodada(file.path(pasta_entrada,arquivos[arquivo == "DATAS_RODADAS", nome_arquivo]))
 
     precipitacao_observada <- data.table::rbindlist(lapply(sub_bacias$nome, function(sub_bacia) {
@@ -272,7 +286,6 @@ le_arq_entrada_novo <- function(pasta_entrada){
         precipitacao_prevista <- transforma_historico_previsao(precipitacao_prevista, datas_rodadas)
     }
 
-    bool_nc_evapotranspiracao <- any(arquivos[, arquivo] == "EVAPOTRANSPIRACAO_NC")
     bool_evapotranspiracao_prevista <- any(arquivos[, arquivo] == "EVAPOTRANSPIRACAO_PREVISTA")
 
     if (bool_nc_evapotranspiracao) {
@@ -294,7 +307,7 @@ le_arq_entrada_novo <- function(pasta_entrada){
     saida <- list(sub_bacias = sub_bacias, vazao_observada = vazao_observada, evapotranspiracao_observada = evapotranspiracao_observada,
     postos_plu = postos_plu, precipitacao_observada = precipitacao_observada, inicializacao = inicializacao,
     datas_rodadas = datas_rodadas, precipitacao_prevista = precipitacao_prevista, evapotranspiracao_prevista = evapotranspiracao_prevista,
-    parametros = parametros)
+    parametros = parametros, evapotranspiracao_nc = evapotranspiracao_nc)
 
     saida
 }
