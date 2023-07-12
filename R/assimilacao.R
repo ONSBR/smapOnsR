@@ -9,7 +9,7 @@
 #' @param Supin Escoamento superficial inicial
 #' @param EbInic Escoamento Subterraneo inicial
 #' @param TuInic Taxa de umidade inicial do solo
-#' @param precipitacao data table com a precipitacao a ser ponderada com as colunas
+#' @param precipitacao_assimilacao data table com a precipitacao a ser ponderada com as colunas
 #'     \itemize{
 #'     \item{data}{data da observacao}
 #'     \item{posto}{nome do posto}
@@ -35,7 +35,7 @@
 #' @export
 #' 
 
-assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao,
+assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao_assimilacao,
       evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias,
       limite_prec = c(0.5, 2), limite_ebin = c(0.8, 1.2),
       limite_supin = c(0, 2)){
@@ -43,7 +43,7 @@ assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, preci
     kt <- vetor_modelo[12:74]
     kt_max <- max(which(kt[3:1] > 0)) - 1
     kt_min <- max(which(kt[3:63] > 0)) - 1
-    precipitacao_ponderada <- data.table::data.table(precipitacao)
+    precipitacao_ponderada <- data.table::data.table(precipitacao_assimilacao)
     precipitacao_ponderada[, valor := valor * vetor_modelo[75]]
     precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada[, valor], kt,
                                                     kt_max, kt_min)
@@ -150,7 +150,7 @@ funcao_objetivo_assimilacao_oficial <- function(vetor_variaveis, vetor_modelo, T
 #' @param Supin Escoamento superficial inicial
 #' @param EbInic Escoamento Subterraneo inicial
 #' @param TuInic Taxa de umidade inicial do solo
-#' @param precipitacao data table com a precipitacao a ser ponderada com as colunas
+#' @param precipitacao_assimilacao data table com a precipitacao a ser ponderada com as colunas
 #'     \itemize{
 #'     \item{data}{data da observacao}
 #'     \item{posto}{nome do posto}
@@ -176,7 +176,7 @@ funcao_objetivo_assimilacao_oficial <- function(vetor_variaveis, vetor_modelo, T
 #' @export
 #' 
 
-assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao,
+assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao_assimilacao,
       evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias,
       limite_prec = c(0.5, 2), limite_etp = c(0.5, 2), limite_ebin = c(0.8, 1.2),
       limite_supin = c(0, 2)){
@@ -184,7 +184,7 @@ assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Su
     kt <- vetor_modelo[12:74]
     kt_max <- max(which(kt[3:1] > 0)) - 1
     kt_min <- max(which(kt[3:63] > 0)) - 1
-    precipitacao_ponderada <- data.table::data.table(precipitacao)
+    precipitacao_ponderada <- data.table::data.table(precipitacao_assimilacao)
     precipitacao_ponderada[, valor := valor * vetor_modelo[75]]
     precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada[, valor], kt,
                                                     kt_max, kt_min)

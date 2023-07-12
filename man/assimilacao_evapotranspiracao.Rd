@@ -10,7 +10,7 @@ assimilacao_evapotranspiracao(
   EbInic,
   TuInic,
   Supin,
-  precipitacao,
+  precipitacao_assimilacao,
   evapotranspiracao,
   evapotranspiracao_planicie,
   vazao,
@@ -32,7 +32,7 @@ assimilacao_evapotranspiracao(
 
 \item{Supin}{Escoamento superficial inicial}
 
-\item{precipitacao}{data table com a precipitacao a ser ponderada com as colunas
+\item{precipitacao_assimilacao}{data table com a precipitacao a ser ponderada com as colunas
 \itemize{
 \item{data}{data da observacao}
 \item{posto}{nome do posto}

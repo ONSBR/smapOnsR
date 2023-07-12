@@ -56,10 +56,10 @@ funcao_objetivo_calibracao <- function(vetor_modelo, kt_min, kt_max, area, EbIni
   evapotranspiracao_planicie_ponderada <- data.table::data.table(evapotranspiracao)
   evapotranspiracao_planicie_ponderada[, valor := valor * vetor_modelo[14]]
 
-  vetorInicializacao <- unlist(inicializacao)
+  vetor_inicializacao <- unlist(inicializacao)
 
   saida <- rodada_varios_dias_cpp(vetor_modelo,
-            vetorInicializacao, area, precipitacao_ponderada,
+            vetor_inicializacao, area, precipitacao_ponderada,
             evapotranspiracao_ponderada[, valor], evapotranspiracao_planicie_ponderada[, valor], numero_dias)
   
   dat <- data.table::data.table(saida)
