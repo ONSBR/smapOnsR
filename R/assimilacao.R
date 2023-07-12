@@ -179,7 +179,7 @@ funcao_objetivo_assimilacao_oficial <- function(vetor_variaveis, vetor_modelo, T
 assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao_assimilacao,
       evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias_assimilacao,
       limite_prec = c(0.5, 2), limite_etp = c(0.5, 2), limite_ebin = c(0.8, 1.2),
-      limite_supin = c(0, 2)){
+      limite_supin = c(0, 2)) {
     
     kt <- vetor_modelo[12:74]
     kt_max <- max(which(kt[3:1] > 0)) - 1
@@ -227,11 +227,11 @@ assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Su
 
     precipitacao_ponderada <- precipitacao_ponderada * ajuste$par[1:numero_dias_assimilacao]
     evapotranspiracao_ponderada <- evapotranspiracao * ajuste$par[(1:numero_dias_assimilacao) * 2]
-    evapotranspiracao_evapotranspiracao_planicie_ponderada <- evapotranspiracao_planicie * ajuste$par[(1:numero_dias_assimilacao) * 2]
+    evapotranspiracao_planicie <- evapotranspiracao_planicie * ajuste$par[(1:numero_dias_assimilacao) * 2]
 
     simulacao <- funcaoSmapCpp::rodada_varios_dias_cpp2(vetor_modelo,
               vetor_inicializacao, area, precipitacao_ponderada,
-              evapotranspiracao_ponderada, evapotranspiracao_evapotranspiracao_planicie_ponderada, numero_dias_assimilacao)
+              evapotranspiracao_ponderada, evapotranspiracao_planicie, numero_dias_assimilacao)
 
     simulacao <- data.table::data.table(simulacao)
 
