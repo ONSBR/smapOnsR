@@ -14,7 +14,7 @@ assimilacao_evapotranspiracao(
   evapotranspiracao,
   evapotranspiracao_planicie,
   vazao,
-  numero_dias,
+  numero_dias_assimilacao,
   limite_prec = c(0.5, 2),
   limite_etp = c(0.5, 2),
   limite_ebin = c(0.8, 1.2),
@@ -46,7 +46,7 @@ assimilacao_evapotranspiracao(
 
 \item{vazao}{vetor de vazao observada}
 
-\item{numero_dias}{numero de dias da assimilacao}
+\item{numero_dias_assimilacao}{numero de dias da assimilacao}
 
 \item{limite_prec}{limites mínimo e máximo dos pesos utilizados para ponderar a precipitacao durante a etapa de assimilacao}
 
