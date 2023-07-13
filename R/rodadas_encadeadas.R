@@ -385,7 +385,8 @@ rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observa
             evapotranspiracao <- evapotranspiracao_observada[posto == sub_bacia & data < dataRodada & data >= (dataRodada - numero_dias_assimilacao), valor] * vetor_modelo[76]
 
             ajuste <- assimilacao_evapotranspiracao(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao_assimilacao,
-                        evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias = numero_dias_assimilacao)
+                        evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias_assimilacao)
+
             ajuste$simulacao[, data_assimilacao := seq.Date((dataRodada - numero_dias_assimilacao), dataRodada - 1, 1)]
             ajuste$simulacao[, nome := sub_bacia]
             ajuste$simulacao[, data_caso := dataRodada]
