@@ -58,7 +58,7 @@ funcao_objetivo_calibracao <- function(vetor_modelo, kt_min, kt_max, area, EbIni
 
   vetor_inicializacao <- unlist(inicializacao)
 
-  saida <- rodada_varios_dias_cpp(vetor_modelo,
+  saida <- funcaoSmapCpp::rodada_varios_dias_cpp2(vetor_modelo,
             vetor_inicializacao, area, precipitacao_ponderada,
             evapotranspiracao_ponderada[, valor], evapotranspiracao_planicie_ponderada[, valor], numero_dias)
   
