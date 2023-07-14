@@ -38,7 +38,7 @@
 #'     }
 #' @export
 
-executa_caso_oficial <- function(pasta_entrada, paralelo = FALSE){
+executa_caso_oficial <- function(pasta_entrada){
     entrada <- le_arq_entrada(pasta_entrada)
 
     saida <- rodada_encadeada_oficial(entrada$parametros,
@@ -88,7 +88,7 @@ executa_caso_oficial <- function(pasta_entrada, paralelo = FALSE){
 #'     }
 #' @export
 
-executa_caso_oficial_novo <- function(pasta_entrada, paralelo = FALSE){
+executa_caso_oficial_novo <- function(pasta_entrada){
     entrada <- le_arq_entrada_novo(pasta_entrada)
 
     saida <- rodada_encadeada_oficial(entrada$parametros,
@@ -138,7 +138,7 @@ executa_caso_oficial_novo <- function(pasta_entrada, paralelo = FALSE){
 #'     }
 #' @export
 
-executa_caso_etp <- function(pasta_entrada, paralelo = FALSE){
+executa_caso_etp <- function(pasta_entrada){
     entrada <- le_arq_entrada_novo(pasta_entrada)
 
     saida <- rodada_encadeada_etp(entrada$parametros,
@@ -163,7 +163,7 @@ executa_caso_etp <- function(pasta_entrada, paralelo = FALSE){
 #              "transforma_NC_serie", "inicializacao_smap", 
 #              "calcula_dm", "calcula_nse", "calcula_mape", "rodada_encadeada_oficial"))
 #
-#numero_sub_bacias <- length(entrada$sub_bacias)
+#numero_sub_bacias <- length(entrada$sub_bacias$nome)
 #tasks <- 1:numero_sub_bacias#
 #saida <- parallel::parLapply(cl, tasks, function(ibacia) {
 #    parametros <- entrada$parametros
@@ -173,7 +173,7 @@ executa_caso_etp <- function(pasta_entrada, paralelo = FALSE){
 #    evapotranspiracao_nc <- entrada$evapotranspiracao_nc
 #    vazao_observada <- entrada$vazao_observada
 #    postos_plu <- entrada$postos_plu
-#    datas_rodadas <- entrada$datas_rodadas
+#    datas_rodadas <- entrada$datas_rodadas[1]
 #    nome_cenario <- unique(precipitacao_prevista[, cenario])
 #    numero_cenarios <- length(nome_cenario)
 #    sub_bacias <- entrada$sub_bacias$nome[ibacia]
@@ -192,21 +192,16 @@ executa_caso_etp <- function(pasta_entrada, paralelo = FALSE){
 #saida <- list(previsao = previsao, otimizacao = otimizacao, assimilacao = assimilacao, precipitacao = precipitacao,
 #    funcao_objetivo = funcao_objetivo)
 #
-
-#####RODADA paralelo ETP
+######RODADA paralelo ETP
 #entrada <- le_arq_entrada_novo(pasta_entrada)
 #
 #cores <- parallel::detectCores()
-#cl <- parallel::makeCluster(cores[1] - 1) #not to overload your computer
+##cl <- parallel::makeCluster(cores[1] - 1) #not to overload your computer
+#parallel::clusterExport(cl, c("entrada", "rodada_encadeada_etp"))
 #
-#parallel::clusterExport(cl, c("entrada",
-#              "new_modelo_smap_ons", "combina_observacao_previsao", "assimilacao_oficial",
-#              "ponderacao_temporal", "funcao_objetivo_assimilacao_oficial",
-#              "transforma_NC_serie", "inicializacao_smap", 
-#              "calcula_dm", "calcula_nse", "calcula_mape", "rodada_encadeada_etp"))
+#numero_sub_bacias <- length(entrada$sub_bacias$nome[1])
 #
-#numero_sub_bacias <- length(entrada$sub_bacias$nome)
-#tasks <- 1:numero_sub_bacias#
+#tasks <- 1:numero_sub_bacias
 #saida <- parallel::parLapply(cl, tasks, function(ibacia) {
 #    parametros <- entrada$parametros
 #    inicializacao <- entrada$inicializacao
@@ -216,14 +211,14 @@ executa_caso_etp <- function(pasta_entrada, paralelo = FALSE){
 #    evapotranspiracao_prevista <- entrada$evapotranspiracao_prevista
 #    vazao_observada <- entrada$vazao_observada
 #    postos_plu <- entrada$postos_plu
-#    datas_rodadas <- entrada$datas_rodadas
+#    datas_rodadas <- entrada$datas_rodadas[1]
 #    nome_cenario <- unique(precipitacao_prevista[, cenario])
 #    numero_cenarios <- length(nome_cenario)
 #    sub_bacias <- entrada$sub_bacias$nome[ibacia]
-#
-#    rodada_encadeada_etp(parametros, inicializacao, precipitacao_observada, 
-#            precipitacao_prevista, evapotranspiracao_observada , evapotranspiracao_prevista, vazao_observada, postos_plu, datas_rodadas, 
-#            numero_cenarios, sub_bacias)
+#    
+#    rodada_encadeada_etp(parametros, inicializacao, precipitacao_observada,
+#            precipitacao_prevista, evapotranspiracao_observada, evapotranspiracao_prevista,
+#            vazao_observada, postos_plu, datas_rodadas, numero_cenarios, sub_bacias)
 #})
 #parallel::stopCluster(cl)
 #previsao <- data.table::rbindlist(lapply(saida, "[[", "previsao"))
@@ -234,3 +229,58 @@ executa_caso_etp <- function(pasta_entrada, paralelo = FALSE){
 #
 #saida <- list(previsao = previsao, otimizacao = otimizacao, assimilacao = assimilacao, precipitacao = precipitacao,
 #    funcao_objetivo = funcao_objetivo)
+#    
+#
+#process_sub_bacia <- function(sub_bacia) {
+#  # Call rodada_encadeada_etp for the specific sub_bacia
+#  resultado <- rodada_encadeada_etp(parametros, inicializacao, precipitacao_observada,
+#                                    precipitacao_prevista, evapotranspiracao_observada,
+#                                    evapotranspiracao_prevista, vazao_observada, postos_plu,
+#                                    datas_rodadas, numero_cenarios, sub_bacia)
+#  
+#  # Return the result
+#  return(resultado)
+#}
+#
+#parametros <- entrada$parametros
+#inicializacao <- entrada$inicializacao
+#precipitacao_observada <- entrada$precipitacao_observada
+#precipitacao_prevista <- entrada$precipitacao_prevista
+#evapotranspiracao_observada <- entrada$evapotranspiracao_observada
+#evapotranspiracao_prevista <- entrada$evapotranspiracao_prevista
+#vazao_observada <- entrada$vazao_observada
+#postos_plu <- entrada$postos_plu
+#datas_rodadas <- entrada$datas_rodadas[1]
+#nome_cenario <- unique(precipitacao_prevista[, cenario])
+#numero_cenarios <- length(nome_cenario)
+#sub_bacias <- entrada$sub_bacias$nome
+## Create a cluster object with the desired number of cores/workers
+#
+#cores <- parallel::detectCores()
+#cl <- parallel::makeCluster(cores[1] - 1) #not to overload your computer
+#
+## Set up the parallel backend
+#parallel::clusterSetRNGStream(cl)
+#
+## Export the necessary variables and functions to the parallel workers
+#parallel::clusterExport(cl, c("parametros", "inicializacao", "precipitacao_observada", "precipitacao_prevista",
+#                    "evapotranspiracao_observada", "evapotranspiracao_prevista", "vazao_observada",
+#                    "postos_plu", "datas_rodadas", "numero_cenarios", 
+#                    "new_modelo_smap_ons", "combina_observacao_previsao", "assimilacao_evapotranspiracao",
+#              "ponderacao_temporal", "funcao_objetivo_assimilacao_evapotranspiracao",
+#              "transforma_NC_serie", "inicializacao_smap", 
+#              "calcula_dm", "calcula_nse", "calcula_mape", "rodada_encadeada_etp",
+#                    "process_sub_bacia"))
+#
+## Use parLapply to process each sub_bacia in parallel
+#results <- parallel::parLapply(cl, sub_bacias, process_sub_bacia)
+#
+## Stop the cluster
+#parallel::stopCluster(cl)
+#
+## Merge the results, assuming each result is a list with the same structure
+#saida <- do.call(rbind, lapply(results, "[[", "saida"))
+#saida_ajuste_otimizacao <- do.call(rbind, lapply(results, "[[", "ajuste_otimizacao"))
+#saida_ajuste_assimilacao <- do.call(rbind, lapply(results, "[[", "ajuste_assimilacao"))
+#saida_precipitacao <- do.call(rbind, lapply(results, "[[", "precipitacao"))
+#
