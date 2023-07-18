@@ -8,8 +8,6 @@
 #' @importFrom shinyjs useShinyjs
 #' @importFrom shiny observe renderPlot reactiveVal renderText updateActionButton updateNumericInput
 #' @importFrom shinyjs toggleState enable disable
-#' @importFrom smapOnsR cria_kt ponderacao_temporal inicializacao_smap funcao_objetivo_calibracao
-#' @importFrom funcaoSmapCpp rodada_varios_dias_cpp2
 #' @importFrom future future value resolved
 #' @export
 
@@ -178,17 +176,22 @@ executa_visualizador_calibracao <- function(entrada){
             precipitacao_ponderada <- precipitacao_ponderada$valor * vetor_modelo[12]
             precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada, kt, kt_max, kt_min)
             
-            evapotranspiracao_ponderada <- data.table::data.table(evapotranspiracao)
+            data_inicio_simulacao <- (min(precipitacao$data) + kt_min)
+            data_fim_simulacao <- (max(precipitacao$data) - kt_max)
+            evapotranspiracao_ponderada <- data.table::data.table(evapotranspiracao[which((evapotranspiracao$data >= data_inicio_simulacao)
+                                         & (evapotranspiracao$data <= data_fim_simulacao))])
             evapotranspiracao_ponderada <- evapotranspiracao_ponderada$valor * vetor_modelo[13]
-            evapotranspiracao_planicie_ponderada <- data.table::data.table(evapotranspiracao)
+            evapotranspiracao_planicie_ponderada <- data.table::data.table(evapotranspiracao[which((evapotranspiracao$data >= data_inicio_simulacao)
+                                         & (evapotranspiracao$data <= data_fim_simulacao))])
             evapotranspiracao_planicie_ponderada <- evapotranspiracao_planicie_ponderada$valor * vetor_modelo[14]
             
-            vetor_inicializacao <- unlist(inicializacao)
             
+            vetor_inicializacao <- unlist(inicializacao)
+            numero_dias <- length(evapotranspiracao_planicie_ponderada)
             saida <- funcaoSmapCpp::rodada_varios_dias_cpp2(vetor_modelo, vetor_inicializacao, area, precipitacao_ponderada,
                                                             evapotranspiracao_ponderada, evapotranspiracao_planicie_ponderada, numero_dias)
             saida <- data.table::data.table(saida)
-            saida$data <- evapotranspiracao$data
+            saida$data <- seq.Date(data_inicio_simulacao, data_fim_simulacao, by = 1)
             saida <- data.table::melt(saida, id.vars = c("data"), variable.name = "variavel",
                                     value.name = "valor")
             entrada$saida <- saida
@@ -245,20 +248,14 @@ executa_visualizador_calibracao <- function(entrada){
             
             inicializacao <- inicializacao_smap(vetor_modelo, area, EbInic, TuInic, Supin)
             
-            precipitacao_ponderada <- data.table::data.table(precipitacao)
-            precipitacao_ponderada <- precipitacao_ponderada$valor * vetor_modelo[12]
-            precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada, kt, kt_max, kt_min)
-            
-            evapotranspiracao_ponderada <- data.table::data.table(evapotranspiracao)
-            evapotranspiracao_ponderada <- evapotranspiracao_ponderada$valor * vetor_modelo[13]
-            evapotranspiracao_planicie_ponderada <- data.table::data.table(evapotranspiracao)
-            evapotranspiracao_planicie_ponderada <- evapotranspiracao_planicie_ponderada$valor * vetor_modelo[14]
+            evapotranspiracao_fo <- data.table::data.table(evapotranspiracao[which((evapotranspiracao$data >= (min(precipitacao$data) + kt_min))
+                                         & (evapotranspiracao$data <= (max(precipitacao$data) - kt_max)))])
             
             vazao_fo <- vazao[which((vazao$data >= data_inicio_objetivo) & (vazao$data <= data_fim_objetivo))]
 
             vetor_inicializacao <- unlist(inicializacao)
             funcao_objetivo <- funcao_objetivo_calibracao(vetor_modelo, kt_min, kt_max, area, EbInic, TuInic, Supin, precipitacao,
-                                                                evapotranspiracao, vazao_fo, data_inicio_objetivo, data_fim_objetivo)
+                                                                evapotranspiracao_fo, vazao_fo, data_inicio_objetivo, data_fim_objetivo)
             paste0("funcao objetivo = ", funcao_objetivo)
         })
 
@@ -318,6 +315,8 @@ executa_visualizador_calibracao <- function(entrada){
             data_fim_objetivo <- input$periodo_calibracao[2]
             kt_max <- input$kt_max
             kt_min <- input$kt_min
+            evapotranspiracao_fo <- data.table::data.table(evapotranspiracao[which((evapotranspiracao$data >= (min(precipitacao$data) + kt_min))
+                                         & (evapotranspiracao$data <= (max(precipitacao$data) - kt_max)))])
 
             vazao_fo <- vazao[which((vazao$data >= data_inicio_objetivo) & (vazao$data <= data_fim_objetivo))]
 
@@ -329,14 +328,12 @@ executa_visualizador_calibracao <- function(entrada){
             # Execute the long-running function asynchronously
             par <- future::future({
                 calibracao(vetor_modelo,  kt_min, kt_max, area, EbInic, TuInic, Supin, precipitacao,
-                                    evapotranspiracao, vazao_fo, data_inicio_objetivo, data_fim_objetivo,
+                                    evapotranspiracao_fo, vazao_fo, data_inicio_objetivo, data_fim_objetivo,
                                     limite_inferior, limite_superior)
             })
             
             shiny::observe({
             if (future::resolved(par)) {
-                
-                # Enable the run button again
                 shiny::updateNumericInput(session, "str", value = as.numeric(future::value(par)$par[1]))
                 shiny::updateNumericInput(session, "k2t", value = as.numeric(future::value(par)$par[2]))
                 shiny::updateNumericInput(session, "crec", value = as.numeric(future::value(par)$par[3]))
@@ -354,7 +351,6 @@ executa_visualizador_calibracao <- function(entrada){
                 shiny::updateNumericInput(session, "alfa", value = as.numeric(future::value(par)$par[15]))
                 shiny::updateNumericInput(session, "beta", value = as.numeric(future::value(par)$par[16]))
                 
-                # Enable the run button again
                 disable_button(FALSE)
                 shinyjs::enable("botao_calibracao")
                 shiny::updateActionButton(session, "botao_calibracao", label = "Calibrar")
