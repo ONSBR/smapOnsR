@@ -2,7 +2,6 @@
 #' 
 #' Ferramenta de visualizacao de calibracao do modelo smap/ons
 #'
-#' @param entrada lista com 
 #' @importFrom shiny fluidPage titlePanel sidebarPanel fluidRow column h2 h3 numericInput 
 #' mainPanel plotOutput textOutput actionButton dateRangeInput checkboxGroupInput brushOpts shinyApp
 #' @importFrom shinyjs useShinyjs
@@ -12,7 +11,7 @@
 #' @importFrom DT renderDataTable dataTableOutput
 #' @export
 
-executa_visualizador_calibracao <- function(entrada){
+executa_visualizador_calibracao <- function(){
     
     ui_calibracao <- shiny::fluidPage(
         shinyjs::useShinyjs(),
@@ -42,65 +41,65 @@ executa_visualizador_calibracao <- function(entrada){
                         shiny::hr(),
                         shiny::fluidRow(
                             shiny::column(4, 
-                                shiny::h3("Limite Inferior"), shiny::numericInput(inputId = "limite_inferior_str", label = "LI str",value = entrada$limite_inferior[1]),
-                                shiny::numericInput(inputId = "limite_inferior_k2t", label = "LI k2t",value = entrada$limite_inferior[2]),
-                                shiny::numericInput(inputId = "limite_inferior_crec", label = "LI crec",value = entrada$limite_inferior[3]),
-                                shiny::numericInput(inputId = "limite_inferior_capc", label = "LI capc",value = entrada$limite_inferior[4]),
-                                shiny::numericInput(inputId = "limite_inferior_k_kt", label = "LI k_kt",value = entrada$limite_inferior[5]),
-                                shiny::numericInput(inputId = "limite_inferior_h1", label = "LI h1",value = entrada$limite_inferior[6]),
-                                shiny::numericInput(inputId = "limite_inferior_k2t2", label = "LI k2t2",value = entrada$limite_inferior[7]),
-                                shiny::numericInput(inputId = "limite_inferior_ai", label = "LI ai",value = entrada$limite_inferior[8]),
-                                shiny::numericInput(inputId = "limite_inferior_h", label = "LI h",value = entrada$limite_inferior[9]),
-                                shiny::numericInput(inputId = "limite_inferior_k1t", label = "LI k1t",value = entrada$limite_inferior[10]),
-                                shiny::numericInput(inputId = "limite_inferior_k3t", label = "LI k3t",value = entrada$limite_inferior[11]),
-                                shiny::numericInput(inputId = "limite_inferior_pcof", label = "LI pcof",value = entrada$limite_inferior[12]),
-                                shiny::numericInput(inputId = "limite_inferior_ecof", label = "LI ecof",value = entrada$limite_inferior[13]),
-                                shiny::numericInput(inputId = "limite_inferior_ecof2", label = "LI ecof2",value = entrada$limite_inferior[14]),
-                                shiny::numericInput(inputId = "limite_inferior_alfa", label = "LI alfa",value = entrada$limite_inferior[15]),
-                                shiny::numericInput(inputId = "limite_inferior_beta", label = "LI beta",value = entrada$limite_inferior[16]),
-                                shiny::numericInput(inputId = "kt_max", label = "kt máx",value = entrada$kt_max)
+                                shiny::h3("Limite Inferior"), shiny::numericInput(inputId = "limite_inferior_str", label = "LI str",value = NULL),
+                                shiny::numericInput(inputId = "limite_inferior_k2t", label = "LI k2t",value = NULL),
+                                shiny::numericInput(inputId = "limite_inferior_crec", label = "LI crec",value = NULL),
+                                shiny::numericInput(inputId = "limite_inferior_capc", label = "LI capc",value = NULL),
+                                shiny::numericInput(inputId = "limite_inferior_k_kt", label = "LI k_kt",value = NULL),
+                                shiny::numericInput(inputId = "limite_inferior_h1", label = "LI h1",value = NULL),
+                                shiny::numericInput(inputId = "limite_inferior_k2t2", label = "LI k2t2",value = NULL),
+                                shiny::numericInput(inputId = "limite_inferior_ai", label = "LI ai",value = NULL),
+                                shiny::numericInput(inputId = "limite_inferior_h", label = "LI h",value = NULL),
+                                shiny::numericInput(inputId = "limite_inferior_k1t", label = "LI k1t",value = NULL),
+                                shiny::numericInput(inputId = "limite_inferior_k3t", label = "LI k3t",value = NULL),
+                                shiny::numericInput(inputId = "limite_inferior_pcof", label = "LI pcof",value = NULL),
+                                shiny::numericInput(inputId = "limite_inferior_ecof", label = "LI ecof",value = NULL),
+                                shiny::numericInput(inputId = "limite_inferior_ecof2", label = "LI ecof2",value = NULL),
+                                shiny::numericInput(inputId = "limite_inferior_alfa", label = "LI alfa",value = NULL),
+                                shiny::numericInput(inputId = "limite_inferior_beta", label = "LI beta",value = NULL),
+                                shiny::numericInput(inputId = "kt_max", label = "kt máx",value = NULL)
                             ),
                             shiny::column(3, 
                             shiny::h3("Variáveis"), shiny::numericInput(inputId = "str", label = "str",value = NULL),
-                                        shiny::numericInput(inputId = "k2t", label = "k2t",value = entrada$vetor_modelo[2]),
-                                        shiny::numericInput(inputId = "crec", label = "crec",value = entrada$vetor_modelo[3]),
-                                        shiny::numericInput(inputId = "capc", label = "capc",value = entrada$vetor_modelo[4]),
-                                        shiny::numericInput(inputId = "k_kt", label = "k_kt",value = entrada$vetor_modelo[5]),
-                                        shiny::numericInput(inputId = "h1", label = "h1",value = entrada$vetor_modelo[6]),
-                                        shiny::numericInput(inputId = "k2t2", label = "k2t2",value = entrada$vetor_modelo[7]),
-                                        shiny::numericInput(inputId = "ai", label = "ai",value = entrada$vetor_modelo[8]),
-                                        shiny::numericInput(inputId = "h", label = "h",value = entrada$vetor_modelo[9]),
-                                        shiny::numericInput(inputId = "k1t", label = "k1t",value = entrada$vetor_modelo[10]),
-                                        shiny::numericInput(inputId = "k3t", label = "k3t",value = entrada$vetor_modelo[11]),
-                                        shiny::numericInput(inputId = "pcof", label = "pcof",value = entrada$vetor_modelo[12]),
-                                        shiny::numericInput(inputId = "ecof", label = "ecof",value = entrada$vetor_modelo[13]),
-                                        shiny::numericInput(inputId = "ecof2", label = "ecof2",value = entrada$vetor_modelo[14]),
-                                        shiny::numericInput(inputId = "alfa", label = "alfa",value = entrada$vetor_modelo[15]),
-                                        shiny::numericInput(inputId = "beta", label = "beta",value = entrada$vetor_modelo[16]),
-                                        shiny::numericInput(inputId = "kt_min", label = "kt mín",value = entrada$kt_min)
+                                        shiny::numericInput(inputId = "k2t", label = "k2t",value = NULL),
+                                        shiny::numericInput(inputId = "crec", label = "crec",value = NULL),
+                                        shiny::numericInput(inputId = "capc", label = "capc",value = NULL),
+                                        shiny::numericInput(inputId = "k_kt", label = "k_kt",value = NULL),
+                                        shiny::numericInput(inputId = "h1", label = "h1",value = NULL),
+                                        shiny::numericInput(inputId = "k2t2", label = "k2t2",value = NULL),
+                                        shiny::numericInput(inputId = "ai", label = "ai",value = NULL),
+                                        shiny::numericInput(inputId = "h", label = "h",value = NULL),
+                                        shiny::numericInput(inputId = "k1t", label = "k1t",value = NULL),
+                                        shiny::numericInput(inputId = "k3t", label = "k3t",value = NULL),
+                                        shiny::numericInput(inputId = "pcof", label = "pcof",value = NULL),
+                                        shiny::numericInput(inputId = "ecof", label = "ecof",value = NULL),
+                                        shiny::numericInput(inputId = "ecof2", label = "ecof2",value = NULL),
+                                        shiny::numericInput(inputId = "alfa", label = "alfa",value = NULL),
+                                        shiny::numericInput(inputId = "beta", label = "beta",value = NULL),
+                                        shiny::numericInput(inputId = "kt_min", label = "kt mín",value = NULL)
                             ),
                             shiny::column(4, 
-                            shiny::h3("Limite Superior"), shiny::numericInput(inputId = "limite_superior_str", label = "LS str",value = entrada$limite_superior[1]),
-                                        shiny::numericInput(inputId = "limite_superior_k2t", label = "LS k2t",value = entrada$limite_superior[2]),
-                                        shiny::numericInput(inputId = "limite_superior_crec", label = "LS crec",value = entrada$limite_superior[3]),
-                                        shiny::numericInput(inputId = "limite_superior_capc", label = "LS capc",value = entrada$limite_superior[4]),
-                                        shiny::numericInput(inputId = "limite_superior_k_kt", label = "LS k_kt",value = entrada$limite_superior[5]),
-                                        shiny::numericInput(inputId = "limite_superior_h1", label = "LS h1",value = entrada$limite_superior[6]),
-                                        shiny::numericInput(inputId = "limite_superior_k2t2", label = "LS k2t2",value = entrada$limite_superior[7]),
-                                        shiny::numericInput(inputId = "limite_superior_ai", label = "LS ai",value = entrada$limite_superior[8]),
-                                        shiny::numericInput(inputId = "limite_superior_h", label = "LS h",value = entrada$limite_superior[9]),
-                                        shiny::numericInput(inputId = "limite_superior_k1t", label = "LS k1t",value = entrada$limite_superior[10]),
-                                        shiny::numericInput(inputId = "limite_superior_k3t", label = "LS k3t",value = entrada$limite_superior[11]),
-                                        shiny::numericInput(inputId = "limite_superior_pcof", label = "LS pcof",value = entrada$limite_superior[12]),
-                                        shiny::numericInput(inputId = "limite_superior_ecof", label = "LS ecof",value = entrada$limite_superior[13]),
-                                        shiny::numericInput(inputId = "limite_superior_ecof2", label = "LS ecof2",value = entrada$limite_superior[14]),
-                                        shiny::numericInput(inputId = "limite_superior_alfa", label = "LS alfa",value = entrada$limite_superior[15]),
-                                        shiny::numericInput(inputId = "limite_superior_beta", label = "LS beta",value = entrada$limite_superior[16])
+                            shiny::h3("Limite Superior"), shiny::numericInput(inputId = "limite_superior_str", label = "LS str",value = NULL),
+                                        shiny::numericInput(inputId = "limite_superior_k2t", label = "LS k2t",value = NULL),
+                                        shiny::numericInput(inputId = "limite_superior_crec", label = "LS crec",value = NULL),
+                                        shiny::numericInput(inputId = "limite_superior_capc", label = "LS capc",value = NULL),
+                                        shiny::numericInput(inputId = "limite_superior_k_kt", label = "LS k_kt",value = NULL),
+                                        shiny::numericInput(inputId = "limite_superior_h1", label = "LS h1",value = NULL),
+                                        shiny::numericInput(inputId = "limite_superior_k2t2", label = "LS k2t2",value = NULL),
+                                        shiny::numericInput(inputId = "limite_superior_ai", label = "LS ai",value = NULL),
+                                        shiny::numericInput(inputId = "limite_superior_h", label = "LS h",value = NULL),
+                                        shiny::numericInput(inputId = "limite_superior_k1t", label = "LS k1t",value = NULL),
+                                        shiny::numericInput(inputId = "limite_superior_k3t", label = "LS k3t",value = NULL),
+                                        shiny::numericInput(inputId = "limite_superior_pcof", label = "LS pcof",value = NULL),
+                                        shiny::numericInput(inputId = "limite_superior_ecof", label = "LS ecof",value = NULL),
+                                        shiny::numericInput(inputId = "limite_superior_ecof2", label = "LS ecof2",value = NULL),
+                                        shiny::numericInput(inputId = "limite_superior_alfa", label = "LS alfa",value = NULL),
+                                        shiny::numericInput(inputId = "limite_superior_beta", label = "LS beta",value = NULL)
                             ),
                         ),
                         shiny::hr(),
                         shiny::fluidRow(
-                            shiny::dateRangeInput(inputId = "periodo_calibracao", label = "Periodo de calibracao", start = entrada$data_inicio_objetivo, end = entrada$data_fim_objetivo)
+                            shiny::dateRangeInput(inputId = "periodo_calibracao", label = "Periodo de calibracao", start = NULL, end = NULL)
                         ),
                     ),
                     
@@ -190,6 +189,7 @@ executa_visualizador_calibracao <- function(entrada){
                 shiny::updateNumericInput(session, "limite_superior_ecof2", value = 1.2)
                 shiny::updateNumericInput(session, "limite_superior_alfa", value = 100)
                 shiny::updateNumericInput(session, "limite_superior_beta", value = 100)
+                shiny::updateDateRangeInput(session, "periodo_calibracao", start = data_minimo(), end = data_maximo())
             }
         })
         
@@ -275,6 +275,16 @@ executa_visualizador_calibracao <- function(entrada){
             precipitacao <- ponderacao_espacial(precipitacao, postos_plu[postos_plu$nome %in% input$sub_bacia])
             return(precipitacao[precipitacao$nome == input$sub_bacia])
         })
+
+        data_minimo <- shiny::reactive({
+            vazao <- vazao_posto()
+            return(min(vazao$data))
+        }) 
+
+        data_maximo <- shiny::reactive({
+            vazao <- vazao_posto()
+            return(max(vazao$data))
+        }) 
 
         shinyjs::enable("arquivo_evapotranspiracao")
         shinyjs::enable("arquivo_evapotranspiracao_nc")
