@@ -314,7 +314,10 @@ executa_visualizador_calibracao <- function(){
             colnames(evapotranspiracao)[2] <- "nome"
             evapotranspiracao <- evapotranspiracao[evapotranspiracao$nome == input$sub_bacia]
             precipitacao <- precipitacao_posto()
-            evapotranspiracao <- transforma_NC_serie(precipitacao, evapotranspiracao)
+            arquivo_evapotranspiracao_nc <- input$arquivo_evapotranspiracao_nc$datapath
+            if (!is.null(arquivo_evapotranspiracao_nc)) {
+                evapotranspiracao <- transforma_NC_serie(precipitacao, evapotranspiracao)
+            }
             return(evapotranspiracao)
         })
 
