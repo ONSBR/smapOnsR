@@ -9,6 +9,7 @@
 #' @importFrom shiny observe renderPlot reactiveVal renderText updateActionButton updateNumericInput
 #' @importFrom shinyjs toggleState enable disable
 #' @importFrom future future value resolved
+#' @importFrom DT renderDataTable dataTableOutput
 #' @export
 
 executa_visualizador_calibracao <- function(entrada){
@@ -114,6 +115,9 @@ executa_visualizador_calibracao <- function(entrada){
                         )
                     )
                 )
+            ),
+            shiny::tabPanel("Tabela Dados",
+                DT::dataTableOutput("tabela")
             )
         )
     )
@@ -320,7 +324,6 @@ executa_visualizador_calibracao <- function(entrada){
             vetor_modelo[16] <- input$beta
             kt_max <- input$kt_max
             kt_min <- input$kt_min
-            entrada$variaveis <- c("Qcalc", input$variaveis)
             
             kt <- cria_kt(kt_max, kt_min, vetor_modelo[15], vetor_modelo[16])
             kt <- data.table::data.table(kt)
@@ -342,7 +345,7 @@ executa_visualizador_calibracao <- function(entrada){
             print(plot)
         })
 
-        output$dygraph <- dygraphs::renderDygraph({
+        saida <-  shiny::reactive({
             vetor_modelo <- vetor_modelo()
             vetor_modelo[1] <- input$str
             vetor_modelo[2] <- input$k2t
@@ -360,7 +363,6 @@ executa_visualizador_calibracao <- function(entrada){
             vetor_modelo[14] <- input$ecof2
             vetor_modelo[15] <- input$alfa
             vetor_modelo[16] <- input$beta
-            entrada$variaveis <- c("Qcalc", input$variaveis)
             kt_max <- input$kt_max
             kt_min <- input$kt_min
             vazao <- vazao_posto()
@@ -393,25 +395,47 @@ executa_visualizador_calibracao <- function(entrada){
             
             vetor_inicializacao <- unlist(inicializacao)
             numero_dias <- length(evapotranspiracao_planicie_ponderada)
+            
             saida <- funcaoSmapCpp::rodada_varios_dias_cpp2(vetor_modelo, vetor_inicializacao, area, precipitacao_ponderada,
-                                                            evapotranspiracao_ponderada, evapotranspiracao_planicie_ponderada, numero_dias)
+                                                        evapotranspiracao_ponderada, evapotranspiracao_planicie_ponderada, numero_dias)
             saida <- data.table::data.table(saida)
             saida$data <- seq.Date(data_inicio_simulacao, data_fim_simulacao, by = 1)
+            saida$precipitacao_ponderada <- precipitacao_ponderada
+            saida$evapotranspiracao_ponderada <- evapotranspiracao_ponderada
+            saida <- merge(saida, vazao, by = "data")
+            saida$posto <- NULL
+            colnames(saida)[22] <- "vazao_observada"
+            saida$Ed <- NULL
+            saida$Ed2 <- NULL
+            saida$Ed3 <- NULL
+            saida$Eb <- NULL
+            data.table::setcolorder(saida, c("data", "precipitacao_ponderada", "evapotranspiracao_ponderada", "vazao_observada", "Qcalc",
+                                            "Qbase", "Qsup1", "Qsup2", "Qplan", "Rsolo", "Rsup", "Rsup2", "Rsub",
+                                            "Es", "Er", "Rec", "Marg", "Tu"))
+            return(saida)
+        })
+
+        output$dygraph <- dygraphs::renderDygraph({
+            variaveis_grafico <- c("Qcalc", input$variaveis)
+            vazao <- vazao_posto()
+            evapotranspiracao <- evapotranspiracao_posto()
+            precipitacao <- precipitacao_posto()
+
+            saida <- saida()
             saida <- data.table::melt(saida, id.vars = c("data"), variable.name = "variavel",
-                                    value.name = "valor")
-            saida <- saida
+                                        value.name = "valor")
             simulacao <- xts::xts()
-            for (variaveis in entrada$variaveis){
+            for (variaveis in variaveis_grafico){
                 simulacao <- cbind(simulacao, xts::xts(saida$valor[which(saida$variavel == variaveis)], order.by = saida$data[which(saida$variavel == variaveis)]))
             }
-            colnames(simulacao) <- entrada$variaveis
+            colnames(simulacao) <- variaveis_grafico
             observacao <- xts::xts(x = vazao$valor, order.by =  vazao$data)
             colnames(observacao) <- "vazao observada"
 
             prec_aux <- xts::xts(x = precipitacao$valor, order.by =  precipitacao$data)
             colnames(prec_aux) <- "Precipitacao"
 
-            dygraphs::dygraph(cbind(simulacao, observacao, prec_aux))%>%
+            dygraphs::dygraph(cbind(simulacao, observacao, prec_aux)) %>%
             dygraphs::dyHighlight(highlightCircleSize = 5,
                                 highlightSeriesBackgroundAlpha = 0.2,
                                 hideOnMouseOut = FALSE,
@@ -423,6 +447,8 @@ executa_visualizador_calibracao <- function(entrada){
             dygraphs::dyAxis("y2", label = "Precipitação (mm)", valueRange = c(200, 0)) %>%
             dygraphs::dySeries("Qcalc", color = "red")
         })
+
+        output$tabela <- DT::renderDataTable(saida())
 
         output$funcao_objetivo <- shiny::renderText({
             vetor_modelo <- vetor_modelo()
@@ -442,7 +468,6 @@ executa_visualizador_calibracao <- function(entrada){
             vetor_modelo[14] <- input$ecof2
             vetor_modelo[15] <- input$alfa
             vetor_modelo[16] <- input$beta
-            entrada$variaveis <- input$variaveis
             data_inicio_objetivo <- input$periodo_calibracao[1]
             data_fim_objetivo <- input$periodo_calibracao[2]
             kt_max <- input$kt_max
