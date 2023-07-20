@@ -99,7 +99,7 @@ executa_visualizador_calibracao <- function(){
                         ),
                         shiny::hr(),
                         shiny::fluidRow(
-                            shiny::dateRangeInput(inputId = "periodo_calibracao", label = "Periodo de calibracao", start = NULL, end = NULL)
+                            shiny::dateRangeInput(inputId = "periodo_calibracao", label = "Periodo de calibracao", start = NULL, end = NULL, min = NULL, max = NULL)
                         ),
                     ),
                     
@@ -189,7 +189,10 @@ executa_visualizador_calibracao <- function(){
                 shiny::updateNumericInput(session, "limite_superior_ecof2", value = 1.2)
                 shiny::updateNumericInput(session, "limite_superior_alfa", value = 100)
                 shiny::updateNumericInput(session, "limite_superior_beta", value = 100)
-                shiny::updateDateRangeInput(session, "periodo_calibracao", start = data_minimo(), end = data_maximo())
+                precipitacao <- precipitacao_posto()
+                data_minimo <- (min(precipitacao$data) + kt_min)
+                data_maximo <- (max(precipitacao$data) - kt_max)
+                shiny::updateDateRangeInput(session, "periodo_calibracao", start = data_minimo, end = data_maximo, min = data_minimo, max = data_maximo)
             }
         })
         
@@ -270,21 +273,14 @@ executa_visualizador_calibracao <- function(){
         })
 
         precipitacao_posto <- shiny::reactive({
-            precipitacao <- precipitacao_observada()
-            postos_plu <- postos_plu()
-            precipitacao <- ponderacao_espacial(precipitacao, postos_plu[postos_plu$nome %in% input$sub_bacia])
-            return(precipitacao[precipitacao$nome == input$sub_bacia])
+            arquivo_precipitacao <- input$arquivo_precipitacao$datapath
+            if (!is.null(arquivo_precipitacao)) {
+                precipitacao <- precipitacao_observada()
+                postos_plu <- postos_plu()
+                precipitacao <- ponderacao_espacial(precipitacao, postos_plu[postos_plu$nome %in% input$sub_bacia])
+                return(precipitacao[precipitacao$nome == input$sub_bacia])
+            }
         })
-
-        data_minimo <- shiny::reactive({
-            vazao <- vazao_posto()
-            return(min(vazao$data))
-        }) 
-
-        data_maximo <- shiny::reactive({
-            vazao <- vazao_posto()
-            return(max(vazao$data))
-        }) 
 
         shinyjs::enable("arquivo_evapotranspiracao")
         shinyjs::enable("arquivo_evapotranspiracao_nc")
@@ -500,6 +496,7 @@ executa_visualizador_calibracao <- function(){
                                          & (evapotranspiracao$data <= (max(precipitacao$data) - kt_max)))])
             
             vazao_fo <- vazao[which((vazao$data >= data_inicio_objetivo) & (vazao$data <= data_fim_objetivo))]
+
 
             vetor_inicializacao <- unlist(inicializacao)
             funcao_objetivo <- funcao_objetivo_calibracao(vetor_modelo, kt_min, kt_max, area, Ebin, Tuin, Supin, precipitacao,
