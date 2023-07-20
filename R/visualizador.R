@@ -444,7 +444,8 @@ executa_visualizador_calibracao <- function(){
             prec_aux <- xts::xts(x = precipitacao$valor, order.by =  precipitacao$data)
             colnames(prec_aux) <- "Precipitacao"
 
-            dygraphs::dygraph(cbind(simulacao, observacao, prec_aux)) %>%
+            dygraphs::dygraph(cbind(simulacao, observacao, prec_aux),
+                            main = input$sub_bacia, ) %>%
             dygraphs::dyHighlight(highlightCircleSize = 5,
                                 highlightSeriesBackgroundAlpha = 0.2,
                                 hideOnMouseOut = FALSE,
