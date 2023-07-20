@@ -34,8 +34,14 @@ executa_visualizador_calibracao <- function(entrada){
                 shiny::sidebarLayout(
                     shiny::sidebarPanel(
                         shiny::fluidRow(
-                            shiny::column(4, shiny::numericInput(inputId = "Ebin", label = "Ebin",value = NULL),
-                                shiny::h3("limite inferior"), shiny::numericInput(inputId = "limite_inferior_str", label = "LI str",value = entrada$limite_inferior[1]),
+                            shiny::column(4, shiny::numericInput(inputId = "Ebin", label = "Ebin",value = NULL)),
+                            shiny::column(3, shiny::numericInput(inputId = "Supin", label = "Supin",value = NULL)),
+                            shiny::column(4, shiny::numericInput(inputId = "Tuin", label = "Tuin",value = NULL))
+                        ),
+                        shiny::hr(),
+                        shiny::fluidRow(
+                            shiny::column(4, 
+                                shiny::h3("Limite Inferior"), shiny::numericInput(inputId = "limite_inferior_str", label = "LI str",value = entrada$limite_inferior[1]),
                                 shiny::numericInput(inputId = "limite_inferior_k2t", label = "LI k2t",value = entrada$limite_inferior[2]),
                                 shiny::numericInput(inputId = "limite_inferior_crec", label = "LI crec",value = entrada$limite_inferior[3]),
                                 shiny::numericInput(inputId = "limite_inferior_capc", label = "LI capc",value = entrada$limite_inferior[4]),
@@ -53,8 +59,8 @@ executa_visualizador_calibracao <- function(entrada){
                                 shiny::numericInput(inputId = "limite_inferior_beta", label = "LI beta",value = entrada$limite_inferior[16]),
                                 shiny::numericInput(inputId = "kt_max", label = "kt máx",value = entrada$kt_max)
                             ),
-                            shiny::column(3, shiny::numericInput(inputId = "Supin", label = "Supin",value = NULL),
-                            shiny::h3("variaveis"), shiny::numericInput(inputId = "str", label = "str",value = NULL),
+                            shiny::column(3, 
+                            shiny::h3("Variáveis"), shiny::numericInput(inputId = "str", label = "str",value = NULL),
                                         shiny::numericInput(inputId = "k2t", label = "k2t",value = entrada$vetor_modelo[2]),
                                         shiny::numericInput(inputId = "crec", label = "crec",value = entrada$vetor_modelo[3]),
                                         shiny::numericInput(inputId = "capc", label = "capc",value = entrada$vetor_modelo[4]),
@@ -72,8 +78,8 @@ executa_visualizador_calibracao <- function(entrada){
                                         shiny::numericInput(inputId = "beta", label = "beta",value = entrada$vetor_modelo[16]),
                                         shiny::numericInput(inputId = "kt_min", label = "kt mín",value = entrada$kt_min)
                             ),
-                            shiny::column(4, shiny::numericInput(inputId = "Tuin", label = "Tuin",value = NULL),
-                            shiny::h3("limite superior"), shiny::numericInput(inputId = "limite_superior_str", label = "LS str",value = entrada$limite_superior[1]),
+                            shiny::column(4, 
+                            shiny::h3("Limite Superior"), shiny::numericInput(inputId = "limite_superior_str", label = "LS str",value = entrada$limite_superior[1]),
                                         shiny::numericInput(inputId = "limite_superior_k2t", label = "LS k2t",value = entrada$limite_superior[2]),
                                         shiny::numericInput(inputId = "limite_superior_crec", label = "LS crec",value = entrada$limite_superior[3]),
                                         shiny::numericInput(inputId = "limite_superior_capc", label = "LS capc",value = entrada$limite_superior[4]),
@@ -91,6 +97,7 @@ executa_visualizador_calibracao <- function(entrada){
                                         shiny::numericInput(inputId = "limite_superior_beta", label = "LS beta",value = entrada$limite_superior[16])
                             ),
                         ),
+                        shiny::hr(),
                         shiny::fluidRow(
                             shiny::dateRangeInput(inputId = "periodo_calibracao", label = "Periodo de calibracao", start = entrada$data_inicio_objetivo, end = entrada$data_fim_objetivo)
                         ),
