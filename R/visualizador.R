@@ -34,25 +34,27 @@ executa_visualizador_calibracao <- function(entrada){
                 shiny::sidebarLayout(
                     shiny::sidebarPanel(
                         shiny::fluidRow(
-                            shiny::column(3, shiny::h3("limite inferior"), shiny::numericInput(inputId = "limite_inferior_str", label = "LI str",value = entrada$limite_inferior[1]),
-                                        shiny::numericInput(inputId = "limite_inferior_k2t", label = "LI k2t",value = entrada$limite_inferior[2]),
-                                        shiny::numericInput(inputId = "limite_inferior_crec", label = "LI crec",value = entrada$limite_inferior[3]),
-                                        shiny::numericInput(inputId = "limite_inferior_capc", label = "LI capc",value = entrada$limite_inferior[4]),
-                                        shiny::numericInput(inputId = "limite_inferior_k_kt", label = "LI k_kt",value = entrada$limite_inferior[5]),
-                                        shiny::numericInput(inputId = "limite_inferior_h1", label = "LI h1",value = entrada$limite_inferior[6]),
-                                        shiny::numericInput(inputId = "limite_inferior_k2t2", label = "LI k2t2",value = entrada$limite_inferior[7]),
-                                        shiny::numericInput(inputId = "limite_inferior_ai", label = "LI ai",value = entrada$limite_inferior[8]),
-                                        shiny::numericInput(inputId = "limite_inferior_h", label = "LI h",value = entrada$limite_inferior[9]),
-                                        shiny::numericInput(inputId = "limite_inferior_k1t", label = "LI k1t",value = entrada$limite_inferior[10]),
-                                        shiny::numericInput(inputId = "limite_inferior_k3t", label = "LI k3t",value = entrada$limite_inferior[11]),
-                                        shiny::numericInput(inputId = "limite_inferior_pcof", label = "LI pcof",value = entrada$limite_inferior[12]),
-                                        shiny::numericInput(inputId = "limite_inferior_ecof", label = "LI ecof",value = entrada$limite_inferior[13]),
-                                        shiny::numericInput(inputId = "limite_inferior_ecof2", label = "LI ecof2",value = entrada$limite_inferior[14]),
-                                        shiny::numericInput(inputId = "limite_inferior_alfa", label = "LI alfa",value = entrada$limite_inferior[15]),
-                                        shiny::numericInput(inputId = "limite_inferior_beta", label = "LI beta",value = entrada$limite_inferior[16]),
-                                        shiny::numericInput(inputId = "kt_max", label = "kt máx",value = entrada$kt_max)
+                            shiny::column(4, shiny::numericInput(inputId = "Ebin", label = "Ebin",value = NULL),
+                                shiny::h3("limite inferior"), shiny::numericInput(inputId = "limite_inferior_str", label = "LI str",value = entrada$limite_inferior[1]),
+                                shiny::numericInput(inputId = "limite_inferior_k2t", label = "LI k2t",value = entrada$limite_inferior[2]),
+                                shiny::numericInput(inputId = "limite_inferior_crec", label = "LI crec",value = entrada$limite_inferior[3]),
+                                shiny::numericInput(inputId = "limite_inferior_capc", label = "LI capc",value = entrada$limite_inferior[4]),
+                                shiny::numericInput(inputId = "limite_inferior_k_kt", label = "LI k_kt",value = entrada$limite_inferior[5]),
+                                shiny::numericInput(inputId = "limite_inferior_h1", label = "LI h1",value = entrada$limite_inferior[6]),
+                                shiny::numericInput(inputId = "limite_inferior_k2t2", label = "LI k2t2",value = entrada$limite_inferior[7]),
+                                shiny::numericInput(inputId = "limite_inferior_ai", label = "LI ai",value = entrada$limite_inferior[8]),
+                                shiny::numericInput(inputId = "limite_inferior_h", label = "LI h",value = entrada$limite_inferior[9]),
+                                shiny::numericInput(inputId = "limite_inferior_k1t", label = "LI k1t",value = entrada$limite_inferior[10]),
+                                shiny::numericInput(inputId = "limite_inferior_k3t", label = "LI k3t",value = entrada$limite_inferior[11]),
+                                shiny::numericInput(inputId = "limite_inferior_pcof", label = "LI pcof",value = entrada$limite_inferior[12]),
+                                shiny::numericInput(inputId = "limite_inferior_ecof", label = "LI ecof",value = entrada$limite_inferior[13]),
+                                shiny::numericInput(inputId = "limite_inferior_ecof2", label = "LI ecof2",value = entrada$limite_inferior[14]),
+                                shiny::numericInput(inputId = "limite_inferior_alfa", label = "LI alfa",value = entrada$limite_inferior[15]),
+                                shiny::numericInput(inputId = "limite_inferior_beta", label = "LI beta",value = entrada$limite_inferior[16]),
+                                shiny::numericInput(inputId = "kt_max", label = "kt máx",value = entrada$kt_max)
                             ),
-                            shiny::column(3, shiny::h3("variaveis"), shiny::numericInput(inputId = "str", label = "str",value = entrada$vetor_modelo[1]),
+                            shiny::column(3, shiny::numericInput(inputId = "Supin", label = "Supin",value = NULL),
+                            shiny::h3("variaveis"), shiny::numericInput(inputId = "str", label = "str",value = NULL),
                                         shiny::numericInput(inputId = "k2t", label = "k2t",value = entrada$vetor_modelo[2]),
                                         shiny::numericInput(inputId = "crec", label = "crec",value = entrada$vetor_modelo[3]),
                                         shiny::numericInput(inputId = "capc", label = "capc",value = entrada$vetor_modelo[4]),
@@ -70,7 +72,8 @@ executa_visualizador_calibracao <- function(entrada){
                                         shiny::numericInput(inputId = "beta", label = "beta",value = entrada$vetor_modelo[16]),
                                         shiny::numericInput(inputId = "kt_min", label = "kt mín",value = entrada$kt_min)
                             ),
-                            shiny::column(4, shiny::h3("limite superior"), shiny::numericInput(inputId = "limite_superior_str", label = "LS str",value = entrada$limite_superior[1]),
+                            shiny::column(4, shiny::numericInput(inputId = "Tuin", label = "Tuin",value = NULL),
+                            shiny::h3("limite superior"), shiny::numericInput(inputId = "limite_superior_str", label = "LS str",value = entrada$limite_superior[1]),
                                         shiny::numericInput(inputId = "limite_superior_k2t", label = "LS k2t",value = entrada$limite_superior[2]),
                                         shiny::numericInput(inputId = "limite_superior_crec", label = "LS crec",value = entrada$limite_superior[3]),
                                         shiny::numericInput(inputId = "limite_superior_capc", label = "LS capc",value = entrada$limite_superior[4]),
@@ -110,20 +113,75 @@ executa_visualizador_calibracao <- function(entrada){
 
     servidor_calibracao <- function(input, output, session) {
 
-        kt_min <- entrada$kt_min
-        kt_max <- entrada$kt_max
-        area <- entrada$area
-        EbInic <- entrada$EbInic
-        TuInic <- entrada$TuInic
-        Supin <- entrada$Supin
-        data_inicio_objetivo <- entrada$data_inicio_objetivo
-        data_fim_objetivo <- entrada$data_fim_objetivo
-        limite_inferior <- entrada$limite_inferior
-        limite_superior <- entrada$limite_superior
-        vetor_modelo <- entrada$vetor_modelo
-
         disable_button <- shiny::reactiveVal(FALSE)
+        shiny::observeEvent(input$sub_bacia, {
+            arquivo_parametros <- input$arquivo_parametros
+            vazao <- vazao_posto()
+            shiny::updateNumericInput(session, "Ebin", value = vazao$valor[1] * 0.3)
+            shiny::updateNumericInput(session, "Supin", value = vazao$valor[1] * 0.7)
+            shiny::updateNumericInput(session, "Tuin", value = 0.3)
+            if (!is.null(arquivo_parametros)) {
+                vetor_modelo <- vetor_modelo()
+                parametros_posto <- parametros_posto()
+                postos_plu <- postos_plu()
+                modelo <- new_modelo_smap_ons(parametros_posto, postos_plu[postos_plu$nome == input$sub_bacia])
+                kt_max <- max(which(modelo$kt[3:1] > 0)) - 1
+                kt_min <- max(which(modelo$kt[3:63] > 0)) - 1
+                shiny::updateNumericInput(session, "str", value = vetor_modelo[1])
+                shiny::updateNumericInput(session, "k2t", value = vetor_modelo[2])
+                shiny::updateNumericInput(session, "crec", value = vetor_modelo[3])
+                shiny::updateNumericInput(session, "capc", value = vetor_modelo[4])
+                shiny::updateNumericInput(session, "k_kt", value = vetor_modelo[5])
+                shiny::updateNumericInput(session, "h1", value = vetor_modelo[6])
+                shiny::updateNumericInput(session, "k2t2", value = vetor_modelo[7])
+                shiny::updateNumericInput(session, "ai", value = vetor_modelo[8])
+                shiny::updateNumericInput(session, "h", value = vetor_modelo[9])
+                shiny::updateNumericInput(session, "k1t", value = vetor_modelo[10])
+                shiny::updateNumericInput(session, "k3t", value = vetor_modelo[11])
+                shiny::updateNumericInput(session, "pcof", value = vetor_modelo[12])
+                shiny::updateNumericInput(session, "ecof", value = vetor_modelo[13])
+                shiny::updateNumericInput(session, "ecof2", value = vetor_modelo[14])
+                shiny::updateNumericInput(session, "alfa", value = vetor_modelo[15])
+                shiny::updateNumericInput(session, "beta", value = vetor_modelo[16])
+                shiny::updateNumericInput(session, "kt_max", value = kt_max)
+                shiny::updateNumericInput(session, "kt_min", value = kt_min)
 
+                shiny::updateNumericInput(session, "limite_inferior_str", value = vetor_modelo[1] * 0.5)
+                shiny::updateNumericInput(session, "limite_inferior_k2t", value = vetor_modelo[2] * 0.5)
+                shiny::updateNumericInput(session, "limite_inferior_crec", value = vetor_modelo[3] * 0.5)
+                shiny::updateNumericInput(session, "limite_inferior_capc", value = vetor_modelo[4] * 0.5)
+                shiny::updateNumericInput(session, "limite_inferior_k_kt", value = vetor_modelo[5] * 0.5)
+                shiny::updateNumericInput(session, "limite_inferior_h1", value = vetor_modelo[6] * 0.5)
+                shiny::updateNumericInput(session, "limite_inferior_k2t2", value = vetor_modelo[7] * 0.5)
+                shiny::updateNumericInput(session, "limite_inferior_ai", value = vetor_modelo[8] * 0.5)
+                shiny::updateNumericInput(session, "limite_inferior_h", value = vetor_modelo[9] * 0.5)
+                shiny::updateNumericInput(session, "limite_inferior_k1t", value = vetor_modelo[10] * 0.5)
+                shiny::updateNumericInput(session, "limite_inferior_k3t", value = vetor_modelo[11] * 0.5)
+                shiny::updateNumericInput(session, "limite_inferior_pcof", value = 0.8)
+                shiny::updateNumericInput(session, "limite_inferior_ecof", value = 0.8)
+                shiny::updateNumericInput(session, "limite_inferior_ecof2", value = 0.8)
+                shiny::updateNumericInput(session, "limite_inferior_alfa", value = 0.0000001)
+                shiny::updateNumericInput(session, "limite_inferior_beta", value = 0.0000001)
+
+                shiny::updateNumericInput(session, "limite_superior_str", value = vetor_modelo[1] * 2)
+                shiny::updateNumericInput(session, "limite_superior_k2t", value = vetor_modelo[2] * 2)
+                shiny::updateNumericInput(session, "limite_superior_crec", value = vetor_modelo[3] * 2)
+                shiny::updateNumericInput(session, "limite_superior_capc", value = vetor_modelo[4] * 2)
+                shiny::updateNumericInput(session, "limite_superior_k_kt", value = vetor_modelo[5] * 2)
+                shiny::updateNumericInput(session, "limite_superior_h1", value = vetor_modelo[6] * 2)
+                shiny::updateNumericInput(session, "limite_superior_k2t2", value = vetor_modelo[7] * 2)
+                shiny::updateNumericInput(session, "limite_superior_ai", value = vetor_modelo[8] * 2)
+                shiny::updateNumericInput(session, "limite_superior_h", value = vetor_modelo[9] * 2)
+                shiny::updateNumericInput(session, "limite_superior_k1t", value = vetor_modelo[10] * 2)
+                shiny::updateNumericInput(session, "limite_superior_k3t", value = vetor_modelo[11] * 2)
+                shiny::updateNumericInput(session, "limite_superior_pcof", value = 1.2)
+                shiny::updateNumericInput(session, "limite_superior_ecof", value = 1.2)
+                shiny::updateNumericInput(session, "limite_superior_ecof2", value = 1.2)
+                shiny::updateNumericInput(session, "limite_superior_alfa", value = 100)
+                shiny::updateNumericInput(session, "limite_superior_beta", value = 100)
+            }
+        })
+        
         parametros <- shiny::reactive({
             arquivo_parametros <- input$arquivo_parametros$datapath
             if (!is.null(arquivo_parametros)) {
@@ -132,19 +190,35 @@ executa_visualizador_calibracao <- function(entrada){
             }
         })
 
-        parametros_posto <- shiny::reactive({
-            parametros <- parametros()
-            return(parametros[parametros$Nome == input$sub_bacia])
+        area <-  shiny::reactive({
+            arquivo_parametros <- input$arquivo_parametros$datapath
+            arquivo_postos_plu <- input$arquivo_postos_plu$datapath
+            if (!is.null(arquivo_parametros) & !is.null(arquivo_postos_plu)) {
+                parametros_posto <- parametros_posto()
+                area <- parametros_posto$valor[parametros_posto$parametro == "Area"]
+            }
         })
 
-        #vetor_modelo <- shiny::reactive({
-        #    postos_plu <- postos_plu()
-        #    parametros_posto <- parametros_posto()
-        #    modelo <- new_modelo_smap_ons(parametros_posto(), postos_plu[nome == input$sub_bacia])
-        #    vetor_modelo <- unlist(modelo)
-        #    vetor_modelo <- c(vetor_modelo[1:11], vetor_modelo[75:77], 5, 5)
-        #    return(vetor_modelo)
-        #})
+        parametros_posto <- shiny::reactive({
+            arquivo_parametros <- input$arquivo_parametros$datapath
+            if (!is.null(arquivo_parametros)) {
+                parametros <- parametros()
+                return(parametros[parametros$Nome == input$sub_bacia])
+            }
+        })
+
+        vetor_modelo <- shiny::reactive({
+            arquivo_parametros <- input$arquivo_parametros$datapath
+            arquivo_postos_plu <- input$arquivo_postos_plu$datapath
+            if (!is.null(arquivo_parametros) & !is.null(arquivo_postos_plu)) {
+                postos_plu <- postos_plu()
+                parametros_posto <- parametros_posto()
+                modelo <- new_modelo_smap_ons(parametros_posto, postos_plu[postos_plu$nome == input$sub_bacia])
+                vetor_modelo <- unlist(modelo)
+                vetor_modelo <- as.numeric(c(vetor_modelo[1:11], vetor_modelo[75:77], 5, 5))
+                return(vetor_modelo)
+            }
+        })
 
         shiny::observeEvent(input$arquivo_vazao, {
             arquivo_vazao <- input$arquivo_vazao$datapath
@@ -234,6 +308,7 @@ executa_visualizador_calibracao <- function(entrada){
         })
 
         output$grafico_kts <- shiny::renderPlot({
+            vetor_modelo <- vetor_modelo()
             vetor_modelo[15] <- input$alfa
             vetor_modelo[16] <- input$beta
             kt_max <- input$kt_max
@@ -261,6 +336,7 @@ executa_visualizador_calibracao <- function(entrada){
         })
 
         output$dygraph <- dygraphs::renderDygraph({
+            vetor_modelo <- vetor_modelo()
             vetor_modelo[1] <- input$str
             vetor_modelo[2] <- input$k2t
             vetor_modelo[3] <- input$crec
@@ -283,12 +359,16 @@ executa_visualizador_calibracao <- function(entrada){
             vazao <- vazao_posto()
             evapotranspiracao <- evapotranspiracao_posto()
             precipitacao <- precipitacao_posto()
+            Ebin <- input$Ebin
+            Tuin <- input$Tuin
+            Supin <- input$Supin
+            area <- area()
             
             kt <- cria_kt(kt_max, kt_min, vetor_modelo[15], vetor_modelo[16])
             
             numero_dias <- nrow(evapotranspiracao)
             
-            inicializacao <- inicializacao_smap(vetor_modelo, area, EbInic, TuInic, Supin)
+            inicializacao <- inicializacao_smap(vetor_modelo, area, Ebin, Tuin, Supin)
             
             precipitacao_ponderada <- data.table::data.table(precipitacao)
             precipitacao_ponderada <- precipitacao_ponderada$valor * vetor_modelo[12]
@@ -338,6 +418,7 @@ executa_visualizador_calibracao <- function(entrada){
         })
 
         output$funcao_objetivo <- shiny::renderText({
+            vetor_modelo <- vetor_modelo()
             vetor_modelo[1] <- input$str
             vetor_modelo[2] <- input$k2t
             vetor_modelo[3] <- input$crec
@@ -359,6 +440,10 @@ executa_visualizador_calibracao <- function(entrada){
             data_fim_objetivo <- input$periodo_calibracao[2]
             kt_max <- input$kt_max
             kt_min <- input$kt_min
+            Ebin <- input$Ebin
+            Tuin <- input$Tuin
+            Supin <- input$Supin
+            area <- area()
             vazao <- vazao_posto()
             evapotranspiracao <- evapotranspiracao_posto()
             precipitacao <- precipitacao_posto()
@@ -367,7 +452,7 @@ executa_visualizador_calibracao <- function(entrada){
             
             numero_dias <- nrow(evapotranspiracao)
             
-            inicializacao <- inicializacao_smap(vetor_modelo, area, EbInic, TuInic, Supin)
+            inicializacao <- inicializacao_smap(vetor_modelo, area, Ebin, Tuin, Supin)
             
             evapotranspiracao_fo <- data.table::data.table(evapotranspiracao[which((evapotranspiracao$data >= (min(precipitacao$data) + kt_min))
                                          & (evapotranspiracao$data <= (max(precipitacao$data) - kt_max)))])
@@ -375,12 +460,13 @@ executa_visualizador_calibracao <- function(entrada){
             vazao_fo <- vazao[which((vazao$data >= data_inicio_objetivo) & (vazao$data <= data_fim_objetivo))]
 
             vetor_inicializacao <- unlist(inicializacao)
-            funcao_objetivo <- funcao_objetivo_calibracao(vetor_modelo, kt_min, kt_max, area, EbInic, TuInic, Supin, precipitacao,
+            funcao_objetivo <- funcao_objetivo_calibracao(vetor_modelo, kt_min, kt_max, area, Ebin, Tuin, Supin, precipitacao,
                                                                 evapotranspiracao_fo, vazao_fo, data_inicio_objetivo, data_fim_objetivo)
             paste0("funcao objetivo = ", funcao_objetivo)
         })
 
         shiny::observeEvent(input$botao_calibracao,{
+            limite_superior <- as.numeric(rep(0, 16), c(16))
             limite_superior[1] <- input$limite_superior_str
             limite_superior[2] <- input$limite_superior_k2t
             limite_superior[3] <- input$limite_superior_crec
@@ -398,6 +484,7 @@ executa_visualizador_calibracao <- function(entrada){
             limite_superior[15] <- input$limite_superior_alfa
             limite_superior[16] <- input$limite_superior_beta
             
+            limite_inferior <- as.numeric(rep(0, 16), c(16))
             limite_inferior[1] <- input$limite_inferior_str
             limite_inferior[2] <- input$limite_inferior_k2t
             limite_inferior[3] <- input$limite_inferior_crec
@@ -415,6 +502,7 @@ executa_visualizador_calibracao <- function(entrada){
             limite_inferior[15] <- input$limite_inferior_alfa
             limite_inferior[16] <- input$limite_inferior_beta
             
+            vetor_modelo <- vetor_modelo()
             vetor_modelo[1] <- input$str
             vetor_modelo[2] <- input$k2t
             vetor_modelo[3] <- input$crec
@@ -431,6 +519,11 @@ executa_visualizador_calibracao <- function(entrada){
             vetor_modelo[14] <- input$ecof2
             vetor_modelo[15] <- input$alfa
             vetor_modelo[16] <- input$beta
+
+            area <- area()
+            Ebin <- input$Ebin
+            Tuin <- input$Tuin
+            Supin <- input$Supin
 
             data_inicio_objetivo <- input$periodo_calibracao[1]
             data_fim_objetivo <- input$periodo_calibracao[2]
@@ -453,7 +546,7 @@ executa_visualizador_calibracao <- function(entrada){
             
             # Execute the long-running function asynchronously
             par <- future::future({
-                calibracao(vetor_modelo,  kt_min, kt_max, area, EbInic, TuInic, Supin, precipitacao,
+                calibracao(vetor_modelo, kt_min, kt_max, area, Ebin, Tuin, Supin, precipitacao,
                                     evapotranspiracao_fo, vazao_fo, data_inicio_objetivo, data_fim_objetivo,
                                     limite_inferior, limite_superior)
             })
