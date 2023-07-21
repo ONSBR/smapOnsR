@@ -40,6 +40,12 @@ executa_visualizador_calibracao <- function(){
                         ),
                         shiny::hr(),
                         shiny::fluidRow(
+                            shiny::column(4, shiny::uiOutput("li_psat")),
+                            shiny::column(3, shiny::uiOutput("psats")),
+                            shiny::column(4, shiny::uiOutput("ls_psat"))
+                        ),
+                        shiny::hr(),
+                        shiny::fluidRow(
                             shiny::column(4, 
                                 shiny::h3("Limite Inferior"), shiny::numericInput(inputId = "limite_inferior_str", label = "LI str",value = NULL),
                                 shiny::numericInput(inputId = "limite_inferior_k2t", label = "LI k2t",value = NULL),
@@ -261,6 +267,93 @@ executa_visualizador_calibracao <- function(){
             if (!is.null(arquivo_postos_plu)) {
                 postos_plu <- le_postos_plu(arquivo_postos_plu)
                 return(postos_plu)
+            }
+        })
+
+        gera_entrada_psat <- function(num_inputs) {
+            inputs <- vector("list", num_inputs)
+            postos_plu <- postos_plu()
+            postos_plu <- postos_plu[postos_plu$nome %in% input$sub_bacia]
+            if (num_inputs > 1){
+                for (i in seq_len(num_inputs)) {
+                inputs[[i]] <- shiny::numericInput(inputId = paste0("posto_plu_", i),
+                                            label = postos_plu$posto[i],
+                                            value = postos_plu$valor[i],
+                                            min = 0,
+                                            max = 1)
+                }
+            } else {
+                inputs[[1]] <- shiny::numericInput(inputId = paste0("posto_plu_", 1),
+                                            label = postos_plu$posto[1],
+                                            value = postos_plu$valor[1],
+                                            min = 1,
+                                            max = 1)
+            }
+            return(inputs)
+        }
+
+        gera_limite_inferior_psat <- function(num_inputs) {
+            inputs <- vector("list", num_inputs)
+            postos_plu <- postos_plu()
+            postos_plu <- postos_plu[postos_plu$nome %in% input$sub_bacia]
+            if (num_inputs > 1) {
+            for (i in seq_len(num_inputs)) {
+                inputs[[i]] <- shiny::numericInput(inputId = paste0("limite_inferior_posto_plu_", i),
+                                            label = paste0("LI ",postos_plu$posto[i]),
+                                            value = 0,
+                                            min = 0,
+                                            max = 1)
+                }
+            } else {
+                inputs[[1]] <- shiny::numericInput(inputId = paste0("limite_inferior_posto_plu_", 1),
+                                            label = paste0("LI ",postos_plu$posto[1]),
+                                            value = 1,
+                                            min = 1,
+                                            max = 1)
+            }
+            return(inputs)
+        }
+
+        gera_limite_superior_psat <- function(num_inputs) {
+            inputs <- vector("list", num_inputs)
+            postos_plu <- postos_plu()
+            postos_plu <- postos_plu[postos_plu$nome %in% input$sub_bacia]
+            if (num_inputs > 1) {
+                for (i in seq_len(num_inputs)) {
+                    inputs[[i]] <- shiny::numericInput(inputId = paste0("limite_superior_posto_plu_", i),
+                                            label = paste0("LS ",postos_plu$posto[i]),
+                                            value = 1,
+                                            min = 0,
+                                            max = 1)
+                }
+            } else {
+                inputs[[1]] <- shiny::numericInput(inputId = paste0("limite_inferior_posto_plu_", 1),
+                                            label = paste0("LS ",postos_plu$posto[1]),
+                                            value = 1,
+                                            min = 1,
+                                            max = 1)
+            }
+            return(inputs)
+        }
+
+        shiny::observeEvent(input$sub_bacia, {
+            arquivo_postos_plu <- input$arquivo_postos_plu$datapath
+            arquivo_vazao <- input$arquivo_vazao$datapath
+            if ((!is.null(arquivo_postos_plu)) & (!is.null(arquivo_vazao))){
+                postos_plu <- postos_plu()
+                numero_postos_plu <- nrow(postos_plu[postos_plu$nome %in% input$sub_bacia])
+                psats <- gera_entrada_psat(numero_postos_plu)
+                li_psat <- gera_limite_inferior_psat(numero_postos_plu)
+                ls_psat <- gera_limite_superior_psat(numero_postos_plu)
+                output$psats <- shiny::renderUI({
+                    psats
+                })
+                output$li_psat <- shiny::renderUI({
+                    li_psat
+                })
+                output$ls_psat <- shiny::renderUI({
+                    ls_psat
+                })
             }
         })
 
