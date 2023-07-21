@@ -201,6 +201,32 @@ executa_visualizador_calibracao <- function(){
                 shiny::updateDateRangeInput(session, "periodo_calibracao", start = data_minimo, end = data_maximo, min = data_minimo, max = data_maximo)
             }
         })
+
+        shiny::observeEvent(input$kt_min, {
+            arquivo_parametros <- input$arquivo_parametros
+            arquivo_precipitacao <- input$arquivo_precipitacao
+            if (!is.null(arquivo_parametros) & !is.null(arquivo_precipitacao)) {
+                precipitacao <- precipitacao_posto()
+                kt_min <- input$kt_min
+                kt_max <- input$kt_max
+                data_minimo <- (min(precipitacao$data) + kt_min)
+                data_maximo <- (max(precipitacao$data) - kt_max)
+                shiny::updateDateRangeInput(session, "periodo_calibracao", start = data_minimo, end = data_maximo, min = data_minimo, max = data_maximo)
+            }
+        })
+
+        shiny::observeEvent(input$kt_max, {
+            arquivo_parametros <- input$arquivo_parametros
+            arquivo_precipitacao <- input$arquivo_precipitacao
+            if (!is.null(arquivo_parametros) & !is.null(arquivo_precipitacao)) {
+                precipitacao <- precipitacao_posto()
+                kt_min <- input$kt_min
+                kt_max <- input$kt_max
+                data_minimo <- (min(precipitacao$data) + kt_min)
+                data_maximo <- (max(precipitacao$data) - kt_max)
+                shiny::updateDateRangeInput(session, "periodo_calibracao", start = data_minimo, end = data_maximo, min = data_minimo, max = data_maximo)
+            }
+        })
         
         parametros <- shiny::reactive({
             arquivo_parametros <- input$arquivo_parametros$datapath
