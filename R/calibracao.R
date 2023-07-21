@@ -39,15 +39,22 @@
 #' @export
 
 funcao_objetivo_calibracao <- function(vetor_modelo, kt_min, kt_max, area, EbInic, TuInic, Supin, 
-      precipitacao, evapotranspiracao, vazao, data_inicio_objetivo, data_fim_objetivo){
+      precipitacao, evapotranspiracao, vazao, data_inicio_objetivo, data_fim_objetivo,
+      postos_plu){
 
   kt <- cria_kt(kt_max, kt_min, vetor_modelo[15], vetor_modelo[16])
 
   numero_dias <- nrow(evapotranspiracao)
 
   inicializacao <- inicializacao_smap(vetor_modelo, area, EbInic, TuInic, Supin)
+  numero_postos_plu <- nrow(postos_plu)
+  if (numero_postos_plu > 1) {
+    vetor_modelo[17:(16 + numero_postos_plu)] <- vetor_modelo[17:(16 + numero_postos_plu)] / sum(vetor_modelo[17:(16 + numero_postos_plu)])
+    postos_plu$valor <- vetor_modelo[17:(16 + numero_postos_plu)]
+  }
 
-  precipitacao_ponderada <- data.table::data.table(precipitacao)
+  precipitacao_ponderada <- ponderacao_espacial(precipitacao, postos_plu)
+  
   precipitacao_ponderada[, valor := valor * vetor_modelo[12]]
   precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada[, valor], kt, kt_max, kt_min)
 
@@ -133,15 +140,15 @@ cria_kt <- function(kt_max, kt_min, alfa, beta){
 #' @importFrom data.table data.table
 #' @return objetivo valor da funcao objetivo
 #' @export
-#' 
+#'
 calibracao <- function(vetor_modelo, kt_min, kt_max, area, EbInic, TuInic, Supin, precipitacao,
       evapotranspiracao, vazao, data_inicio_objetivo, data_fim_objetivo,
-      limite_inferior, limite_superior){
-  
+      limite_inferior, limite_superior, postos_plu){
+
   if(length(unique(limite_inferior == limite_superior)) == 2){
     limite_superior[limite_inferior == limite_superior] <- limite_superior[limite_inferior == limite_superior] + 0.000001
   }
-  
+
   ajuste <- stats::optim(par = vetor_modelo, method = "L-BFGS-B",
               lower = limite_inferior, upper = limite_superior,
               fn = funcao_objetivo_calibracao,
@@ -154,6 +161,12 @@ calibracao <- function(vetor_modelo, kt_min, kt_max, area, EbInic, TuInic, Supin
               vazao = vazao,
               data_inicio_objetivo = data_inicio_objetivo,
               data_fim_objetivo = data_fim_objetivo,
+              postos_plu = postos_plu,
               control = list(fnscale = 1))
+  
+  numero_postos_plu <- nrow(postos_plu)
+  if (numero_postos_plu > 1) {
+    ajuste$par[17:(16 + numero_postos_plu)] <- vetor_modelo[17:(16 + numero_postos_plu)] / sum(vetor_modelo[17:(16 + numero_postos_plu)])
+  }
   ajuste
 }
