@@ -40,14 +40,14 @@ executa_visualizador_calibracao <- function(){
                         ),
                         shiny::hr(),
                         shiny::fluidRow(
-                            shiny::column(4, shiny::uiOutput("li_psat")),
-                            shiny::column(3, shiny::uiOutput("psats")),
-                            shiny::column(4, shiny::uiOutput("ls_psat"))
+                            shiny::column(4, shiny::h3("Limite Inferior"), shiny::uiOutput("li_psat")),
+                            shiny::column(3, shiny::h3("Variáveis"), shiny::uiOutput("psats")),
+                            shiny::column(4, shiny::h3("Limite Superior"), shiny::uiOutput("ls_psat"))
                         ),
                         shiny::hr(),
                         shiny::fluidRow(
                             shiny::column(4, 
-                                shiny::h3("Limite Inferior"), shiny::numericInput(inputId = "limite_inferior_str", label = "LI str",value = NULL),
+                                shiny::numericInput(inputId = "limite_inferior_str", label = "LI str",value = NULL),
                                 shiny::numericInput(inputId = "limite_inferior_k2t", label = "LI k2t",value = NULL),
                                 shiny::numericInput(inputId = "limite_inferior_crec", label = "LI crec",value = NULL),
                                 shiny::numericInput(inputId = "limite_inferior_capc", label = "LI capc",value = NULL),
@@ -65,8 +65,8 @@ executa_visualizador_calibracao <- function(){
                                 shiny::numericInput(inputId = "limite_inferior_beta", label = "LI beta",value = NULL),
                                 shiny::numericInput(inputId = "kt_max", label = "kt máx",value = NULL)
                             ),
-                            shiny::column(3, 
-                            shiny::h3("Variáveis"), shiny::numericInput(inputId = "str", label = "str",value = NULL),
+                            shiny::column(3,
+                                        shiny::numericInput(inputId = "str", label = "str",value = NULL),
                                         shiny::numericInput(inputId = "k2t", label = "k2t",value = NULL),
                                         shiny::numericInput(inputId = "crec", label = "crec",value = NULL),
                                         shiny::numericInput(inputId = "capc", label = "capc",value = NULL),
@@ -85,7 +85,7 @@ executa_visualizador_calibracao <- function(){
                                         shiny::numericInput(inputId = "kt_min", label = "kt mín",value = NULL)
                             ),
                             shiny::column(4, 
-                            shiny::h3("Limite Superior"), shiny::numericInput(inputId = "limite_superior_str", label = "LS str",value = NULL),
+                                        shiny::numericInput(inputId = "limite_superior_str", label = "LS str",value = NULL),
                                         shiny::numericInput(inputId = "limite_superior_k2t", label = "LS k2t",value = NULL),
                                         shiny::numericInput(inputId = "limite_superior_crec", label = "LS crec",value = NULL),
                                         shiny::numericInput(inputId = "limite_superior_capc", label = "LS capc",value = NULL),
@@ -771,13 +771,12 @@ executa_visualizador_calibracao <- function(){
                         shiny::updateNumericInput(session, paste0("posto_plu_", iposto), value = as.numeric(future::value(par)$par[(16 + iposto)]))
                     }
                 }
-                
+
                 disable_button(FALSE)
                 shinyjs::enable("botao_calibracao")
                 shiny::updateActionButton(session, "botao_calibracao", label = "Calibrar")
             }
             })
-            
         })
     }
     shiny::shinyApp(ui = ui_calibracao, server = servidor_calibracao)
