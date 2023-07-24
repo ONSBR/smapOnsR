@@ -166,7 +166,7 @@ calibracao <- function(vetor_modelo, kt_min, kt_max, area, EbInic, TuInic, Supin
   
   numero_postos_plu <- nrow(postos_plu)
   if (numero_postos_plu > 1) {
-    ajuste$par[17:(16 + numero_postos_plu)] <- vetor_modelo[17:(16 + numero_postos_plu)] / sum(vetor_modelo[17:(16 + numero_postos_plu)])
+    ajuste$par[17:(16 + numero_postos_plu)] <- ajuste$par[17:(16 + numero_postos_plu)] / sum(ajuste$par[17:(16 + numero_postos_plu)])
   }
   ajuste
 }
