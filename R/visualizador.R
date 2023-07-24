@@ -396,8 +396,7 @@ executa_visualizador_calibracao <- function(){
             if (!is.null(arquivo_precipitacao)) {
                 precipitacao <- precipitacao_observada()
                 postos_plu <- postos_plu()
-                precipitacao <- ponderacao_espacial(precipitacao, postos_plu[postos_plu$nome %in% input$sub_bacia])
-                return(precipitacao[precipitacao$nome == input$sub_bacia])
+                return(precipitacao[precipitacao$posto %in% postos_plu$posto[postos_plu$nome == input$sub_bacia]])
             }
         })
 
@@ -432,9 +431,11 @@ executa_visualizador_calibracao <- function(){
             evapotranspiracao <- evapotranspiracao_observada()
             colnames(evapotranspiracao)[2] <- "nome"
             evapotranspiracao <- evapotranspiracao[evapotranspiracao$nome == input$sub_bacia]
-            precipitacao <- precipitacao_posto()
             arquivo_evapotranspiracao_nc <- input$arquivo_evapotranspiracao_nc$datapath
             if (!is.null(arquivo_evapotranspiracao_nc)) {
+                precipitacao <- precipitacao_posto()
+                postos_plu <- postos_plu()
+                precipitacao <- ponderacao_espacial(precipitacao, postos_plu[postos_plu$nome == input$sub_bacia])
                 evapotranspiracao <- transforma_NC_serie(precipitacao, evapotranspiracao)
             }
             return(evapotranspiracao)
@@ -500,6 +501,7 @@ executa_visualizador_calibracao <- function(){
             Tuin <- input$Tuin
             Supin <- input$Supin
             area <- area()
+            postos_plu <- postos_plu()
             
             kt <- cria_kt(kt_max, kt_min, vetor_modelo[15], vetor_modelo[16])
             
@@ -507,7 +509,16 @@ executa_visualizador_calibracao <- function(){
             
             inicializacao <- inicializacao_smap(vetor_modelo, area, Ebin, Tuin, Supin)
             
-            precipitacao_ponderada <- data.table::data.table(precipitacao)
+            numero_postos_plu <- nrow(postos_plu[postos_plu$nome == input$sub_bacia])
+            if (numero_postos_plu > 1) {
+                for (iposto in 1: numero_postos_plu){
+                    vetor_modelo[(16 + iposto)] <- input[[paste0("posto_plu_", iposto)]]
+                    postos_plu[postos_plu$nome == input$sub_bacia]$valor[iposto] <- input[[paste0("posto_plu_", iposto)]]
+                }
+            }
+
+            precipitacao_ponderada <- ponderacao_espacial(precipitacao, postos_plu[postos_plu$nome == input$sub_bacia])
+
             precipitacao_ponderada <- precipitacao_ponderada$valor * vetor_modelo[12]
             precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada, kt, kt_max, kt_min)
             
@@ -548,7 +559,9 @@ executa_visualizador_calibracao <- function(){
             vazao <- vazao_posto()
             evapotranspiracao <- evapotranspiracao_posto()
             precipitacao <- precipitacao_posto()
+            postos_plu <- postos_plu()
 
+            precipitacao <- ponderacao_espacial(precipitacao, postos_plu[postos_plu$nome == input$sub_bacia])
             saida <- saida()
             saida <- data.table::melt(saida, id.vars = c("data"), variable.name = "variavel",
                                         value.name = "valor")
@@ -608,7 +621,18 @@ executa_visualizador_calibracao <- function(){
             vazao <- vazao_posto()
             evapotranspiracao <- evapotranspiracao_posto()
             precipitacao <- precipitacao_posto()
-            
+            postos_plu <- postos_plu()
+
+            numero_postos_plu <- nrow(postos_plu[postos_plu$nome == input$sub_bacia])
+            if (numero_postos_plu > 1) {
+                for (iposto in 1: numero_postos_plu){
+                    vetor_modelo[16 + iposto] <- input[[paste0("posto_plu_", iposto)]]
+                    postos_plu[postos_plu$nome == input$sub_bacia]$valor[iposto] <- input[[paste0("posto_plu_", iposto)]]
+                }
+            }
+
+            vetor_modelo[17:(16 + numero_postos_plu)] <- postos_plu$valor[postos_plu$nome == input$sub_bacia]
+
             kt <- cria_kt(kt_max, kt_min, vetor_modelo[15], vetor_modelo[16])
             
             numero_dias <- nrow(evapotranspiracao)
@@ -620,10 +644,10 @@ executa_visualizador_calibracao <- function(){
             
             vazao_fo <- vazao[which((vazao$data >= data_inicio_objetivo) & (vazao$data <= data_fim_objetivo))]
 
-
             vetor_inicializacao <- unlist(inicializacao)
             funcao_objetivo <- funcao_objetivo_calibracao(vetor_modelo, kt_min, kt_max, area, Ebin, Tuin, Supin, precipitacao,
-                                                                evapotranspiracao_fo, vazao_fo, data_inicio_objetivo, data_fim_objetivo)
+                                                                evapotranspiracao_fo, vazao_fo, data_inicio_objetivo, data_fim_objetivo,
+                                                                postos_plu[postos_plu$nome == input$sub_bacia])
             paste0("funcao objetivo = ", funcao_objetivo)
         })
 
@@ -695,6 +719,16 @@ executa_visualizador_calibracao <- function(){
             vazao <- vazao_posto()
             evapotranspiracao <- evapotranspiracao_posto()
             precipitacao <- precipitacao_posto()
+            postos_plu <- postos_plu()
+            numero_postos_plu <- nrow(postos_plu[postos_plu$nome == input$sub_bacia])
+
+            if (numero_postos_plu > 1) {
+                for (iposto in 1:numero_postos_plu){
+                    vetor_modelo[(16 + iposto)] <- input[[paste0("posto_plu_", iposto)]]
+                    limite_superior[(16 + iposto)] <- input[[paste0("limite_superior_posto_plu_", iposto)]]
+                    limite_inferior[(16 + iposto)] <- input[[paste0("limite_inferior_posto_plu_", iposto)]]
+                }
+            }
 
             evapotranspiracao_fo <- data.table::data.table(evapotranspiracao[which((evapotranspiracao$data >= (min(precipitacao$data) + kt_min))
                                          & (evapotranspiracao$data <= (max(precipitacao$data) - kt_max)))])
@@ -710,7 +744,7 @@ executa_visualizador_calibracao <- function(){
             par <- future::future({
                 calibracao(vetor_modelo, kt_min, kt_max, area, Ebin, Tuin, Supin, precipitacao,
                                     evapotranspiracao_fo, vazao_fo, data_inicio_objetivo, data_fim_objetivo,
-                                    limite_inferior, limite_superior)
+                                    limite_inferior, limite_superior, postos_plu[postos_plu$nome == input$sub_bacia])
             })
             
             shiny::observe({
@@ -731,6 +765,12 @@ executa_visualizador_calibracao <- function(){
                 shiny::updateNumericInput(session, "ecof2", value = as.numeric(future::value(par)$par[14]))
                 shiny::updateNumericInput(session, "alfa", value = as.numeric(future::value(par)$par[15]))
                 shiny::updateNumericInput(session, "beta", value = as.numeric(future::value(par)$par[16]))
+                if (numero_postos_plu > 1) {
+                    for (iposto in 1:numero_postos_plu){
+                        postos_plu[postos_plu$nome == input$sub_bacia]$valor[iposto] <- as.numeric(future::value(par)$par[(16 + iposto)])
+                        shiny::updateNumericInput(session, paste0("posto_plu_", iposto), value = as.numeric(future::value(par)$par[(16 + iposto)]))
+                    }
+                }
                 
                 disable_button(FALSE)
                 shinyjs::enable("botao_calibracao")
