@@ -4,10 +4,7 @@
 \alias{executa_visualizador_calibracao}
 \title{Visualizador de calibracao}
 \usage{
-executa_visualizador_calibracao(entrada)
-}
-\arguments{
-\item{entrada}{lista com}
+executa_visualizador_calibracao()
 }
 \description{
 Ferramenta de visualizacao de calibracao do modelo smap/ons

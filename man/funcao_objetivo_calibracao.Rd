@@ -16,7 +16,8 @@ funcao_objetivo_calibracao(
   evapotranspiracao,
   vazao,
   data_inicio_objetivo,
-  data_fim_objetivo
+  data_fim_objetivo,
+  postos_plu
 )
 }
 \arguments{

@@ -18,7 +18,8 @@ calibracao(
   data_inicio_objetivo,
   data_fim_objetivo,
   limite_inferior,
-  limite_superior
+  limite_superior,
+  postos_plu
 )
 }
 \arguments{
