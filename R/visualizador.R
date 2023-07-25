@@ -108,15 +108,18 @@ executa_visualizador_calibracao <- function(){
                             shiny::dateRangeInput(inputId = "periodo_calibracao", label = "Periodo de calibracao", start = NULL, end = NULL, min = NULL, max = NULL)
                         ),
                     ),
-                    
-                    
+
                     shiny::mainPanel(
                         shiny::fluidRow(
                             dygraphs::dygraphOutput("dygraph", heigh = "600px"),
                             shiny::textOutput("funcao_objetivo"),
-                            shiny::actionButton(inputId = "botao_calibracao", label = "Calibrar", class = "btn-lg btn-success"),
-                            shiny::checkboxGroupInput("variaveis", "variaveis", choices = c("Qsup1", "Qsup2", "Qplan", "Qbase")),
-                            shiny::plotOutput("grafico_kts", width = '50%')
+                            shiny::column(3,
+                                shiny::actionButton(inputId = "botao_calibracao", label = "Calibrar", class = "btn-lg btn-success"),
+                                shiny::checkboxGroupInput("variaveis", "variaveis", choices = c("Qsup1", "Qsup2", "Qplan", "Qbase")),
+                                shiny::plotOutput("grafico_kts", width = "50%")
+                            ),
+                            shiny::downloadButton("download_parametros", "Download parametros_sub_bacia.csv"),
+                            shiny::downloadButton("download_postos_plu", "Download postos_plu_sub_bacia.csv")
                         )
                     )
                 )
@@ -778,6 +781,64 @@ executa_visualizador_calibracao <- function(){
             }
             })
         })
+
+        parametros_exportacao <- shiny::reactive({
+            parametros <- parametros_posto()
+
+            parametros$valor[parametros$parametro == "Str"] <- input$str
+            parametros$valor[parametros$parametro == "K2t"] <- input$k2t
+            parametros$valor[parametros$parametro == "Crec"] <- input$crec
+            parametros$valor[parametros$parametro == "Capc"] <- input$capc
+            parametros$valor[parametros$parametro == "K_kt"] <- input$k_kt
+            parametros$valor[parametros$parametro == "H1"] <- input$h1
+            parametros$valor[parametros$parametro == "K2t2"] <- input$k2t2
+            parametros$valor[parametros$parametro == "Ai"] <- input$ai
+            parametros$valor[parametros$parametro == "H"] <- input$h
+            parametros$valor[parametros$parametro == "K1t"] <- input$k1t
+            parametros$valor[parametros$parametro == "K3t"] <- input$k3t
+            parametros$valor[parametros$parametro == "Pcof"] <- input$pcof
+            parametros$valor[parametros$parametro == "Ecof"] <- input$ecof
+            parametros$valor[parametros$parametro == "Ecof2"] <- input$ecof2
+            parametros$valor[parametros$parametro == "Area"] <- area()
+            parametros$valor[parametros$parametro == "ktMin"] <- input$kt_min
+            parametros$valor[parametros$parametro == "ktMax"] <- input$kt_max
+
+            kt <- cria_kt(input$kt_max, input$kt_min, input$alfa, input$beta)
+            parametros$valor[parametros$parametro %in% paste0("Kt", 2:-60)] <- kt
+
+            return(parametros)
+        })
+
+        postos_plu_exportacao <- shiny::reactive({
+            postos_plu <- postos_plu()
+            postos_plu <- postos_plu[postos_plu$nome == input$sub_bacia]
+            numero_postos_plu <- nrow(postos_plu)
+            if (numero_postos_plu > 1) {
+                for (iposto in 1:numero_postos_plu){
+                    postos_plu[postos_plu$nome == input$sub_bacia]$valor[iposto] <- input[[paste0("posto_plu_", iposto)]]
+                }
+            }
+            return(postos_plu)
+        })
+
+        output$download_parametros <- shiny::downloadHandler(
+            filename = function() {
+                paste0("parametros_", input$sub_bacia, ".csv")
+            },
+            content = function(file) {
+                write.csv(parametros_exportacao(), file, quote = FALSE, row.names = FALSE, sep = ";")
+            }
+        )
+
+        output$download_postos_plu <- shiny::downloadHandler(
+            filename = function() {
+                paste0("postos_plu_", input$sub_bacia, ".csv")
+            },
+            content = function(file) {
+                write.csv(postos_plu_exportacao(), file, quote = FALSE, row.names = FALSE, sep = ";")
+            }
+        )
     }
+
     shiny::shinyApp(ui = ui_calibracao, server = servidor_calibracao)
 }
