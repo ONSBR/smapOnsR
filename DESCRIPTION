@@ -15,7 +15,14 @@ Imports:
     Rcpp,
     data.table,
     lubridate,
-    funcaoSmapCpp
+    funcaoSmapCpp,
+    dygraphs,
+    shiny,
+    shinyjs,
+    DT,
+    future,
+    ggplot2,
+    xts
 LazyData: true
 Suggests: 
     testthat (>= 3.0.0)
