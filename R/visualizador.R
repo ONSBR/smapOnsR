@@ -12,6 +12,7 @@
 #' @export
 
 executa_visualizador_calibracao <- function(){
+    `%>%` <- magrittr::`%>%`
     
     ui_calibracao <- shiny::fluidPage(
         shinyjs::useShinyjs(),
@@ -133,6 +134,7 @@ executa_visualizador_calibracao <- function(){
     servidor_calibracao <- function(input, output, session) {
 
         disable_button <- shiny::reactiveVal(FALSE)
+
         shiny::observeEvent(input$sub_bacia, {
             arquivo_parametros <- input$arquivo_parametros
             vazao <- vazao_posto()
@@ -826,7 +828,7 @@ executa_visualizador_calibracao <- function(){
                 paste0("parametros_", input$sub_bacia, ".csv")
             },
             content = function(file) {
-                write.csv(parametros_exportacao(), file, quote = FALSE, row.names = FALSE, sep = ";")
+                utils::write.csv(parametros_exportacao(), file, quote = FALSE, row.names = FALSE, sep = ";")
             }
         )
 
@@ -835,7 +837,7 @@ executa_visualizador_calibracao <- function(){
                 paste0("postos_plu_", input$sub_bacia, ".csv")
             },
             content = function(file) {
-                write.csv(postos_plu_exportacao(), file, quote = FALSE, row.names = FALSE, sep = ";")
+                utils::write.csv(postos_plu_exportacao(), file, quote = FALSE, row.names = FALSE, sep = ";")
             }
         )
     }

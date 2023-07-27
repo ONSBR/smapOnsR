@@ -22,7 +22,8 @@ Imports:
     DT,
     future,
     ggplot2,
-    xts
+    xts,
+    magrittr
 LazyData: true
 Suggests: 
     testthat (>= 3.0.0)
