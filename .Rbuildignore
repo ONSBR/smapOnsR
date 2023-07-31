@@ -1,3 +1,5 @@
+^renv$
+^renv\.lock$
 ^smapOnsR\.Rproj$
 ^\.Rproj\.user$
 ^data-raw$
