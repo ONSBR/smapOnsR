@@ -42,7 +42,8 @@ Exemplo de como realizar o ajuste da transformação censurada latente gaussiana
 
 ```{r example}
 library(smapOnsR)
-## executa um caso
+## Executar linha abaixo
 #pasta_entrada <- system.file("extdata", "Arq_entrada", package = "smapOnsR")
 
 #saida <- executa_caso_oficial(pasta_entrada)
+```

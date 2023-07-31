@@ -33,7 +33,7 @@ gaussiana com a base de dados exemplo.
 
 ``` r
 library(smapOnsR)
-## executa um caso
+## Executar linha abaixo
 #pasta_entrada <- system.file("extdata", "Arq_entrada", package = "smapOnsR")
 
 #saida <- executa_caso_oficial(pasta_entrada)
