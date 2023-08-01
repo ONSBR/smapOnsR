@@ -103,17 +103,29 @@ le_entrada_evapotranspiracao <- function(pasta_entrada, nome_subbacia) {
 #' @export
 le_entrada_caso <- function(pasta_entrada) {
 
-    if (missing("pasta_entrada")) stop("forneca o caminho da pasta 'arq_entrada' a leitura do caso")
+    if (missing("pasta_entrada")) stop("forneca o caminho da pasta 'arq_entrada' para a leitura do caso")
 
     arq <- file.path(pasta_entrada, "caso.txt")
 
-    if (!file.exists(arq)) {
-        stop("nao existe o arquivo do tipo caso.txt")
-    }
+    if (!file.exists(arq)) stop("nao existe o arquivo do tipo caso.txt")
     
-    dat <- data.table::fread(arq, sep = "'")
+    dat <- data.table::fread(arq, sep = "'", header = FALSE, )
     numero_subbacias <- as.numeric(dat[1, V1])
+
+    if (is.na(numero_subbacias)) stop("Valor não numérico de sub-bacias no arquivo caso.txt")
     
+    if (numero_subbacias < 0) stop("Número negativo de sub-bacias no arquivo caso.txt")
+
+    if (numero_subbacias == 0) stop("Valor nulo de sub-bacias no arquivo caso.txt")
+
+    dat <- na.omit(dat)
+
+    if (numero_subbacias != (nrow(dat) - 1)) stop("Número de sub-bacias diferente da quantidade declarada no arquivo caso.txt")
+    
+    duplicados <- dat[duplicated(V1) | duplicated(V1, fromLast = TRUE), V1]
+
+    if (length(duplicados) > 0) stop(paste0("A sub-bacia ", unique(duplicados), " está duplicada no arquivo caso.dat"))
+
     nome_subbacia <- ""
     for (ibacia in 2: nrow(dat)){
         nome_subbacia[ibacia - 1] <- tolower(as.character(dat[ibacia, V1]))

@@ -45,3 +45,49 @@
 #
 #  expect_error(le_entrada_evapotranspiracao(nome_subbacia = "baixoig", pasta_entrada = pasta_entrada))
 #})
+
+test_that("testa arquivo caso.txt", {
+    pasta_entrada <- system.file("extdata", "Arq_entrada", package = "smapOnsR")
+    caso <- le_entrada_caso(pasta_entrada)
+
+    expect_equal(caso$numero_subbacias, 22)
+
+    dir.create(file.path(system.file("extdata", package = "smapOnsR"), "Validacao"))
+    zip::unzip(system.file("extdata", "validacao.zip", package = "smapOnsR"), exdir = system.file("extdata", "Validacao", package = "smapOnsR"))
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN01", "CT1.1", "Arq_Entrada", package = "smapOnsR")
+    expect_error(le_entrada_caso(pasta_entrada))
+    
+    pasta_entrada <- system.file("extdata", "Validacao", "CN01", "CT1.2", "Arq_Entrada", package = "smapOnsR")
+    expect_error(le_entrada_caso(pasta_entrada))
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN01", "CT1.3", "Arq_Entrada", package = "smapOnsR")
+    expect_error(le_entrada_caso(pasta_entrada))
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN01", "CT1.4", "Arq_Entrada", package = "smapOnsR")
+    expect_error(le_entrada_caso(pasta_entrada))
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN01", "CT1.5", "Arq_Entrada", package = "smapOnsR")
+    expect_error(le_entrada_caso(pasta_entrada))
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN01", "CT1.6", "Arq_Entrada", package = "smapOnsR")
+    expect_error(le_entrada_caso(pasta_entrada))
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN01", "CT1.7", "Arq_Entrada", package = "smapOnsR")
+    expect_error(le_entrada_caso(pasta_entrada))
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN01", "CT1.8", "Arq_Entrada", package = "smapOnsR")
+    expect_error(le_entrada_caso(pasta_entrada))
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN01", "CT1.9", "Arq_Entrada", package = "smapOnsR")
+    expect_error(le_entrada_caso(pasta_entrada))
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN01", "CT1.11", "Arq_Entrada", package = "smapOnsR")
+    expect_error(le_entrada_caso(pasta_entrada))
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN01", "CT1.12", "Arq_Entrada", package = "smapOnsR")
+    expect_error(le_entrada_caso(pasta_entrada))
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN01", "CT1.13", "Arq_Entrada", package = "smapOnsR")
+    expect_error(le_entrada_caso(pasta_entrada))
+})
