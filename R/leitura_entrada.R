@@ -350,14 +350,34 @@ le_entrada_modelos_precipitacao <- function(pasta_entrada) {
 
     if (missing("pasta_entrada")) stop("forneca o caminho da pasta 'arq_entrada' a leitura do caso")
 
-    arq <- file.path(pasta_entrada, "modelos_precipitacao.txt")
+    pattern <- "modelos_precipitacao.txt"  
+
+    arquivo <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE)
+
+    arq <- file.path(pasta_entrada, arquivo)
 
     if (!file.exists(arq)) {
         stop("nao existe o arquivo do tipo modelos_precipitacao.txt")
     }
 
-    dat <- data.table::fread(arq)
+    dat <- data.table::fread(arq, header = FALSE)
     numero_cenarios <- as.numeric(dat[1])
+    
+    if (is.na(numero_cenarios)) stop("Valor não numérico de cenários no arquivo modelos_precipitacao.txt")
+    
+    if (numero_cenarios < 0) stop("Número negativo de cenários no arquivo modelos_precipitacao.txt")
+
+    if (numero_cenarios == 0) stop("Valor nulo de cenários no arquivo modelos_precipitacao.txt")
+
+    dat <- na.omit(dat)
+    dat <- dat[!apply(dat, 1, function(row) all(is.na(row) | row == ""))]
+
+    if (numero_cenarios != (nrow(dat) - 1)) stop("Número de cenários diferente da quantidade declarada no arquivo modelos_precipitacao.txt")
+    
+    duplicados <- dat[duplicated(V1) | duplicated(V1, fromLast = TRUE), V1]
+
+    if (length(duplicados) > 0) stop(paste0("A sub-bacia ", unique(duplicados), " está duplicada no arquivo modelos_precipitacao.dat"))
+
 
     nome_cenario <- ""
     for (icenario in 2:nrow(dat)){

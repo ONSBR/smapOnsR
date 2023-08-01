@@ -91,3 +91,49 @@ test_that("testa arquivo caso.txt", {
     pasta_entrada <- system.file("extdata", "Validacao", "CN01", "CT1.13", "Arq_Entrada", package = "smapOnsR")
     expect_error(le_entrada_caso(pasta_entrada))
 })
+
+
+test_that("testa arquivo Modelos_precipitacao.txt", {
+    pasta_entrada <- system.file("extdata", "Arq_entrada", package = "smapOnsR")
+    modelos_precipitacao <- le_entrada_modelos_precipitacao(pasta_entrada)
+
+    expect_equal(modelos_precipitacao$numero_cenarios, 52)
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN02", "CT2.1", "Arq_Entrada", package = "smapOnsR")
+    expect_error(le_entrada_modelos_precipitacao(pasta_entrada))
+    
+    pasta_entrada <- system.file("extdata", "Validacao", "CN02", "CT2.2", "Arq_Entrada", package = "smapOnsR")
+    expect_error(le_entrada_modelos_precipitacao(pasta_entrada))
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN02", "CT2.3", "Arq_Entrada", package = "smapOnsR")
+    expect_error(le_entrada_modelos_precipitacao(pasta_entrada))
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN02", "CT2.4", "Arq_Entrada", package = "smapOnsR")
+    expect_error(le_entrada_modelos_precipitacao(pasta_entrada))
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN02", "CT2.5", "Arq_Entrada", package = "smapOnsR")
+    expect_error(le_entrada_modelos_precipitacao(pasta_entrada))
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN02", "CT2.6", "Arq_Entrada", package = "smapOnsR")
+    expect_error(le_entrada_modelos_precipitacao(pasta_entrada))
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN02", "CT2.7", "Arq_Entrada", package = "smapOnsR")
+    expect_equal(le_entrada_modelos_precipitacao(pasta_entrada)$numero_cenarios, 1)
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN02", "CT2.8", "Arq_Entrada", package = "smapOnsR")
+    expect_equal(le_entrada_modelos_precipitacao(pasta_entrada)$numero_cenarios, 2)
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN02", "CT2.9", "Arq_Entrada", package = "smapOnsR")
+    expect_error(le_entrada_modelos_precipitacao(pasta_entrada))
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN02", "CT2.11", "Arq_Entrada", package = "smapOnsR")
+    expect_equal(le_entrada_modelos_precipitacao(pasta_entrada)$numero_cenarios, 1)
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN02", "CT2.12", "Arq_Entrada", package = "smapOnsR")
+    expect_error(le_entrada_modelos_precipitacao(pasta_entrada))
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN02", "CT2.13", "Arq_Entrada", package = "smapOnsR")
+    expect_error(le_entrada_modelos_precipitacao(pasta_entrada))
+
+    unlink(system.file("extdata", "Validacao", package = "smapOnsR"), recursive = TRUE)
+})
