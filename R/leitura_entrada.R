@@ -160,7 +160,11 @@ le_entrada_inicializacao <- function(pasta_entrada, nome_subbacia) {
         stop("forneca o nome da sub-bacia para a leitura do arquivo 'sub-bacia_inicializacao.txt'")
     }
 
-    arq <- file.path(pasta_entrada, paste0(nome_subbacia, "_inicializacao.txt"))
+    pattern <- paste0(nome_subbacia, "_inicializacao.txt")
+
+    arquivo <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE)
+
+    arq <- file.path(pasta_entrada, arquivo)
 
     if (!file.exists(arq)) {
         stop(paste0("nao existe o arquivo ", arq))
@@ -175,13 +179,37 @@ le_entrada_inicializacao <- function(pasta_entrada, nome_subbacia) {
     inicializacao[, numero_dias_assimilacao := as.numeric(numero_dias_assimilacao)]
     inicializacao <- data.table::melt(inicializacao, id.vars = "nome", variable.name = "variavel",
            value.name = "valor")
-    inicializacao[variavel == "Tuin", valor := valor]
 
-    if (any(inicializacao[, valor] < 0)) {
-        stop(paste0(" variavel ", inicializacao[valor < 0, variavel]," negativa para a sub-bacia ", nome_subbacia))
+    if (any(is.na(inicializacao[, valor] ))) {
+        stop(paste0("variavel ", inicializacao[is.na(valor), variavel]," não existente para a sub-bacia ", nome_subbacia))
     }
 
-    datas_rodadas <- data.table::data.table(data = as.Date(dat[1, V1], format = "%d/%m/%Y"), numero_dias_previsao = as.numeric(dat[3, V1]))
+    if (inicializacao[variavel == "numero_dias_assimilacao", valor] <= 0) {
+        stop(paste0("variavel número de dias de assimilação menor que 2 para a sub-bacia ", nome_subbacia))
+    }
+
+    if (any(inicializacao[, valor] < 0)) {
+        stop(paste0("variavel ", inicializacao[valor < 0, variavel]," negativa para a sub-bacia ", nome_subbacia))
+    }
+
+    if (inicializacao[variavel == "Tuin", valor] > 100) {
+        stop(paste0("variavel Tuin maior que 100 para a sub-bacia ", nome_subbacia))
+    }
+
+    if (!grepl("^\\d{2}/\\d{2}/\\d{4}$", dat[1, V1])) {
+        stop("Formato inválido de data para o arquivo ", arquivo)
+    } else {
+        datas_rodadas <- data.table::data.table(data = as.Date(dat[1, V1], format = "%d/%m/%Y"), numero_dias_previsao = as.numeric(dat[3, V1]))
+        if (is.na(datas_rodadas$data)) stop("Formato inválido de data para o arquivo ", arquivo)
+    }    
+
+    if (any(is.na(datas_rodadas[, numero_dias_previsao] ))) {
+        stop(paste0("número de dias de previsão não existente para a sub-bacia ", nome_subbacia))
+    }
+
+    if (any(datas_rodadas[, numero_dias_previsao] <= 0)) {
+        stop(paste0("número de dias de previsão menor ou igual a zero para a sub-bacia ", nome_subbacia))
+    }
 
     saida <- list(inicializacao = inicializacao, datas_rodadas = datas_rodadas)
     saida
@@ -189,7 +217,7 @@ le_entrada_inicializacao <- function(pasta_entrada, nome_subbacia) {
 
 #' Leitor de arquivo de vazao observada do smap/ons
 #' 
-#' Le arquivo "sub-bacia_inicializacao.txt" utilizado no aplicativo SMAP/ONS
+#' Le arquivo "sub-bacia.txt" utilizado no aplicativo SMAP/ONS
 #' 
 #' @param pasta_entrada caminho da pasta  "arq_entrada"
 #' @param nome_subbacia nome da sub-bacia
