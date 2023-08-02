@@ -457,26 +457,50 @@ le_entrada_pontos_grade <- function(pasta_entrada, nome_subbacia, modelos_precip
             stop(paste0("nao existe o arquivo ", arq))
         }
 
-        aux <- read.table(arq, header = FALSE, sep = ";")
+        aux <- readLines(arq)
+        aux <- aux[nchar(aux) > 0]
+        aux <- strsplit(aux, "\\s+")
         
         aux_pontos_grade <- modelos_precipitacao$nome_cenario
-        aux_pontos_grade[, longitude := as.numeric(substr(aux[2, ], 1, 6))]
-        aux_pontos_grade[, latitude := as.numeric(substr(aux[2, ], 8, 14))]
+        aux_pontos_grade[, longitude := as.numeric(aux[[2]][1])]
+        aux_pontos_grade[, latitude := as.numeric(aux[[2]][2])]
         aux_pontos_grade[, nome := nome_subbacia]
-        
-        if (as.numeric(aux[1, ]) > 1) {
-            for (iponto in 3:as.numeric(aux[1,])) {
+
+        if(is.na(as.numeric(aux[[1]][1]))) stop(paste0("Valor não numérico de número de pontos de grade no arquivo ", arq))
+
+        if(as.numeric(aux[[1]][1]) <= 0) stop(paste0("Valor menor ou igual a zero de pontos de grade no arquivo ", arq))
+
+        if(as.numeric(aux[[1]][1]) != (length(aux) - 1)) stop(paste0("Número de pontos de grade diferente da quantidade declarada no arquivo ", arq))
+
+        if (as.numeric(aux[[1]][1]) > 1) {
+            for (iponto in 3:(as.numeric(aux[[1]][1]) + 1)) {
                 aux_pontos_grade2 <- modelos_precipitacao$nome_cenario
-                aux_pontos_grade[, longitude := as.numeric(substr(aux[iponto, ], 1, 6))]
-                aux_pontos_grade[, latitude := as.numeric(substr(aux[iponto, ], 8, 14))]
+                aux_pontos_grade[, longitude := as.numeric(aux[[iponto]][1])]
+                aux_pontos_grade[, latitude := as.numeric(aux[[iponto]][2])]
                 aux_pontos_grade2[, nome := nome_subbacia]
-                rbind(aux_pontos_grade, aux_pontos_grade2)
+                aux_pontos_grade <- rbind(aux_pontos_grade, aux_pontos_grade2)
             }
         }
         pontos_grade <- rbind(pontos_grade, aux_pontos_grade)
     }
     pontos_grade <- data.table::setcolorder(pontos_grade, c("nome", "nome_cenario_1", "nome_cenario_2", "latitude", "longitude"))
     
+    if (any(is.na(pontos_grade[, latitude] ))) {
+        stop(paste0("Valor não numérico de latitude no arquivo ", arq))
+    }
+
+    if (any(is.na(pontos_grade[, longitude] ))) {
+        stop(paste0("Valor não numérico de longitude no arquivo ", arq))
+    }
+
+    if (any(abs(pontos_grade[, longitude]) >= 100)) {
+        stop(paste0("Valor de longitude maior ou igual a 100 no arquivo ", arq))
+    }
+
+    if (any(abs(pontos_grade[, latitude]) >= 100)) {
+        stop(paste0("Valor de latitude maior ou igual a 100 no arquivo ", arq))
+    }
+
     pontos_grade
 }
 
