@@ -235,9 +235,6 @@ test_that("testa arquivo 'sub_bacia'_'modelo_precipitacao'.txt", {
     caso <- le_entrada_caso(pasta_entrada)
     modelos_precipitacao <- le_entrada_modelos_precipitacao(pasta_entrada)
 
-    nome_subbacia <- "Porto"
-    le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao)
-    
     pasta_entrada <- system.file("extdata", "Validacao", "CN04", "CT4.1", "Arq_Entrada", package = "smapOnsR")
     expect_error(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))
    
@@ -257,10 +254,10 @@ test_that("testa arquivo 'sub_bacia'_'modelo_precipitacao'.txt", {
     expect_error(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN04", "CT4.7", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))
+    expect_equal(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao)$longitude[1], -45.4)
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN04", "CT4.8", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))
+    expect_equal(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao)$longitude[1], -45.4)
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN04", "CT4.9", "Arq_Entrada", package = "smapOnsR")
     expect_equal(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao)$longitude[1], -45)
