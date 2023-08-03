@@ -844,3 +844,100 @@ executa_visualizador_calibracao <- function(){
 
     shiny::shinyApp(ui = ui_calibracao, server = servidor_calibracao)
 }
+
+
+##### VISUALIZADOR DE CASOS EXECUTADOS ############
+
+
+executa_visualizador_previsao <- function(previsoes, assimilacao, precipitacao, funcao_objetivo, historico_vazao){
+    `%>%` <- magrittr::`%>%`
+    
+    ui_previsao <- shiny::fluidPage(
+        shinyjs::useShinyjs(),
+        shiny::titlePanel("Visualizador de previsões do SMAP/ONS"),
+        shiny::tabsetPanel(
+            shiny::tabPanel("Previsão SMAP/ONS",
+                shiny::sidebarLayout(
+                    shiny::sidebarPanel(
+                        shiny::fluidRow(
+                            shiny::selectInput("data_caso", h3("Data do Caso"), 
+                            choices = unique(previsoes[, data_caso]), selected = NULL),
+                            shiny::selectInput("sub_bacia", h3("Sub-bacia"), 
+                            choices = unique(previsoes[, nome]), selected = NULL)
+                        )
+                    ),
+                    shiny::mainPanel(
+                        shiny::fluidRow(
+                            dygraphs::dygraphOutput("dygraph", heigh = "600px"),
+                            shiny::textOutput("funcao_objetivo")
+                        )
+                    )
+                )
+            ),
+            shiny::tabPanel("Tabela Previsão",
+                DT::dataTableOutput("tabela_previsao")
+            ),
+            shiny::tabPanel("Tabela Assimilação",
+                DT::dataTableOutput("tabela_assimilacao")
+            )
+        )
+    )
+
+    servidor_previsao <- function(input, output, session) {
+
+        output$tabela_previsao <- DT::renderDataTable(previsoes)
+
+        output$tabela_assimilacao <- DT::renderDataTable(assimilacao)
+
+        output$dygraph <- dygraphs::renderDygraph({
+            variaveis_grafico <- c("Qcalc", "Qbase")
+            datas_previsao <- previsoes$data_previsao[which((previsoes$variavel == "Qcalc") & (previsoes$nome == input$sub_bacia) & (previsoes$data_caso == input$data_caso))]
+
+            simulacao <- xts::xts()
+            for (variaveis in variaveis_grafico){
+                simulacao <- cbind(simulacao, xts::xts(previsoes$valor[which((previsoes$variavel == variaveis) & (previsoes$nome == input$sub_bacia) & (previsoes$data_caso == input$data_caso))], order.by = datas_previsao))
+            }
+            colnames(simulacao) <- variaveis_grafico
+            
+            datas_assimilacao <- assimilacao$data_assimilacao[which((assimilacao$variavel == variaveis) & (assimilacao$nome == input$sub_bacia) & (assimilacao$data_caso == input$data_caso))]
+            
+            assimilacao_aux <- xts::xts()
+            for (variaveis in variaveis_grafico){
+                assimilacao_aux <- cbind(assimilacao_aux, xts::xts(assimilacao$valor[which((assimilacao$variavel == variaveis) & (assimilacao$nome == input$sub_bacia) & (assimilacao$data_caso == input$data_caso))], order.by = datas_assimilacao))
+            }
+            colnames(assimilacao_aux) <- variaveis_grafico
+
+            simulacao <- rbind(simulacao, assimilacao_aux)
+            datas_precipitacao <- precipitacao$data_previsao[which((precipitacao$data_rodada == input$data_caso) & (precipitacao$nome == input$sub_bacia) & (precipitacao$data_previsao >= min(datas_assimilacao)) & (precipitacao$data_previsao <= max(datas_previsao)))]
+            prec_aux <- xts::xts(x = precipitacao$valor[which((precipitacao$data_rodada == input$data_caso) & (precipitacao$nome == input$sub_bacia) & (precipitacao$data_previsao %in% datas_precipitacao))], order.by = datas_precipitacao)
+            colnames(prec_aux) <- "Precipitacao"
+
+            vazao_observada <- xts::xts(x = historico_vazao$valor[which((historico_vazao$posto == input$sub_bacia) & (historico_vazao$data %in% datas_precipitacao))], order.by = datas_precipitacao)
+            colnames(vazao_observada) <- "vazao_observada"
+
+            dygraphs::dygraph(cbind(simulacao, prec_aux, vazao_observada),
+                            main = input$sub_bacia) %>%
+            dygraphs::dyHighlight(highlightCircleSize = 5,
+                                highlightSeriesBackgroundAlpha = 0.2,
+                                hideOnMouseOut = FALSE,
+                                highlightSeriesOpts = list(strokeWidth = 2)) %>% 
+            dygraphs::dyRangeSelector() %>%
+            dygraphs::dyAxis("y", label = "Vazão (m³/s)", independentTicks = TRUE) %>%
+            dygraphs::dySeries("vazao_observada", color = "#0c2ad3") %>%
+            dygraphs::dySeries("Precipitacao", stepPlot = TRUE, fillGraph = TRUE, axis = 'y2', color = "#0f610f") %>%
+            dygraphs::dyAxis("y2", label = "Precipitação (mm)", valueRange = c(200, 0)) %>%
+            dygraphs::dySeries("Qcalc", color = "red") %>%
+            dygraphs::dySeries("Qbase", color = "#e4c356") %>%
+            dygraphs::dyLegend(show = "follow")
+        })
+
+        output$tabela <- DT::renderDataTable(previsoes)
+
+        output$funcao_objetivo <- shiny::renderText({
+            paste0("funcao objetivo = ", funcao_objetivo$funcao_objetivo[(funcao_objetivo$nome == input$sub_bacia) & (funcao_objetivo$data_caso == input$data_caso)])
+        })
+
+    }
+
+    shiny::shinyApp(ui = ui_previsao, server = servidor_previsao)
+}
