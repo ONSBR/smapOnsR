@@ -51,7 +51,7 @@ test_that("testa rodada 2 dias e 2 cenarios SMAP/ONS rotina cpp", {
             vetor_inicializacao, area, precipitacao,
             evapotranspiracao, Emarg,  numero_dias = 2, numero_cenarios)
 
-  expect_equal(colnames(saida[[1]]), ("Qcalc", "Rsolo", "Rsup", "Rsup2", "Rsub",
+  expect_equal(colnames(saida[[1]]), c("Qcalc", "Rsolo", "Rsup", "Rsup2", "Rsub",
                                   "Es", "Er", "Rec", "Marg", "Ed", "Ed3", "Ed2",
                                   "Eb", "Tu", "Qsup1", "Qplan", "Qsup2", "Qbase"))
   expect_equal(as.numeric(saida[[1]][1, 1]), 1100)
