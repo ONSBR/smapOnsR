@@ -20,5 +20,5 @@ data.table vazao com as colunas
 }
 }
 \description{
-Le arquivo "sub-bacia_inicializacao.txt" utilizado no aplicativo SMAP/ONS
+Le arquivo "sub-bacia.txt" utilizado no aplicativo SMAP/ONS
 }
