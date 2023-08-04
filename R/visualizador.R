@@ -913,7 +913,9 @@ executa_visualizador_previsao <- function(previsoes, assimilacao, precipitacao, 
             prec_aux <- xts::xts(x = precipitacao$valor[which((precipitacao$data_rodada == input$data_caso) & (precipitacao$nome == input$sub_bacia) & (precipitacao$data_previsao %in% datas_precipitacao))], order.by = datas_precipitacao)
             colnames(prec_aux) <- "Precipitacao"
 
-            vazao_observada <- xts::xts(x = historico_vazao$valor[which((historico_vazao$posto == input$sub_bacia) & (historico_vazao$data %in% datas_precipitacao))], order.by = datas_precipitacao)
+            datas_vazao <- historico_vazao$data[(historico_vazao$posto == input$sub_bacia) & (historico_vazao$data <= max(datas_precipitacao)) & (historico_vazao$data >= min(datas_precipitacao))]
+            print(datas_vazao)
+            vazao_observada <- xts::xts(x = historico_vazao$valor[which((historico_vazao$posto == input$sub_bacia) & (historico_vazao$data %in% datas_vazao))], order.by = datas_vazao)
             colnames(vazao_observada) <- "vazao_observada"
 
             dygraphs::dygraph(cbind(simulacao, prec_aux, vazao_observada),
