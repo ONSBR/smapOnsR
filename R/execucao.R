@@ -45,6 +45,11 @@ executa_caso_oficial <- function(pasta_entrada){
         entrada$inicializacao, entrada$precipitacao, entrada$previsao_precipitacao, entrada$evapotranspiracao, entrada$vazao,
         entrada$postos_plu, entrada$datas_rodadas, length(unique(entrada$previsao_precipitacao[, cenario])), entrada$caso$nome_subbacia)
 
+    if (length(unique(entrada$precipitacao_prevista[, cenario])) == 1) {
+        executa_visualizador_previsao(saida$previsoes, saida$assimilacao, saida$precipitacao, 
+        saida$funcao_objetivo, entrada$vazao)
+    }
+
     saida
 }
 
@@ -94,6 +99,11 @@ executa_caso_oficial_novo <- function(pasta_entrada){
     saida <- rodada_encadeada_oficial(entrada$parametros,
           entrada$inicializacao, entrada$precipitacao_observada, entrada$precipitacao_prevista, entrada$evapotranspiracao_nc, entrada$vazao,
           entrada$postos_plu, entrada$datas_rodadas, length(unique(entrada$precipitacao_prevista[, cenario])), entrada$sub_bacias)
+
+    if (length(unique(entrada$precipitacao_prevista[, cenario])) == 1) {
+        executa_visualizador_previsao(saida$previsoes, saida$assimilacao, saida$precipitacao, 
+        saida$funcao_objetivo, entrada$vazao)
+    }
 
     saida
 }
