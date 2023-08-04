@@ -592,7 +592,8 @@ executa_visualizador_calibracao <- function(){
             dygraphs::dySeries("vazao.observada", color = "#0c2ad3") %>%
             dygraphs::dySeries("Precipitacao", stepPlot = TRUE, fillGraph = TRUE, axis = 'y2', color = "#0f610f") %>%
             dygraphs::dyAxis("y2", label = "Precipitação (mm)", valueRange = c(200, 0)) %>%
-            dygraphs::dySeries("Qcalc", color = "red")
+            dygraphs::dySeries("Qcalc", color = "red") %>%
+            dygraphs::dyLegend(show = "follow")
         })
 
         output$tabela <- DT::renderDataTable(saida())
@@ -927,6 +928,7 @@ executa_visualizador_previsao <- function(previsoes, assimilacao, precipitacao, 
             dygraphs::dySeries("Precipitacao", stepPlot = TRUE, fillGraph = TRUE, axis = 'y2', color = "#0f610f") %>%
             dygraphs::dyAxis("y2", label = "Precipitação (mm)", valueRange = c(200, 0)) %>%
             dygraphs::dySeries("Qcalc", color = "red") %>%
+            dygraphs::dyEvent(min(datas_previsao), "Previsão", labelLoc = "bottom") %>%
             dygraphs::dySeries("Qbase", color = "#e4c356") %>%
             dygraphs::dyLegend(show = "follow")
         })
