@@ -45,7 +45,7 @@ executa_caso_oficial <- function(pasta_entrada){
         entrada$inicializacao, entrada$precipitacao, entrada$previsao_precipitacao, entrada$evapotranspiracao, entrada$vazao,
         entrada$postos_plu, entrada$datas_rodadas, length(unique(entrada$previsao_precipitacao[, cenario])), entrada$caso$nome_subbacia)
 
-    if (length(unique(entrada$precipitacao_prevista[, cenario])) == 1) {
+    if (length(unique(entrada$previsao_precipitacao[, cenario])) == 1) {
         executa_visualizador_previsao(saida$previsoes, saida$assimilacao, saida$precipitacao, 
         saida$funcao_objetivo, entrada$vazao)
     }
