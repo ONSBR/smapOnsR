@@ -10,7 +10,7 @@
 #'     \item{posto}{nome do posto}
 #'     \item{valor}{valor da NC de evapotranspiracao observada}
 #'     }
-#' @importFrom data.table data.table
+#' @importFrom data.table data.table setnames setorder
 #' @importFrom lubridate month
 #' @return data.table com as colunas
 #'     \itemize{
@@ -27,7 +27,7 @@ transforma_NC_serie <- function(serie_temporal, normal_climatologica) {
     serie_temporal_etp[, valor.x := NULL]
     serie_temporal_etp[, mes := NULL]
 
-    colnames(serie_temporal_etp) <- c("data", "nome", "valor")
+    data.table::setnames(serie_temporal_etp, old = c("nome.y", "valor.y"), new = c("nome", "valor"))
     data.table::setorder(serie_temporal_etp, nome, data)
     serie_temporal_etp
 }
