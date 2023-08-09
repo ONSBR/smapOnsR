@@ -82,9 +82,27 @@ le_entrada_evapotranspiracao <- function(pasta_entrada, nome_subbacia) {
     }
 
     dat <- data.table::fread(arq)
+
+    if (ncol(dat) < 2) stop(paste0("O arquivo ", arq, " deve possuir 2 colunas"))
+
     dat$posto <- tolower(nome_subbacia)
 
     colnames(dat) <- c("mes", "valor", "nome")
+
+    if (!is.numeric(dat[, mes])) stop(paste0("Valor não numérico para mes no arquivo ", arq))
+
+    if (!is.numeric(dat[, valor])) stop(paste0("Valor não numérico para evapotranspiracao no arquivo ", arq))
+
+    if ((any(dat[, mes] <= 0)) || (any(dat[, mes] > 12)) ) stop(paste0("Valor inválido para mes no arquivo ", arq))
+
+    if (any(dat[, valor] <= 0) ) stop(paste0("Valor negativo para evapotranspiracao no arquivo ", arq))
+
+    duplicados <- dat[duplicated(mes) | duplicated(mes, fromLast = TRUE), mes]
+
+    if (length(duplicados) > 0) stop(paste0("O mes ", unique(duplicados), " está duplicado no arquivo ", arq))
+    
+    if (any(dat[, mes]) > 12)
+
     data.table::setcolorder(dat, c("mes", "nome", "valor"))
 
     dat
