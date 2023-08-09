@@ -239,11 +239,12 @@ le_evapotranspiracao_nc <- function(arq) {
 #' @return saida lista contendo os seguintes data tables:
 #' 
 #' @export
-le_arq_entrada_novo <- function(pasta_entrada){
+le_arq_entrada_novo <- function(pasta_entrada) {
     arquivos <- le_arquivos(pasta_entrada)
 
     if (any(arquivos[, arquivo] == "SUB_BACIAS")) {
-        sub_bacias <- data.table::fread(file.path(pasta_entrada,arquivos[arquivo == "SUB_BACIAS", nome_arquivo]))
+        sub_bacias <- data.table::fread(file.path(pasta_entrada,arquivos[arquivo == "SUB_BACIAS", nome_arquivo]), sep = ";")
+        sub_bacias[, nome := tolower(nome)]
     } else {
         stop("nao existe o arquivo de sub-bacias")
     }
