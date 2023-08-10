@@ -19,7 +19,7 @@ executa_visualizador_calibracao <- function(){
         shiny::titlePanel("Calibracao SMAP/ONS"),
         shiny::tabsetPanel(
             shiny::tabPanel("Dados",
-                shiny::fileInput(inputId = "arquivo_parametros", label = shiny::h3("Selecione o arquivo de parâmetros")),
+                shiny::fileInput(inputId = "arquivo_parametros", label = shiny::h3("Selecione o arquivo de parametros")),
                 shiny::fileInput(inputId = "arquivo_vazao", label = shiny::h3("Selecione o arquivo de vazao")),
                 shiny::fileInput(inputId = "arquivo_precipitacao", label = shiny::h3("Selecione o arquivo de precipitacao")),
                 shiny::fluidRow(
