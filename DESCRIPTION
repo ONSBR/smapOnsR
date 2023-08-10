@@ -23,6 +23,7 @@ Imports:
     xts,
     magrittr,
     hydroGOF,
+    funcaoSmapCpp,
     zip
 Remotes: felipe-treistman/funcaoSmapCpp
 LazyData: true
