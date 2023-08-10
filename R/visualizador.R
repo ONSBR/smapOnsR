@@ -16,22 +16,22 @@ executa_visualizador_calibracao <- function(){
     
     ui_calibracao <- shiny::fluidPage(
         shinyjs::useShinyjs(),
-        shiny::titlePanel("Calibração SMAP/ONS"),
+        shiny::titlePanel("Calibraçao SMAP/ONS"),
         shiny::tabsetPanel(
             shiny::tabPanel("Dados",
                 shiny::fileInput(inputId = "arquivo_parametros", label = shiny::h3("Selecione o arquivo de parâmetros")),
-                shiny::fileInput(inputId = "arquivo_vazao", label = shiny::h3("Selecione o arquivo de vazão")),
-                shiny::fileInput(inputId = "arquivo_precipitacao", label = shiny::h3("Selecione o arquivo de precipitação")),
+                shiny::fileInput(inputId = "arquivo_vazao", label = shiny::h3("Selecione o arquivo de vazao")),
+                shiny::fileInput(inputId = "arquivo_precipitacao", label = shiny::h3("Selecione o arquivo de precipitaçao")),
                 shiny::fluidRow(
                     shiny::column(3, 
-                        shiny::fileInput(inputId = "arquivo_evapotranspiracao", label = shiny::h3("Selecione o arquivo de evapotranspiração")),
-                        shiny::fileInput(inputId = "arquivo_evapotranspiracao_nc", label = shiny::h3("Selecione o arquivo de NC de evapotranspiração"))
+                        shiny::fileInput(inputId = "arquivo_evapotranspiracao", label = shiny::h3("Selecione o arquivo de evapotranspiraçao")),
+                        shiny::fileInput(inputId = "arquivo_evapotranspiracao_nc", label = shiny::h3("Selecione o arquivo de NC de evapotranspiraçao"))
                     )
                 ),
-                shiny::fileInput(inputId = "arquivo_postos_plu", label = shiny::h3("Selecione o arquivo de relação postos plu x sub-bacias")),
+                shiny::fileInput(inputId = "arquivo_postos_plu", label = shiny::h3("Selecione o arquivo de relaçao postos plu x sub-bacias")),
                 shiny::selectInput(inputId ="sub_bacia", label = shiny::h3("Selecione a sub-bacia a ser calibrada"), choices = NULL)
             ),
-            shiny::tabPanel("Calibração",
+            shiny::tabPanel("Calibraçao",
                 shiny::sidebarLayout(
                     shiny::sidebarPanel(
                         shiny::fluidRow(
@@ -42,7 +42,7 @@ executa_visualizador_calibracao <- function(){
                         shiny::hr(),
                         shiny::fluidRow(
                             shiny::column(4, shiny::h3("Limite Inferior"), shiny::uiOutput("li_psat")),
-                            shiny::column(3, shiny::h3("Variáveis"), shiny::uiOutput("psats")),
+                            shiny::column(3, shiny::h3("Variaveis"), shiny::uiOutput("psats")),
                             shiny::column(4, shiny::h3("Limite Superior"), shiny::uiOutput("ls_psat"))
                         ),
                         shiny::hr(),
@@ -64,7 +64,7 @@ executa_visualizador_calibracao <- function(){
                                 shiny::numericInput(inputId = "limite_inferior_ecof2", label = "LI ecof2",value = NULL),
                                 shiny::numericInput(inputId = "limite_inferior_alfa", label = "LI alfa",value = NULL),
                                 shiny::numericInput(inputId = "limite_inferior_beta", label = "LI beta",value = NULL),
-                                shiny::numericInput(inputId = "kt_max", label = "kt máx",value = NULL)
+                                shiny::numericInput(inputId = "kt_max", label = "kt max",value = NULL)
                             ),
                             shiny::column(3,
                                         shiny::numericInput(inputId = "str", label = "str",value = NULL),
@@ -83,7 +83,7 @@ executa_visualizador_calibracao <- function(){
                                         shiny::numericInput(inputId = "ecof2", label = "ecof2",value = NULL),
                                         shiny::numericInput(inputId = "alfa", label = "alfa",value = NULL),
                                         shiny::numericInput(inputId = "beta", label = "beta",value = NULL),
-                                        shiny::numericInput(inputId = "kt_min", label = "kt mín",value = NULL)
+                                        shiny::numericInput(inputId = "kt_min", label = "kt min",value = NULL)
                             ),
                             shiny::column(4, 
                                         shiny::numericInput(inputId = "limite_superior_str", label = "LS str",value = NULL),
@@ -465,7 +465,7 @@ executa_visualizador_calibracao <- function(){
 
             plot <- ggplot2::ggplot() +
                     ggplot2::geom_line(data = kt[which(lag %in% kt_max:-kt_min)], ggplot2::aes(y = kt, x = lag), show.legend = TRUE) + 
-                    ggplot2::labs(title = "Distribuição dos Kts",
+                    ggplot2::labs(title = "Distribuiçao dos Kts",
                                     y = "",
                                     x = "lag") +
                     ggplot2::theme_bw() +
@@ -588,10 +588,10 @@ executa_visualizador_calibracao <- function(){
                                 hideOnMouseOut = FALSE,
                                 highlightSeriesOpts = list(strokeWidth = 2)) %>% 
             dygraphs::dyRangeSelector() %>%
-            dygraphs::dyAxis("y", label = "Vazão (m³/s)", independentTicks = TRUE) %>%
+            dygraphs::dyAxis("y", label = "Vazao (m³/s)", independentTicks = TRUE) %>%
             dygraphs::dySeries("vazao.observada", color = "#0c2ad3") %>%
             dygraphs::dySeries("Precipitacao", stepPlot = TRUE, fillGraph = TRUE, axis = 'y2', color = "#0f610f") %>%
-            dygraphs::dyAxis("y2", label = "Precipitação (mm)", valueRange = c(200, 0)) %>%
+            dygraphs::dyAxis("y2", label = "Precipitaçao (mm)", valueRange = c(200, 0)) %>%
             dygraphs::dySeries("Qcalc", color = "red") %>%
             dygraphs::dyLegend(show = "follow")
         })
@@ -857,7 +857,7 @@ executa_visualizador_previsao <- function(previsoes, assimilacao, precipitacao, 
         shinyjs::useShinyjs(),
         shiny::titlePanel("Visualizador de previsões do SMAP/ONS"),
         shiny::tabsetPanel(
-            shiny::tabPanel("Previsão SMAP/ONS",
+            shiny::tabPanel("Previsao SMAP/ONS",
                 shiny::sidebarLayout(
                     shiny::sidebarPanel(
                         shiny::fluidRow(
@@ -875,10 +875,10 @@ executa_visualizador_previsao <- function(previsoes, assimilacao, precipitacao, 
                     )
                 )
             ),
-            shiny::tabPanel("Tabela Previsão",
+            shiny::tabPanel("Tabela Previsao",
                 DT::dataTableOutput("tabela_previsao")
             ),
-            shiny::tabPanel("Tabela Assimilação",
+            shiny::tabPanel("Tabela Assimilaçao",
                 DT::dataTableOutput("tabela_assimilacao")
             )
         )
@@ -924,12 +924,12 @@ executa_visualizador_previsao <- function(previsoes, assimilacao, precipitacao, 
                                 hideOnMouseOut = FALSE,
                                 highlightSeriesOpts = list(strokeWidth = 2)) %>% 
             dygraphs::dyRangeSelector() %>%
-            dygraphs::dyAxis("y", label = "Vazão (m³/s)", independentTicks = TRUE) %>%
+            dygraphs::dyAxis("y", label = "Vazao (m³/s)", independentTicks = TRUE) %>%
             dygraphs::dySeries("vazao_observada", color = "#0c2ad3") %>%
             dygraphs::dySeries("Precipitacao", stepPlot = TRUE, fillGraph = TRUE, axis = 'y2', color = "#0f610f") %>%
-            dygraphs::dyAxis("y2", label = "Precipitação (mm)", valueRange = c(200, 0)) %>%
+            dygraphs::dyAxis("y2", label = "Precipitaçao (mm)", valueRange = c(200, 0)) %>%
             dygraphs::dySeries("Qcalc", color = "red") %>%
-            dygraphs::dyEvent(min(datas_previsao), "Previsão", labelLoc = "bottom") %>%
+            dygraphs::dyEvent(min(datas_previsao), "Previsao", labelLoc = "bottom") %>%
             dygraphs::dySeries("Qbase", color = "#e4c356") %>%
             dygraphs::dyLegend(show = "follow")
         })

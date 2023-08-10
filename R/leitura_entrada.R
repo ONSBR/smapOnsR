@@ -89,17 +89,17 @@ le_entrada_evapotranspiracao <- function(pasta_entrada, nome_subbacia) {
 
     colnames(dat) <- c("mes", "valor", "nome")
 
-    if (!is.numeric(dat[, mes])) stop(paste0("Valor não numérico para mes no arquivo ", arq))
+    if (!is.numeric(dat[, mes])) stop(paste0("Valor nao numerico para mes no arquivo ", arq))
 
-    if (!is.numeric(dat[, valor])) stop(paste0("Valor não numérico para evapotranspiracao no arquivo ", arq))
+    if (!is.numeric(dat[, valor])) stop(paste0("Valor nao numerico para evapotranspiracao no arquivo ", arq))
 
-    if ((any(dat[, mes] <= 0)) || (any(dat[, mes] > 12)) ) stop(paste0("Valor inválido para mes no arquivo ", arq))
+    if ((any(dat[, mes] <= 0)) || (any(dat[, mes] > 12)) ) stop(paste0("Valor invalido para mes no arquivo ", arq))
 
     if (any(dat[, valor] <= 0) ) stop(paste0("Valor negativo para evapotranspiracao no arquivo ", arq))
 
     duplicados <- dat[duplicated(mes) | duplicated(mes, fromLast = TRUE), mes]
 
-    if (length(duplicados) > 0) stop(paste0("O mes ", unique(duplicados), " está duplicado no arquivo ", arq))
+    if (length(duplicados) > 0) stop(paste0("O mes ", unique(duplicados), " esta duplicado no arquivo ", arq))
     
     if (any(dat[, mes]) > 12)
 
@@ -127,22 +127,22 @@ le_entrada_caso <- function(pasta_entrada) {
 
     if (!file.exists(arq)) stop("nao existe o arquivo do tipo caso.txt")
     
-    dat <- data.table::fread(arq, sep = "'", header = FALSE, )
+    dat <- data.table::fread(arq, sep = "'", header = FALSE)
     numero_subbacias <- as.numeric(dat[1, V1])
 
-    if (is.na(numero_subbacias)) stop("Valor não numérico de sub-bacias no arquivo caso.txt")
+    if (is.na(numero_subbacias)) stop("Valor nao numerico de sub-bacias no arquivo caso.txt")
     
-    if (numero_subbacias < 0) stop("Número negativo de sub-bacias no arquivo caso.txt")
+    if (numero_subbacias < 0) stop("Numero negativo de sub-bacias no arquivo caso.txt")
 
     if (numero_subbacias == 0) stop("Valor nulo de sub-bacias no arquivo caso.txt")
 
     dat <- na.omit(dat)
 
-    if (numero_subbacias != (nrow(dat) - 1)) stop("Número de sub-bacias diferente da quantidade declarada no arquivo caso.txt")
+    if (numero_subbacias != (nrow(dat) - 1)) stop("Numero de sub-bacias diferente da quantidade declarada no arquivo caso.txt")
     
     duplicados <- dat[duplicated(V1) | duplicated(V1, fromLast = TRUE), V1]
 
-    if (length(duplicados) > 0) stop(paste0("A sub-bacia ", unique(duplicados), " está duplicada no arquivo caso.dat"))
+    if (length(duplicados) > 0) stop(paste0("A sub-bacia ", unique(duplicados), " esta duplicada no arquivo caso.dat"))
 
     nome_subbacia <- ""
     for (ibacia in 2: nrow(dat)){
@@ -169,7 +169,7 @@ le_entrada_caso <- function(pasta_entrada) {
 #' e data table datas_rodadas com as colunas
 #'     \itemize{
 #'     \item{data}{data da rodada}
-#'     \item{numero_dias_previsao}{numero de dias de previsão}
+#'     \item{numero_dias_previsao}{numero de dias de previsao}
 #'     }
 #' @export
 le_entrada_inicializacao <- function(pasta_entrada, nome_subbacia) {
@@ -199,11 +199,11 @@ le_entrada_inicializacao <- function(pasta_entrada, nome_subbacia) {
            value.name = "valor")
 
     if (any(is.na(inicializacao[, valor] ))) {
-        stop(paste0("variavel ", inicializacao[is.na(valor), variavel]," não existente para a sub-bacia ", nome_subbacia))
+        stop(paste0("variavel ", inicializacao[is.na(valor), variavel]," nao existente para a sub-bacia ", nome_subbacia))
     }
 
     if (inicializacao[variavel == "numero_dias_assimilacao", valor] <= 0) {
-        stop(paste0("variavel número de dias de assimilação menor que 2 para a sub-bacia ", nome_subbacia))
+        stop(paste0("variavel Numero de dias de assimilaçao menor que 2 para a sub-bacia ", nome_subbacia))
     }
 
     if (any(inicializacao[, valor] < 0)) {
@@ -215,18 +215,18 @@ le_entrada_inicializacao <- function(pasta_entrada, nome_subbacia) {
     }
 
     if (!grepl("^\\d{2}/\\d{2}/\\d{4}$", dat[1, V1])) {
-        stop("Formato inválido de data para o arquivo ", arquivo)
+        stop("Formato invalido de data para o arquivo ", arquivo)
     } else {
         datas_rodadas <- data.table::data.table(data = as.Date(dat[1, V1], format = "%d/%m/%Y"), numero_dias_previsao = as.numeric(dat[3, V1]))
-        if (is.na(datas_rodadas$data)) stop("Formato inválido de data para o arquivo ", arquivo)
+        if (is.na(datas_rodadas$data)) stop("Formato invalido de data para o arquivo ", arquivo)
     }    
 
     if (any(is.na(datas_rodadas[, numero_dias_previsao] ))) {
-        stop(paste0("número de dias de previsão não existente para a sub-bacia ", nome_subbacia))
+        stop(paste0("Numero de dias de previsao nao existente para a sub-bacia ", nome_subbacia))
     }
 
     if (any(datas_rodadas[, numero_dias_previsao] <= 0)) {
-        stop(paste0("número de dias de previsão menor ou igual a zero para a sub-bacia ", nome_subbacia))
+        stop(paste0("Numero de dias de previsao menor ou igual a zero para a sub-bacia ", nome_subbacia))
     }
 
     saida <- list(inicializacao = inicializacao, datas_rodadas = datas_rodadas)
@@ -409,20 +409,20 @@ le_entrada_modelos_precipitacao <- function(pasta_entrada) {
     dat <- data.table::fread(arq, header = FALSE)
     numero_cenarios <- as.numeric(dat[1])
     
-    if (is.na(numero_cenarios)) stop("Valor não numérico de cenários no arquivo modelos_precipitacao.txt")
+    if (is.na(numero_cenarios)) stop("Valor nao numerico de cenarios no arquivo modelos_precipitacao.txt")
     
-    if (numero_cenarios < 0) stop("Número negativo de cenários no arquivo modelos_precipitacao.txt")
+    if (numero_cenarios < 0) stop("Numero negativo de cenarios no arquivo modelos_precipitacao.txt")
 
-    if (numero_cenarios == 0) stop("Valor nulo de cenários no arquivo modelos_precipitacao.txt")
+    if (numero_cenarios == 0) stop("Valor nulo de cenarios no arquivo modelos_precipitacao.txt")
 
     dat <- na.omit(dat)
     dat <- dat[!apply(dat, 1, function(row) all(is.na(row) | row == ""))]
 
-    if (numero_cenarios != (nrow(dat) - 1)) stop("Número de cenários diferente da quantidade declarada no arquivo modelos_precipitacao.txt")
+    if (numero_cenarios != (nrow(dat) - 1)) stop("Numero de cenarios diferente da quantidade declarada no arquivo modelos_precipitacao.txt")
     
     duplicados <- dat[duplicated(V1) | duplicated(V1, fromLast = TRUE), V1]
 
-    if (length(duplicados) > 0) stop(paste0("A sub-bacia ", unique(duplicados), " está duplicada no arquivo modelos_precipitacao.dat"))
+    if (length(duplicados) > 0) stop(paste0("A sub-bacia ", unique(duplicados), " esta duplicada no arquivo modelos_precipitacao.dat"))
 
 
     nome_cenario <- ""
@@ -457,8 +457,8 @@ le_entrada_modelos_precipitacao <- function(pasta_entrada) {
 #'     \item{nome}{nome da sub_bacia}
 #'     \item{nome_cenario_1}{primeira parte do nome dos cenarios de precipitacao considerados o caso}
 #'     \item{nome_cenario_2}{segunda parte do nome dos cenarios de precipitacao considerados o caso}
-#'     \item{latitude}{latitude do ponto de grade do cenário}
-#'     \item{longitude}{longitude do ponto de grade do cenário}
+#'     \item{latitude}{latitude do ponto de grade do cenario}
+#'     \item{longitude}{longitude do ponto de grade do cenario}
 #'     }
 #' @export
 le_entrada_pontos_grade <- function(pasta_entrada, nome_subbacia, modelos_precipitacao) {
@@ -484,11 +484,11 @@ le_entrada_pontos_grade <- function(pasta_entrada, nome_subbacia, modelos_precip
         aux_pontos_grade[, latitude := as.numeric(aux[[2]][2])]
         aux_pontos_grade[, nome := nome_subbacia]
 
-        if(is.na(as.numeric(aux[[1]][1]))) stop(paste0("Valor não numérico de número de pontos de grade no arquivo ", arq))
+        if(is.na(as.numeric(aux[[1]][1]))) stop(paste0("Valor nao numerico de Numero de pontos de grade no arquivo ", arq))
 
         if(as.numeric(aux[[1]][1]) <= 0) stop(paste0("Valor menor ou igual a zero de pontos de grade no arquivo ", arq))
 
-        if(as.numeric(aux[[1]][1]) != (length(aux) - 1)) stop(paste0("Número de pontos de grade diferente da quantidade declarada no arquivo ", arq))
+        if(as.numeric(aux[[1]][1]) != (length(aux) - 1)) stop(paste0("Numero de pontos de grade diferente da quantidade declarada no arquivo ", arq))
 
         if (as.numeric(aux[[1]][1]) > 1) {
             for (iponto in 3:(as.numeric(aux[[1]][1]) + 1)) {
@@ -504,11 +504,11 @@ le_entrada_pontos_grade <- function(pasta_entrada, nome_subbacia, modelos_precip
     pontos_grade <- data.table::setcolorder(pontos_grade, c("nome", "nome_cenario_1", "nome_cenario_2", "latitude", "longitude"))
     
     if (any(is.na(pontos_grade[, latitude] ))) {
-        stop(paste0("Valor não numérico de latitude no arquivo ", arq))
+        stop(paste0("Valor nao numerico de latitude no arquivo ", arq))
     }
 
     if (any(is.na(pontos_grade[, longitude] ))) {
-        stop(paste0("Valor não numérico de longitude no arquivo ", arq))
+        stop(paste0("Valor nao numerico de longitude no arquivo ", arq))
     }
 
     if (any(abs(pontos_grade[, longitude]) >= 100)) {
@@ -524,7 +524,7 @@ le_entrada_pontos_grade <- function(pasta_entrada, nome_subbacia, modelos_precip
 
 #' Le arquivo bat.conf
 #'
-#' Leitor do arquivo de entrada bat.txt contendo para receber qual padrão de arquivo de previsao está 
+#' Leitor do arquivo de entrada bat.txt contendo para receber qual padrao de arquivo de previsao esta 
 #' @param pasta_entrada o arquivo do tipo "caso.txt"
 #' @importFrom  data.table fread
 #' @return formato_previsao numero do tipo de arquivo de previsao
@@ -560,13 +560,13 @@ le_entrada_bat_conf <- function(pasta_entrada) {
 #'     \item{nome}{nome da sub_bacia}
 #'     \item{nome_cenario_1}{primeira parte do nome dos cenarios de precipitacao considerados o caso}
 #'     \item{nome_cenario_2}{segunda parte do nome dos cenarios de precipitacao considerados o caso}
-#'     \item{latitude}{latitude do ponto de grade do cenário}
-#'     \item{longitude}{longitude do ponto de grade do cenário}
+#'     \item{latitude}{latitude do ponto de grade do cenario}
+#'     \item{longitude}{longitude do ponto de grade do cenario}
 #'     }
 #' @param datas_rodadas data table com as colunas
 #'     \itemize{
 #'     \item{data}{data da rodada}
-#'     \item{numero_dias_previsao}{numero de dias de previsão}
+#'     \item{numero_dias_previsao}{numero de dias de previsao}
 #'     }
 #' @importFrom  data.table fread setcolorder setorder
 #' @importFrom stats na.omit
@@ -633,13 +633,13 @@ le_entrada_previsao_precipitacao_2 <- function(pasta_entrada, datas_rodadas, pon
 #'     \item{nome}{nome da sub_bacia}
 #'     \item{nome_cenario_1}{primeira parte do nome dos cenarios de precipitacao considerados o caso}
 #'     \item{nome_cenario_2}{segunda parte do nome dos cenarios de precipitacao considerados o caso}
-#'     \item{latitude}{latitude do ponto de grade do cenário}
-#'     \item{longitude}{longitude do ponto de grade do cenário}
+#'     \item{latitude}{latitude do ponto de grade do cenario}
+#'     \item{longitude}{longitude do ponto de grade do cenario}
 #'     }
 #' @param datas_rodadas data table com as colunas
 #'     \itemize{
 #'     \item{data}{data da rodada}
-#'     \item{numero_dias_previsao}{numero de dias de previsão}
+#'     \item{numero_dias_previsao}{numero de dias de previsao}
 #'     }
 #' @param nome_cenario nome do cenario a ser simulado
 #' @importFrom  data.table fread setcolorder setorder
@@ -711,14 +711,14 @@ le_entrada_previsao_precipitacao_1 <- function(pasta_entrada, datas_rodadas, pon
 #'     \item{nome}{nome da sub_bacia}
 #'     \item{nome_cenario_1}{primeira parte do nome dos cenarios de precipitacao considerados o caso}
 #'     \item{nome_cenario_2}{segunda parte do nome dos cenarios de precipitacao considerados o caso}
-#'     \item{latitude}{latitude do ponto de grade do cenário}
-#'     \item{longitude}{longitude do ponto de grade do cenário}
+#'     \item{latitude}{latitude do ponto de grade do cenario}
+#'     \item{longitude}{longitude do ponto de grade do cenario}
 #'     }
 #' @param data_previsao data da previsao
 #' @param datas_rodadas data table com as colunas
 #'     \itemize{
 #'     \item{data}{data da rodada}
-#'     \item{numero_dias_previsao}{numero de dias de previsão}
+#'     \item{numero_dias_previsao}{numero de dias de previsao}
 #'     }
 #' @param nome_cenario nome do cenario a ser simulado
 #' @importFrom  data.table fread setcolorder setorder
