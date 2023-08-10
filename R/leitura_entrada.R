@@ -127,7 +127,7 @@ le_entrada_caso <- function(pasta_entrada) {
     arquivo <- file.path(pasta_entrada, arquivo)
     if (!file.exists(arquivo)) stop("nao existe o arquivo do tipo caso.txt")
     
-    dat <- data.table::fread(arq, sep = "'", header = FALSE)
+    dat <- data.table::fread(arquivo, sep = "'", header = FALSE)
     numero_subbacias <- as.numeric(dat[1, V1])
 
     if (is.na(numero_subbacias)) stop("Valor nao numerico de sub-bacias no arquivo caso.txt")
