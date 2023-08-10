@@ -588,7 +588,7 @@ executa_visualizador_calibracao <- function(){
                                 hideOnMouseOut = FALSE,
                                 highlightSeriesOpts = list(strokeWidth = 2)) %>% 
             dygraphs::dyRangeSelector() %>%
-            dygraphs::dyAxis("y", label = "Vazao (m³/s)", independentTicks = TRUE) %>%
+            dygraphs::dyAxis("y", label = "Vazao (m3/s)", independentTicks = TRUE) %>%
             dygraphs::dySeries("vazao.observada", color = "#0c2ad3") %>%
             dygraphs::dySeries("Precipitacao", stepPlot = TRUE, fillGraph = TRUE, axis = 'y2', color = "#0f610f") %>%
             dygraphs::dyAxis("y2", label = "Precipitacao (mm)", valueRange = c(200, 0)) %>%
@@ -924,7 +924,7 @@ executa_visualizador_previsao <- function(previsoes, assimilacao, precipitacao, 
                                 hideOnMouseOut = FALSE,
                                 highlightSeriesOpts = list(strokeWidth = 2)) %>% 
             dygraphs::dyRangeSelector() %>%
-            dygraphs::dyAxis("y", label = "Vazao (m³/s)", independentTicks = TRUE) %>%
+            dygraphs::dyAxis("y", label = "Vazao (m3/s)", independentTicks = TRUE) %>%
             dygraphs::dySeries("vazao_observada", color = "#0c2ad3") %>%
             dygraphs::dySeries("Precipitacao", stepPlot = TRUE, fillGraph = TRUE, axis = 'y2', color = "#0f610f") %>%
             dygraphs::dyAxis("y2", label = "Precipitacao (mm)", valueRange = c(200, 0)) %>%
