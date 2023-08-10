@@ -232,10 +232,9 @@ test_that("testa arquivo 'sub_bacia'_inicializacao.txt", {
 
 test_that("testa arquivo 'sub_bacia'_'modelo_precipitacao'.txt", {
     pasta_entrada <- system.file("extdata", "Validacao", "CN04", "CT4.1", "Arq_Entrada", package = "smapOnsR")
-    caso <- le_entrada_caso(pasta_entrada)
     modelos_precipitacao <- le_entrada_modelos_precipitacao(pasta_entrada)
 
-    nome_subbacia < "Porto"
+    nome_subbacia <- "Porto"
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN04", "CT4.1", "Arq_Entrada", package = "smapOnsR")
     expect_error(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))
