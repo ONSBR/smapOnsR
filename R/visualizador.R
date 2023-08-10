@@ -855,7 +855,7 @@ executa_visualizador_previsao <- function(previsoes, assimilacao, precipitacao, 
     
     ui_previsao <- shiny::fluidPage(
         shinyjs::useShinyjs(),
-        shiny::titlePanel("Visualizador de previsões do SMAP/ONS"),
+        shiny::titlePanel("Visualizador de previsoes do SMAP/ONS"),
         shiny::tabsetPanel(
             shiny::tabPanel("Previsao SMAP/ONS",
                 shiny::sidebarLayout(
