@@ -16,6 +16,7 @@ knitr::opts_chunk$set(
 # smapOnsR
 
 <!-- badges: start -->
+[![R-CMD-check](https://github.com/felipe-treistman/smapOnsR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/felipe-treistman/smapOnsR/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 Pacote com a implementacao em R do modelo SMAP/ONS
