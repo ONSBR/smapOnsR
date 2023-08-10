@@ -22,7 +22,6 @@ Imports:
     ggplot2,
     xts,
     magrittr,
-    hydroGOF,
     funcaoSmapCpp,
     zip
 Remotes: felipe-treistman/funcaoSmapCpp
