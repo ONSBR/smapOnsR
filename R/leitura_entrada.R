@@ -124,7 +124,7 @@ le_entrada_caso <- function(pasta_entrada) {
     if (missing("pasta_entrada")) stop("forneca o caminho da pasta 'arq_entrada' para a leitura do caso")
 
     arquivo <- list.files(path = pasta_entrada, pattern = "caso.txt", ignore.case = TRUE)
-
+    arquivo <- file.path(pasta_entrada, arquivo)
     if (!file.exists(arquivo)) stop("nao existe o arquivo do tipo caso.txt")
     
     dat <- data.table::fread(arq, sep = "'", header = FALSE)
