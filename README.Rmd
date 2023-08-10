@@ -39,7 +39,7 @@ devtools::install_github("felipe-treistman/funcaoSmapCpp")
 
 ## Exemplo
 
-Exemplo de como realizar o ajuste da transformação censurada latente gaussiana com a base de dados exemplo.
+Exemplo de como executar um caso com os dados de entrada oficiais.
 
 ```{r example}
 library(smapOnsR)

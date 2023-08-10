@@ -14,7 +14,6 @@ Depends:
 Imports:
     data.table,
     lubridate,
-    funcaoSmapCpp,
     dygraphs,
     shiny,
     shinyjs,
@@ -25,6 +24,7 @@ Imports:
     magrittr,
     hydroGOF,
     zip
+Remotes: felipe-treistman/funcaoSmapCpp
 LazyData: true
 Suggests: 
     testthat (>= 3.0.0)
