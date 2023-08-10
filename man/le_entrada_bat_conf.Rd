@@ -13,5 +13,5 @@ le_entrada_bat_conf(pasta_entrada)
 formato_previsao numero do tipo de arquivo de previsao
 }
 \description{
-Leitor do arquivo de entrada bat.txt contendo para receber qual padrão de arquivo de previsao está
+Leitor do arquivo de entrada bat.txt contendo para receber qual padrao de arquivo de previsao esta
 }

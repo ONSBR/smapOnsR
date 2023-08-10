@@ -68,6 +68,13 @@ calibracao(
 \item{limite_inferior}{vetor com o limite inferior dos parametros}
 
 \item{limite_superior}{vetor com o limite superior dos parametros}
+
+\item{postos_plu}{data.table com as colunas
+\itemize{
+\item{nome}{nome da sub_bacia}
+\item{posto}{nome do posto plu}
+\item{valor}{peso do posto plu}
+}}
 }
 \value{
 objetivo valor da funcao objetivo

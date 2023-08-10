@@ -62,6 +62,13 @@ funcao_objetivo_calibracao(
 \item{data_inicio_objetivo}{data inicial da avaliacao da funcao objetivo}
 
 \item{data_fim_objetivo}{data final da avaliacao da funcao objetivo}
+
+\item{postos_plu}{data.table com as colunas
+\itemize{
+\item{nome}{nome da sub_bacia}
+\item{posto}{nome do posto plu}
+\item{valor}{peso do posto plu}
+}}
 }
 \value{
 objetivo valor da funcao objetivo

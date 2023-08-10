@@ -30,7 +30,12 @@
 #'     \item{id}{id do posto}
 #'     \item{valor}{valor da variavel}
 #'     }
-#' 
+#' @param postos_plu data.table com as colunas
+#'     \itemize{
+#'     \item{nome}{nome da sub_bacia}
+#'     \item{posto}{nome do posto plu}
+#'     \item{valor}{peso do posto plu}
+#'     }
 #' @param data_inicio_objetivo data inicial da avaliacao da funcao objetivo
 #' @param data_fim_objetivo data final da avaliacao da funcao objetivo
 #' @importFrom data.table data.table
@@ -137,6 +142,12 @@ cria_kt <- function(kt_max, kt_min, alfa, beta){
 #' @param data_fim_objetivo data final da avaliacao da funcao objetivo
 #' @param limite_inferior vetor com o limite inferior dos parametros
 #' @param limite_superior vetor com o limite superior dos parametros
+#' @param postos_plu data.table com as colunas
+#'     \itemize{
+#'     \item{nome}{nome da sub_bacia}
+#'     \item{posto}{nome do posto plu}
+#'     \item{valor}{peso do posto plu}
+#'     }
 #' @importFrom data.table data.table
 #' @return objetivo valor da funcao objetivo
 #' @export

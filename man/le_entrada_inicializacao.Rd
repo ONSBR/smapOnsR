@@ -21,7 +21,7 @@ lista com o data.table inicializacao com as colunas
 e data table datas_rodadas com as colunas
 \itemize{
 \item{data}{data da rodada}
-\item{numero_dias_previsao}{numero de dias de previsão}
+\item{numero_dias_previsao}{numero de dias de previsao}
 }
 }
 \description{

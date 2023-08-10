@@ -18,7 +18,7 @@ le_entrada_previsao_precipitacao_0(
 \item{datas_rodadas}{data table com as colunas
 \itemize{
 \item{data}{data da rodada}
-\item{numero_dias_previsao}{numero de dias de previsão}
+\item{numero_dias_previsao}{numero de dias de previsao}
 }}
 
 \item{data_previsao}{data da previsao}
@@ -28,8 +28,8 @@ le_entrada_previsao_precipitacao_0(
 \item{nome}{nome da sub_bacia}
 \item{nome_cenario_1}{primeira parte do nome dos cenarios de precipitacao considerados o caso}
 \item{nome_cenario_2}{segunda parte do nome dos cenarios de precipitacao considerados o caso}
-\item{latitude}{latitude do ponto de grade do cenário}
-\item{longitude}{longitude do ponto de grade do cenário}
+\item{latitude}{latitude do ponto de grade do cenario}
+\item{longitude}{longitude do ponto de grade do cenario}
 }}
 
 \item{nome_cenario}{nome do cenario a ser simulado}
