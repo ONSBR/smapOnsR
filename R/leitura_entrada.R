@@ -203,7 +203,7 @@ le_entrada_inicializacao <- function(pasta_entrada, nome_subbacia) {
     }
 
     if (inicializacao[variavel == "numero_dias_assimilacao", valor] <= 0) {
-        stop(paste0("variavel Numero de dias de assimilaçao menor que 2 para a sub-bacia ", nome_subbacia))
+        stop(paste0("variavel Numero de dias de assimilacao menor que 2 para a sub-bacia ", nome_subbacia))
     }
 
     if (any(inicializacao[, valor] < 0)) {
