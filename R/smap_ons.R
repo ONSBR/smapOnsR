@@ -131,8 +131,8 @@ new_modelo_smap_ons <- function(parametros, postos_plu){
   k3t <- parametros[parametro == "K3t", valor]
 
   #coeficiente temporal
-  kt <- parametros[, valor][3:65]
-  names(kt) <- parametros[, parametro][3:65]
+  kt <- parametros[substr(parametro, 1, 2) == "Kt", valor]
+  names(kt) <- parametros[substr(parametro, 1, 2) == "Kt", parametro]
 
   #coeficientes de ponderacao
   pcof <- parametros[parametro == "Pcof", valor]
