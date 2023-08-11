@@ -1,6 +1,0 @@
-18/01/2023      'data da rodada
-32      'dia de inicializacao do aquecimento do modelo
-19      'número de dias de previsão
-69.86      ' ebin
-319.61      ' supin
-42.89      ' tuin 

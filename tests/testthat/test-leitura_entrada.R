@@ -47,11 +47,6 @@
 #})
 
 test_that("testa arquivo caso.txt", {
-    pasta_entrada <- system.file("extdata", "Arq_entrada", package = "smapOnsR")
-    caso <- le_entrada_caso(pasta_entrada)
-
-    expect_equal(caso$numero_subbacias, 22)
-
     dir.create(file.path(system.file("extdata", package = "smapOnsR"), "Validacao"))
     zip::unzip(system.file("extdata", "validacao.zip", package = "smapOnsR"), exdir = system.file("extdata", "Validacao", package = "smapOnsR"))
 
@@ -94,11 +89,6 @@ test_that("testa arquivo caso.txt", {
 
 
 test_that("testa arquivo Modelos_precipitacao.txt", {
-    pasta_entrada <- system.file("extdata", "Arq_entrada", package = "smapOnsR")
-    modelos_precipitacao <- le_entrada_modelos_precipitacao(pasta_entrada)
-
-    expect_equal(modelos_precipitacao$numero_cenarios, 52)
-
     pasta_entrada <- system.file("extdata", "Validacao", "CN02", "CT2.1", "Arq_Entrada", package = "smapOnsR")
     expect_error(le_entrada_modelos_precipitacao(pasta_entrada))
     

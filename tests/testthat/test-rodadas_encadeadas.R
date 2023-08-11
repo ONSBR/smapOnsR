@@ -31,6 +31,8 @@ test_that("testa rodadas encadeadas", {
 })
 
 test_that("testa rodada ecmwf", {
+  zip::unzip(system.file("extdata", "dados_entrada.zip", package = "smapOnsR"), exdir = system.file("extdata", package = "smapOnsR"))
+
   pasta_entrada <- system.file("extdata", "Arq_entrada", package = "smapOnsR")
   #pasta_entrada <- "inst//extdata//Arq_Entrada"
 
@@ -121,6 +123,11 @@ test_that("testa rodada com serie temporal etp", {
 
     expect_equal(saida$previsao[data_previsao == "2020-05-05" & cenario == "cenario2", valor],
                 saida$previsao[data_previsao == "2020-05-05" & cenario == "historico", valor])
+
+    unlink(system.file("extdata", "Arq_Entrada", package = "smapOnsR"), recursive = TRUE)
+    unlink(system.file("extdata", "arq_entrada_novo_sem_etp", package = "smapOnsR"), recursive = TRUE)
+    unlink(system.file("extdata", "Arq_Entrada0", package = "smapOnsR"), recursive = TRUE)
+    unlink(system.file("extdata", "Arq_Entrada1", package = "smapOnsR"), recursive = TRUE)
 })
 
 #test_that("testa rodada com serie temporal etp", {
