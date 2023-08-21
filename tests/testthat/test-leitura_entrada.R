@@ -51,61 +51,61 @@ test_that("testa arquivo caso.txt", {
     zip::unzip(system.file("extdata", "validacao.zip", package = "smapOnsR"), exdir = system.file("extdata", "Validacao", package = "smapOnsR"))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN01", "CT1.1", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_caso(pasta_entrada))
+    expect_error(suppressWarnings(le_entrada_caso(pasta_entrada)))
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN01", "CT1.2", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_caso(pasta_entrada))
+    expect_error(suppressWarnings(le_entrada_caso(pasta_entrada)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN01", "CT1.3", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_caso(pasta_entrada))
+    expect_error(suppressWarnings(le_entrada_caso(pasta_entrada)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN01", "CT1.4", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_caso(pasta_entrada))
+    expect_error(suppressWarnings(le_entrada_caso(pasta_entrada)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN01", "CT1.5", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_caso(pasta_entrada))
+    expect_error(suppressWarnings(le_entrada_caso(pasta_entrada)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN01", "CT1.6", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_caso(pasta_entrada))
+    expect_error(suppressWarnings(le_entrada_caso(pasta_entrada)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN01", "CT1.7", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_caso(pasta_entrada))
+    expect_error(suppressWarnings(le_entrada_caso(pasta_entrada)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN01", "CT1.8", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_caso(pasta_entrada))
+    expect_error(suppressWarnings(le_entrada_caso(pasta_entrada)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN01", "CT1.9", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_caso(pasta_entrada))
+    expect_error(suppressWarnings(le_entrada_caso(pasta_entrada)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN01", "CT1.11", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_caso(pasta_entrada))
+    expect_error(suppressWarnings(le_entrada_caso(pasta_entrada)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN01", "CT1.12", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_caso(pasta_entrada))
+    expect_error(suppressWarnings(le_entrada_caso(pasta_entrada)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN01", "CT1.13", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_caso(pasta_entrada))
+    expect_error(suppressWarnings(le_entrada_caso(pasta_entrada)))
 })
 
 
 test_that("testa arquivo Modelos_precipitacao.txt", {
     pasta_entrada <- system.file("extdata", "Validacao", "CN02", "CT2.1", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_modelos_precipitacao(pasta_entrada))
+    expect_error(suppressWarnings(le_entrada_modelos_precipitacao(pasta_entrada)))
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN02", "CT2.2", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_modelos_precipitacao(pasta_entrada))
+    expect_error(suppressWarnings(le_entrada_modelos_precipitacao(pasta_entrada)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN02", "CT2.3", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_modelos_precipitacao(pasta_entrada))
+    expect_error(suppressWarnings(le_entrada_modelos_precipitacao(pasta_entrada)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN02", "CT2.4", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_modelos_precipitacao(pasta_entrada))
+    expect_error(suppressWarnings(le_entrada_modelos_precipitacao(pasta_entrada)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN02", "CT2.5", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_modelos_precipitacao(pasta_entrada))
+    expect_error(suppressWarnings(le_entrada_modelos_precipitacao(pasta_entrada)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN02", "CT2.6", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_modelos_precipitacao(pasta_entrada))
+    expect_error(suppressWarnings(le_entrada_modelos_precipitacao(pasta_entrada)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN02", "CT2.7", "Arq_Entrada", package = "smapOnsR")
     expect_equal(le_entrada_modelos_precipitacao(pasta_entrada)$numero_cenarios, 1)
@@ -114,220 +114,220 @@ test_that("testa arquivo Modelos_precipitacao.txt", {
     expect_equal(le_entrada_modelos_precipitacao(pasta_entrada)$numero_cenarios, 2)
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN02", "CT2.9", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_modelos_precipitacao(pasta_entrada))
+    expect_error(suppressWarnings(le_entrada_modelos_precipitacao(pasta_entrada)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN02", "CT2.11", "Arq_Entrada", package = "smapOnsR")
     expect_equal(le_entrada_modelos_precipitacao(pasta_entrada)$numero_cenarios, 1)
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN02", "CT2.12", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_modelos_precipitacao(pasta_entrada))
+    expect_error(suppressWarnings(le_entrada_modelos_precipitacao(pasta_entrada)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN02", "CT2.13", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_modelos_precipitacao(pasta_entrada))
+    expect_error(suppressWarnings(le_entrada_modelos_precipitacao(pasta_entrada)))
 })
 
 test_that("testa arquivo 'sub_bacia'_inicializacao.txt", {
     nome_subbacia <- "Porto"
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN03", "CT3.1", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_inicializacao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_inicializacao(pasta_entrada, nome_subbacia)))
    
     pasta_entrada <- system.file("extdata", "Validacao", "CN03", "CT3.2", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_inicializacao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_inicializacao(pasta_entrada, nome_subbacia)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN03", "CT3.3", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_inicializacao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_inicializacao(pasta_entrada, nome_subbacia)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN03", "CT3.4", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_inicializacao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_inicializacao(pasta_entrada, nome_subbacia)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN03", "CT3.5", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_inicializacao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_inicializacao(pasta_entrada, nome_subbacia)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN03", "CT3.6", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_inicializacao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_inicializacao(pasta_entrada, nome_subbacia)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN03", "CT3.7", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_inicializacao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_inicializacao(pasta_entrada, nome_subbacia)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN03", "CT3.8", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_inicializacao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_inicializacao(pasta_entrada, nome_subbacia)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN03", "CT3.9", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_inicializacao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_inicializacao(pasta_entrada, nome_subbacia)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN03", "CT3.10", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_inicializacao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_inicializacao(pasta_entrada, nome_subbacia)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN03", "CT3.11", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_inicializacao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_inicializacao(pasta_entrada, nome_subbacia)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN03", "CT3.12", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_inicializacao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_inicializacao(pasta_entrada, nome_subbacia)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN03", "CT3.13", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_inicializacao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_inicializacao(pasta_entrada, nome_subbacia)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN03", "CT3.14", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_inicializacao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_inicializacao(pasta_entrada, nome_subbacia)))
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN03", "CT3.15", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_inicializacao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_inicializacao(pasta_entrada, nome_subbacia)))
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN03", "CT3.16", "Arq_Entrada", package = "smapOnsR")
     expect_equal(le_entrada_inicializacao(pasta_entrada, nome_subbacia)$inicializacao[variavel == "Ebin", valor], 12.5)
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN03", "CT3.17", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_inicializacao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_inicializacao(pasta_entrada, nome_subbacia)))
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN03", "CT3.18", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_inicializacao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_inicializacao(pasta_entrada, nome_subbacia)))
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN03", "CT3.19", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_inicializacao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_inicializacao(pasta_entrada, nome_subbacia)))
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN03", "CT3.20", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_inicializacao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_inicializacao(pasta_entrada, nome_subbacia)))
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN03", "CT3.21", "Arq_Entrada", package = "smapOnsR")
     expect_equal(le_entrada_inicializacao(pasta_entrada, nome_subbacia)$inicializacao[variavel == "Supin", valor], 1.4)
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN03", "CT3.22", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_inicializacao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_inicializacao(pasta_entrada, nome_subbacia)))
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN03", "CT3.23", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_inicializacao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_inicializacao(pasta_entrada, nome_subbacia)))
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN03", "CT3.24", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_inicializacao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_inicializacao(pasta_entrada, nome_subbacia)))
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN03", "CT3.25", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_inicializacao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_inicializacao(pasta_entrada, nome_subbacia)))
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN03", "CT3.26", "Arq_Entrada", package = "smapOnsR")
     expect_equal(le_entrada_inicializacao(pasta_entrada, nome_subbacia)$inicializacao[variavel == "Tuin", valor], 30.2)
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN03", "CT3.27", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_inicializacao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_inicializacao(pasta_entrada, nome_subbacia)))
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN03", "CT3.28", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_inicializacao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_inicializacao(pasta_entrada, nome_subbacia)))
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN03", "CT3.29", "Arq_Entrada", package = "smapOnsR")
     expect_equal(le_entrada_inicializacao(pasta_entrada, nome_subbacia)$inicializacao[variavel == "Tuin", valor], 30.0)
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN03", "CT3.30", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_inicializacao(pasta_entrada, nome_subbacia))    
+    expect_error(suppressWarnings(le_entrada_inicializacao(pasta_entrada, nome_subbacia)))    
 })
 
 test_that("testa arquivo 'sub_bacia'_'modelo_precipitacao'.txt", {
     pasta_entrada <- system.file("extdata", "Validacao", "CN04", "CT4.1", "Arq_Entrada", package = "smapOnsR")
-    modelos_precipitacao <- le_entrada_modelos_precipitacao(pasta_entrada)
+    modelos_precipitacao <- suppressWarnings(le_entrada_modelos_precipitacao(pasta_entrada))
 
     nome_subbacia <- "Porto"
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN04", "CT4.1", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))
+    expect_error(suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao)))
    
     pasta_entrada <- system.file("extdata", "Validacao", "CN04", "CT4.2", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))
+    expect_error(suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN04", "CT4.3", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))
+    expect_error(suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN04", "CT4.4", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))
+    expect_error(suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN04", "CT4.5", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))
+    expect_error(suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN04", "CT4.6", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))
+    expect_error(suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN04", "CT4.7", "Arq_Entrada", package = "smapOnsR")
-    expect_equal(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao)$longitude[1], -45.4)
+    expect_equal(suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))$longitude[1], -45.4)
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN04", "CT4.8", "Arq_Entrada", package = "smapOnsR")
-    expect_equal(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao)$longitude[1], -45.4)
+    expect_equal(suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))$longitude[1], -45.4)
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN04", "CT4.9", "Arq_Entrada", package = "smapOnsR")
-    expect_equal(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao)$longitude[1], -45)
+    expect_equal(suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))$longitude[1], -45)
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN04", "CT4.10", "Arq_Entrada", package = "smapOnsR")
-    expect_equal(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao)$longitude[1], -45.4)
+    expect_equal(suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))$longitude[1], -45.4)
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN04", "CT4.11", "Arq_Entrada", package = "smapOnsR")
-    expect_equal(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao)$longitude[1], -45.4)
+    expect_equal(suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))$longitude[1], -45.4)
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN04", "CT4.12", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))
+    expect_error(suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN04", "CT4.13", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))
+    expect_error(suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN04", "CT4.14", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))
+    expect_error(suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao)))
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN04", "CT4.15", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))
+    expect_error(suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao)))
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN04", "CT4.16", "Arq_Entrada", package = "smapOnsR")
-    expect_equal(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao)$latitude[1], -21)
+    expect_equal(suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))$latitude[1], -21)
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN04", "CT4.17", "Arq_Entrada", package = "smapOnsR")
-    expect_equal(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao)$latitude[1], -21.8)
+    expect_equal(suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))$latitude[1], -21.8)
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN04", "CT4.18", "Arq_Entrada", package = "smapOnsR")
-    expect_equal(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao)$latitude[1], -21.801)
+    expect_equal(suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))$latitude[1], -21.801)
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN04", "CT4.19", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))
+    expect_error(suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao)))
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN04", "CT4.20", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))
+    expect_error(suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao)))
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN04", "CT4.21", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))
+    expect_error(suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao)))
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN04", "CT4.22", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))
+    expect_error(suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao)))
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN04", "CT4.23", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))
+    expect_error(suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao)))
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN04", "CT4.24", "Arq_Entrada", package = "smapOnsR")
-    expect_equal(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao)$longitude[1], -45.4)
+    expect_equal(suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))$longitude[1], -45.4)
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN04", "CT4.25", "Arq_Entrada", package = "smapOnsR")
     expect_equal(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao)$longitude[1], -45.4)
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN04", "CT4.26", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))
+    expect_error(suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao)))
 })
 
 test_that("testa arquivo 'sub_bacia'_'evapotranspiracao'.txt", {
     nome_subbacia <- "Porto"
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN05", "CT5.1", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_evapotranspiracao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_evapotranspiracao(pasta_entrada, nome_subbacia)))
    
     pasta_entrada <- system.file("extdata", "Validacao", "CN05", "CT5.2", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_evapotranspiracao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_evapotranspiracao(pasta_entrada, nome_subbacia)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN05", "CT5.3", "Arq_Entrada", package = "smapOnsR")
     expect_equal(le_entrada_evapotranspiracao(pasta_entrada, nome_subbacia)$mes[1], 1)
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN05", "CT5.4", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_evapotranspiracao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_evapotranspiracao(pasta_entrada, nome_subbacia)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN05", "CT5.5", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_evapotranspiracao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_evapotranspiracao(pasta_entrada, nome_subbacia)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN05", "CT5.6", "Arq_Entrada", package = "smapOnsR")
     expect_equal(le_entrada_evapotranspiracao(pasta_entrada, nome_subbacia)$mes[1], 1)
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN05", "CT5.7", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_evapotranspiracao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_evapotranspiracao(pasta_entrada, nome_subbacia)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN05", "CT5.8", "Arq_Entrada", package = "smapOnsR")
     expect_equal(le_entrada_evapotranspiracao(pasta_entrada, nome_subbacia)$valor[1], 4)
@@ -339,22 +339,22 @@ test_that("testa arquivo 'sub_bacia'_'evapotranspiracao'.txt", {
     expect_equal(le_entrada_evapotranspiracao(pasta_entrada, nome_subbacia)$valor[1], 4.904)
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN05", "CT5.11", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_evapotranspiracao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_evapotranspiracao(pasta_entrada, nome_subbacia)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN05", "CT5.12", "Arq_Entrada", package = "smapOnsR")
     expect_equal(le_entrada_evapotranspiracao(pasta_entrada, nome_subbacia)$valor[1], 494)
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN05", "CT5.13", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_evapotranspiracao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_evapotranspiracao(pasta_entrada, nome_subbacia)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN05", "CT5.14", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_evapotranspiracao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_evapotranspiracao(pasta_entrada, nome_subbacia)))
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN05", "CT5.15", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_evapotranspiracao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_evapotranspiracao(pasta_entrada, nome_subbacia)))
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN05", "CT5.16", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_evapotranspiracao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_evapotranspiracao(pasta_entrada, nome_subbacia)))
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN05", "CT5.17", "Arq_Entrada", package = "smapOnsR")
     expect_equal(le_entrada_evapotranspiracao(pasta_entrada, nome_subbacia)$valor[1], 4.94)
@@ -363,7 +363,7 @@ test_that("testa arquivo 'sub_bacia'_'evapotranspiracao'.txt", {
     expect_equal(le_entrada_evapotranspiracao(pasta_entrada, nome_subbacia)$valor[1], 4.94)
     
     pasta_entrada <- system.file("extdata", "Validacao", "CN05", "CT5.19", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_entrada_evapotranspiracao(pasta_entrada, nome_subbacia))
+    expect_error(suppressWarnings(le_entrada_evapotranspiracao(pasta_entrada, nome_subbacia)))
 
     unlink(system.file("extdata", "Validacao", package = "smapOnsR"), recursive = TRUE)
 })
