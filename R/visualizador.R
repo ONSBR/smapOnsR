@@ -9,6 +9,7 @@
 #' @importFrom shinyjs toggleState enable disable
 #' @importFrom future future value resolved
 #' @importFrom DT renderDataTable dataTableOutput
+#' @importFrom plotly renderPlotly plotlyOutput plot_ly
 #' @export
 
 executa_visualizador_calibracao <- function(){
@@ -114,10 +115,12 @@ executa_visualizador_calibracao <- function(){
                         shiny::fluidRow(
                             dygraphs::dygraphOutput("dygraph", heigh = "600px"),
                             shiny::textOutput("funcao_objetivo"),
+                            dygraphs::dygraphOutput("dygraph_zoom", heigh = "600px"),
+                            shiny::dateRangeInput("zoom_calibracao", "Zoom calibracao", start = NULL, end = NULL, min = NULL, max = NULL),
                             shiny::column(3,
                                 shiny::actionButton(inputId = "botao_calibracao", label = "Calibrar", class = "btn-lg btn-success"),
                                 shiny::checkboxGroupInput("variaveis", "variaveis", choices = c("Qsup1", "Qsup2", "Qplan", "Qbase")),
-                                shiny::plotOutput("grafico_kts", width = "50%")
+                                plotly::plotlyOutput("grafico_kts")
                             ),
                             shiny::downloadButton("download_parametros", "Download parametros_sub_bacia.csv"),
                             shiny::downloadButton("download_postos_plu", "Download postos_plu_sub_bacia.csv")
@@ -204,6 +207,7 @@ executa_visualizador_calibracao <- function(){
                 data_minimo <- (min(precipitacao$data) + kt_min)
                 data_maximo <- (max(precipitacao$data) - kt_max)
                 shiny::updateDateRangeInput(session, "periodo_calibracao", start = data_minimo, end = data_maximo, min = data_minimo, max = data_maximo)
+                shiny::updateDateRangeInput(session, "zoom_calibracao", start = data_minimo, end = data_maximo, min = data_minimo, max = data_maximo)
             }
         })
 
@@ -217,6 +221,7 @@ executa_visualizador_calibracao <- function(){
                 data_minimo <- (min(precipitacao$data) + kt_min)
                 data_maximo <- (max(precipitacao$data) - kt_max)
                 shiny::updateDateRangeInput(session, "periodo_calibracao", start = data_minimo, end = data_maximo, min = data_minimo, max = data_maximo)
+                shiny::updateDateRangeInput(session, "zoom_calibracao", start = data_minimo, end = data_maximo, min = data_minimo, max = data_maximo)
             }
         })
 
@@ -230,6 +235,7 @@ executa_visualizador_calibracao <- function(){
                 data_minimo <- (min(precipitacao$data) + kt_min)
                 data_maximo <- (max(precipitacao$data) - kt_max)
                 shiny::updateDateRangeInput(session, "periodo_calibracao", start = data_minimo, end = data_maximo, min = data_minimo, max = data_maximo)
+                shiny::updateDateRangeInput(session, "zoom_calibracao", start = data_minimo, end = data_maximo, min = data_minimo, max = data_maximo)
             }
         })
         
@@ -452,7 +458,7 @@ executa_visualizador_calibracao <- function(){
             shinyjs::toggleState(id = "botao_calibracao", condition = !disable_button())
         })
 
-        output$grafico_kts <- shiny::renderPlot({
+        output$grafico_kts <- plotly::renderPlotly({
             vetor_modelo <- vetor_modelo()
             vetor_modelo[15] <- input$alfa
             vetor_modelo[16] <- input$beta
@@ -463,20 +469,7 @@ executa_visualizador_calibracao <- function(){
             kt <- data.table::data.table(kt)
             kt$lag <- 2:-60
 
-            plot <- ggplot2::ggplot() +
-                    ggplot2::geom_line(data = kt[which(lag %in% kt_max:-kt_min)], ggplot2::aes(y = kt, x = lag), show.legend = TRUE) + 
-                    ggplot2::labs(title = "Distribuicao dos Kts",
-                                    y = "",
-                                    x = "lag") +
-                    ggplot2::theme_bw() +
-                    ggplot2::theme(title = ggplot2::element_text(size = 20, face = "bold"),
-                   axis.text = ggplot2::element_text(size = 14),
-                   axis.text.x = ggplot2::element_text(size = 12, angle = 90, vjust = -0.1),
-                   axis.title = ggplot2::element_text(size = 14, face = "bold"),
-                   strip.text = ggplot2::element_text(size = 20),
-                   legend.text = ggplot2::element_text(size = 20),
-                   legend.position = 'bottom')
-            print(plot)
+            plot <- plotly::plot_ly(data = kt[which(lag %in% kt_max:-kt_min)], x = ~lag, y = ~kt, name = 'Distribuicao dos Kts', type = 'scatter', mode = 'lines', height = 4, width = 4) 
         })
 
         saida <-  shiny::reactive({
@@ -579,6 +572,43 @@ executa_visualizador_calibracao <- function(){
             colnames(observacao) <- "vazao observada"
 
             prec_aux <- xts::xts(x = precipitacao$valor, order.by =  precipitacao$data)
+            colnames(prec_aux) <- "Precipitacao"
+
+            dygraphs::dygraph(cbind(simulacao, observacao, prec_aux),
+                            main = input$sub_bacia, ) %>%
+            dygraphs::dyHighlight(highlightCircleSize = 5,
+                                highlightSeriesBackgroundAlpha = 0.2,
+                                hideOnMouseOut = FALSE,
+                                highlightSeriesOpts = list(strokeWidth = 2)) %>% 
+            dygraphs::dyRangeSelector() %>%
+            dygraphs::dyAxis("y", label = "Vazao (m3/s)", independentTicks = TRUE) %>%
+            dygraphs::dySeries("vazao.observada", color = "#0c2ad3") %>%
+            dygraphs::dySeries("Precipitacao", stepPlot = TRUE, fillGraph = TRUE, axis = 'y2', color = "#0f610f") %>%
+            dygraphs::dyAxis("y2", label = "Precipitacao (mm)", valueRange = c(200, 0)) %>%
+            dygraphs::dySeries("Qcalc", color = "red") %>%
+            dygraphs::dyLegend(show = "follow")
+        })
+
+        output$dygraph_zoom <- dygraphs::renderDygraph({
+            variaveis_grafico <- c("Qcalc", input$variaveis)
+            vazao <- vazao_posto()
+            evapotranspiracao <- evapotranspiracao_posto()
+            precipitacao <- precipitacao_posto()
+            postos_plu <- postos_plu()
+
+            precipitacao <- ponderacao_espacial(precipitacao, postos_plu[postos_plu$nome == input$sub_bacia])
+            saida <- saida()
+            saida <- data.table::melt(saida, id.vars = c("data"), variable.name = "variavel",
+                                        value.name = "valor")
+            simulacao <- xts::xts()
+            for (variaveis in variaveis_grafico){
+                simulacao <- cbind(simulacao, xts::xts(saida$valor[which((saida$variavel == variaveis) & (saida$data >= input$zoom_calibracao[1]) & (saida$data <= input$zoom_calibracao[2]))], order.by = saida$data[which((saida$variavel == variaveis) & (saida$data >= input$zoom_calibracao[1]) & (saida$data <= input$zoom_calibracao[2]))]))
+            }
+            colnames(simulacao) <- variaveis_grafico
+            observacao <- xts::xts(x = vazao$valor[which((vazao$data >= input$zoom_calibracao[1]) & (vazao$data <= input$zoom_calibracao[2]))], order.by =  vazao$data[which((vazao$data >= input$zoom_calibracao[1]) & (vazao$data <= input$zoom_calibracao[2]))])
+            colnames(observacao) <- "vazao observada"
+
+            prec_aux <- xts::xts(x = precipitacao$valor[which((precipitacao$data >= input$zoom_calibracao[1]) & (precipitacao$data <= input$zoom_calibracao[2]))], order.by =  precipitacao$data[which((precipitacao$data >= input$zoom_calibracao[1]) & (precipitacao$data <= input$zoom_calibracao[2]))])
             colnames(prec_aux) <- "Precipitacao"
 
             dygraphs::dygraph(cbind(simulacao, observacao, prec_aux),

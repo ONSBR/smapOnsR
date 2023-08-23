@@ -23,6 +23,7 @@ Imports:
     xts,
     magrittr,
     funcaoSmapCpp,
+    plotly,
     zip
 Remotes: felipe-treistman/funcaoSmapCpp
 LazyData: true
