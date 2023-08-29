@@ -30,13 +30,6 @@ Este pacote ainda nao se encontra disponibilizado no CRAN, de modo que deve ser 
 devtools::install_github("felipe-treistman/smapOnsR")
 ```
 
-Por questões de paralelismo a funcao principal está separada em um pacote a parte, sendo necessária a sua instalação:
-
-``` r
-# install.packages("devtools")
-devtools::install_github("felipe-treistman/funcaoSmapCpp")
-```
-
 ## Exemplo
 
 Exemplo de como executar um caso com os dados de entrada oficiais.
