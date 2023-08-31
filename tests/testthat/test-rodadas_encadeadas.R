@@ -33,7 +33,7 @@ test_that("testa rodadas encadeadas", {
 test_that("testa rodada ecmwf", {
   zip::unzip(system.file("extdata", "dados_entrada.zip", package = "smapOnsR"), exdir = system.file("extdata", package = "smapOnsR"))
 
-  pasta_entrada <- system.file("extdata", "Arq_entrada", package = "smapOnsR")
+  pasta_entrada <- system.file("extdata", "Arq_Entrada", package = "smapOnsR")
   #pasta_entrada <- "inst//extdata//Arq_Entrada"
 
   entrada <- le_arq_entrada(pasta_entrada)
@@ -58,7 +58,7 @@ test_that("testa rodada ecmwf", {
 })
 
 test_that("testa rodada ecmwf formato oficial", {
-  pasta_entrada <- system.file("extdata", "Arq_entrada1", package = "smapOnsR")
+  pasta_entrada <- system.file("extdata", "Arq_Entrada1", package = "smapOnsR")
 
   entrada <- le_arq_entrada(pasta_entrada)
 
@@ -71,7 +71,7 @@ test_that("testa rodada ecmwf formato oficial", {
 })
 
 test_that("testa rodada oficial", {
-  pasta_entrada <- system.file("extdata", "Arq_entrada0", package = "smapOnsR")
+  pasta_entrada <- system.file("extdata", "Arq_Entrada0", package = "smapOnsR")
 
   entrada <- le_arq_entrada(pasta_entrada)
 

@@ -1,7 +1,7 @@
 test_that("testa execucao oficial", {
   zip::unzip(system.file("extdata", "dados_entrada.zip", package = "smapOnsR"), exdir = system.file("extdata", package = "smapOnsR"))
   
-  pasta_entrada <- system.file("extdata", "Arq_entrada1", package = "smapOnsR")
+  pasta_entrada <- system.file("extdata", "Arq_Entrada1", package = "smapOnsR")
 
   saida <- executa_caso_oficial(pasta_entrada)
 

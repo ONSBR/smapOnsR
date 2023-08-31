@@ -1,5 +1,5 @@
 test_that("Testa a funcao de calibracao", {
-  nome2 <- "sobradinho"
+  nome2 <- "baixoig"
   modelo <- new_modelo_smap_ons(parametros[Nome == nome2], postos_plu[nome == nome2])
   kt_max <- max(which(modelo$kt[3:1] > 0)) - 1
   kt_min <- max(which(modelo$kt[3:63] > 0)) - 1

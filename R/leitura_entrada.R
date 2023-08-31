@@ -77,6 +77,12 @@ le_entrada_evapotranspiracao <- function(pasta_entrada, nome_subbacia) {
 
     arq <- file.path(pasta_entrada, paste0(nome_subbacia, "_evapotranspiracao.txt"))
 
+    pattern <- paste0(nome_subbacia, "_evapotranspiracao.txt")
+        
+    arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE)
+
+    arq <- file.path(pasta_entrada, arq)
+
     if (!file.exists(arq)) {
         stop(paste0("nao existe o arquivo ", arq))
     }
@@ -469,7 +475,11 @@ le_entrada_pontos_grade <- function(pasta_entrada, nome_subbacia, modelos_precip
 
     pontos_grade <- data.table::data.table()
     for (cenario in unique(modelos_precipitacao$nome_cenario[, nome_cenario_1])){
-        arq <- file.path(pasta_entrada, paste0(nome_subbacia, "_", cenario, ".txt"))
+        pattern <- paste0(nome_subbacia, "_", cenario, ".txt")
+        
+        arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE)
+
+        arq <- file.path(pasta_entrada, arq)
 
         if (!file.exists(arq)) {
             stop(paste0("nao existe o arquivo ", arq))
