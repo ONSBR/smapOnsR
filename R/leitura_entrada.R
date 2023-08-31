@@ -15,10 +15,14 @@ le_entrada_parametros <- function(pasta_entrada, nome_subbacia) {
 
     if (missing("nome_subbacia")) stop("forneca o nome da sub-bacia para a leitura do arquivo 'sub-bacia_parametros.txt'")
 
-    arq <- file.path(pasta_entrada, paste0(nome_subbacia, "_parametros.txt"))
+    pattern <- paste0(nome_subbacia, "_parametros.txt")
+        
+    arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE)
 
-    if (!file.exists(arq)) {
-        stop(paste0("nao existe o arquivo ", arq))
+    arq <- file.path(pasta_entrada, arq)
+
+    if (length(arq) == 0) {
+        stop(paste0("nao existe o arquivo ", pattern))
     }
 
     parametros <- read.csv(arq, sep = "'", header = FALSE)
@@ -31,7 +35,7 @@ le_entrada_parametros <- function(pasta_entrada, nome_subbacia) {
     
     aux <- strsplit(arq, split = "/")[[1]]
     sb <- strsplit(aux[length(aux)], split = "_")[[1]]
-    parametros_smap$Nome <- tolower(sub(".*/", "", sub("_parametros.txt", "", arq)))
+    parametros_smap$Nome <- tolower(sub(".*/", "", sub("_parametros.txt", "", nome_subbacia)))
     
     parametros_smap$Area <- as.numeric(parametros[1, 1])
     parametros_smap$nKt <- as.numeric(substr(parametros[2,1], 1, 3))
@@ -75,16 +79,14 @@ le_entrada_evapotranspiracao <- function(pasta_entrada, nome_subbacia) {
         stop("forneca o nome da sub-bacia para a leitura do arquivo 'sub-bacia_EVAPOTRANSPIRACAO.txt'")
     }
 
-    arq <- file.path(pasta_entrada, paste0(nome_subbacia, "_evapotranspiracao.txt"))
-
     pattern <- paste0(nome_subbacia, "_evapotranspiracao.txt")
         
     arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE)
 
     arq <- file.path(pasta_entrada, arq)
 
-    if (!file.exists(arq)) {
-        stop(paste0("nao existe o arquivo ", arq))
+    if (length(arq) == 0) {
+        stop(paste0("nao existe o arquivo ", pattern))
     }
 
     dat <- data.table::fread(arq)
@@ -190,8 +192,8 @@ le_entrada_inicializacao <- function(pasta_entrada, nome_subbacia) {
 
     arq <- file.path(pasta_entrada, arquivo)
 
-    if (!file.exists(arq)) {
-        stop(paste0("nao existe o arquivo ", arq))
+    if (length(arq) == 0) {
+        stop(paste0("nao existe o arquivo ", pattern))
     }
 
     dat <- data.table::fread(arq, sep = "'", header = FALSE)
@@ -260,10 +262,14 @@ le_entrada_vazao <- function(pasta_entrada, nome_subbacia) {
         stop("forneca o nome da sub-bacia para a leitura do arquivo 'sub-bacia.txt'")
     }
 
-    arq <- file.path(pasta_entrada, paste0(nome_subbacia, ".txt"))
+    pattern <- paste0(nome_subbacia, ".txt")
+        
+    arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE)
 
-    if (!file.exists(arq)) {
-        stop(paste0("nao existe o arquivo ", arq))
+    arq <- file.path(pasta_entrada, arq)
+
+    if (length(arq) == 0) {
+        stop(paste0("nao existe o arquivo ", pattern))
     }
 
     vazao <- data.table::fread(arq, header = FALSE)
@@ -308,10 +314,14 @@ le_entrada_posto_plu <- function(pasta_entrada, nome_subbacia) {
         stop("forneca o nome da sub-bacia para a leitura do arquivo '_postos_plu.txt'")
     }
 
-    arq <- file.path(pasta_entrada, paste0(nome_subbacia, "_postos_plu.txt"))
+    pattern <- paste0(nome_subbacia, "_postos_plu.txt")
 
-    if (!file.exists(arq)) {
-        stop(paste0("nao existe o arquivo ", arq))
+    arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE)
+
+    arq <- file.path(pasta_entrada, arq)
+
+    if (length(arq) == 0) {
+        stop(paste0("nao existe o arquivo ", pattern))
     }
 
     postos_plu <- data.table::fread(arq, header = FALSE)
@@ -349,12 +359,15 @@ le_entrada_precipitacao <- function(pasta_entrada, postos_plu) {
 
     precipitacao <- data.table::data.table()
     for (iposto in 1:nrow(postos_plu)){
-        arq <- file.path(pasta_entrada, paste0(postos_plu[iposto, posto], "_c.txt"))
-
-        if (!file.exists(arq)) {
-            arq <- file.path(pasta_entrada, paste0("0", postos_plu[iposto, posto], "_c.txt"))
-            if (!file.exists(arq)) {
-                stop(paste0("nao existe o arquivo ", arq))
+        pattern <- paste0(postos_plu[iposto, posto], "_c.txt")
+        arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE)
+        arq <- file.path(pasta_entrada, arq)
+        if (length(arq) == 0) {
+            pattern <- paste0("0", postos_plu[iposto, posto], "_c.txt")
+            arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE)
+            arq <- file.path(pasta_entrada, arq)
+            if (length(arq) == 0) {
+                stop(paste0("nao existe o arquivo ", pattern))
             }
         }
 
@@ -408,7 +421,7 @@ le_entrada_modelos_precipitacao <- function(pasta_entrada) {
 
     arq <- file.path(pasta_entrada, arquivo)
 
-    if (!file.exists(arq)) {
+    if (length(arq) == 0) {
         stop("nao existe o arquivo do tipo modelos_precipitacao.txt")
     }
 
@@ -481,8 +494,8 @@ le_entrada_pontos_grade <- function(pasta_entrada, nome_subbacia, modelos_precip
 
         arq <- file.path(pasta_entrada, arq)
 
-        if (!file.exists(arq)) {
-            stop(paste0("nao existe o arquivo ", arq))
+        if (length(arq) == 0) {
+            stop(paste0("nao existe o arquivo ", pattern))
         }
 
         aux <- readLines(arq)
@@ -543,9 +556,11 @@ le_entrada_bat_conf <- function(pasta_entrada) {
 
     if (missing("pasta_entrada")) stop("forneca o caminho da pasta 'arq_entrada' a leitura do caso")
 
-    arq <- file.path(pasta_entrada, "bat.conf")
+    pattern <- "bat.conf"
+    arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE)
+    arq <- file.path(pasta_entrada, arq)
 
-    if (!file.exists(arq)) {
+    if (length(arq) == 0) {
         stop("nao existe o arquivo do tipo bat.conf")
     }
     
@@ -591,10 +606,12 @@ le_entrada_bat_conf <- function(pasta_entrada) {
 #' @export
 le_entrada_previsao_precipitacao_2 <- function(pasta_entrada, datas_rodadas, pontos_grade) {
 
-    arq <- file.path(pasta_entrada, paste0("precipitacao_prevista_p", substr(datas_rodadas$data,9,10), substr(datas_rodadas$data,6,7), substr(datas_rodadas$data,3,4), ".dat"))
+    pattern <- paste0("precipitacao_prevista_p", substr(datas_rodadas$data,9,10), substr(datas_rodadas$data,6,7), substr(datas_rodadas$data,3,4), ".dat")
+    arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE)
+    arq <- file.path(pasta_entrada, arq)
 
-    if (!file.exists(arq)) {
-        stop(paste0("nao existe o arquivo ", arq))
+    if (length(arq) == 0) {
+        stop(paste0("nao existe o arquivo ", pattern))
     }
 
     previsao_precipitacao <- data.table::fread(arq, header = FALSE)
@@ -666,11 +683,14 @@ le_entrada_previsao_precipitacao_2 <- function(pasta_entrada, datas_rodadas, pon
 le_entrada_previsao_precipitacao_1 <- function(pasta_entrada, datas_rodadas, pontos_grade, nome_cenario) {
 
     data_final <- as.character(datas_rodadas$data + datas_rodadas$numero_dias_previsao)
-    arq <- file.path(pasta_entrada, paste0(nome_cenario, "_p", substr(datas_rodadas$data,9,10), substr(datas_rodadas$data,6,7), substr(datas_rodadas$data,3,4),"a",
-     substr(data_final,9,10), substr(data_final,6,7), substr(data_final,3,4), ".dat"))
 
-    if (!file.exists(arq)) {
-        stop(paste0("nao existe o arquivo ", arq))
+    pattern <- paste0(nome_cenario, "_p", substr(datas_rodadas$data,9,10), substr(datas_rodadas$data,6,7), substr(datas_rodadas$data,3,4),"a",
+     substr(data_final,9,10), substr(data_final,6,7), substr(data_final,3,4), ".dat")
+    arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE)
+    arq <- file.path(pasta_entrada, arq)
+
+    if (length(arq) == 0) {
+        stop(paste0("nao existe o arquivo ", pattern))
     }
 
     previsao_precipitacao <- data.table::fread(arq, header = FALSE, colClasses = "double")
@@ -744,12 +764,14 @@ le_entrada_previsao_precipitacao_1 <- function(pasta_entrada, datas_rodadas, pon
 #' @export
 le_entrada_previsao_precipitacao_0 <- function(pasta_entrada, datas_rodadas, data_previsao, pontos_grade, nome_cenario) {
 
-    arq <- file.path(pasta_entrada, paste0(nome_cenario, "_p", substr(datas_rodadas$data,9,10), substr(datas_rodadas$data,6,7), substr(datas_rodadas$data,3,4),"a",
-     substr(data_previsao,9,10), substr(data_previsao,6,7), substr(data_previsao,3,4), ".dat"))
-    
+    pattern <- paste0(nome_cenario, "_p", substr(datas_rodadas$data,9,10), substr(datas_rodadas$data,6,7), substr(datas_rodadas$data,3,4),"a",
+     substr(data_previsao,9,10), substr(data_previsao,6,7), substr(data_previsao,3,4), ".dat")
+    arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE)
+    arq <- file.path(pasta_entrada, arq)
+
     previsao_precipitacao <- data.table::data.table()
     
-    if (!file.exists(arq)) {
+    if (length(arq) == 0) {
         paste0("nao existe o arquivo ", arq)
     } else {
 
