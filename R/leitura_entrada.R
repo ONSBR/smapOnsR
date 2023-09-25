@@ -324,9 +324,34 @@ le_entrada_posto_plu <- function(pasta_entrada, nome_subbacia) {
         stop(paste0("nao existe o arquivo ", pattern))
     }
 
-    postos_plu <- data.table::fread(arq, header = FALSE)
+    aux <- read.table(arq, header = FALSE, sep = ";")
+    numero_postos <- as.numeric(aux$V1[1])
+    
+    if (is.na(numero_postos)) stop(paste0("Valor nao numerico de numero de postos plu no arquivo ", arq))
+    
+    if (numero_postos < 0) stop(paste0("Numero negativo de postos plu no arquivo ", arq))
+
+    if (numero_postos == 0) stop(paste0("Valor nulo de postos plu no arquivo ", arq))
+
+    postos_plu <- data.table::fread(arq, header = FALSE, blank.lines.skip = TRUE)
+    
+    if (ncol(postos_plu) != 2) stop(paste0("Arquivo ", arq, " com menos de 2 colunas"))
+
+    if (numero_postos != nrow(postos_plu)) stop(paste0("Numero de postos plu diferente do declarado no arquivo ", arq))
+
     postos_plu[, nome := nome_subbacia]
     colnames(postos_plu)[1:2] <- c("posto", "valor")
+    postos_plu[, valor := as.numeric(valor)]
+
+    if (any(postos_plu[, valor] < 0)) stop(paste0("Valor negativo de KE no arquivo ", arq))
+
+    if (any(is.na(postos_plu[, valor]))) stop(paste0("Valor nao numerico de KE no arquivo ", arq))    
+
+    if(postos_plu[, sum(valor)] > 1.005) stop(paste0("Somatorio do KE maior que 1.005 no arquivo ", arq))
+
+    if(postos_plu[, sum(valor)] < 0.995) stop(paste0("Somatorio do KE menor que 0.995 no arquivo ", arq))
+
+    if (any(nchar(postos_plu[, posto]) > 8)) stop(paste0("Nome do posto plu com mais de 8 caracteres no arquivo ", arq))
 
     postos_plu <- data.table::setcolorder(postos_plu, c("nome", "posto", "valor"))
     postos_plu[, posto := tolower(posto)]
