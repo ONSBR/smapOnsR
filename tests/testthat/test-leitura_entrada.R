@@ -366,7 +366,7 @@ test_that("testa arquivo 'sub_bacia'_'evapotranspiracao'.txt", {
     expect_error(suppressWarnings(le_entrada_evapotranspiracao(pasta_entrada, nome_subbacia)))
 })
 
-test_that("testa arquivo 'sub_bacia'_'evapotranspiracao'.txt", {
+test_that("testa arquivo 'sub_bacia'_'postos_plu'.txt", {
     nome_subbacia <- "Porto"
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN06", "CT6.1", "Arq_Entrada", package = "smapOnsR")
@@ -403,7 +403,7 @@ test_that("testa arquivo 'sub_bacia'_'evapotranspiracao'.txt", {
     expect_equal(le_entrada_posto_plu(pasta_entrada, nome_subbacia)$valor[1], 0.201)
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN06", "CT6.12", "Arq_Entrada", package = "smapOnsR")
-    expect_equal(le_entrada_posto_plu(pasta_entrada, nome_subbacia)$valor[1], 0.201)
+    expect_error(suppressWarnings(le_entrada_posto_plu(pasta_entrada, nome_subbacia)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN06", "CT6.13", "Arq_Entrada", package = "smapOnsR")
     expect_error(suppressWarnings(le_entrada_posto_plu(pasta_entrada, nome_subbacia)))
@@ -433,16 +433,13 @@ test_that("testa arquivo 'sub_bacia'_'evapotranspiracao'.txt", {
     expect_error(suppressWarnings(le_entrada_posto_plu(pasta_entrada, nome_subbacia)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN06", "CT6.22", "Arq_Entrada", package = "smapOnsR")
-    expect_error(suppressWarnings(le_entrada_posto_plu(pasta_entrada, nome_subbacia)))
-
-    pasta_entrada <- system.file("extdata", "Validacao", "CN06", "CT6.22", "Arq_Entrada", package = "smapOnsR")
     expect_equal(le_entrada_posto_plu(pasta_entrada, nome_subbacia)$posto[1], "2245196")
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN06", "CT6.23", "Arq_Entrada", package = "smapOnsR")
     expect_error(suppressWarnings(le_entrada_posto_plu(pasta_entrada, nome_subbacia)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN06", "CT6.24", "Arq_Entrada", package = "smapOnsR")
-    expect_error(suppressWarnings(le_entrada_posto_plu(pasta_entrada, nome_subbacia)))
+    expect_equal(le_entrada_posto_plu(pasta_entrada, nome_subbacia)$posto[1], "2245196")
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN06", "CT6.25", "Arq_Entrada", package = "smapOnsR")
     expect_equal(le_entrada_posto_plu(pasta_entrada, nome_subbacia)$posto[1], "2245196")

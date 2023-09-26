@@ -333,7 +333,7 @@ le_entrada_posto_plu <- function(pasta_entrada, nome_subbacia) {
 
     if (numero_postos == 0) stop(paste0("Valor nulo de postos plu no arquivo ", arq))
 
-    postos_plu <- data.table::fread(arq, header = FALSE, blank.lines.skip = TRUE)
+    postos_plu <- data.table::fread(arq, header = FALSE, blank.lines.skip = TRUE, sep = " ")
     
     if (ncol(postos_plu) != 2) stop(paste0("Arquivo ", arq, " com menos de 2 colunas"))
 
@@ -343,9 +343,9 @@ le_entrada_posto_plu <- function(pasta_entrada, nome_subbacia) {
     colnames(postos_plu)[1:2] <- c("posto", "valor")
     postos_plu[, valor := as.numeric(valor)]
 
-    if (any(postos_plu[, valor] < 0)) stop(paste0("Valor negativo de KE no arquivo ", arq))
+    if (any(is.na(postos_plu[, valor]))) stop(paste0("Valor nao numerico de KE no arquivo ", arq))
 
-    if (any(is.na(postos_plu[, valor]))) stop(paste0("Valor nao numerico de KE no arquivo ", arq))    
+    if (any(postos_plu[, valor] < 0)) stop(paste0("Valor negativo de KE no arquivo ", arq))
 
     if(postos_plu[, sum(valor)] > 1.005) stop(paste0("Somatorio do KE maior que 1.005 no arquivo ", arq))
 
