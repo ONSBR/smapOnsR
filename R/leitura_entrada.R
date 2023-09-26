@@ -14,11 +14,8 @@
 le_entrada_parametros <- function(pasta_entrada, nome_subbacia) {
 
     if (missing("nome_subbacia")) stop("forneca o nome da sub-bacia para a leitura do arquivo 'sub-bacia_parametros.txt'")
-
     pattern <- paste0(nome_subbacia, "_parametros.txt")
-        
     arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE)
-
     arq <- file.path(pasta_entrada, arq)
 
     if (length(arq) == 0) {
@@ -34,26 +31,42 @@ le_entrada_parametros <- function(pasta_entrada, nome_subbacia) {
     "Ecof", "Pcof", "Ecof2", "ktMin", "ktMax")
     
     aux <- strsplit(arq, split = "/")[[1]]
-    sb <- strsplit(aux[length(aux)], split = "_")[[1]]
     parametros_smap$Nome <- tolower(sub(".*/", "", sub("_parametros.txt", "", nome_subbacia)))
-    
     parametros_smap$Area <- as.numeric(parametros[1, 1])
-    parametros_smap$nKt <- as.numeric(substr(parametros[2,1], 1, 3))
-    aux <- strsplit(trimws(substr(parametros[2,1],4,nchar(parametros[2,1]))),split = " ")
+    if (!is.character(parametros[2, 1])) stop(paste0("Nao existe valores de kt declarados no arquivo ", arq))
+    aux <- unlist(strsplit(parametros[2, 1], "\\s+"))
+    parametros_smap$nKt <- as.numeric(aux[1])
+    if(as.numeric(aux[1]) != length(aux) - 1) stop(paste0("Numero de kt diferente do total de kt declarado no arquivo ", arq))    
+    if (is.na(parametros_smap$nKt)) stop(paste0("Parametro de numero de kt com valor nao numerico no arquivo ", arq))    
+    if (parametros_smap$nKt < 3) stop(paste0("Parametro de numero de kt com valor inferior a 3 no arquivo ", arq))    
+    if (parametros_smap$nKt != trunc(parametros_smap$nKt)) stop(paste0("Parametro de numero de kt com valor decimal no arquivo ", arq))    
 
     for (ikt in 1:parametros_smap[, nKt]) {
         if (parametros_smap[1, nKt] > 3) {
-            parametros_smap[1, (ikt + 3)] <- as.numeric(aux[[1]][(parametros_smap[1, nKt - ikt + 1])])
-        } else{
-            parametros_smap[1, (ikt + 4)] <- as.numeric(aux[[1]][(parametros_smap[1, nKt - ikt + 1])])
+            parametros_smap[1, (ikt + 3)] <- as.numeric(aux[parametros_smap$nKt - ikt + 2])
+        } else {
+            parametros_smap[1, (ikt + 4)] <- as.numeric(aux[parametros_smap$nKt - ikt + 2])
         }
     }
+
     for (iparametro in 67:80) {
-        parametros_smap[1,iparametro] <- as.numeric(parametros[(iparametro - 64), 1])
+        parametros_smap[1, iparametro] <- as.numeric(parametros[(iparametro - 64), 1])
     }
+
     parametros_smap[1, 81] <- sum(parametros_smap[, 7:66] > 0)
     parametros_smap[1, 82] <- sum(parametros_smap[, 4:5] > 0)
+    if (sum(parametros_smap[, 4:66]) < 0.995) stop(paste0("Somatorio dos kts inferior a 0.995 no arquivo ", arq))
+    if (sum(parametros_smap[, 4:66]) > 1.005) stop(paste0("Somatorio dos kts superior a 1.005 no arquivo ", arq))
+    parametros_smap[, limite_superior_ebin := as.numeric(parametros[17, 1])]
+    parametros_smap[, limite_inferior_ebin := as.numeric(parametros[18, 1])]
+    parametros_smap[, limite_superior_prec := as.numeric(parametros[19, 1])]
+    parametros_smap[, limite_inferior_prec := as.numeric(parametros[20, 1])]
+    parametros_smap <- data.table::melt(parametros_smap, id.vars = "Nome", variable.name = "parametro",
+           value.name = "valor")
 
+    if (any(is.na(parametros_smap[, valor]))) stop(paste0("Parametro ", parametros_smap[is.na(valor), parametro], " com valor nao numerico no arquivo ", arq))
+    if (any(parametros_smap[, valor] < 0)) stop(paste0("Parametro ", parametros_smap[valor < 0, parametro], " com valor negativo no arquivo ", arq))
+    
     parametros_smap
 }
 
@@ -80,7 +93,7 @@ le_entrada_evapotranspiracao <- function(pasta_entrada, nome_subbacia) {
     }
 
     pattern <- paste0(nome_subbacia, "_evapotranspiracao.txt")
-        
+
     arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE)
 
     arq <- file.path(pasta_entrada, arq)
@@ -108,8 +121,6 @@ le_entrada_evapotranspiracao <- function(pasta_entrada, nome_subbacia) {
     duplicados <- dat[duplicated(mes) | duplicated(mes, fromLast = TRUE), mes]
 
     if (length(duplicados) > 0) stop(paste0("O mes ", unique(duplicados), " esta duplicado no arquivo ", arq))
-    
-    if (any(dat[, mes]) > 12)
 
     data.table::setcolorder(dat, c("mes", "nome", "valor"))
 
@@ -909,8 +920,6 @@ le_arq_entrada <- function(pasta_entrada) {
     parametros <- data.table::rbindlist(lapply(caso$nome_subbacia, function(sub_bacia) {
   le_entrada_parametros(pasta_entrada, sub_bacia)
         }))
-    parametros <- data.table::melt(parametros, id.vars = "Nome", variable.name = "parametro",
-           value.name = "valor")
 
     evapotranspiracao <- data.table::rbindlist(lapply(caso$nome_subbacia, function(sub_bacia) {
   le_entrada_evapotranspiracao(pasta_entrada, sub_bacia)
