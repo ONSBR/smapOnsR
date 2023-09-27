@@ -533,12 +533,12 @@ le_entrada_pontos_grade <- function(pasta_entrada, nome_subbacia, modelos_precip
         if (length(arq) == 0) {
             stop(paste0("nao existe o arquivo ", pattern))
         }
-
         aux <- readLines(arq)
         aux <- aux[nchar(aux) > 0]
+        aux <- trimws(aux)
         aux <- strsplit(aux, "\\s+")
         
-        aux_pontos_grade <- modelos_precipitacao$nome_cenario
+        aux_pontos_grade <- data.table::copy(modelos_precipitacao$nome_cenario)
         aux_pontos_grade[, longitude := as.numeric(aux[[2]][1])]
         aux_pontos_grade[, latitude := as.numeric(aux[[2]][2])]
         aux_pontos_grade[, nome := nome_subbacia]
@@ -551,9 +551,9 @@ le_entrada_pontos_grade <- function(pasta_entrada, nome_subbacia, modelos_precip
 
         if (as.numeric(aux[[1]][1]) > 1) {
             for (iponto in 3:(as.numeric(aux[[1]][1]) + 1)) {
-                aux_pontos_grade2 <- modelos_precipitacao$nome_cenario
-                aux_pontos_grade[, longitude := as.numeric(aux[[iponto]][1])]
-                aux_pontos_grade[, latitude := as.numeric(aux[[iponto]][2])]
+                aux_pontos_grade2 <- data.table::copy(modelos_precipitacao$nome_cenario)
+                aux_pontos_grade2[, longitude := as.numeric(aux[[iponto]][1])]
+                aux_pontos_grade2[, latitude := as.numeric(aux[[iponto]][2])]
                 aux_pontos_grade2[, nome := nome_subbacia]
                 aux_pontos_grade <- rbind(aux_pontos_grade, aux_pontos_grade2)
             }
@@ -801,17 +801,33 @@ le_entrada_previsao_precipitacao_1 <- function(pasta_entrada, datas_rodadas, pon
 le_entrada_previsao_precipitacao_0 <- function(pasta_entrada, datas_rodadas, data_previsao, pontos_grade, nome_cenario) {
 
     pattern <- paste0(nome_cenario, "_p", substr(datas_rodadas$data,9,10), substr(datas_rodadas$data,6,7), substr(datas_rodadas$data,3,4),"a",
-     substr(data_previsao,9,10), substr(data_previsao,6,7), substr(data_previsao,3,4), ".dat")
+    substr(data_previsao,9,10), substr(data_previsao,6,7), substr(data_previsao,3,4), ".dat")
     arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE)
     arq <- file.path(pasta_entrada, arq)
-
     previsao_precipitacao <- data.table::data.table()
-    
     if (length(arq) == 0) {
-        paste0("nao existe o arquivo ", arq)
+        if (data_previsao == datas_rodadas$data + 1) stop(paste0("Nao existe o arquivo ", pattern))
+        pattern2 <- paste0(nome_cenario, "_p", substr(datas_rodadas$data,9,10), substr(datas_rodadas$data,6,7), substr(datas_rodadas$data,3,4))
+        arquivos <- list.files(pasta_entrada)
+        arquivos <- grep(pattern2, tolower(arquivos), value = TRUE) 
+        for (data_seguinte in (data_previsao + 1):(datas_rodadas$data + datas_rodadas$numero_dias_previsao - 1)){
+            data <- as.Date(data_seguinte)
+            pattern2 <- paste0(nome_cenario, "_p", substr(datas_rodadas$data,9,10), substr(datas_rodadas$data,6,7), substr(datas_rodadas$data,3,4),"a",
+                    substr(data,9,10), substr(data,6,7), substr(data,3,4), ".dat")
+            if(file.exists(file.path(pasta_entrada, pattern2))) stop(paste0("Nao existe o arquivo ", pattern))
+        }
     } else {
-
         previsao_precipitacao <- data.table::fread(arq, header = FALSE)
+        previsao_precipitacao[, V1 := as.numeric(V1)]
+        if (any(is.na(previsao_precipitacao[, V1]))) stop(paste0("Valor nao numerico de longitude no arquivo ", arq))
+        if (any(abs(previsao_precipitacao[, V1]) >= 100)) stop(paste0("Valor de longitude com 3 inteiros no arquivo ", arq))
+        previsao_precipitacao[, V2 := as.numeric(V2)]
+        if (any(is.na(previsao_precipitacao[, V2]))) stop(paste0("Valor nao numerico de latitude no arquivo ", arq))
+        if (any(abs(previsao_precipitacao[, V2]) >= 100)) stop(paste0("Valor de latitude com 3 inteiros no arquivo ", arq))
+        previsao_precipitacao[, V3 := as.numeric(V3)]
+        if (any(is.na(previsao_precipitacao[, V3]))) stop(paste0("Valor nao numerico de previsao de precipitacao no arquivo ", arq))
+        if (any(previsao_precipitacao[, V3] < 0)) stop(paste0("Valor negativo de previsao de precipitacao no arquivo ", arq))
+
         colnames(previsao_precipitacao)[1:2] <- c("longitude", "latitude")
         colnames(previsao_precipitacao)[3] <- as.character(data_previsao)
         previsao_precipitacao$cenario <- nome_cenario
@@ -821,6 +837,7 @@ le_entrada_previsao_precipitacao_0 <- function(pasta_entrada, datas_rodadas, dat
         nome_2 <- strsplit(nome_cenario, split = "_")[[1]][2]
 
         previsao_precipitacao <- merge(previsao_precipitacao, pontos_grade[nome_cenario_1 == nome_1 & nome_cenario_2 == nome_2], by = c("latitude", "longitude"))
+        if(nrow(previsao_precipitacao) != nrow(pontos_grade)) stop(paste0("Numero de pontos de grade declarado anteriormente e diferente no arquivo ", arq))
 
         previsao_precipitacao[, nome_cenario_1 := NULL]
         previsao_precipitacao[, nome_cenario_2 := NULL]
@@ -968,19 +985,16 @@ le_arq_entrada <- function(pasta_entrada) {
     } else {
         datas <- data.table::as.data.table(seq.Date(datas_rodadas$data + 1, datas_rodadas$data + datas_rodadas$numero_dias_previsao, 1))
         cenarios <- data.table::as.data.table(paste0(unique(pontos_grade$nome_cenario_1),"_",unique(pontos_grade$nome_cenario_2)))
-        previsao_precipitacao <- data.table::data.table()
-        for (icenario in 1:nrow(cenarios)){
-            nome_cenario <- cenarios$V1[icenario]
-            for (idata in 1:nrow(datas)){
-                data_previsao <- datas$V1[idata]
-                aux <- data.table::data.table()
-                aux <- le_entrada_previsao_precipitacao_0(pasta_entrada, datas_rodadas, data_previsao, pontos_grade, nome_cenario)
-                previsao_precipitacao <- rbind(previsao_precipitacao, aux)
-            }
-        }
+        previsao_precipitacao <- data.table::rbindlist(lapply(cenarios$V1, function(nome_cenario) {
+            data.table::rbindlist(lapply(datas$V1, function(data_previsao) {
+                le_entrada_previsao_precipitacao_0(pasta_entrada, datas_rodadas, data_previsao, pontos_grade, nome_cenario)
+            }))
+        }))
     }
     
     previsao_precipitacao <- completa_previsao(previsao_precipitacao, datas_rodadas)
+    previsao_precipitacao <- previsao_precipitacao[, mean(valor), by = .(data_rodada, data_previsao, cenario, nome)]
+    colnames(previsao_precipitacao)[5] <- "valor"
 
     saida <- list(parametros = parametros, vazao = vazao, precipitacao = precipitacao, evapotranspiracao = evapotranspiracao,
         previsao_precipitacao = previsao_precipitacao, postos_plu = postos_plu, inicializacao = inicializacao,
