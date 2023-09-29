@@ -1,51 +1,3 @@
-#test_that("testa le_entrada_caso", {
-#  dir <- getwd()
-#  pasta_entrada <- file.path(dir, "inst//extdata//arq_entrada")
-#  caso <- le_entrada_caso(pasta_entrada)
-#
-#  expect_equal(caso$numero_subbacias == 3, TRUE)
-#  expect_equal(caso$nome_subbacia[1] == "camargos", TRUE)
-#  expect_error(le_entrada_caso('pasta_entrada'))
-#})
-#
-#test_that("testa le_entrada_evapotranspiracao", {
-#  dir <- getwd()
-#  pasta_entrada <- file.path(dir, "inst//extdata//arq_entrada")
-#  caso <- le_entrada_caso(pasta_entrada)
-#
-#  evapotranspiracao <- le_entrada_evapotranspiracao(nome_subbacia = caso$nome_subbacia[1], pasta_entrada = pasta_entrada)
-#  expect_equal(colnames(evapotranspiracao), c("mes", "posto", "valor"))
-#  expect_equal(evapotranspiracao[, valor][1] == 4.94, TRUE)
-#
-#  expect_error(le_entrada_evapotranspiracao(nome_subbacia = "baixoig", pasta_entrada = pasta_entrada))
-#})
-#
-#test_that("testa le_entrada_parametros", {
-#  dir <- getwd()
-#  pasta_entrada <- file.path(dir, "inst//extdata//arq_entrada")
-#  caso <- le_entrada_caso(pasta_entrada)
-#
-#  parametros_subbacia <- le_entrada_parametros(nome_subbacia = caso$nome_subbacia[1], pasta_entrada = pasta_entrada)
-#  expect_equal(colnames(parametros_subbacia), c("Nome", "Area", "nKt", paste0("Kt", 2:-60),
-#    "Str", "K2t", "Crec", "Ai", "Capc", "K_kt", "K2t2", "H1", "H", "K3t", "K1t",
-#    "Ecof", "Pcof", "Ecof2", "ktMin", "ktMax"))
-#  expect_equal(parametros_subbacia$Str == 100, TRUE)
-#
-#  expect_error(le_entrada_parametros(nome_subbacia = "baixoig", pasta_entrada = pasta_entrada))
-#})
-#
-#test_that("testa le_entrada_posto_plu", {
-#  dir <- getwd()
-#  pasta_entrada <- file.path(dir, "inst//extdata//arq_entrada")
-#  caso <- le_entrada_caso(pasta_entrada)
-#
-#  postos_plu <- le_entrada_posto_plu(nome_subbacia = caso$nome_subbacia[3], pasta_entrada = pasta_entrada)
-#  expect_equal(colnames(evapotranspiracao), c("mes", "posto", "valor"))
-#  expect_equal(evapotranspiracao[, valor][1] == 4.94, TRUE)
-#
-#  expect_error(le_entrada_evapotranspiracao(nome_subbacia = "baixoig", pasta_entrada = pasta_entrada))
-#})
-
 test_that("testa arquivo caso.txt", {
     dir.create(file.path(system.file("extdata", package = "smapOnsR"), "Validacao"))
     zip::unzip(system.file("extdata", "validacao.zip", package = "smapOnsR"), exdir = system.file("extdata", "Validacao", package = "smapOnsR"))
@@ -863,6 +815,61 @@ test_that("testa arquivo de previsoes de precipitacao", {
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.29", "Arq_Entrada", package = "smapOnsR")
     expect_error(suppressWarnings(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)))
+})
+
+test_that("testa arquivo 'sub_bacia'.txt", {
+    nome_subbacia <- "Porto"
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN09", "CT9.10", "Arq_Entrada", package = "smapOnsR")
+    expect_error(suppressWarnings(le_entrada_vazao(pasta_entrada, nome_subbacia)))
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN09", "CT9.11", "Arq_Entrada", package = "smapOnsR")
+    expect_error(suppressWarnings(le_entrada_vazao(pasta_entrada, nome_subbacia)))
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN09", "CT9.12", "Arq_Entrada", package = "smapOnsR")
+    expect_error(suppressWarnings(le_entrada_vazao(pasta_entrada, nome_subbacia)))
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN09", "CT9.13", "Arq_Entrada", package = "smapOnsR")
+    expect_error(suppressWarnings(le_entrada_vazao(pasta_entrada, nome_subbacia)))
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN09", "CT9.18", "Arq_Entrada", package = "smapOnsR")
+    expect_error(suppressWarnings(le_entrada_vazao(pasta_entrada, nome_subbacia)))
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN09", "CT9.19", "Arq_Entrada", package = "smapOnsR")
+    expect_error(suppressWarnings(le_entrada_vazao(pasta_entrada, nome_subbacia)))
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN09", "CT9.22", "Arq_Entrada", package = "smapOnsR")
+    expect_equal(le_entrada_vazao(pasta_entrada, nome_subbacia)$valor[1], 99)
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN09", "CT9.23", "Arq_Entrada", package = "smapOnsR")
+    expect_error(suppressWarnings(le_entrada_vazao(pasta_entrada, nome_subbacia)))
+    
+    pasta_entrada <- system.file("extdata", "Validacao", "CN09", "CT9.24", "Arq_Entrada", package = "smapOnsR")
+    expect_error(suppressWarnings(le_entrada_vazao(pasta_entrada, nome_subbacia)))
+    
+    pasta_entrada <- system.file("extdata", "Validacao", "CN09", "CT9.25", "Arq_Entrada", package = "smapOnsR")
+    expect_equal(le_entrada_vazao(pasta_entrada, nome_subbacia)$valor[1], 1111199)
+    
+    pasta_entrada <- system.file("extdata", "Validacao", "CN09", "CT9.26", "Arq_Entrada", package = "smapOnsR")
+    expect_equal(le_entrada_vazao(pasta_entrada, nome_subbacia)$valor[1], 99)
+    
+    pasta_entrada <- system.file("extdata", "Validacao", "CN09", "CT9.27", "Arq_Entrada", package = "smapOnsR")
+    expect_equal(le_entrada_vazao(pasta_entrada, nome_subbacia)$valor[1], 0)
+    
+    pasta_entrada <- system.file("extdata", "Validacao", "CN09", "CT9.28", "Arq_Entrada", package = "smapOnsR")
+    expect_error(suppressWarnings(le_entrada_vazao(pasta_entrada, nome_subbacia)))
+    
+    pasta_entrada <- system.file("extdata", "Validacao", "CN09", "CT9.30", "Arq_Entrada", package = "smapOnsR")
+    expect_equal(le_entrada_vazao(pasta_entrada, nome_subbacia)$valor[1], 99)
+    
+    pasta_entrada <- system.file("extdata", "Validacao", "CN09", "CT9.31", "Arq_Entrada", package = "smapOnsR")
+    expect_equal(le_entrada_vazao(pasta_entrada, nome_subbacia)$valor[1], 99)
+    
+    pasta_entrada <- system.file("extdata", "Validacao", "CN09", "CT9.32", "Arq_Entrada", package = "smapOnsR")
+    expect_error(suppressWarnings(le_arq_entrada(pasta_entrada)))
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN09", "CT9.33", "Arq_Entrada", package = "smapOnsR")
+    expect_error(suppressWarnings(le_entrada_vazao(pasta_entrada)))
 
     unlink(system.file("extdata", "Validacao", package = "smapOnsR"), recursive = TRUE)
 })

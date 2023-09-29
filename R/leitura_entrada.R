@@ -260,6 +260,7 @@ le_entrada_inicializacao <- function(pasta_entrada, nome_subbacia) {
 #' @param nome_subbacia nome da sub-bacia
 #' @importFrom  data.table fread setcolorder
 #' @importFrom stats na.omit
+#' @importFrom lubridate year
 #' @return data.table vazao com as colunas
 #'     \itemize{
 #'     \item{data}{data da observacao}
@@ -283,24 +284,31 @@ le_entrada_vazao <- function(pasta_entrada, nome_subbacia) {
         stop(paste0("nao existe o arquivo ", pattern))
     }
 
-    vazao <- data.table::fread(arq, header = FALSE)
+    vazao <- data.table::fread(arq, header = FALSE, sep = "|", fill = TRUE)
+    if(ncol(vazao) != 6) stop(paste0("O arquivo ", arq, " deve possuir 6 colunas"))
 
     vazao[, V1 := NULL]
     vazao[, V2 := NULL]
     vazao[, V3 := NULL]
     vazao[, V4 := NULL]
+    vazao <- vazao[!is.na(V5) & !is.na(V6)]
 
     colnames(vazao) <- c("data", "valor")
-    vazao[, data := as.Date(data)]
+    vazao[, data := as.Date(data, format = "%Y-%m-%d")]
+    if (any(is.na(vazao[, data]))) stop(paste0("Data com formato incorreto no arquivo ", arq))
+    if (any(vazao[, lubridate::year(data)] < 0 )) stop(paste0("Data com formato incorreto no arquivo ", arq))
+    if (nrow(vazao[grepl("-", valor)]) > 1) {
+        stop(paste0("Vazao observada da data ", vazao[valor < 0, data]," negativa para a sub-bacia ", nome_subbacia))
+    }    
     vazao <- vazao[!grepl("-", valor)]
     vazao[, valor := as.numeric(valor)]
+    if (any(is.na(vazao[, valor]))) stop(paste0("Vazao observada da data ", vazao[is.na(valor), data]," nao existente para a sub-bacia ", nome_subbacia))
 
     vazao[, posto := nome_subbacia]
     vazao <- data.table::setcolorder(vazao, c("data", "posto", "valor"))
-
-    if (any(vazao[, valor] < 0)) {
-        stop(paste0(" vazao observada da data ", vazao[valor < 0, data]," negativa para a sub-bacia ", nome_subbacia))
-    }
+    vazao <- data.table::setorder(vazao, data)
+    if (length(vazao[, data]) != length(seq.Date(vazao[, min(data)], vazao[, max(data)], by = 1))) stop(paste0("Data faltante no arquivo ", arq))
+    
 
     vazao
 }
@@ -601,11 +609,12 @@ le_entrada_bat_conf <- function(pasta_entrada) {
     }
     
     dat <- data.table::fread(arq, sep = "=")
+    colnames(dat) <- c("parametro", "valor")
     
-    if (length(dat[V1 == "arqPrev", V1]) == 0) {
+    if (length(dat[parametro == "arqPrev", parametro]) == 0) {
         formato_previsao <- 0
     } else {
-        formato_previsao <- as.numeric(dat[V1 == "arqPrev", V2])
+        formato_previsao <- as.numeric(dat[parametro == "arqPrev", strsplit(valor, "'")[[1]][1]])
     }
 
     formato_previsao
@@ -958,6 +967,15 @@ le_arq_entrada <- function(pasta_entrada) {
     vazao <- data.table::rbindlist(lapply(caso$nome_subbacia, function(sub_bacia) {
   le_entrada_vazao(pasta_entrada, sub_bacia)
         }))
+
+    lapply(caso$nome_subbacia, function(nome_subbacia) {
+        data_inicio <- datas_rodadas[, min(data)] - inicializacao[nome == nome_subbacia & variavel == "numero_dias_assimilacao", valor] + 1
+        data_fim <- datas_rodadas[, max(data)] - 1
+        if (vazao[, min(data)] > data_inicio)
+        stop(stop(paste0("O histórico de vazão da sub-bacia ", nome_subbacia, " deve começar na data ", data_inicio)))
+        if (vazao[, max(data)] < data_fim)
+        stop(stop(paste0("O histórico de vazão da sub-bacia ", nome_subbacia, " deve terminar na data ", data_fim)))
+    })
 
     postos_plu <- data.table::rbindlist(lapply(caso$nome_subbacia, function(sub_bacia) {
   le_entrada_posto_plu(pasta_entrada, sub_bacia)
