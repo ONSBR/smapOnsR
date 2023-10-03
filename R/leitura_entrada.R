@@ -1,7 +1,5 @@
 # LEITURA DE ARQUIVOS DE ENTRADA SMAP---------------------------------
 
-#' le_parametros
-#' 
 #' Leitor de arquivo de parametros
 #' 
 #' Le arquivo de parametros "sub-bacia_PARAMETROS.txt".
@@ -42,11 +40,7 @@ le_entrada_parametros <- function(pasta_entrada, nome_subbacia) {
     if (parametros_smap$nKt != trunc(parametros_smap$nKt)) stop(paste0("Parametro de numero de kt com valor decimal no arquivo ", arq))    
 
     for (ikt in 1:parametros_smap[, nKt]) {
-        if (parametros_smap[1, nKt] > 3) {
-            parametros_smap[1, (ikt + 3)] <- as.numeric(aux[parametros_smap$nKt - ikt + 2])
-        } else {
-            parametros_smap[1, (ikt + 4)] <- as.numeric(aux[parametros_smap$nKt - ikt + 2])
-        }
+        parametros_smap[1, (ikt + 3)] <- as.numeric(aux[parametros_smap$nKt - ikt + 2])
     }
 
     for (iparametro in 67:80) {
@@ -70,8 +64,6 @@ le_entrada_parametros <- function(pasta_entrada, nome_subbacia) {
     parametros_smap
 }
 
-#' le_evapotranspiracao
-#' 
 #' Leitor de arquivo de normal climatologica de evapotranspiracao
 #' 
 #' Le arquivo evapotranspiracao utilizado no aplicativo SMAP/ONS
@@ -972,9 +964,9 @@ le_arq_entrada <- function(pasta_entrada) {
         data_inicio <- datas_rodadas[, min(data)] - inicializacao[nome == nome_subbacia & variavel == "numero_dias_assimilacao", valor] + 1
         data_fim <- datas_rodadas[, max(data)] - 1
         if (vazao[, min(data)] > data_inicio)
-        stop(stop(paste0("O histórico de vazão da sub-bacia ", nome_subbacia, " deve começar na data ", data_inicio)))
+        stop(stop(paste0("O historico de vazao da sub-bacia ", nome_subbacia, " deve comecar na data ", data_inicio)))
         if (vazao[, max(data)] < data_fim)
-        stop(stop(paste0("O histórico de vazão da sub-bacia ", nome_subbacia, " deve terminar na data ", data_fim)))
+        stop(stop(paste0("O historico de vazao da sub-bacia ", nome_subbacia, " deve terminar na data ", data_fim)))
     })
 
     postos_plu <- data.table::rbindlist(lapply(caso$nome_subbacia, function(sub_bacia) {

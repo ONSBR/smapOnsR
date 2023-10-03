@@ -2,7 +2,7 @@
 % Please edit documentation in R/leitura_entrada.R
 \name{le_entrada_parametros}
 \alias{le_entrada_parametros}
-\title{le_parametros}
+\title{Leitor de arquivo de parametros}
 \usage{
 le_entrada_parametros(pasta_entrada, nome_subbacia)
 }
@@ -15,8 +15,5 @@ le_entrada_parametros(pasta_entrada, nome_subbacia)
 lista contendo os parametros da sub-bacia
 }
 \description{
-Leitor de arquivo de parametros
-}
-\details{
 Le arquivo de parametros "sub-bacia_PARAMETROS.txt".
 }
