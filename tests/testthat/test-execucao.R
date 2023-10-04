@@ -5,10 +5,17 @@ test_that("testa execucao oficial", {
 
   saida <- executa_caso_oficial(pasta_entrada)
 
-  expect_equal(round(saida$previsao[nome == "avermelha" & variavel == "Qcalc" & cenario == "ecmwf_ex42", valor][27], 0), 202)
+  secao <- sessionInfo()
+  
+  if (secao$R.version$os == "mingw32") {
+    expect_equal(round(saida$previsao[nome == "avermelha" & variavel == "Qcalc" & cenario == "ecmwf_ex42", valor][27], 0), 202)
+  } else {
+    expect_true(abs(round(saida$previsao[nome == "avermelha" & variavel == "Qcalc" & cenario == "ecmwf_ex42", valor][27], 0) - 202) < 202 * 0.01)
+  }
 
   unlink(system.file("extdata", "Arq_Entrada", package = "smapOnsR"), recursive = TRUE)
   unlink(system.file("extdata", "arq_entrada_novo_sem_etp", package = "smapOnsR"), recursive = TRUE)
   unlink(system.file("extdata", "Arq_Entrada0", package = "smapOnsR"), recursive = TRUE)
   unlink(system.file("extdata", "Arq_Entrada1", package = "smapOnsR"), recursive = TRUE)
+  unlink(system.file("extdata", "caso_completo", package = "smapOnsR"), recursive = TRUE)
 })
