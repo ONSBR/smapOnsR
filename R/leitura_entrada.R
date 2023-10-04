@@ -439,7 +439,7 @@ le_entrada_precipitacao <- function(pasta_entrada, postos_plu) {
         }
 
         if (length(precipitacao_aux[, data]) != length(seq.Date(precipitacao_aux[, min(data)], precipitacao_aux[, max(data)], by = 1))) stop(paste0("Data faltante no arquivo ", arq))
-        
+
         precipitacao <- rbind(precipitacao, precipitacao_aux)
     }
     precipitacao <- data.table::setcolorder(precipitacao, c("data", "posto", "valor"))
@@ -831,7 +831,8 @@ le_entrada_previsao_precipitacao_0 <- function(pasta_entrada, datas_rodadas, dat
             data <- as.Date(data_seguinte)
             pattern2 <- paste0(nome_cenario, "_p", substr(datas_rodadas$data,9,10), substr(datas_rodadas$data,6,7), substr(datas_rodadas$data,3,4),"a",
                     substr(data,9,10), substr(data,6,7), substr(data,3,4), ".dat")
-            if(file.exists(file.path(pasta_entrada, pattern2))) stop(paste0("Nao existe o arquivo ", pattern))
+            arq <- list.files(path = pasta_entrada, pattern = pattern2, ignore.case = TRUE, full.names = TRUE)
+            if(file.exists(arq)) stop(paste0("Nao existe o arquivo ", pattern))
         }
     } else {
         previsao_precipitacao <- data.table::fread(arq, header = FALSE)
