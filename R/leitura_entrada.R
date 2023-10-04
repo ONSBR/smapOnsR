@@ -300,7 +300,6 @@ le_entrada_vazao <- function(pasta_entrada, nome_subbacia) {
     vazao <- data.table::setcolorder(vazao, c("data", "posto", "valor"))
     vazao <- data.table::setorder(vazao, data)
     if (length(vazao[, data]) != length(seq.Date(vazao[, min(data)], vazao[, max(data)], by = 1))) stop(paste0("Data faltante no arquivo ", arq))
-    
 
     vazao
 }
@@ -394,6 +393,11 @@ le_entrada_posto_plu <- function(pasta_entrada, nome_subbacia) {
 le_entrada_precipitacao <- function(pasta_entrada, postos_plu) {
 
     precipitacao <- data.table::data.table()
+
+    contem_n_numerico <- function(coluna) {
+        any(!is.na(coluna) & !is.numeric(coluna))
+    }
+
     for (iposto in 1:nrow(postos_plu)){
         pattern <- paste0(postos_plu[iposto, posto], "_c.txt")
         arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE)
@@ -407,13 +411,23 @@ le_entrada_precipitacao <- function(pasta_entrada, postos_plu) {
             }
         }
 
-        precipitacao_aux <- data.table::fread(arq, header = FALSE)
+        precipitacao_aux <- data.table::fread(arq, header = FALSE, fill = TRUE, blank.lines.skip = TRUE)
+        precipitacao_aux[, V2 := as.Date(V2, format = "%d/%m/%Y")]
+        
+        if (length(names(precipitacao_aux)) != 4) stop(paste0("O arquivo ", arq, " contem ", length(names(precipitacao_aux))), " colunas. sao necessarias 4 colunas")
+        if (anyNA(precipitacao_aux[, V2])) stop(paste0("Formato invalido de data para o arquivo ", arq))
+        if (anyNA(precipitacao_aux)) stop(paste0("Os dados informados no arquivo ", arq, " contem linhas em branco"))
+
+        data.table::setorder(precipitacao_aux, V2)
 
         precipitacao_aux[, V1 := NULL]
         precipitacao_aux[, V3 := NULL]
 
         colnames(precipitacao_aux) <- c("data", "valor")
-        precipitacao_aux[, data := as.Date(data, format = "%d/%m/%Y")]
+
+        if (any(grepl(",", precipitacao_aux[['valor']]))) stop(paste0("Valor de precipitacao verificada com separador ',' no arquivo ", arq))
+        if (contem_n_numerico(precipitacao_aux[['valor']])) stop(paste0("Valor nao numerico de precipitacao verificada no arquivo ", arq))
+
         precipitacao_aux[, valor := as.numeric(valor)]
         
         precipitacao_aux <- stats::na.omit(precipitacao_aux)
@@ -424,6 +438,8 @@ le_entrada_precipitacao <- function(pasta_entrada, postos_plu) {
             stop(paste0(" precipitacao observada da data ", precipitacao_aux[valor < 0, data]," negativa para a sub-bacia ", nome_subbacia))
         }
 
+        if (length(precipitacao_aux[, data]) != length(seq.Date(precipitacao_aux[, min(data)], precipitacao_aux[, max(data)], by = 1))) stop(paste0("Data faltante no arquivo ", arq))
+        
         precipitacao <- rbind(precipitacao, precipitacao_aux)
     }
     precipitacao <- data.table::setcolorder(precipitacao, c("data", "posto", "valor"))
@@ -980,6 +996,16 @@ le_arq_entrada <- function(pasta_entrada) {
     precipitacao <- data.table::rbindlist(lapply(caso$nome_subbacia, function(sub_bacia) {
   ponderacao_espacial(precipitacao, postos_plu[nome %in% sub_bacia])
         }))
+
+    lapply(caso$nome_subbacia, function(nome_subbacia) {
+        ktMin <- parametros[Nome == nome_subbacia & parametro == "ktMin", valor]
+        data_inicio <- datas_rodadas[, min(data)] - inicializacao[nome == nome_subbacia & variavel == "numero_dias_assimilacao", valor] + 1
+        data_fim <- datas_rodadas[, max(data)]
+        if (precipitacao[, min(data)] > (data_inicio - ktMin))
+            stop(paste0("O historico de precipitacao verificada da sub-bacia ", nome_subbacia, " deve comecar na data ", data_inicio - ktMin))
+        if (precipitacao[, max(data)] < (data_fim))
+            stop(paste0("O historico de precipitacao verificada da sub-bacia ", nome_subbacia, " deve terminar na data ", data_fim + ktMax))
+    })
 
     pontos_grade <- data.table::rbindlist(lapply(caso$nome_subbacia, function(sub_bacia) {
   le_entrada_pontos_grade(pasta_entrada, sub_bacia, modelos_precipitacao)
