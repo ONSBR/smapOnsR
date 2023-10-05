@@ -832,7 +832,7 @@ le_entrada_previsao_precipitacao_0 <- function(pasta_entrada, datas_rodadas, dat
             pattern2 <- paste0(nome_cenario, "_p", substr(datas_rodadas$data,9,10), substr(datas_rodadas$data,6,7), substr(datas_rodadas$data,3,4),"a",
                     substr(data,9,10), substr(data,6,7), substr(data,3,4), ".dat")
             arq <- list.files(path = pasta_entrada, pattern = pattern2, ignore.case = TRUE, full.names = TRUE)
-            if(file.exists(arq)) stop(paste0("Nao existe o arquivo ", pattern))
+            if(length(arq) != 0) stop(paste0("Nao existe o arquivo ", pattern))
         }
     } else {
         previsao_precipitacao <- data.table::fread(arq, header = FALSE)
