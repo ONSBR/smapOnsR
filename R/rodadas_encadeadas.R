@@ -114,8 +114,8 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
 
         modelo <- new_modelo_smap_ons(parametros[Nome == sub_bacia], postos_plu[nome %in% sub_bacia])
         kt <- modelo$kt
-        kt_max <- max(which(modelo$kt[3:1] > 0)) - 1
-        kt_min <- max(which(modelo$kt[3:63] > 0)) - 1
+        kt_max <- parametros[Nome == sub_bacia & parametro == "ktMax", valor]
+        kt_min <- parametros[Nome == sub_bacia & parametro == "ktMin", valor]
         vetor_modelo <- unlist(modelo)
         area <- attributes(modelo)$area
 
@@ -350,8 +350,8 @@ rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observa
 
         modelo <- new_modelo_smap_ons(parametros[Nome == sub_bacia], postos_plu[nome %in% sub_bacia])
         kt <- modelo$kt
-        kt_max <- max(which(modelo$kt[3:1] > 0)) - 1
-        kt_min <- max(which(modelo$kt[3:63] > 0)) - 1
+        kt_max <- parametros[Nome == sub_bacia & parametro == "ktMax", valor]
+        kt_min <- parametros[Nome == sub_bacia & parametro == "ktMin", valor]
         vetor_modelo <- unlist(modelo)
         area <- attributes(modelo)$area
 

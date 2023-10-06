@@ -1,7 +1,5 @@
 # LEITURA DE ARQUIVOS DE ENTRADA SMAP---------------------------------
 
-#' le_parametros
-#' 
 #' Leitor de arquivo de parametros
 #' 
 #' Le arquivo de parametros "sub-bacia_PARAMETROS.txt".
@@ -14,11 +12,8 @@
 le_entrada_parametros <- function(pasta_entrada, nome_subbacia) {
 
     if (missing("nome_subbacia")) stop("forneca o nome da sub-bacia para a leitura do arquivo 'sub-bacia_parametros.txt'")
-
     pattern <- paste0(nome_subbacia, "_parametros.txt")
-        
     arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE)
-
     arq <- file.path(pasta_entrada, arq)
 
     if (length(arq) == 0) {
@@ -34,31 +29,41 @@ le_entrada_parametros <- function(pasta_entrada, nome_subbacia) {
     "Ecof", "Pcof", "Ecof2", "ktMin", "ktMax")
     
     aux <- strsplit(arq, split = "/")[[1]]
-    sb <- strsplit(aux[length(aux)], split = "_")[[1]]
     parametros_smap$Nome <- tolower(sub(".*/", "", sub("_parametros.txt", "", nome_subbacia)))
-    
     parametros_smap$Area <- as.numeric(parametros[1, 1])
-    parametros_smap$nKt <- as.numeric(substr(parametros[2,1], 1, 3))
-    aux <- strsplit(trimws(substr(parametros[2,1],4,nchar(parametros[2,1]))),split = " ")
+    if (!is.character(parametros[2, 1])) stop(paste0("Nao existe valores de kt declarados no arquivo ", arq))
+    aux <- unlist(strsplit(parametros[2, 1], "\\s+"))
+    parametros_smap$nKt <- as.numeric(aux[1])
+    if(as.numeric(aux[1]) != length(aux) - 1) stop(paste0("Numero de kt diferente do total de kt declarado no arquivo ", arq))    
+    if (is.na(parametros_smap$nKt)) stop(paste0("Parametro de numero de kt com valor nao numerico no arquivo ", arq))    
+    if (parametros_smap$nKt < 3) stop(paste0("Parametro de numero de kt com valor inferior a 3 no arquivo ", arq))    
+    if (parametros_smap$nKt != trunc(parametros_smap$nKt)) stop(paste0("Parametro de numero de kt com valor decimal no arquivo ", arq))    
 
     for (ikt in 1:parametros_smap[, nKt]) {
-        if (parametros_smap[1, nKt] > 3) {
-            parametros_smap[1, (ikt + 3)] <- as.numeric(aux[[1]][(parametros_smap[1, nKt - ikt + 1])])
-        } else{
-            parametros_smap[1, (ikt + 4)] <- as.numeric(aux[[1]][(parametros_smap[1, nKt - ikt + 1])])
-        }
+        parametros_smap[1, (ikt + 3)] <- as.numeric(aux[parametros_smap$nKt - ikt + 2])
     }
+
     for (iparametro in 67:80) {
-        parametros_smap[1,iparametro] <- as.numeric(parametros[(iparametro - 64), 1])
+        parametros_smap[1, iparametro] <- as.numeric(parametros[(iparametro - 64), 1])
     }
+
     parametros_smap[1, 81] <- sum(parametros_smap[, 7:66] > 0)
     parametros_smap[1, 82] <- sum(parametros_smap[, 4:5] > 0)
+    if (sum(parametros_smap[, 4:66]) < 0.995) stop(paste0("Somatorio dos kts inferior a 0.995 no arquivo ", arq))
+    if (sum(parametros_smap[, 4:66]) > 1.005) stop(paste0("Somatorio dos kts superior a 1.005 no arquivo ", arq))
+    parametros_smap[, limite_superior_ebin := as.numeric(parametros[17, 1])]
+    parametros_smap[, limite_inferior_ebin := as.numeric(parametros[18, 1])]
+    parametros_smap[, limite_superior_prec := as.numeric(parametros[19, 1])]
+    parametros_smap[, limite_inferior_prec := as.numeric(parametros[20, 1])]
+    parametros_smap <- data.table::melt(parametros_smap, id.vars = "Nome", variable.name = "parametro",
+           value.name = "valor")
 
+    if (any(is.na(parametros_smap[, valor]))) stop(paste0("Parametro ", parametros_smap[is.na(valor), parametro], " com valor nao numerico no arquivo ", arq))
+    if (any(parametros_smap[, valor] < 0)) stop(paste0("Parametro ", parametros_smap[valor < 0, parametro], " com valor negativo no arquivo ", arq))
+    
     parametros_smap
 }
 
-#' le_evapotranspiracao
-#' 
 #' Leitor de arquivo de normal climatologica de evapotranspiracao
 #' 
 #' Le arquivo evapotranspiracao utilizado no aplicativo SMAP/ONS
@@ -80,7 +85,7 @@ le_entrada_evapotranspiracao <- function(pasta_entrada, nome_subbacia) {
     }
 
     pattern <- paste0(nome_subbacia, "_evapotranspiracao.txt")
-        
+
     arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE)
 
     arq <- file.path(pasta_entrada, arq)
@@ -108,8 +113,6 @@ le_entrada_evapotranspiracao <- function(pasta_entrada, nome_subbacia) {
     duplicados <- dat[duplicated(mes) | duplicated(mes, fromLast = TRUE), mes]
 
     if (length(duplicados) > 0) stop(paste0("O mes ", unique(duplicados), " esta duplicado no arquivo ", arq))
-    
-    if (any(dat[, mes]) > 12)
 
     data.table::setcolorder(dat, c("mes", "nome", "valor"))
 
@@ -249,6 +252,7 @@ le_entrada_inicializacao <- function(pasta_entrada, nome_subbacia) {
 #' @param nome_subbacia nome da sub-bacia
 #' @importFrom  data.table fread setcolorder
 #' @importFrom stats na.omit
+#' @importFrom lubridate year
 #' @return data.table vazao com as colunas
 #'     \itemize{
 #'     \item{data}{data da observacao}
@@ -272,24 +276,30 @@ le_entrada_vazao <- function(pasta_entrada, nome_subbacia) {
         stop(paste0("nao existe o arquivo ", pattern))
     }
 
-    vazao <- data.table::fread(arq, header = FALSE)
+    vazao <- data.table::fread(arq, header = FALSE, sep = "|", fill = TRUE)
+    if(ncol(vazao) != 6) stop(paste0("O arquivo ", arq, " deve possuir 6 colunas"))
 
     vazao[, V1 := NULL]
     vazao[, V2 := NULL]
     vazao[, V3 := NULL]
     vazao[, V4 := NULL]
+    vazao <- vazao[!is.na(V5) & !is.na(V6)]
 
     colnames(vazao) <- c("data", "valor")
-    vazao[, data := as.Date(data)]
+    vazao[, data := as.Date(data, format = "%Y-%m-%d")]
+    if (any(is.na(vazao[, data]))) stop(paste0("Data com formato incorreto no arquivo ", arq))
+    if (any(vazao[, lubridate::year(data)] < 0 )) stop(paste0("Data com formato incorreto no arquivo ", arq))
+    if (nrow(vazao[grepl("-", valor)]) > 1) {
+        stop(paste0("Vazao observada da data ", vazao[valor < 0, data]," negativa para a sub-bacia ", nome_subbacia))
+    }    
     vazao <- vazao[!grepl("-", valor)]
     vazao[, valor := as.numeric(valor)]
+    if (any(is.na(vazao[, valor]))) stop(paste0("Vazao observada da data ", vazao[is.na(valor), data]," nao existente para a sub-bacia ", nome_subbacia))
 
     vazao[, posto := nome_subbacia]
     vazao <- data.table::setcolorder(vazao, c("data", "posto", "valor"))
-
-    if (any(vazao[, valor] < 0)) {
-        stop(paste0(" vazao observada da data ", vazao[valor < 0, data]," negativa para a sub-bacia ", nome_subbacia))
-    }
+    vazao <- data.table::setorder(vazao, data)
+    if (length(vazao[, data]) != length(seq.Date(vazao[, min(data)], vazao[, max(data)], by = 1))) stop(paste0("Data faltante no arquivo ", arq))
 
     vazao
 }
@@ -324,9 +334,34 @@ le_entrada_posto_plu <- function(pasta_entrada, nome_subbacia) {
         stop(paste0("nao existe o arquivo ", pattern))
     }
 
-    postos_plu <- data.table::fread(arq, header = FALSE)
+    aux <- read.table(arq, header = FALSE, sep = ";")
+    numero_postos <- as.numeric(aux$V1[1])
+    
+    if (is.na(numero_postos)) stop(paste0("Valor nao numerico de numero de postos plu no arquivo ", arq))
+    
+    if (numero_postos < 0) stop(paste0("Numero negativo de postos plu no arquivo ", arq))
+
+    if (numero_postos == 0) stop(paste0("Valor nulo de postos plu no arquivo ", arq))
+
+    postos_plu <- data.table::fread(arq, header = FALSE, blank.lines.skip = TRUE, sep = " ")
+    
+    if (ncol(postos_plu) != 2) stop(paste0("Arquivo ", arq, " com menos de 2 colunas"))
+
+    if (numero_postos != nrow(postos_plu)) stop(paste0("Numero de postos plu diferente do declarado no arquivo ", arq))
+
     postos_plu[, nome := nome_subbacia]
     colnames(postos_plu)[1:2] <- c("posto", "valor")
+    postos_plu[, valor := as.numeric(valor)]
+
+    if (any(is.na(postos_plu[, valor]))) stop(paste0("Valor nao numerico de KE no arquivo ", arq))
+
+    if (any(postos_plu[, valor] < 0)) stop(paste0("Valor negativo de KE no arquivo ", arq))
+
+    if(postos_plu[, sum(valor)] > 1.005) stop(paste0("Somatorio do KE maior que 1.005 no arquivo ", arq))
+
+    if(postos_plu[, sum(valor)] < 0.995) stop(paste0("Somatorio do KE menor que 0.995 no arquivo ", arq))
+
+    if (any(nchar(postos_plu[, posto]) > 8)) stop(paste0("Nome do posto plu com mais de 8 caracteres no arquivo ", arq))
 
     postos_plu <- data.table::setcolorder(postos_plu, c("nome", "posto", "valor"))
     postos_plu[, posto := tolower(posto)]
@@ -358,6 +393,11 @@ le_entrada_posto_plu <- function(pasta_entrada, nome_subbacia) {
 le_entrada_precipitacao <- function(pasta_entrada, postos_plu) {
 
     precipitacao <- data.table::data.table()
+
+    contem_n_numerico <- function(coluna) {
+        any(!is.na(coluna) & !is.numeric(coluna))
+    }
+
     for (iposto in 1:nrow(postos_plu)){
         pattern <- paste0(postos_plu[iposto, posto], "_c.txt")
         arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE)
@@ -371,13 +411,23 @@ le_entrada_precipitacao <- function(pasta_entrada, postos_plu) {
             }
         }
 
-        precipitacao_aux <- data.table::fread(arq, header = FALSE)
+        precipitacao_aux <- data.table::fread(arq, header = FALSE, fill = TRUE, blank.lines.skip = TRUE)
+        precipitacao_aux[, V2 := as.Date(V2, format = "%d/%m/%Y")]
+        
+        if (length(names(precipitacao_aux)) != 4) stop(paste0("O arquivo ", arq, " contem ", length(names(precipitacao_aux))), " colunas. sao necessarias 4 colunas")
+        if (anyNA(precipitacao_aux[, V2])) stop(paste0("Formato invalido de data para o arquivo ", arq))
+        if (anyNA(precipitacao_aux)) stop(paste0("Os dados informados no arquivo ", arq, " contem linhas em branco"))
+
+        data.table::setorder(precipitacao_aux, V2)
 
         precipitacao_aux[, V1 := NULL]
         precipitacao_aux[, V3 := NULL]
 
         colnames(precipitacao_aux) <- c("data", "valor")
-        precipitacao_aux[, data := as.Date(data, format = "%d/%m/%Y")]
+
+        if (any(grepl(",", precipitacao_aux[['valor']]))) stop(paste0("Valor de precipitacao verificada com separador ',' no arquivo ", arq))
+        if (contem_n_numerico(precipitacao_aux[['valor']])) stop(paste0("Valor nao numerico de precipitacao verificada no arquivo ", arq))
+
         precipitacao_aux[, valor := as.numeric(valor)]
         
         precipitacao_aux <- stats::na.omit(precipitacao_aux)
@@ -387,6 +437,8 @@ le_entrada_precipitacao <- function(pasta_entrada, postos_plu) {
         if (any(precipitacao_aux[, valor] < 0)) {
             stop(paste0(" precipitacao observada da data ", precipitacao_aux[valor < 0, data]," negativa para a sub-bacia ", nome_subbacia))
         }
+
+        if (length(precipitacao_aux[, data]) != length(seq.Date(precipitacao_aux[, min(data)], precipitacao_aux[, max(data)], by = 1))) stop(paste0("Data faltante no arquivo ", arq))
 
         precipitacao <- rbind(precipitacao, precipitacao_aux)
     }
@@ -497,12 +549,12 @@ le_entrada_pontos_grade <- function(pasta_entrada, nome_subbacia, modelos_precip
         if (length(arq) == 0) {
             stop(paste0("nao existe o arquivo ", pattern))
         }
-
         aux <- readLines(arq)
         aux <- aux[nchar(aux) > 0]
+        aux <- trimws(aux)
         aux <- strsplit(aux, "\\s+")
         
-        aux_pontos_grade <- modelos_precipitacao$nome_cenario
+        aux_pontos_grade <- data.table::copy(modelos_precipitacao$nome_cenario)
         aux_pontos_grade[, longitude := as.numeric(aux[[2]][1])]
         aux_pontos_grade[, latitude := as.numeric(aux[[2]][2])]
         aux_pontos_grade[, nome := nome_subbacia]
@@ -515,9 +567,9 @@ le_entrada_pontos_grade <- function(pasta_entrada, nome_subbacia, modelos_precip
 
         if (as.numeric(aux[[1]][1]) > 1) {
             for (iponto in 3:(as.numeric(aux[[1]][1]) + 1)) {
-                aux_pontos_grade2 <- modelos_precipitacao$nome_cenario
-                aux_pontos_grade[, longitude := as.numeric(aux[[iponto]][1])]
-                aux_pontos_grade[, latitude := as.numeric(aux[[iponto]][2])]
+                aux_pontos_grade2 <- data.table::copy(modelos_precipitacao$nome_cenario)
+                aux_pontos_grade2[, longitude := as.numeric(aux[[iponto]][1])]
+                aux_pontos_grade2[, latitude := as.numeric(aux[[iponto]][2])]
                 aux_pontos_grade2[, nome := nome_subbacia]
                 aux_pontos_grade <- rbind(aux_pontos_grade, aux_pontos_grade2)
             }
@@ -565,11 +617,12 @@ le_entrada_bat_conf <- function(pasta_entrada) {
     }
     
     dat <- data.table::fread(arq, sep = "=")
+    colnames(dat) <- c("parametro", "valor")
     
-    if (length(dat[V1 == "arqPrev", V1]) == 0) {
+    if (length(dat[parametro == "arqPrev", parametro]) == 0) {
         formato_previsao <- 0
     } else {
-        formato_previsao <- as.numeric(dat[V1 == "arqPrev", V2])
+        formato_previsao <- as.numeric(dat[parametro == "arqPrev", strsplit(valor, "'")[[1]][1]])
     }
 
     formato_previsao
@@ -765,17 +818,34 @@ le_entrada_previsao_precipitacao_1 <- function(pasta_entrada, datas_rodadas, pon
 le_entrada_previsao_precipitacao_0 <- function(pasta_entrada, datas_rodadas, data_previsao, pontos_grade, nome_cenario) {
 
     pattern <- paste0(nome_cenario, "_p", substr(datas_rodadas$data,9,10), substr(datas_rodadas$data,6,7), substr(datas_rodadas$data,3,4),"a",
-     substr(data_previsao,9,10), substr(data_previsao,6,7), substr(data_previsao,3,4), ".dat")
+    substr(data_previsao,9,10), substr(data_previsao,6,7), substr(data_previsao,3,4), ".dat")
     arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE)
     arq <- file.path(pasta_entrada, arq)
-
     previsao_precipitacao <- data.table::data.table()
-    
     if (length(arq) == 0) {
-        paste0("nao existe o arquivo ", arq)
+        if (data_previsao == datas_rodadas$data + 1) stop(paste0("Nao existe o arquivo ", pattern))
+        pattern2 <- paste0(nome_cenario, "_p", substr(datas_rodadas$data,9,10), substr(datas_rodadas$data,6,7), substr(datas_rodadas$data,3,4))
+        arquivos <- list.files(pasta_entrada)
+        arquivos <- grep(pattern2, tolower(arquivos), value = TRUE) 
+        for (idata in 1:datas_rodadas$numero_dias_previsao - 1){
+            data <- data_previsao + idata
+            pattern2 <- paste0(nome_cenario, "_p", substr(datas_rodadas$data,9,10), substr(datas_rodadas$data,6,7), substr(datas_rodadas$data,3,4),"a",
+                    substr(data,9,10), substr(data,6,7), substr(data,3,4), ".dat")
+            arq <- list.files(path = pasta_entrada, pattern = pattern2, ignore.case = TRUE, full.names = TRUE)
+            if(length(arq) != 0) stop(paste0("Nao existe o arquivo ", pattern))
+        }
     } else {
-
         previsao_precipitacao <- data.table::fread(arq, header = FALSE)
+        previsao_precipitacao[, V1 := as.numeric(V1)]
+        if (any(is.na(previsao_precipitacao[, V1]))) stop(paste0("Valor nao numerico de longitude no arquivo ", arq))
+        if (any(abs(previsao_precipitacao[, V1]) >= 100)) stop(paste0("Valor de longitude com 3 inteiros no arquivo ", arq))
+        previsao_precipitacao[, V2 := as.numeric(V2)]
+        if (any(is.na(previsao_precipitacao[, V2]))) stop(paste0("Valor nao numerico de latitude no arquivo ", arq))
+        if (any(abs(previsao_precipitacao[, V2]) >= 100)) stop(paste0("Valor de latitude com 3 inteiros no arquivo ", arq))
+        previsao_precipitacao[, V3 := as.numeric(V3)]
+        if (any(is.na(previsao_precipitacao[, V3]))) stop(paste0("Valor nao numerico de previsao de precipitacao no arquivo ", arq))
+        if (any(previsao_precipitacao[, V3] < 0)) stop(paste0("Valor negativo de previsao de precipitacao no arquivo ", arq))
+
         colnames(previsao_precipitacao)[1:2] <- c("longitude", "latitude")
         colnames(previsao_precipitacao)[3] <- as.character(data_previsao)
         previsao_precipitacao$cenario <- nome_cenario
@@ -785,6 +855,7 @@ le_entrada_previsao_precipitacao_0 <- function(pasta_entrada, datas_rodadas, dat
         nome_2 <- strsplit(nome_cenario, split = "_")[[1]][2]
 
         previsao_precipitacao <- merge(previsao_precipitacao, pontos_grade[nome_cenario_1 == nome_1 & nome_cenario_2 == nome_2], by = c("latitude", "longitude"))
+        if(nrow(previsao_precipitacao) != nrow(pontos_grade)) stop(paste0("Numero de pontos de grade declarado anteriormente e diferente no arquivo ", arq))
 
         previsao_precipitacao[, nome_cenario_1 := NULL]
         previsao_precipitacao[, nome_cenario_2 := NULL]
@@ -884,8 +955,6 @@ le_arq_entrada <- function(pasta_entrada) {
     parametros <- data.table::rbindlist(lapply(caso$nome_subbacia, function(sub_bacia) {
   le_entrada_parametros(pasta_entrada, sub_bacia)
         }))
-    parametros <- data.table::melt(parametros, id.vars = "Nome", variable.name = "parametro",
-           value.name = "valor")
 
     evapotranspiracao <- data.table::rbindlist(lapply(caso$nome_subbacia, function(sub_bacia) {
   le_entrada_evapotranspiracao(pasta_entrada, sub_bacia)
@@ -908,6 +977,15 @@ le_arq_entrada <- function(pasta_entrada) {
   le_entrada_vazao(pasta_entrada, sub_bacia)
         }))
 
+    lapply(caso$nome_subbacia, function(nome_subbacia) {
+        data_inicio <- datas_rodadas[, min(data)] - inicializacao[nome == nome_subbacia & variavel == "numero_dias_assimilacao", valor] + 1
+        data_fim <- datas_rodadas[, max(data)] - 1
+        if (vazao[, min(data)] > data_inicio)
+        stop(stop(paste0("O historico de vazao da sub-bacia ", nome_subbacia, " deve comecar na data ", data_inicio)))
+        if (vazao[, max(data)] < data_fim)
+        stop(stop(paste0("O historico de vazao da sub-bacia ", nome_subbacia, " deve terminar na data ", data_fim)))
+    })
+
     postos_plu <- data.table::rbindlist(lapply(caso$nome_subbacia, function(sub_bacia) {
   le_entrada_posto_plu(pasta_entrada, sub_bacia)
         }))
@@ -919,6 +997,16 @@ le_arq_entrada <- function(pasta_entrada) {
     precipitacao <- data.table::rbindlist(lapply(caso$nome_subbacia, function(sub_bacia) {
   ponderacao_espacial(precipitacao, postos_plu[nome %in% sub_bacia])
         }))
+
+    lapply(caso$nome_subbacia, function(nome_subbacia) {
+        ktMin <- parametros[Nome == nome_subbacia & parametro == "ktMin", valor]
+        data_inicio <- datas_rodadas[, min(data)] - inicializacao[nome == nome_subbacia & variavel == "numero_dias_assimilacao", valor] + 1
+        data_fim <- datas_rodadas[, max(data)]
+        if (precipitacao[, min(data)] > (data_inicio - ktMin))
+            stop(paste0("O historico de precipitacao verificada da sub-bacia ", nome_subbacia, " deve comecar na data ", data_inicio - ktMin))
+        if (precipitacao[, max(data)] < (data_fim))
+            stop(paste0("O historico de precipitacao verificada da sub-bacia ", nome_subbacia, " deve terminar na data ", data_fim + ktMax))
+    })
 
     pontos_grade <- data.table::rbindlist(lapply(caso$nome_subbacia, function(sub_bacia) {
   le_entrada_pontos_grade(pasta_entrada, sub_bacia, modelos_precipitacao)
@@ -934,19 +1022,16 @@ le_arq_entrada <- function(pasta_entrada) {
     } else {
         datas <- data.table::as.data.table(seq.Date(datas_rodadas$data + 1, datas_rodadas$data + datas_rodadas$numero_dias_previsao, 1))
         cenarios <- data.table::as.data.table(paste0(unique(pontos_grade$nome_cenario_1),"_",unique(pontos_grade$nome_cenario_2)))
-        previsao_precipitacao <- data.table::data.table()
-        for (icenario in 1:nrow(cenarios)){
-            nome_cenario <- cenarios$V1[icenario]
-            for (idata in 1:nrow(datas)){
-                data_previsao <- datas$V1[idata]
-                aux <- data.table::data.table()
-                aux <- le_entrada_previsao_precipitacao_0(pasta_entrada, datas_rodadas, data_previsao, pontos_grade, nome_cenario)
-                previsao_precipitacao <- rbind(previsao_precipitacao, aux)
-            }
-        }
+        previsao_precipitacao <- data.table::rbindlist(lapply(cenarios$V1, function(nome_cenario) {
+            data.table::rbindlist(lapply(datas$V1, function(data_previsao) {
+                le_entrada_previsao_precipitacao_0(pasta_entrada, datas_rodadas, data_previsao, pontos_grade, nome_cenario)
+            }))
+        }))
     }
     
     previsao_precipitacao <- completa_previsao(previsao_precipitacao, datas_rodadas)
+    previsao_precipitacao <- previsao_precipitacao[, mean(valor), by = .(data_rodada, data_previsao, cenario, nome)]
+    colnames(previsao_precipitacao)[5] <- "valor"
 
     saida <- list(parametros = parametros, vazao = vazao, precipitacao = precipitacao, evapotranspiracao = evapotranspiracao,
         previsao_precipitacao = previsao_precipitacao, postos_plu = postos_plu, inicializacao = inicializacao,

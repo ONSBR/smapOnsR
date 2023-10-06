@@ -41,8 +41,8 @@ assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, preci
       limite_supin = c(0, 2)){
     
     kt <- vetor_modelo[12:74]
-    kt_max <- max(which(kt[3:1] > 0)) - 1
-    kt_min <- max(which(kt[3:63] > 0)) - 1
+    kt_max <- sum(vetor_modelo[12:13] > 0)
+    kt_min <- sum(vetor_modelo[15:74] > 0)
     precipitacao_ponderada <- data.table::data.table(precipitacao_assimilacao)
     precipitacao_ponderada[, valor := valor * vetor_modelo[75]]
     precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada[, valor], kt,
@@ -73,7 +73,8 @@ assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, preci
               vazao = vazao,
               numero_dias_assimilacao = numero_dias_assimilacao,
               pesos_funcao_objetivo = pesos_funcao_objetivo,
-              control = list(fnscale = 1))
+              control = list(fnscale = 1, ndeps = rep(0.000001, length(vetor_variaveis)),
+              maxit = 1000))
 
   EbInic <- ajuste$par[numero_dias_assimilacao + 1]
   Supin <- ajuste$par[numero_dias_assimilacao + 2]
@@ -182,8 +183,8 @@ assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Su
       limite_supin = c(0, 2)) {
     
     kt <- vetor_modelo[12:74]
-    kt_max <- max(which(kt[3:1] > 0)) - 1
-    kt_min <- max(which(kt[3:63] > 0)) - 1
+    kt_max <- sum(vetor_modelo[12:13] > 0)
+    kt_min <- sum(vetor_modelo[15:74] > 0)
     precipitacao_ponderada <- data.table::data.table(precipitacao_assimilacao)
     precipitacao_ponderada[, valor := valor * vetor_modelo[75]]
     precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada[, valor], kt,
@@ -215,7 +216,8 @@ assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Su
               vazao = vazao,
               numero_dias_assimilacao = numero_dias_assimilacao,
               pesos_funcao_objetivo = pesos_funcao_objetivo,
-              control = list(fnscale = 1, maxit = 1000))
+              control = list(fnscale = 1, ndeps = rep(0.000001, length(vetor_variaveis)),
+              maxit = 1000))
     
     EbInic <- ajuste$par[numero_dias_assimilacao * 2 + 1]
     Supin <- ajuste$par[numero_dias_assimilacao * 2 + 2]
