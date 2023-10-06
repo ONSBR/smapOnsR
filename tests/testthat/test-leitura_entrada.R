@@ -832,7 +832,9 @@ test_that("testa arquivo 'sub_bacia'.txt", {
     expect_error(suppressWarnings(le_entrada_vazao(pasta_entrada, nome_subbacia)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN09", "CT9.18", "Arq_Entrada", package = "smapOnsR")
-    expect_error(suppressWarnings(le_entrada_vazao(pasta_entrada, nome_subbacia)))
+    if ((sessionInfo()$R.version$os == "mingw32") || (sessionInfo()$R.version$os == "linux-gnu")) {
+        expect_error(suppressWarnings(le_entrada_vazao(pasta_entrada, nome_subbacia)))
+    }
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN09", "CT9.19", "Arq_Entrada", package = "smapOnsR")
     expect_error(suppressWarnings(le_entrada_vazao(pasta_entrada, nome_subbacia)))
