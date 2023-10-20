@@ -179,9 +179,10 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
             saida_precipitacao <- data.table::rbindlist(list(saida_precipitacao, precipitacao))
 
             precipitacao[, valor := valor * vetor_modelo[75]]
-            for (icenario in 1:length(unique(precipitacao[, cenario]))){
-                matriz_precipitacao[icenario,] <- ponderacao_temporal(precipitacao[data_previsao < (dataRodada + numero_dias_previsao + kt_max) & data_rodada == dataRodada & 
-                data_previsao >= (dataRodada - numero_dias_assimilacao  - kt_min) & cenario == nome_cenario[icenario], valor], kt, kt_max, kt_min)
+            matriz_precipitacao <- array(precipitacao[data_previsao < (dataRodada + numero_dias_previsao + kt_max) & data_rodada == dataRodada & 
+                data_previsao >= (dataRodada - numero_dias_assimilacao - kt_min), valor], c(numero_dias_previsao + numero_dias_assimilacao + kt_max + kt_min, numero_cenarios))
+            matriz_precipitacao <- t(ponderacao_temporal(matriz_precipitacao, kt, kt_max, kt_min))
+            for (icenario in 1:numero_cenarios){
                 matriz_precipitacao[icenario, 1:numero_dias_assimilacao] <- matriz_precipitacao[icenario, 1:numero_dias_assimilacao] * ajuste$ajuste$par[1:numero_dias_assimilacao]
             }
             
@@ -423,9 +424,10 @@ rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observa
             saida_precipitacao <- data.table::rbindlist(list(saida_precipitacao, precipitacao))
 
             precipitacao[, valor := valor * vetor_modelo[75]]
-            for (icenario in 1:length(unique(precipitacao[, cenario]))){
-                matriz_precipitacao[icenario,] <- ponderacao_temporal(precipitacao[data_previsao < (dataRodada + numero_dias_previsao + kt_max) & 
-                data_previsao >= (dataRodada - numero_dias_assimilacao  - kt_min) & cenario == nome_cenario[icenario], valor], kt, kt_max, kt_min)
+            matriz_precipitacao <- array(precipitacao[data_previsao < (dataRodada + numero_dias_previsao + kt_max) & data_rodada == dataRodada & 
+                data_previsao >= (dataRodada - numero_dias_assimilacao - kt_min), valor], c(numero_dias_previsao + numero_dias_assimilacao + kt_max + kt_min, numero_cenarios))
+            matriz_precipitacao <- t(ponderacao_temporal(matriz_precipitacao, kt, kt_max, kt_min))
+            for (icenario in 1:numero_cenarios){
                 matriz_precipitacao[icenario, 1:numero_dias_assimilacao] <- matriz_precipitacao[icenario, 1:numero_dias_assimilacao] * ajuste$ajuste$par[1:numero_dias_assimilacao]
             }
             

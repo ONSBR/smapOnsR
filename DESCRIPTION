@@ -19,12 +19,12 @@ Imports:
     shinyjs,
     DT,
     future,
-    ggplot2,
     xts,
     magrittr,
     funcaoSmapCpp,
     plotly,
-    zip
+    zip,
+    zoo
 Remotes: felipe-treistman/funcaoSmapCpp
 LazyData: true
 LazyDataCompression: bzip2
