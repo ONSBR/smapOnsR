@@ -261,7 +261,7 @@ executa_visualizador_calibracao <- function(){
             arquivo_parametros <- input$arquivo_parametros$datapath
             if (!is.null(arquivo_parametros)) {
                 parametros <- parametros()
-                return(parametros[parametros$Nome == input$sub_bacia])
+                return(parametros[parametros$nome == input$sub_bacia])
             }
         })
 

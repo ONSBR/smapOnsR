@@ -24,12 +24,12 @@ le_entrada_parametros <- function(pasta_entrada, nome_subbacia) {
 
     parametros_smap <- array(rep(0, 82), c(1, 82))
     parametros_smap <- data.table::data.table(parametros_smap)
-    colnames(parametros_smap) <- c("Nome", "Area", "nKt", paste0("Kt", 2:-60),
+    colnames(parametros_smap) <- c("nome", "Area", "nKt", paste0("Kt", 2:-60),
     "Str", "K2t", "Crec", "Ai", "Capc", "K_kt", "K2t2", "H1", "H", "K3t", "K1t",
     "Ecof", "Pcof", "Ecof2", "ktMin", "ktMax")
     
     aux <- strsplit(arq, split = "/")[[1]]
-    parametros_smap$Nome <- tolower(sub(".*/", "", sub("_parametros.txt", "", nome_subbacia)))
+    parametros_smap$nome <- tolower(sub(".*/", "", sub("_parametros.txt", "", nome_subbacia)))
     parametros_smap$Area <- as.numeric(parametros[1, 1])
     if (!is.character(parametros[2, 1])) stop(paste0("Nao existe valores de kt declarados no arquivo ", arq))
     aux <- unlist(strsplit(parametros[2, 1], "\\s+"))
@@ -55,7 +55,7 @@ le_entrada_parametros <- function(pasta_entrada, nome_subbacia) {
     parametros_smap[, limite_inferior_ebin := as.numeric(parametros[18, 1])]
     parametros_smap[, limite_superior_prec := as.numeric(parametros[19, 1])]
     parametros_smap[, limite_inferior_prec := as.numeric(parametros[20, 1])]
-    parametros_smap <- data.table::melt(parametros_smap, id.vars = "Nome", variable.name = "parametro",
+    parametros_smap <- data.table::melt(parametros_smap, id.vars = "nome", variable.name = "parametro",
            value.name = "valor")
 
     if (any(is.na(parametros_smap[, valor]))) stop(paste0("Parametro ", parametros_smap[is.na(valor), parametro], " com valor nao numerico no arquivo ", arq))
@@ -354,7 +354,7 @@ le_entrada_posto_plu <- function(pasta_entrada, nome_subbacia) {
 
     if(postos_plu[, sum(valor)] < 0.995) stop(paste0("Somatorio do KE menor que 0.995 no arquivo ", arq))
 
-    if (any(nchar(postos_plu[, posto]) > 8)) stop(paste0("Nome do posto plu com mais de 8 caracteres no arquivo ", arq))
+    if (any(nchar(postos_plu[, posto]) > 8)) stop(paste0("nome do posto plu com mais de 8 caracteres no arquivo ", arq))
 
     postos_plu <- data.table::setcolorder(postos_plu, c("nome", "posto", "valor"))
     postos_plu[, posto := tolower(posto)]
@@ -879,7 +879,7 @@ le_entrada_previsao_precipitacao_0 <- function(pasta_entrada, datas_rodadas, dat
 #' @importFrom  data.table rbindlist
 #' @return saida lista com as variaveis: parametros data table com os parametros dos modelos
 #'     \itemize{
-#'     \item{Nome}{Nome da sub-bacia}
+#'     \item{nome}{nome da sub-bacia}
 #'     \item{parametro}{nome do parametro}
 #'     \item{valor}{valor do parametro}
 #'     }
@@ -985,7 +985,7 @@ le_arq_entrada <- function(pasta_entrada) {
         }))
 
     lapply(caso$nome_subbacia, function(nome_subbacia) {
-        ktMin <- parametros[Nome == nome_subbacia & parametro == "ktMin", valor]
+        ktMin <- parametros[nome == nome_subbacia & parametro == "ktMin", valor]
         data_inicio <- datas_rodadas[, min(data)] - inicializacao[nome == nome_subbacia & variavel == "numero_dias_assimilacao", valor] + 1
         data_fim <- datas_rodadas[, max(data)]
         if (precipitacao[, min(data)] > (data_inicio - ktMin))

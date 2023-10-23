@@ -39,7 +39,7 @@ le_evapotranspiracao <- function(arq) {
 #' @importFrom utils read.csv
 #' @return data.table com as colunas
 #'     \itemize{
-#'     \item{Nome}{Nome da sub-bacia}
+#'     \item{nome}{nome da sub-bacia}
 #'     \item{parametro}{nome do parametro}
 #'     \item{valor}{valor do parametro}
 #'     }
@@ -52,12 +52,12 @@ le_parametros <- function(arq) {
 
     dat <- data.table::fread(arq)
 
-    if (any(colnames(dat) != c("Nome", "parametro", "valor"))) {
-        stop("o arquivos deve deve possuir colunas 'Nome', 'parametro' e 'valor'")
+    if (any(colnames(dat) != c("nome", "parametro", "valor"))) {
+        stop("o arquivos deve deve possuir colunas 'nome', 'parametro' e 'valor'")
     }
 
     dat[, valor := as.numeric(valor)]
-    dat[, Nome := tolower(Nome)]
+    dat[, nome := tolower(nome)]
 
     if (any(is.na(dat$valor))) {
         stop("a coluna 'valor' do arquivo ", arq, " possui valores nao numericos")
@@ -67,8 +67,8 @@ le_parametros <- function(arq) {
         stop("a coluna 'parametro' do arquivo ", arq, " possui valores nao numericos")
     }
 
-    if (any(is.na(dat$Nome) | dat$Nome == "")) {
-        stop("a coluna 'Nome' do arquivo ", arq, " possui valores nao numericos")
+    if (any(is.na(dat$nome) | dat$nome == "")) {
+        stop("a coluna 'nome' do arquivo ", arq, " possui valores nao numericos")
     }
 
     if (any(dat$valor < 0)) {
@@ -79,27 +79,27 @@ le_parametros <- function(arq) {
         stop("a coluna 'valor' do arquivo ", arq, " possui valores iguais a zero associados ao parametro 'Area'")
     }
     
-    if (any(duplicated(dat[, .(Nome, parametro)]))) {
+    if (any(duplicated(dat[, .(nome, parametro)]))) {
         stop("o arquivo ", arq, " possui valores duplicados na coluna 'parametro' para uma mesma sub-bacia")
     }
 
     parametros <- c("Area", "Str", "K2t", "Crec", "Ai", "Capc", 
     "K_kt", "K2t2", "H1", "H", "K3t", "K1t", "Ecof", "Pcof", "Ecof2")
 
-    teste <- dat[, setdiff(parametros, parametro), by = c("Nome")]
+    teste <- dat[, setdiff(parametros, parametro), by = c("nome")]
 
     if (nrow(teste) != 0) {
-        stop(paste0("falta o parametro ", teste$V1, " para a sub-bacia ", teste$Nome, " no arquivo ", arq, "\n"))
+        stop(paste0("falta o parametro ", teste$V1, " para a sub-bacia ", teste$nome, " no arquivo ", arq, "\n"))
     }
 
-    teste <- dat[substr(parametro, 1, 2) == "Kt", sum(valor), by = c("Nome")]
+    teste <- dat[substr(parametro, 1, 2) == "Kt", sum(valor), by = c("nome")]
 
     if (max(teste$V1) > 1.005) {
-        stop(paste0("o somatorio dos Kts da sub-bacia ", teste[V1 > 1.005, Nome], ", e maior que 1.005 no arquivo ", arq, "\n"))
+        stop(paste0("o somatorio dos Kts da sub-bacia ", teste[V1 > 1.005, nome], ", e maior que 1.005 no arquivo ", arq, "\n"))
     }
 
     if (min(teste$V1) < 0.995) {
-        stop(paste0("o somatorio dos Kts da sub-bacia ", teste[V1 < 0.995, Nome], ", e menor que 0.995 no arquivo ", arq, "\n"))
+        stop(paste0("o somatorio dos Kts da sub-bacia ", teste[V1 < 0.995, nome], ", e menor que 0.995 no arquivo ", arq, "\n"))
     }
     # FAZER O TESTE PARA A SOMA DOS KT'S (KT2 ATE KT-60) A QUAL NAO PODE SER MAIOR DO QUE 1
     dat
@@ -508,8 +508,8 @@ le_arq_entrada_novo <- function(pasta_entrada) {
     }
 
     if (any(arquivos[, arquivo] == "PARAMETROS")) {
-        parametros <- le_parametros(file.path(pasta_entrada,arquivos[arquivo == "PARAMETROS", nome_arquivo])) #[Nome %in% sub_bacias$nome]
-        parametros[, nome := tolower(Nome)]
+        parametros <- le_parametros(file.path(pasta_entrada,arquivos[arquivo == "PARAMETROS", nome_arquivo])) #[nome %in% sub_bacias$nome]
+        parametros[, nome := tolower(nome)]
         if (!sub_bacias$nome %in% parametros[, nome]) {
             stop("o arquivo 'parametros.csv' deve conter os mesmos nomes descritos no arquivo 'sub_bacias.csv'")
         }

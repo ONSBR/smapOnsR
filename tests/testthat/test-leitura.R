@@ -196,7 +196,7 @@ test_that("testa vazoes.csv", {
     expect_error(le_historico_verificado(arq))
 
     arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN07", "CT7.3", "Arq_Entrada", "vazoes.csv", package = "smapOnsR")
-    expect_error(le_historico_verificado(arq))
+    expect_error(suppressWarnings(le_historico_verificado(arq)))
 
     arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN07", "CT7.4", "Arq_Entrada", "vazoes.csv", package = "smapOnsR")
     expect_error(le_historico_verificado(arq))

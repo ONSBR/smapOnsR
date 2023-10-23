@@ -7,7 +7,7 @@ test_that("testa a assimilacao de dados oficial", {
   Supin <- historico_vazao[data == (data_rodada - dias_assimilacao + 1) & posto == sub_bacia, valor] / 2
   TuInic <- 0.5
 
-  modelo <- new_modelo_smap_ons(parametros[Nome == sub_bacia], postos_plu[nome == sub_bacia])
+  modelo <- new_modelo_smap_ons(parametros[nome == sub_bacia], postos_plu[nome == sub_bacia])
   vetor_modelo <- unlist(modelo)
   area <- attributes(modelo)$area
 
@@ -55,7 +55,7 @@ test_that("testa a assimilacao de dados com evapotranspiracao", {
   Supin <- historico_vazao[data == (data_rodada - dias_assimilacao + 1) & posto == sub_bacia, valor] / 2
   TuInic <- 0.5
 
-  modelo <- new_modelo_smap_ons(parametros[Nome == sub_bacia], postos_plu[nome == sub_bacia])
+  modelo <- new_modelo_smap_ons(parametros[nome == sub_bacia], postos_plu[nome == sub_bacia])
   vetor_modelo <- unlist(modelo)
   area <- attributes(modelo)$area
 

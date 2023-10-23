@@ -4,7 +4,7 @@
 #'
 #' @param parametros data table com os parametros dos modelos
 #'     \itemize{
-#'     \item{Nome}{Nome da sub-bacia}
+#'     \item{nome}{nome da sub-bacia}
 #'     \item{parametro}{nome do parametro}
 #'     \item{valor}{valor do parametro}
 #'     }
@@ -112,10 +112,10 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
         numero_dias_assimilacao <- inicializacao[nome == sub_bacia & variavel == "numero_dias_assimilacao", valor]
         vetor_inicializacao <- array(rep(0, numero_cenarios * 7), c(numero_cenarios, 7))
 
-        modelo <- new_modelo_smap_ons(parametros[Nome == sub_bacia], postos_plu[nome %in% sub_bacia])
+        modelo <- new_modelo_smap_ons(parametros[nome == sub_bacia], postos_plu[nome %in% sub_bacia])
         kt <- modelo$kt
-        kt_max <- parametros[Nome == sub_bacia & parametro == "ktMax", valor]
-        kt_min <- parametros[Nome == sub_bacia & parametro == "ktMin", valor]
+        kt_max <- parametros[nome == sub_bacia & parametro == "ktMax", valor]
+        kt_min <- parametros[nome == sub_bacia & parametro == "ktMin", valor]
         vetor_modelo <- unlist(modelo)
         area <- attributes(modelo)$area
 
@@ -244,7 +244,7 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
 #'
 #' @param parametros data table com os parametros dos modelos
 #'     \itemize{
-#'     \item{Nome}{Nome da sub-bacia}
+#'     \item{nome}{nome da sub-bacia}
 #'     \item{parametro}{nome do parametro}
 #'     \item{valor}{valor do parametro}
 #'     }
@@ -359,10 +359,10 @@ rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observa
         numero_dias_assimilacao <- inicializacao[nome == sub_bacia & variavel == "numero_dias_assimilacao", valor]
         vetor_inicializacao <- array(rep(0, numero_cenarios * 7), c(numero_cenarios, 7))
 
-        modelo <- new_modelo_smap_ons(parametros[Nome == sub_bacia], postos_plu[nome %in% sub_bacia])
+        modelo <- new_modelo_smap_ons(parametros[nome == sub_bacia], postos_plu[nome %in% sub_bacia])
         kt <- modelo$kt
-        kt_max <- parametros[Nome == sub_bacia & parametro == "ktMax", valor]
-        kt_min <- parametros[Nome == sub_bacia & parametro == "ktMin", valor]
+        kt_max <- parametros[nome == sub_bacia & parametro == "ktMax", valor]
+        kt_min <- parametros[nome == sub_bacia & parametro == "ktMin", valor]
         vetor_modelo <- unlist(modelo)
         area <- attributes(modelo)$area
 

@@ -22,7 +22,7 @@ test_that("testa rodadas encadeadas", {
     inicializacao <- data.table::data.table(nome = c(rep("avermelha", 4), rep("ssimao2", 4)), variavel = rep(c("Ebin", "Supin", "Tuin", "numero_dias_assimilacao"),2), 
     valor = c(218.71, 46.69, 0.2891, 31, 441.67, 256.98, 0.3141, 31))
     
-    saida <- rodada_encadeada_oficial(parametros[Nome %in% sub_bacias],
+    saida <- rodada_encadeada_oficial(parametros[nome %in% sub_bacias],
     inicializacao, precipitacao, previsao_precipitacao, evapotranspiracao, vazao,
     postos_plu, datas_rodadas, numero_cenarios, sub_bacias)
 
@@ -135,7 +135,7 @@ test_that("testa rodada com serie temporal etp", {
     inicializacao <- data.table::data.table(nome = c(rep("avermelha", 4), rep("ssimao2", 4)), variavel = rep(c("Ebin", "Supin", "Tuin", "numero_dias_assimilacao"),2), 
     valor = c(218.71, 46.69, 0.2891, 31, 441.67, 256.98, 0.3141, 31))
     
-    saida <- rodada_encadeada_etp(parametros[Nome %in% sub_bacias],
+    saida <- rodada_encadeada_etp(parametros[nome %in% sub_bacias],
     inicializacao, precipitacao_observada, precipitacao_prevista, evapotranspiracao_observada, evapotranspiracao_prevista, vazao_observada,
     postos_plu, datas_rodadas, numero_cenarios, sub_bacias)
 
@@ -172,10 +172,10 @@ test_that("testa caso pegando a assimilacao original do aplicativo",{
           numero_dias_assimilacao <- inicializacao[nome == sub_bacia & variavel == "numero_dias_assimilacao", valor]
           vetor_inicializacao <- array(rep(0, numero_cenarios * 7), c(numero_cenarios, 7))
 
-          modelo <- new_modelo_smap_ons(parametros[Nome == sub_bacia], postos_plu[nome %in% sub_bacia])
+          modelo <- new_modelo_smap_ons(parametros[nome == sub_bacia], postos_plu[nome %in% sub_bacia])
           kt <- modelo$kt
-          kt_max <- parametros[Nome == sub_bacia & parametro == "ktMax", valor]
-          kt_min <- parametros[Nome == sub_bacia & parametro == "ktMin", valor]
+          kt_max <- parametros[nome == sub_bacia & parametro == "ktMax", valor]
+          kt_min <- parametros[nome == sub_bacia & parametro == "ktMin", valor]
           vetor_modelo <- unlist(modelo)
           area <- attributes(modelo)$area
 
