@@ -119,7 +119,7 @@ executa_visualizador_calibracao <- function(){
                             shiny::dateRangeInput("zoom_calibracao", "Zoom calibracao", start = NULL, end = NULL, min = NULL, max = NULL),
                             shiny::column(3,
                                 shiny::actionButton(inputId = "botao_calibracao", label = "Calibrar", class = "btn-lg btn-success"),
-                                shiny::checkboxGroupInput("variaveis", "variaveis", choices = c("Qsup1", "Qsup2", "Qplan", "Qbase")),
+                                shiny::checkboxGroupInput("variaveis", "variaveis", choices = c("Qsup1", "Qsup2", "Qplan")),
                                 plotly::plotlyOutput("grafico_kts")
                             ),
                             shiny::downloadButton("download_parametros", "Download parametros_sub_bacia.csv"),
@@ -140,11 +140,12 @@ executa_visualizador_calibracao <- function(){
 
         shiny::observeEvent(input$sub_bacia, {
             arquivo_parametros <- input$arquivo_parametros
+            arquivo_postos_plu <- input$arquivo_postos_plu
             vazao <- vazao_posto()
             shiny::updateNumericInput(session, "Ebin", value = vazao$valor[1] * 0.3)
             shiny::updateNumericInput(session, "Supin", value = vazao$valor[1] * 0.7)
             shiny::updateNumericInput(session, "Tuin", value = 0.3)
-            if (!is.null(arquivo_parametros)) {
+            if (!is.null(arquivo_parametros) & !is.null(arquivo_postos_plu)) {
                 vetor_modelo <- vetor_modelo()
                 parametros_posto <- parametros_posto()
                 postos_plu <- postos_plu()
@@ -260,7 +261,7 @@ executa_visualizador_calibracao <- function(){
             arquivo_parametros <- input$arquivo_parametros$datapath
             if (!is.null(arquivo_parametros)) {
                 parametros <- parametros()
-                return(parametros[parametros$Nome == input$sub_bacia])
+                return(parametros[parametros$nome == input$sub_bacia])
             }
         })
 
@@ -473,218 +474,228 @@ executa_visualizador_calibracao <- function(){
         })
 
         saida <-  shiny::reactive({
-            vetor_modelo <- vetor_modelo()
-            vetor_modelo[1] <- input$str
-            vetor_modelo[2] <- input$k2t
-            vetor_modelo[3] <- input$crec
-            vetor_modelo[4] <- input$capc
-            vetor_modelo[5] <- input$k_kt
-            vetor_modelo[6] <- input$h1
-            vetor_modelo[7] <- input$k2t2
-            vetor_modelo[8] <- input$ai
-            vetor_modelo[9] <- input$h
-            vetor_modelo[10] <- input$k1t
-            vetor_modelo[11] <- input$k3t
-            vetor_modelo[12] <- input$pcof
-            vetor_modelo[13] <- input$ecof
-            vetor_modelo[14] <- input$ecof2
-            vetor_modelo[15] <- input$alfa
-            vetor_modelo[16] <- input$beta
-            kt_max <- input$kt_max
-            kt_min <- input$kt_min
-            vazao <- vazao_posto()
-            evapotranspiracao <- evapotranspiracao_posto()
-            precipitacao <- precipitacao_posto()
-            Ebin <- input$Ebin
-            Tuin <- input$Tuin
-            Supin <- input$Supin
-            area <- area()
-            postos_plu <- postos_plu()
-            
-            kt <- cria_kt(kt_max, kt_min, vetor_modelo[15], vetor_modelo[16])
-            
-            numero_dias <- nrow(evapotranspiracao)
-            
-            inicializacao <- inicializacao_smap(vetor_modelo, area, Ebin, Tuin, Supin)
-            
-            numero_postos_plu <- nrow(postos_plu[postos_plu$nome == input$sub_bacia])
-            if (numero_postos_plu > 1) {
-                for (iposto in 1: numero_postos_plu){
-                    vetor_modelo[(16 + iposto)] <- input[[paste0("posto_plu_", iposto)]]
-                    postos_plu[postos_plu$nome == input$sub_bacia]$valor[iposto] <- input[[paste0("posto_plu_", iposto)]]
+            if (!is.null(input[[paste0("posto_plu_1")]])) {
+                vetor_modelo <- vetor_modelo()
+                vetor_modelo[1] <- input$str
+                vetor_modelo[2] <- input$k2t
+                vetor_modelo[3] <- input$crec
+                vetor_modelo[4] <- input$capc
+                vetor_modelo[5] <- input$k_kt
+                vetor_modelo[6] <- input$h1
+                vetor_modelo[7] <- input$k2t2
+                vetor_modelo[8] <- input$ai
+                vetor_modelo[9] <- input$h
+                vetor_modelo[10] <- input$k1t
+                vetor_modelo[11] <- input$k3t
+                vetor_modelo[12] <- input$pcof
+                vetor_modelo[13] <- input$ecof
+                vetor_modelo[14] <- input$ecof2
+                vetor_modelo[15] <- input$alfa
+                vetor_modelo[16] <- input$beta
+                kt_max <- input$kt_max
+                kt_min <- input$kt_min
+                vazao <- vazao_posto()
+                evapotranspiracao <- evapotranspiracao_posto()
+                precipitacao <- precipitacao_posto()
+                Ebin <- input$Ebin
+                Tuin <- input$Tuin
+                Supin <- input$Supin
+                area <- area()
+                postos_plu <- postos_plu()
+                
+                kt <- cria_kt(kt_max, kt_min, vetor_modelo[15], vetor_modelo[16])
+                
+                numero_dias <- nrow(evapotranspiracao)
+                
+                inicializacao <- inicializacao_smap(vetor_modelo, area, Ebin, Tuin, Supin)
+                
+                numero_postos_plu <- nrow(postos_plu[postos_plu$nome == input$sub_bacia])
+                if (numero_postos_plu > 1) {
+                    for (iposto in 1: numero_postos_plu){
+                        vetor_modelo[(16 + iposto)] <- input[[paste0("posto_plu_", iposto)]]
+                        postos_plu[postos_plu$nome == input$sub_bacia]$valor[iposto] <- input[[paste0("posto_plu_", iposto)]]
+                    }
                 }
+
+                precipitacao_ponderada <- ponderacao_espacial(precipitacao, postos_plu[postos_plu$nome == input$sub_bacia])
+
+                precipitacao_ponderada <- precipitacao_ponderada$valor * vetor_modelo[12]
+                precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada, kt, kt_max, kt_min)
+                
+                data_inicio_simulacao <- (min(precipitacao$data) + kt_min)
+                data_fim_simulacao <- (max(precipitacao$data) - kt_max)
+                evapotranspiracao_ponderada <- data.table::data.table(evapotranspiracao[which((evapotranspiracao$data >= data_inicio_simulacao)
+                                            & (evapotranspiracao$data <= data_fim_simulacao))])
+                evapotranspiracao_ponderada <- evapotranspiracao_ponderada$valor * vetor_modelo[13]
+                evapotranspiracao_planicie_ponderada <- data.table::data.table(evapotranspiracao[which((evapotranspiracao$data >= data_inicio_simulacao)
+                                            & (evapotranspiracao$data <= data_fim_simulacao))])
+                evapotranspiracao_planicie_ponderada <- evapotranspiracao_planicie_ponderada$valor * vetor_modelo[14]
+                
+                
+                vetor_inicializacao <- unlist(inicializacao)
+                numero_dias <- length(evapotranspiracao_planicie_ponderada)
+                
+                saida <- funcaoSmapCpp::rodada_varios_dias_cpp2(vetor_modelo, vetor_inicializacao, area, precipitacao_ponderada,
+                                                            evapotranspiracao_ponderada, evapotranspiracao_planicie_ponderada, numero_dias)
+                saida <- data.table::data.table(saida)
+                saida$data <- seq.Date(data_inicio_simulacao, data_fim_simulacao, by = 1)
+                saida$precipitacao_ponderada <- precipitacao_ponderada
+                saida$evapotranspiracao_ponderada <- evapotranspiracao_ponderada
+                saida <- merge(saida, vazao, by = "data")
+                saida$posto <- NULL
+                colnames(saida)[22] <- "vazao_observada"
+                saida$Ed <- NULL
+                saida$Ed2 <- NULL
+                saida$Ed3 <- NULL
+                saida$Eb <- NULL
+                data.table::setcolorder(saida, c("data", "precipitacao_ponderada", "evapotranspiracao_ponderada", "vazao_observada", "Qcalc",
+                                                "Qbase", "Qsup1", "Qsup2", "Qplan", "Rsolo", "Rsup", "Rsup2", "Rsub",
+                                                "Es", "Er", "Rec", "Marg", "Tu"))
+                return(saida)
             }
-
-            precipitacao_ponderada <- ponderacao_espacial(precipitacao, postos_plu[postos_plu$nome == input$sub_bacia])
-
-            precipitacao_ponderada <- precipitacao_ponderada$valor * vetor_modelo[12]
-            precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada, kt, kt_max, kt_min)
-            
-            data_inicio_simulacao <- (min(precipitacao$data) + kt_min)
-            data_fim_simulacao <- (max(precipitacao$data) - kt_max)
-            evapotranspiracao_ponderada <- data.table::data.table(evapotranspiracao[which((evapotranspiracao$data >= data_inicio_simulacao)
-                                         & (evapotranspiracao$data <= data_fim_simulacao))])
-            evapotranspiracao_ponderada <- evapotranspiracao_ponderada$valor * vetor_modelo[13]
-            evapotranspiracao_planicie_ponderada <- data.table::data.table(evapotranspiracao[which((evapotranspiracao$data >= data_inicio_simulacao)
-                                         & (evapotranspiracao$data <= data_fim_simulacao))])
-            evapotranspiracao_planicie_ponderada <- evapotranspiracao_planicie_ponderada$valor * vetor_modelo[14]
-            
-            
-            vetor_inicializacao <- unlist(inicializacao)
-            numero_dias <- length(evapotranspiracao_planicie_ponderada)
-            
-            saida <- funcaoSmapCpp::rodada_varios_dias_cpp2(vetor_modelo, vetor_inicializacao, area, precipitacao_ponderada,
-                                                        evapotranspiracao_ponderada, evapotranspiracao_planicie_ponderada, numero_dias)
-            saida <- data.table::data.table(saida)
-            saida$data <- seq.Date(data_inicio_simulacao, data_fim_simulacao, by = 1)
-            saida$precipitacao_ponderada <- precipitacao_ponderada
-            saida$evapotranspiracao_ponderada <- evapotranspiracao_ponderada
-            saida <- merge(saida, vazao, by = "data")
-            saida$posto <- NULL
-            colnames(saida)[22] <- "vazao_observada"
-            saida$Ed <- NULL
-            saida$Ed2 <- NULL
-            saida$Ed3 <- NULL
-            saida$Eb <- NULL
-            data.table::setcolorder(saida, c("data", "precipitacao_ponderada", "evapotranspiracao_ponderada", "vazao_observada", "Qcalc",
-                                            "Qbase", "Qsup1", "Qsup2", "Qplan", "Rsolo", "Rsup", "Rsup2", "Rsub",
-                                            "Es", "Er", "Rec", "Marg", "Tu"))
-            return(saida)
         })
 
         output$dygraph <- dygraphs::renderDygraph({
-            variaveis_grafico <- c("Qcalc", input$variaveis)
-            vazao <- vazao_posto()
-            evapotranspiracao <- evapotranspiracao_posto()
-            precipitacao <- precipitacao_posto()
-            postos_plu <- postos_plu()
+            if (!is.null(saida())) {
+                variaveis_grafico <- c("Qcalc", "Qbase", input$variaveis)
+                vazao <- vazao_posto()
+                evapotranspiracao <- evapotranspiracao_posto()
+                precipitacao <- precipitacao_posto()
+                postos_plu <- postos_plu()
 
-            precipitacao <- ponderacao_espacial(precipitacao, postos_plu[postos_plu$nome == input$sub_bacia])
-            saida <- saida()
-            saida <- data.table::melt(saida, id.vars = c("data"), variable.name = "variavel",
-                                        value.name = "valor")
-            simulacao <- xts::xts()
-            for (variaveis in variaveis_grafico){
-                simulacao <- cbind(simulacao, xts::xts(saida$valor[which(saida$variavel == variaveis)], order.by = saida$data[which(saida$variavel == variaveis)]))
+                precipitacao <- ponderacao_espacial(precipitacao, postos_plu[postos_plu$nome == input$sub_bacia])
+                saida <- saida()
+                saida <- data.table::melt(saida, id.vars = c("data"), variable.name = "variavel",
+                                            value.name = "valor")
+                simulacao <- xts::xts()
+                for (variaveis in variaveis_grafico){
+                    simulacao <- cbind(simulacao, xts::xts(saida$valor[which(saida$variavel == variaveis)], order.by = saida$data[which(saida$variavel == variaveis)]))
+                }
+                colnames(simulacao) <- variaveis_grafico
+                observacao <- xts::xts(x = vazao$valor, order.by =  vazao$data)
+                colnames(observacao) <- "vazao observada"
+
+                prec_aux <- xts::xts(x = precipitacao$valor, order.by =  precipitacao$data)
+                colnames(prec_aux) <- "Precipitacao"
+
+                dygraphs::dygraph(cbind(simulacao, observacao, prec_aux),
+                                main = input$sub_bacia, ) %>%
+                dygraphs::dyHighlight(highlightCircleSize = 5,
+                                    highlightSeriesBackgroundAlpha = 0.2,
+                                    hideOnMouseOut = FALSE,
+                                    highlightSeriesOpts = list(strokeWidth = 2)) %>% 
+                dygraphs::dyRangeSelector() %>%
+                dygraphs::dyAxis("y", label = "Vazao (m3/s)", independentTicks = TRUE) %>%
+                dygraphs::dySeries("vazao.observada", color = "#0000FF") %>%
+                dygraphs::dyBarSeries("Precipitacao", axis = 'y2', color = "#008000") %>%
+                dygraphs::dyAxis("y2", label = "Precipitacao (mm)", valueRange = c(200, 0)) %>%
+                dygraphs::dySeries("Qcalc", color = "#FF0000") %>%
+                dygraphs::dySeries("Qbase", color = "#FFCC00") %>%
+                dygraphs::dyLegend(show = "follow")
             }
-            colnames(simulacao) <- variaveis_grafico
-            observacao <- xts::xts(x = vazao$valor, order.by =  vazao$data)
-            colnames(observacao) <- "vazao observada"
-
-            prec_aux <- xts::xts(x = precipitacao$valor, order.by =  precipitacao$data)
-            colnames(prec_aux) <- "Precipitacao"
-
-            dygraphs::dygraph(cbind(simulacao, observacao, prec_aux),
-                            main = input$sub_bacia, ) %>%
-            dygraphs::dyHighlight(highlightCircleSize = 5,
-                                highlightSeriesBackgroundAlpha = 0.2,
-                                hideOnMouseOut = FALSE,
-                                highlightSeriesOpts = list(strokeWidth = 2)) %>% 
-            dygraphs::dyRangeSelector() %>%
-            dygraphs::dyAxis("y", label = "Vazao (m3/s)", independentTicks = TRUE) %>%
-            dygraphs::dySeries("vazao.observada", color = "#0c2ad3") %>%
-            dygraphs::dySeries("Precipitacao", stepPlot = TRUE, fillGraph = TRUE, axis = 'y2', color = "#0f610f") %>%
-            dygraphs::dyAxis("y2", label = "Precipitacao (mm)", valueRange = c(200, 0)) %>%
-            dygraphs::dySeries("Qcalc", color = "red") %>%
-            dygraphs::dyLegend(show = "follow")
         })
 
         output$dygraph_zoom <- dygraphs::renderDygraph({
-            variaveis_grafico <- c("Qcalc", input$variaveis)
-            vazao <- vazao_posto()
-            evapotranspiracao <- evapotranspiracao_posto()
-            precipitacao <- precipitacao_posto()
-            postos_plu <- postos_plu()
+            if (!is.null(saida())) {
+                variaveis_grafico <- c("Qcalc", "Qbase", input$variaveis)
+                vazao <- vazao_posto()
+                evapotranspiracao <- evapotranspiracao_posto()
+                precipitacao <- precipitacao_posto()
+                postos_plu <- postos_plu()
 
-            precipitacao <- ponderacao_espacial(precipitacao, postos_plu[postos_plu$nome == input$sub_bacia])
-            saida <- saida()
-            saida <- data.table::melt(saida, id.vars = c("data"), variable.name = "variavel",
-                                        value.name = "valor")
-            simulacao <- xts::xts()
-            for (variaveis in variaveis_grafico){
-                simulacao <- cbind(simulacao, xts::xts(saida$valor[which((saida$variavel == variaveis) & (saida$data >= input$zoom_calibracao[1]) & (saida$data <= input$zoom_calibracao[2]))], order.by = saida$data[which((saida$variavel == variaveis) & (saida$data >= input$zoom_calibracao[1]) & (saida$data <= input$zoom_calibracao[2]))]))
+                precipitacao <- ponderacao_espacial(precipitacao, postos_plu[postos_plu$nome == input$sub_bacia])
+                saida <- saida()
+                saida <- data.table::melt(saida, id.vars = c("data"), variable.name = "variavel",
+                                            value.name = "valor")
+                simulacao <- xts::xts()
+                for (variaveis in variaveis_grafico){
+                    simulacao <- cbind(simulacao, xts::xts(saida$valor[which((saida$variavel == variaveis) & (saida$data >= input$zoom_calibracao[1]) & (saida$data <= input$zoom_calibracao[2]))], order.by = saida$data[which((saida$variavel == variaveis) & (saida$data >= input$zoom_calibracao[1]) & (saida$data <= input$zoom_calibracao[2]))]))
+                }
+                colnames(simulacao) <- variaveis_grafico
+                observacao <- xts::xts(x = vazao$valor[which((vazao$data >= input$zoom_calibracao[1]) & (vazao$data <= input$zoom_calibracao[2]))], order.by =  vazao$data[which((vazao$data >= input$zoom_calibracao[1]) & (vazao$data <= input$zoom_calibracao[2]))])
+                colnames(observacao) <- "vazao observada"
+
+                prec_aux <- xts::xts(x = precipitacao$valor[which((precipitacao$data >= input$zoom_calibracao[1]) & (precipitacao$data <= input$zoom_calibracao[2]))], order.by =  precipitacao$data[which((precipitacao$data >= input$zoom_calibracao[1]) & (precipitacao$data <= input$zoom_calibracao[2]))])
+                colnames(prec_aux) <- "Precipitacao"
+
+                dygraphs::dygraph(cbind(simulacao, observacao, prec_aux),
+                                main = input$sub_bacia, ) %>%
+                dygraphs::dyHighlight(highlightCircleSize = 5,
+                                    highlightSeriesBackgroundAlpha = 0.2,
+                                    hideOnMouseOut = FALSE,
+                                    highlightSeriesOpts = list(strokeWidth = 2)) %>% 
+                dygraphs::dyRangeSelector() %>%
+                dygraphs::dyAxis("y", label = "Vazao (m3/s)", independentTicks = TRUE) %>%
+                dygraphs::dySeries("vazao.observada", color = "#0000FF") %>%
+                dygraphs::dyBarSeries("Precipitacao", axis = 'y2', color = "#008000") %>%
+                dygraphs::dyAxis("y2", label = "Precipitacao (mm)", valueRange = c(200, 0)) %>%
+                dygraphs::dySeries("Qcalc", color = "#FF0000") %>%
+                dygraphs::dySeries("Qbase", color = "#FFCC00") %>%
+                dygraphs::dyLegend(show = "follow")
             }
-            colnames(simulacao) <- variaveis_grafico
-            observacao <- xts::xts(x = vazao$valor[which((vazao$data >= input$zoom_calibracao[1]) & (vazao$data <= input$zoom_calibracao[2]))], order.by =  vazao$data[which((vazao$data >= input$zoom_calibracao[1]) & (vazao$data <= input$zoom_calibracao[2]))])
-            colnames(observacao) <- "vazao observada"
-
-            prec_aux <- xts::xts(x = precipitacao$valor[which((precipitacao$data >= input$zoom_calibracao[1]) & (precipitacao$data <= input$zoom_calibracao[2]))], order.by =  precipitacao$data[which((precipitacao$data >= input$zoom_calibracao[1]) & (precipitacao$data <= input$zoom_calibracao[2]))])
-            colnames(prec_aux) <- "Precipitacao"
-
-            dygraphs::dygraph(cbind(simulacao, observacao, prec_aux),
-                            main = input$sub_bacia, ) %>%
-            dygraphs::dyHighlight(highlightCircleSize = 5,
-                                highlightSeriesBackgroundAlpha = 0.2,
-                                hideOnMouseOut = FALSE,
-                                highlightSeriesOpts = list(strokeWidth = 2)) %>% 
-            dygraphs::dyRangeSelector() %>%
-            dygraphs::dyAxis("y", label = "Vazao (m3/s)", independentTicks = TRUE) %>%
-            dygraphs::dySeries("vazao.observada", color = "#0c2ad3") %>%
-            dygraphs::dySeries("Precipitacao", stepPlot = TRUE, fillGraph = TRUE, axis = 'y2', color = "#0f610f") %>%
-            dygraphs::dyAxis("y2", label = "Precipitacao (mm)", valueRange = c(200, 0)) %>%
-            dygraphs::dySeries("Qcalc", color = "red") %>%
-            dygraphs::dyLegend(show = "follow")
         })
 
         output$tabela <- DT::renderDataTable(saida())
 
         output$funcao_objetivo <- shiny::renderText({
-            vetor_modelo <- vetor_modelo()
-            vetor_modelo[1] <- input$str
-            vetor_modelo[2] <- input$k2t
-            vetor_modelo[3] <- input$crec
-            vetor_modelo[4] <- input$capc
-            vetor_modelo[5] <- input$k_kt
-            vetor_modelo[6] <- input$h1
-            vetor_modelo[7] <- input$k2t2
-            vetor_modelo[8] <- input$ai
-            vetor_modelo[9] <- input$h
-            vetor_modelo[10] <- input$k1t
-            vetor_modelo[11] <- input$k3t
-            vetor_modelo[12] <- input$pcof
-            vetor_modelo[13] <- input$ecof
-            vetor_modelo[14] <- input$ecof2
-            vetor_modelo[15] <- input$alfa
-            vetor_modelo[16] <- input$beta
-            data_inicio_objetivo <- input$periodo_calibracao[1]
-            data_fim_objetivo <- input$periodo_calibracao[2]
-            kt_max <- input$kt_max
-            kt_min <- input$kt_min
-            Ebin <- input$Ebin
-            Tuin <- input$Tuin
-            Supin <- input$Supin
-            area <- area()
-            vazao <- vazao_posto()
-            evapotranspiracao <- evapotranspiracao_posto()
-            precipitacao <- precipitacao_posto()
-            postos_plu <- postos_plu()
+            if (!is.null(input[[paste0("posto_plu_1")]])) {
+                vetor_modelo <- vetor_modelo()
+                vetor_modelo[1] <- input$str
+                vetor_modelo[2] <- input$k2t
+                vetor_modelo[3] <- input$crec
+                vetor_modelo[4] <- input$capc
+                vetor_modelo[5] <- input$k_kt
+                vetor_modelo[6] <- input$h1
+                vetor_modelo[7] <- input$k2t2
+                vetor_modelo[8] <- input$ai
+                vetor_modelo[9] <- input$h
+                vetor_modelo[10] <- input$k1t
+                vetor_modelo[11] <- input$k3t
+                vetor_modelo[12] <- input$pcof
+                vetor_modelo[13] <- input$ecof
+                vetor_modelo[14] <- input$ecof2
+                vetor_modelo[15] <- input$alfa
+                vetor_modelo[16] <- input$beta
+                data_inicio_objetivo <- input$periodo_calibracao[1]
+                data_fim_objetivo <- input$periodo_calibracao[2]
+                kt_max <- input$kt_max
+                kt_min <- input$kt_min
+                Ebin <- input$Ebin
+                Tuin <- input$Tuin
+                Supin <- input$Supin
+                area <- area()
+                vazao <- vazao_posto()
+                evapotranspiracao <- evapotranspiracao_posto()
+                precipitacao <- precipitacao_posto()
+                postos_plu <- postos_plu()
 
-            numero_postos_plu <- nrow(postos_plu[postos_plu$nome == input$sub_bacia])
-            if (numero_postos_plu > 1) {
-                for (iposto in 1: numero_postos_plu){
-                    vetor_modelo[16 + iposto] <- input[[paste0("posto_plu_", iposto)]]
-                    postos_plu[postos_plu$nome == input$sub_bacia]$valor[iposto] <- input[[paste0("posto_plu_", iposto)]]
+                numero_postos_plu <- nrow(postos_plu[postos_plu$nome == input$sub_bacia])
+                if (numero_postos_plu > 1) {
+                    for (iposto in 1: numero_postos_plu){
+                        vetor_modelo[16 + iposto] <- input[[paste0("posto_plu_", iposto)]]
+                        postos_plu[postos_plu$nome == input$sub_bacia]$valor[iposto] <- input[[paste0("posto_plu_", iposto)]]
+                    }
                 }
+
+                vetor_modelo[17:(16 + numero_postos_plu)] <- postos_plu$valor[postos_plu$nome == input$sub_bacia]
+
+                kt <- cria_kt(kt_max, kt_min, vetor_modelo[15], vetor_modelo[16])
+                
+                numero_dias <- nrow(evapotranspiracao)
+                
+                inicializacao <- inicializacao_smap(vetor_modelo, area, Ebin, Tuin, Supin)
+                
+                evapotranspiracao_fo <- data.table::data.table(evapotranspiracao[which((evapotranspiracao$data >= (min(precipitacao$data) + kt_min))
+                                            & (evapotranspiracao$data <= (max(precipitacao$data) - kt_max)))])
+                
+                vazao_fo <- vazao[which((vazao$data >= data_inicio_objetivo) & (vazao$data <= data_fim_objetivo))]
+
+                vetor_inicializacao <- unlist(inicializacao)
+                funcao_objetivo <- funcao_objetivo_calibracao(vetor_modelo, kt_min, kt_max, area, Ebin, Tuin, Supin, precipitacao,
+                                                                    evapotranspiracao_fo, vazao_fo, data_inicio_objetivo, data_fim_objetivo,
+                                                                    postos_plu[postos_plu$nome == input$sub_bacia])
+                paste0("funcao objetivo = ", funcao_objetivo)
             }
-
-            vetor_modelo[17:(16 + numero_postos_plu)] <- postos_plu$valor[postos_plu$nome == input$sub_bacia]
-
-            kt <- cria_kt(kt_max, kt_min, vetor_modelo[15], vetor_modelo[16])
-            
-            numero_dias <- nrow(evapotranspiracao)
-            
-            inicializacao <- inicializacao_smap(vetor_modelo, area, Ebin, Tuin, Supin)
-            
-            evapotranspiracao_fo <- data.table::data.table(evapotranspiracao[which((evapotranspiracao$data >= (min(precipitacao$data) + kt_min))
-                                         & (evapotranspiracao$data <= (max(precipitacao$data) - kt_max)))])
-            
-            vazao_fo <- vazao[which((vazao$data >= data_inicio_objetivo) & (vazao$data <= data_fim_objetivo))]
-
-            vetor_inicializacao <- unlist(inicializacao)
-            funcao_objetivo <- funcao_objetivo_calibracao(vetor_modelo, kt_min, kt_max, area, Ebin, Tuin, Supin, precipitacao,
-                                                                evapotranspiracao_fo, vazao_fo, data_inicio_objetivo, data_fim_objetivo,
-                                                                postos_plu[postos_plu$nome == input$sub_bacia])
-            paste0("funcao objetivo = ", funcao_objetivo)
         })
 
         shiny::observeEvent(input$botao_calibracao,{
@@ -784,34 +795,34 @@ executa_visualizador_calibracao <- function(){
             })
             
             shiny::observe({
-            if (future::resolved(par)) {
-                shiny::updateNumericInput(session, "str", value = as.numeric(future::value(par)$par[1]))
-                shiny::updateNumericInput(session, "k2t", value = as.numeric(future::value(par)$par[2]))
-                shiny::updateNumericInput(session, "crec", value = as.numeric(future::value(par)$par[3]))
-                shiny::updateNumericInput(session, "capc", value = as.numeric(future::value(par)$par[4]))
-                shiny::updateNumericInput(session, "k_kt", value = as.numeric(future::value(par)$par[5]))
-                shiny::updateNumericInput(session, "h1", value = as.numeric(future::value(par)$par[6]))
-                shiny::updateNumericInput(session, "k2t2", value = as.numeric(future::value(par)$par[7]))
-                shiny::updateNumericInput(session, "ai", value = as.numeric(future::value(par)$par[8]))
-                shiny::updateNumericInput(session, "h", value = as.numeric(future::value(par)$par[9]))
-                shiny::updateNumericInput(session, "k1t", value = as.numeric(future::value(par)$par[10]))
-                shiny::updateNumericInput(session, "k3t", value = as.numeric(future::value(par)$par[11]))
-                shiny::updateNumericInput(session, "pcof", value = as.numeric(future::value(par)$par[12]))
-                shiny::updateNumericInput(session, "ecof", value = as.numeric(future::value(par)$par[13]))
-                shiny::updateNumericInput(session, "ecof2", value = as.numeric(future::value(par)$par[14]))
-                shiny::updateNumericInput(session, "alfa", value = as.numeric(future::value(par)$par[15]))
-                shiny::updateNumericInput(session, "beta", value = as.numeric(future::value(par)$par[16]))
-                if (numero_postos_plu > 1) {
-                    for (iposto in 1:numero_postos_plu){
-                        postos_plu[postos_plu$nome == input$sub_bacia]$valor[iposto] <- as.numeric(future::value(par)$par[(16 + iposto)])
-                        shiny::updateNumericInput(session, paste0("posto_plu_", iposto), value = as.numeric(future::value(par)$par[(16 + iposto)]))
+                if (future::resolved(par)) {
+                    shiny::updateNumericInput(session, "str", value = as.numeric(future::value(par)$par[1]))
+                    shiny::updateNumericInput(session, "k2t", value = as.numeric(future::value(par)$par[2]))
+                    shiny::updateNumericInput(session, "crec", value = as.numeric(future::value(par)$par[3]))
+                    shiny::updateNumericInput(session, "capc", value = as.numeric(future::value(par)$par[4]))
+                    shiny::updateNumericInput(session, "k_kt", value = as.numeric(future::value(par)$par[5]))
+                    shiny::updateNumericInput(session, "h1", value = as.numeric(future::value(par)$par[6]))
+                    shiny::updateNumericInput(session, "k2t2", value = as.numeric(future::value(par)$par[7]))
+                    shiny::updateNumericInput(session, "ai", value = as.numeric(future::value(par)$par[8]))
+                    shiny::updateNumericInput(session, "h", value = as.numeric(future::value(par)$par[9]))
+                    shiny::updateNumericInput(session, "k1t", value = as.numeric(future::value(par)$par[10]))
+                    shiny::updateNumericInput(session, "k3t", value = as.numeric(future::value(par)$par[11]))
+                    shiny::updateNumericInput(session, "pcof", value = as.numeric(future::value(par)$par[12]))
+                    shiny::updateNumericInput(session, "ecof", value = as.numeric(future::value(par)$par[13]))
+                    shiny::updateNumericInput(session, "ecof2", value = as.numeric(future::value(par)$par[14]))
+                    shiny::updateNumericInput(session, "alfa", value = as.numeric(future::value(par)$par[15]))
+                    shiny::updateNumericInput(session, "beta", value = as.numeric(future::value(par)$par[16]))
+                    if (numero_postos_plu > 1) {
+                        for (iposto in 1:numero_postos_plu){
+                            postos_plu[postos_plu$nome == input$sub_bacia]$valor[iposto] <- as.numeric(future::value(par)$par[(16 + iposto)])
+                            shiny::updateNumericInput(session, paste0("posto_plu_", iposto), value = as.numeric(future::value(par)$par[(16 + iposto)]))
+                        }
                     }
-                }
 
-                disable_button(FALSE)
-                shinyjs::enable("botao_calibracao")
-                shiny::updateActionButton(session, "botao_calibracao", label = "Calibrar")
-            }
+                    disable_button(FALSE)
+                    shinyjs::enable("botao_calibracao")
+                    shiny::updateActionButton(session, "botao_calibracao", label = "Calibrar")
+                }
             })
         })
 

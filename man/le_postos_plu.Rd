@@ -2,7 +2,7 @@
 % Please edit documentation in R/leitura.R
 \name{le_postos_plu}
 \alias{le_postos_plu}
-\title{Le csv com a relaca de postos plu x sub_bacia}
+\title{Le csv com a relacao de postos plu x sub_bacia}
 \usage{
 le_postos_plu(arq)
 }

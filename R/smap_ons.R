@@ -143,7 +143,7 @@ new_modelo_smap_ons <- function(parametros, postos_plu){
   h1 = h1, k2t2 = k2t2, ai = ai, h = h, k1t = k1t, k3t = k3t, kt = kt, pcof = pcof,
   ecof = ecof, ecof2 = ecof2)
 
-  attr(modelo, "nome") <- parametros[, unique(Nome)]
+  attr(modelo, "nome") <- parametros[, unique(nome)]
   attr(modelo, "area") <- area
   attr(modelo, "postos_plu") <- postos_plu
 

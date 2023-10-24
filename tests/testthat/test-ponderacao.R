@@ -1,6 +1,6 @@
 test_that("Testa ponderacao temporal", {
   sub_bacia <- "avermelha"
-  modelo <- new_modelo_smap_ons(parametros[Nome == sub_bacia], postos_plu[nome == sub_bacia])
+  modelo <- new_modelo_smap_ons(parametros[nome == sub_bacia], postos_plu[nome == sub_bacia])
   kt <- unlist(modelo)[12:74]
   kt_min <- sum(kt[4:63] > 0)
   kt_max <- sum(kt[1:2] > 0)
@@ -15,7 +15,7 @@ test_that("Testa ponderacao temporal", {
 
 test_that("Testa ponderacao espacial", {
   sub_bacia <- "pimentalt"
-  modelo <- new_modelo_smap_ons(parametros[Nome == sub_bacia], postos_plu[nome == sub_bacia])
+  modelo <- new_modelo_smap_ons(parametros[nome == sub_bacia], postos_plu[nome == sub_bacia])
   kt <- unlist(modelo)[12:74]
   kt_min <- sum(kt[4:63] > 0)
   kt_max <- sum(kt[1:2] > 0)

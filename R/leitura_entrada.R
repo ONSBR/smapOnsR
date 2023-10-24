@@ -13,8 +13,8 @@ le_entrada_parametros <- function(pasta_entrada, nome_subbacia) {
 
     if (missing("nome_subbacia")) stop("forneca o nome da sub-bacia para a leitura do arquivo 'sub-bacia_parametros.txt'")
     pattern <- paste0(nome_subbacia, "_parametros.txt")
-    arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE)
-    arq <- file.path(pasta_entrada, arq)
+    pattern <- gsub("\\+", "\\\\+", pattern)
+    arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE, full.names = TRUE)
 
     if (length(arq) == 0) {
         stop(paste0("nao existe o arquivo ", pattern))
@@ -24,12 +24,12 @@ le_entrada_parametros <- function(pasta_entrada, nome_subbacia) {
 
     parametros_smap <- array(rep(0, 82), c(1, 82))
     parametros_smap <- data.table::data.table(parametros_smap)
-    colnames(parametros_smap) <- c("Nome", "Area", "nKt", paste0("Kt", 2:-60),
+    colnames(parametros_smap) <- c("nome", "Area", "nKt", paste0("Kt", 2:-60),
     "Str", "K2t", "Crec", "Ai", "Capc", "K_kt", "K2t2", "H1", "H", "K3t", "K1t",
     "Ecof", "Pcof", "Ecof2", "ktMin", "ktMax")
     
     aux <- strsplit(arq, split = "/")[[1]]
-    parametros_smap$Nome <- tolower(sub(".*/", "", sub("_parametros.txt", "", nome_subbacia)))
+    parametros_smap$nome <- tolower(sub(".*/", "", sub("_parametros.txt", "", nome_subbacia)))
     parametros_smap$Area <- as.numeric(parametros[1, 1])
     if (!is.character(parametros[2, 1])) stop(paste0("Nao existe valores de kt declarados no arquivo ", arq))
     aux <- unlist(strsplit(parametros[2, 1], "\\s+"))
@@ -55,7 +55,7 @@ le_entrada_parametros <- function(pasta_entrada, nome_subbacia) {
     parametros_smap[, limite_inferior_ebin := as.numeric(parametros[18, 1])]
     parametros_smap[, limite_superior_prec := as.numeric(parametros[19, 1])]
     parametros_smap[, limite_inferior_prec := as.numeric(parametros[20, 1])]
-    parametros_smap <- data.table::melt(parametros_smap, id.vars = "Nome", variable.name = "parametro",
+    parametros_smap <- data.table::melt(parametros_smap, id.vars = "nome", variable.name = "parametro",
            value.name = "valor")
 
     if (any(is.na(parametros_smap[, valor]))) stop(paste0("Parametro ", parametros_smap[is.na(valor), parametro], " com valor nao numerico no arquivo ", arq))
@@ -86,9 +86,8 @@ le_entrada_evapotranspiracao <- function(pasta_entrada, nome_subbacia) {
 
     pattern <- paste0(nome_subbacia, "_evapotranspiracao.txt")
 
-    arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE)
-
-    arq <- file.path(pasta_entrada, arq)
+    pattern <- gsub("\\+", "\\\\+", pattern)
+    arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE, full.names = TRUE)
 
     if (length(arq) == 0) {
         stop(paste0("nao existe o arquivo ", pattern))
@@ -134,8 +133,8 @@ le_entrada_caso <- function(pasta_entrada) {
 
     if (missing("pasta_entrada")) stop("forneca o caminho da pasta 'arq_entrada' para a leitura do caso")
 
-    arquivo <- list.files(path = pasta_entrada, pattern = "caso.txt", ignore.case = TRUE)
-    arquivo <- file.path(pasta_entrada, arquivo)
+    arquivo <- list.files(path = pasta_entrada, pattern = "caso.txt", ignore.case = TRUE, full.names = TRUE)
+
     if (!file.exists(arquivo)) stop("nao existe o arquivo do tipo caso.txt")
     
     dat <- data.table::fread(arquivo, sep = "'", header = FALSE)
@@ -190,10 +189,8 @@ le_entrada_inicializacao <- function(pasta_entrada, nome_subbacia) {
     }
 
     pattern <- paste0(nome_subbacia, "_inicializacao.txt")
-
-    arquivo <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE)
-
-    arq <- file.path(pasta_entrada, arquivo)
+    pattern <- gsub("\\+", "\\\\+", pattern)
+    arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE, full.names = TRUE)
 
     if (length(arq) == 0) {
         stop(paste0("nao existe o arquivo ", pattern))
@@ -267,10 +264,8 @@ le_entrada_vazao <- function(pasta_entrada, nome_subbacia) {
     }
 
     pattern <- paste0(nome_subbacia, ".txt")
-        
-    arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE)
-
-    arq <- file.path(pasta_entrada, arq)
+    pattern <- gsub("\\+", "\\\\+", pattern)
+    arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE, full.names = TRUE)
 
     if (length(arq) == 0) {
         stop(paste0("nao existe o arquivo ", pattern))
@@ -325,10 +320,8 @@ le_entrada_posto_plu <- function(pasta_entrada, nome_subbacia) {
     }
 
     pattern <- paste0(nome_subbacia, "_postos_plu.txt")
-
-    arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE)
-
-    arq <- file.path(pasta_entrada, arq)
+    pattern <- gsub("\\+", "\\\\+", pattern)
+    arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE, full.names = TRUE)
 
     if (length(arq) == 0) {
         stop(paste0("nao existe o arquivo ", pattern))
@@ -361,7 +354,7 @@ le_entrada_posto_plu <- function(pasta_entrada, nome_subbacia) {
 
     if(postos_plu[, sum(valor)] < 0.995) stop(paste0("Somatorio do KE menor que 0.995 no arquivo ", arq))
 
-    if (any(nchar(postos_plu[, posto]) > 8)) stop(paste0("Nome do posto plu com mais de 8 caracteres no arquivo ", arq))
+    if (any(nchar(postos_plu[, posto]) > 8)) stop(paste0("nome do posto plu com mais de 8 caracteres no arquivo ", arq))
 
     postos_plu <- data.table::setcolorder(postos_plu, c("nome", "posto", "valor"))
     postos_plu[, posto := tolower(posto)]
@@ -469,9 +462,7 @@ le_entrada_modelos_precipitacao <- function(pasta_entrada) {
 
     pattern <- "modelos_precipitacao.txt"  
 
-    arquivo <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE)
-
-    arq <- file.path(pasta_entrada, arquivo)
+    arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE, full.names = TRUE)
 
     if (length(arq) == 0) {
         stop("nao existe o arquivo do tipo modelos_precipitacao.txt")
@@ -541,10 +532,8 @@ le_entrada_pontos_grade <- function(pasta_entrada, nome_subbacia, modelos_precip
     pontos_grade <- data.table::data.table()
     for (cenario in unique(modelos_precipitacao$nome_cenario[, nome_cenario_1])){
         pattern <- paste0(nome_subbacia, "_", cenario, ".txt")
-        
-        arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE)
-
-        arq <- file.path(pasta_entrada, arq)
+        pattern <- gsub("\\+", "\\\\+", pattern)
+        arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE, full.names = TRUE)
 
         if (length(arq) == 0) {
             stop(paste0("nao existe o arquivo ", pattern))
@@ -609,8 +598,7 @@ le_entrada_bat_conf <- function(pasta_entrada) {
     if (missing("pasta_entrada")) stop("forneca o caminho da pasta 'arq_entrada' a leitura do caso")
 
     pattern <- "bat.conf"
-    arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE)
-    arq <- file.path(pasta_entrada, arq)
+    arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE, full.names = TRUE)
 
     if (length(arq) == 0) {
         stop("nao existe o arquivo do tipo bat.conf")
@@ -660,8 +648,7 @@ le_entrada_bat_conf <- function(pasta_entrada) {
 le_entrada_previsao_precipitacao_2 <- function(pasta_entrada, datas_rodadas, pontos_grade) {
 
     pattern <- paste0("precipitacao_prevista_p", substr(datas_rodadas$data,9,10), substr(datas_rodadas$data,6,7), substr(datas_rodadas$data,3,4), ".dat")
-    arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE)
-    arq <- file.path(pasta_entrada, arq)
+    arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE, full.names = TRUE)
 
     if (length(arq) == 0) {
         stop(paste0("nao existe o arquivo ", pattern))
@@ -739,8 +726,7 @@ le_entrada_previsao_precipitacao_1 <- function(pasta_entrada, datas_rodadas, pon
 
     pattern <- paste0(nome_cenario, "_p", substr(datas_rodadas$data,9,10), substr(datas_rodadas$data,6,7), substr(datas_rodadas$data,3,4),"a",
      substr(data_final,9,10), substr(data_final,6,7), substr(data_final,3,4), ".dat")
-    arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE)
-    arq <- file.path(pasta_entrada, arq)
+    arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE, full.names = TRUE)
 
     if (length(arq) == 0) {
         stop(paste0("nao existe o arquivo ", pattern))
@@ -819,8 +805,8 @@ le_entrada_previsao_precipitacao_0 <- function(pasta_entrada, datas_rodadas, dat
 
     pattern <- paste0(nome_cenario, "_p", substr(datas_rodadas$data,9,10), substr(datas_rodadas$data,6,7), substr(datas_rodadas$data,3,4),"a",
     substr(data_previsao,9,10), substr(data_previsao,6,7), substr(data_previsao,3,4), ".dat")
-    arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE)
-    arq <- file.path(pasta_entrada, arq)
+    arq <- list.files(path = pasta_entrada, pattern = pattern, ignore.case = TRUE, full.names = TRUE)
+    
     previsao_precipitacao <- data.table::data.table()
     if (length(arq) == 0) {
         if (data_previsao == datas_rodadas$data + 1) stop(paste0("Nao existe o arquivo ", pattern))
@@ -893,7 +879,7 @@ le_entrada_previsao_precipitacao_0 <- function(pasta_entrada, datas_rodadas, dat
 #' @importFrom  data.table rbindlist
 #' @return saida lista com as variaveis: parametros data table com os parametros dos modelos
 #'     \itemize{
-#'     \item{Nome}{Nome da sub-bacia}
+#'     \item{nome}{nome da sub-bacia}
 #'     \item{parametro}{nome do parametro}
 #'     \item{valor}{valor do parametro}
 #'     }
@@ -999,7 +985,7 @@ le_arq_entrada <- function(pasta_entrada) {
         }))
 
     lapply(caso$nome_subbacia, function(nome_subbacia) {
-        ktMin <- parametros[Nome == nome_subbacia & parametro == "ktMin", valor]
+        ktMin <- parametros[nome == nome_subbacia & parametro == "ktMin", valor]
         data_inicio <- datas_rodadas[, min(data)] - inicializacao[nome == nome_subbacia & variavel == "numero_dias_assimilacao", valor] + 1
         data_fim <- datas_rodadas[, max(data)]
         if (precipitacao[, min(data)] > (data_inicio - ktMin))

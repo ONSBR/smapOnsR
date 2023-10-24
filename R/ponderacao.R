@@ -6,19 +6,17 @@
 #' @param kt vetor de kts
 #' @param kt_max valor do maximo lag positivo
 #' @param kt_min valor do maximo lag maximo negativo
-#' @importFrom stats embed
+#' @importFrom zoo rollapply
+#' @importFrom stats weighted.mean
 #' @return serie_temporal_ponderada: vetor com a serie temporal ponderada pelos kts
 #' @export
 ponderacao_temporal <- function(serie_temporal, kt, kt_max, kt_min) {
 
-  aux <- embed(serie_temporal, kt_min + kt_max + 1)
-  kts <- t(array(rep(kt[(3 - kt_max):(3 + kt_min)]), c(ncol(aux), nrow(aux))))
-
-  serie_temporal_ponderada <- rowSums(aux * kts)
-
+  N <- length(kt[(3 - kt_max):(3 + kt_min)])
+  serie_temporal_ponderada <- zoo::rollapply(serie_temporal, N, function(v) stats::weighted.mean(v, kt[(3 + kt_min):(3 - kt_max)]), align = "right")
   serie_temporal_ponderada
-}
 
+}
 #' Funcao de ponderacao espacial 
 #' 
 #' Realiza a ponderacao espacial de precipitacao atraves dos pesos de cada sub_bacia
