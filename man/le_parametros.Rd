@@ -12,7 +12,7 @@ le_parametros(arq)
 \value{
 data.table com as colunas
 \itemize{
-\item{Nome}{Nome da sub-bacia}
+\item{nome}{nome da sub-bacia}
 \item{parametro}{nome do parametro}
 \item{valor}{valor do parametro}
 }

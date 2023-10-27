@@ -150,131 +150,8 @@ test_that("testa caso pegando a assimilacao original do aplicativo",{
     entrada <- le_arq_entrada(pasta_entrada)
     execucao <- le_execucao(pasta_saida, entrada$datas_rodadas$data)
 
-  testa_rodada_sem_assimilacao <- function(parametros, inicializacao, precipitacao_observada, 
-    precipitacao_prevista, evapotranspiracao_nc, vazao_observada, postos_plu, datas_rodadas, 
-    numero_cenarios, sub_bacias, execucao) {
-      numero_sub_bacias <- length(sub_bacias)
-      numero_datas <- nrow(datas_rodadas)
-      numero_dias_previsao <- datas_rodadas$numero_dias_previsao
-      nome_cenario <- unique(precipitacao_prevista[, cenario])
 
-      saida <- data.table::data.table()
-      saida_ajuste_otimizacao <- data.table::data.table()
-      saida_ajuste_assimilacao <- data.table::data.table()
-      saida_ajuste_fo <- data.table::data.table()
-      saida_precipitacao <- data.table::data.table()
-      for (ibacia in 1:numero_sub_bacias){
-          sub_bacia <- sub_bacias[ibacia]
-
-          EbInic <- inicializacao[nome == sub_bacia & variavel == "Ebin", valor]
-          Supin <- inicializacao[nome == sub_bacia & variavel == "Supin", valor]
-          TuInic <- inicializacao[nome == sub_bacia & variavel == "Tuin", valor]
-          numero_dias_assimilacao <- inicializacao[nome == sub_bacia & variavel == "numero_dias_assimilacao", valor]
-          vetor_inicializacao <- array(rep(0, numero_cenarios * 7), c(numero_cenarios, 7))
-
-          modelo <- new_modelo_smap_ons(parametros[nome == sub_bacia], postos_plu[nome %in% sub_bacia])
-          kt <- modelo$kt
-          kt_max <- parametros[nome == sub_bacia & parametro == "ktMax", valor]
-          kt_min <- parametros[nome == sub_bacia & parametro == "ktMin", valor]
-          vetor_modelo <- unlist(modelo)
-          area <- attributes(modelo)$area
-
-          for (idata in 1:numero_datas){
-              saida_bacia_aux <- data.table::data.table()
-              
-              dataRodada <- datas_rodadas[idata, data]
-              numero_dias_previsao <- datas_rodadas[data == dataRodada, numero_dias_previsao]
-              matriz_precipitacao <- array(rep(0, numero_cenarios * numero_dias_previsao), c(numero_cenarios, numero_dias_previsao))
-              matriz_evapotranspiracao <- array(rep(0, numero_cenarios * numero_dias_previsao), c(numero_cenarios, numero_dias_previsao))
-              matriz_evapotranspiracao_planicie <- array(rep(0, numero_cenarios * numero_dias_previsao), c(numero_cenarios, numero_dias_previsao))
-
-              vazao <- vazao_observada[data < dataRodada & data >= (dataRodada - numero_dias_assimilacao) 
-                            & posto == sub_bacia, valor]
-                            
-              normal_climatologica <- evapotranspiracao_nc[nome == sub_bacia]
-
-              precipitacao <- data.table::data.table(precipitacao_observada[nome == sub_bacia &
-              data <= dataRodada & data >= (dataRodada - numero_dias_assimilacao - kt_min)])
-              previsao_rodada <- precipitacao_prevista[nome == sub_bacia & data_rodada == dataRodada]
-
-              precipitacao[, data_rodada := dataRodada]
-              precipitacao <- combina_observacao_previsao(precipitacao, previsao_rodada)
-
-              precipitacao_assimilacao <- data.table::data.table(precipitacao[data_previsao < (dataRodada + kt_max) & 
-                  data_previsao >= (dataRodada - numero_dias_assimilacao - kt_min) & cenario == unique(cenario)[1]])
-              colnames(precipitacao_assimilacao)[1] <- "data"
-              precipitacao_assimilacao[, cenario := NULL]
-              precipitacao_assimilacao[, data_rodada := NULL]
-
-              evapotranspiracao <- transforma_NC_serie(precipitacao_assimilacao[data < dataRodada & data >= (dataRodada - numero_dias_assimilacao)], normal_climatologica) 
-              evapotranspiracao_planicie <- evapotranspiracao[, valor] * vetor_modelo[77]
-              evapotranspiracao <- evapotranspiracao[, valor] * vetor_modelo[76]
-
-              EbInic <- execucao[subbacia == sub_bacia & dia_assimilacao == 1, ebin]
-              Supin <- execucao[subbacia == sub_bacia & dia_assimilacao == 1, supin]
-              if (Supin < 0) { #L-BFGS-B as vezes fornece valor negativo próximo a 0 ('-1e-17')
-                Supin <- 0
-              }
-              inicializacao2 <- inicializacao_smap(vetor_modelo, area, EbInic, TuInic, Supin)
-              vetor_inicializacao <- unlist(inicializacao2)
-              precipitacao_ponderada <- data.table::data.table(precipitacao_assimilacao)
-              precipitacao_ponderada[, valor := valor * vetor_modelo[75]]
-              precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada[, valor], kt,
-                                                              kt_max, kt_min)
-              precipitacao_ponderada <- precipitacao_ponderada * execucao[subbacia == sub_bacia, peso_chuva]
-
-              simulacao <- funcaoSmapCpp::rodada_varios_dias_cpp2(vetor_modelo,
-                        vetor_inicializacao, area, precipitacao_ponderada,
-                        evapotranspiracao, evapotranspiracao_planicie, numero_dias_assimilacao)
-
-              simulacao <- data.table::data.table(simulacao)
-
-              ajuste <- list(ajuste = execucao, simulacao = simulacao)
-
-              saida_precipitacao <- data.table::rbindlist(list(saida_precipitacao, precipitacao))
-
-              precipitacao[, valor := valor * vetor_modelo[75]]
-              for (icenario in 1:length(unique(precipitacao[, cenario]))){
-                  matriz_precipitacao[icenario,] <- ponderacao_temporal(precipitacao[data_previsao < (dataRodada + numero_dias_previsao + kt_max) & data_rodada == dataRodada & 
-                  data_previsao >= (dataRodada - kt_min) & cenario == nome_cenario[icenario], valor], kt, kt_max, kt_min)
-              }
-              
-              colnames(precipitacao)[1] <- "data"
-              precipitacao <- precipitacao[cenario == unique(cenario)[1]]
-              precipitacao[, data_rodada := NULL]
-              precipitacao[, cenario := NULL]
-              evapotranspiracao <- transforma_NC_serie(precipitacao[data <= dataRodada + numero_dias_previsao - 1 & data >= dataRodada], normal_climatologica)
-              for (icenario in 1:numero_cenarios){
-                  matriz_evapotranspiracao_planicie[icenario,] <- evapotranspiracao[, valor] * vetor_modelo[77]
-                  matriz_evapotranspiracao[icenario,] <- evapotranspiracao[, valor] * vetor_modelo[76]
-              }
-
-              vetor_inicializacao <- array(rep(0, numero_cenarios * 7), c(numero_cenarios, 7))
-              vetor_inicializacao[, 4] <- ajuste$simulacao[numero_dias_assimilacao, Rsup2]
-              vetor_inicializacao[, 5] <- ajuste$simulacao[numero_dias_assimilacao, Rsolo]
-              vetor_inicializacao[, 6] <- ajuste$simulacao[numero_dias_assimilacao, Rsup]
-              vetor_inicializacao[, 7] <- ajuste$simulacao[numero_dias_assimilacao, Rsub]
-              
-              simulacao <- funcaoSmapCpp::rodada_cenarios_dias_cpp2(vetor_modelo,
-              vetor_inicializacao, area, matriz_precipitacao,
-              matriz_evapotranspiracao, matriz_evapotranspiracao_planicie, numero_dias_previsao, numero_cenarios)
-
-              saida_bacia_aux <- data.table::data.table(do.call(rbind, simulacao))
-
-              saida_bacia_aux[, nome := sub_bacia]
-              saida_bacia_aux[, data_caso := dataRodada]
-              saida_bacia_aux[, cenario := rep(nome_cenario, each = numero_dias_previsao)]
-              saida_bacia_aux[, data_previsao := rep(seq.Date(dataRodada, dataRodada + numero_dias_previsao - 1, by = 1), numero_cenarios)]
-              saida <- data.table::rbindlist(list(saida, saida_bacia_aux))
-          }
-      }
-      saida <- melt(saida, id.vars = c("data_caso", "data_previsao", "cenario", "nome"), variable.name = "variavel",
-            value.name = "valor")
-      saida <- list(previsao = saida)
-      saida
-    }
-
-    saida <- testa_rodada_sem_assimilacao(entrada$parametros,
+    saida <- rodada_sem_assimilacao(entrada$parametros,
       entrada$inicializacao, entrada$precipitacao, entrada$previsao_precipitacao, entrada$evapotranspiracao, entrada$vazao,
       entrada$postos_plu, entrada$datas_rodadas, length(unique(entrada$previsao_precipitacao[, cenario])), entrada$caso$nome_subbacia, execucao)
     previsao <- saida$previsao[variavel == "Qcalc"]
@@ -288,6 +165,7 @@ test_that("testa caso pegando a assimilacao original do aplicativo",{
     unlink(system.file("extdata", "Arq_Entrada0", package = "smapOnsR"), recursive = TRUE)
     unlink(system.file("extdata", "Arq_Entrada1", package = "smapOnsR"), recursive = TRUE)
     unlink(system.file("extdata", "caso_completo", package = "smapOnsR"), recursive = TRUE)
+    unlink(system.file("extdata", "caso_completo2", package = "smapOnsR"), recursive = TRUE)
 })
 
 #test_that("testa rodada com serie temporal etp", {

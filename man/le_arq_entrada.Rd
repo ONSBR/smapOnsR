@@ -12,7 +12,7 @@ le_arq_entrada(pasta_entrada)
 \value{
 saida lista com as variaveis: parametros data table com os parametros dos modelos
 \itemize{
-\item{Nome}{Nome da sub-bacia}
+\item{nome}{nome da sub-bacia}
 \item{parametro}{nome do parametro}
 \item{valor}{valor do parametro}
 }

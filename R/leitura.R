@@ -509,8 +509,7 @@ le_arq_entrada_novo <- function(pasta_entrada) {
 
     if (any(arquivos[, arquivo] == "PARAMETROS")) {
         parametros <- le_parametros(file.path(pasta_entrada,arquivos[arquivo == "PARAMETROS", nome_arquivo])) #[nome %in% sub_bacias$nome]
-        parametros[, nome := tolower(nome)]
-        if (!sub_bacias$nome %in% parametros[, nome]) {
+        if (!all(sub_bacias$nome %in% parametros[, nome])) {
             stop("o arquivo 'parametros.csv' deve conter os mesmos nomes descritos no arquivo 'sub_bacias.csv'")
         }
     } else {
@@ -519,7 +518,7 @@ le_arq_entrada_novo <- function(pasta_entrada) {
 
     if (any(arquivos[, arquivo] == "VAZAO_OBSERVADA")) {
         vazao_observada <- le_historico_verificado(file.path(pasta_entrada,arquivos[arquivo == "VAZAO_OBSERVADA", nome_arquivo]))[posto %in% sub_bacias$nome]
-        if (!sub_bacias$nome %in% vazao_observada$posto) {
+        if (!all(sub_bacias$nome %in% vazao_observada$posto)) {
             stop("o arquivo ", arquivos[arquivo == "VAZAO_OBSERVADA", nome_arquivo], " deve conter os mesmos nomes descritos no arquivo 'sub_bacias.csv'")
         }
     } else {
@@ -540,16 +539,14 @@ le_arq_entrada_novo <- function(pasta_entrada) {
 
     if (bool_evapotranspiracao_observada) {
         evapotranspiracao_observada <- le_historico_verificado(file.path(pasta_entrada,arquivos[arquivo == "EVAPOTRANSPIRACAO_OBSERVADA", nome_arquivo]))[posto %in% sub_bacias$nome]
-        if (!sub_bacias$nome %in% evapotranspiracao_observada$posto) {
+        if (!all(sub_bacias$nome %in% evapotranspiracao_observada$posto)) {
             stop("o arquivo ", arquivos[arquivo == "EVAPOTRANSPIRACAO_OBSERVADA", nome_arquivo], " deve conter os mesmos nomes descritos no arquivo 'sub_bacias.csv'")
         }
     }
 
     if (any(arquivos[, arquivo] == "POSTOS_PLUVIOMETRICOS")) {
         postos_plu <- le_postos_plu(file.path(pasta_entrada, arquivos[arquivo == "POSTOS_PLUVIOMETRICOS", nome_arquivo]))
-        postos_plu[, nome := tolower(nome)]
-        
-        if (!sub_bacias$nome %in% postos_plu$nome) {
+        if (!all(sub_bacias$nome %in% postos_plu$nome)) {
             stop("o arquivo 'postos_plu.csv' deve conter os mesmos nomes descritos no arquivo 'sub_bacias.csv'")
         }
     } else{
@@ -558,7 +555,7 @@ le_arq_entrada_novo <- function(pasta_entrada) {
 
     if (any(arquivos[, arquivo] == "PRECIPITACAO_OBSERVADA")) {
         precipitacao_observada <- le_historico_verificado(file.path(pasta_entrada,arquivos[arquivo == "PRECIPITACAO_OBSERVADA", nome_arquivo]))[posto %in% postos_plu$posto]
-        if (!sub_bacias$nome %in% precipitacao_observada$posto) {
+        if (!all(sub_bacias$nome %in% postos_plu[precipitacao_observada[, unique(posto)] %in% posto, nome])) {
             stop("o arquivo ", arquivos[arquivo == "PRECIPITACAO_OBSERVADA", nome_arquivo], " deve conter os mesmos nomes descritos no arquivo 'sub_bacias.csv'")
         }
     } else {
@@ -568,7 +565,7 @@ le_arq_entrada_novo <- function(pasta_entrada) {
     if (any(arquivos[, arquivo] == "INICIALIZACAO")) {
         inicializacao <-  le_inicializacao(file.path(pasta_entrada,arquivos[arquivo == "INICIALIZACAO", nome_arquivo]))
         inicializacao[variavel == "Tuin", valor := valor / 100]
-        if (!sub_bacias$nome %in% inicializacao$nome) {
+        if (!all(sub_bacias$nome %in% inicializacao$nome)) {
             stop("o arquivo 'inicializacao.csv' deve conter os mesmos nomes descritos no arquivo 'sub_bacias.csv'")
         }
     } else {
@@ -587,7 +584,7 @@ le_arq_entrada_novo <- function(pasta_entrada) {
 
     if (any(arquivos[, arquivo] == "PRECIPITACAO_PREVISTA")) {
         precipitacao_prevista <- le_precipitacao_prevista(file.path(pasta_entrada,arquivos[arquivo == "PRECIPITACAO_PREVISTA", nome_arquivo]))
-        if (!sub_bacias$nome %in% precipitacao_prevista$nome) {
+        if (!all(sub_bacias$nome %in% precipitacao_prevista$nome)) {
             stop("o arquivo precipitacao prevista deve conter os mesmos nomes descritos no arquivo 'sub_bacias.csv'")
         }
     } else {
