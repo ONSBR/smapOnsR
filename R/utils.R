@@ -192,3 +192,39 @@ completa_previsao <- function(previsao_precipitacao, datas_rodadas, numero_dias 
     
     previsao_precipitacao
 }
+
+#' Ordem de afluencia
+#'
+#' @param montante Nomes ou IDs das UHEs de montante da cascata
+#' @param jusante Nomes ou IDs das UHEs imediatamente a jusante de cada UHE
+#'
+#' @return Retorna a ordem de afluencia para cada UHE
+#' @export
+ordem_afluencia <- function(montante, jusante) {
+  # Vetor com ordens de afluencia
+  ord_aflu <- rep(NA, length(montante))
+  
+  # UHES qua nao sao jusantes de nenhuma outra (nao tem montantes)
+  tmp <- which(!is.element(montante,jusante))
+  ord <- 1
+  ord_aflu[tmp] <- ord
+  
+  # Ate preencher as ordens de todos montante
+  while (any(is.na(ord_aflu))) {
+    ord <- ord + 1
+    uhe_c_ord <- montante[!is.na(ord_aflu)]
+    uhe_s_ord <- montante[is.na(ord_aflu)]
+    
+    for(u in uhe_s_ord){
+      # UHEs imediatamente a montande de u
+      m.u <- montante[is.element(jusante, u)]
+      
+      # Se todos os montantes imediatos ja tiverem ordem determinada, u recebe a ordem seguinte
+      if (all(is.element(m.u, uhe_c_ord))) {
+        tmp <- which(montante == u)
+        ord_aflu[tmp] <- ord
+      }
+    }
+  }
+  return(ord_aflu)
+}

@@ -1,0 +1,168 @@
+﻿posto;nome_real;sub_bacia_agrupada;bacia_smap;fator;posto_jusante;bacia;posto_jusante_gvp_art;posto_gvp_artificial;tv;n;c1;c2;c3;latitude;longitude
+1;Camargos;Camargos;GRD_PRNB;1;2;Grande;2;1;0;0;0;0;0;-21.32527778;-44.61611111
+2;Itutinga;Camargos;GRD_PRNB;0;211;Grande;211;2;13;0;0;0;0;-21.291667;-44.62388889
+6;Furnas;FURNAS;GRD_PRNB;1;7;Grande;7;6;23;0;0;0;0;-20.66732;-46.319262
+7;Mascarenhas de Moraes;PCOLOMBIA;GRD_PRNB;0.377;8;Grande;8;7;7;0;0;0;0;-20.286561;-47.069916
+8;L.C. Barreto;PCOLOMBIA;GRD_PRNB;0.087;9;Grande;9;8;5;0;0;0;0;-20.155287;-47.284213
+9;Jaguara;PCOLOMBIA;GRD_PRNB;0.036;10;Grande;10;9;10;0;0;0;0;-20.023055;-47.43444444
+10;Igarapava;PCOLOMBIA;GRD_PRNB;0.103;11;Grande;11;10;12;0;0;0;0;-19.97583333;-47.73222222
+11;Volta Grande;PCOLOMBIA;GRD_PRNB;0.23;12;Grande;12;11;11;0;0;0;0;-20.02888889;-48.22083333
+12;Porto Colômbia;PCOLOMBIA;GRD_PRNB;0.167;17;Grande;17;12;20;0;0;0;0;-20.120132;-48.574948
+14;Caconde;EDACUNHA;GRD_PRNB;0.61;15;Grande;15;14;12;0;0;0;0;-21.56638889;-46.61666667
+15;Euclides da Cunha;EDACUNHA;GRD_PRNB;0.39;16;Grande;16;15;3;0;0;0;0;-21.59972222;-46.95
+16;Limoeiro;MARIMBONDO;GRD_PRNB;0.004;17;Grande;17;16;72;0;0;0;0;-21.61638889;-47.05
+17;Marimbondo;MARIMBONDO;GRD_PRNB;0.996;18;Grande;18;17;28;0;0;0;0;-20.301198;-49.20339
+18;Água Vermelha;AVERMELHA;GRD_PRNB;1;34;Grande;34;18;18;0;0;0;0;-19.86722222;-50.35
+22;Batalha ;SDOFACAO;GRD_PRNB;0.615;251;Paranaiba;251;22;12;0;0;0;0;-17.345556;-47.489444
+23;Corumbá 3;CORUMBA1;GRD_PRNB;0.1;209;Paranaiba;209;23;24;0;0;0;0;-16.786111;-47.941944
+24;Emborcação;EMBORCACAO;GRD_PRNB;1;31;Paranaiba;31;24;17;0;0;0;0;-18.451944;-47.993888
+25;Nova Ponte;NOVAPONTE;GRD_PRNB;1;206;Paranaiba;206;25;11;0;0;0;0;-19.133055;-47.693611
+28;Capim Branco 2;ITUMBIARA;GRD_PRNB;0.012;31;Paranaiba;31;28;17;0;0;0;0;-18.659722;-48.435278
+31;Itumbiara;ITUMBIARA;GRD_PRNB;0.943;32;Paranaiba;32;31;8;0;0;0;0;-18.407529;-49.112968
+32;C. Dourada;SSIMAO2;GRD_PRNB;0.109;33;Paranaiba;33;32;15;0;0;0;0;-18.49916667;-49.48638889
+33;São Simão;SSIMAO2;GRD_PRNB;0.891;34;Paranaiba;34;33;30;0;0;0;0;-19.018055;-50.499166
+99;Espora;Espora;GRD_PRNB;1;34;Paranaiba;34;99;46;0;0;0;0;-18.666667;-51.85
+205;Corumbá 4;CORUMBAIV;GRD_PRNB;1;23;Paranaiba;23;205;12;0;0;0;0;-16.3225;-48.18722222
+206;Miranda;ITUMBIARA;GRD_PRNB;0.04;207;Paranaiba;207;206;5;0;0;0;0;-18.91194444;-48.04138889
+207;Capim Branco 1;ITUMBIARA;GRD_PRNB;0.005;28;Paranaiba;28;207;12;0;0;0;0;-18.790278;-48.147222
+209;Corumbá;CORUMBA1;GRD_PRNB;0.9;31;Paranaiba;31;209;17;0;0;0;0;-17.987029;-48.54114
+211;Funil;FUNIL MG;GRD_PRNB;1;6;Grande;6;211;36;0;0;0;0;-21.08305556;-44.91666667
+241;S.R. Verdinho;SaltoVerdi;GRD_PRNB;0.077;34;Paranaiba;34;241;28;0;0;0;0;-19.139722;-50.752778
+247;Cacu;FozClaro;GRD_PRNB;0.894;248;Paranaiba;248;247;6;0;0;0;0;-18.529444;-51.15
+248;B. Coqueiros;FozClaro;GRD_PRNB;0.037;261;Paranaiba;261;248;15;0;0;0;0;-18.723333;-51.003056
+251;Serra do Facão;SDOFACAO;GRD_PRNB;0.385;24;Paranaiba;24;251;17;0;0;0;0;-18.066667;-47.666667
+261;Foz do Rio Claro;FozClaro;GRD_PRNB;0.069;34;Paranaiba;34;261;28;0;0;0;0;-19.115833;-50.643611
+294;Salto;SaltoVerdi;GRD_PRNB;0.923;241;Paranaiba;241;294;34;0;0;0;0;-18.800833;-51.182222
+145;Rondon II;RondonII;Norte;1;0;Madeira;0;145;0;0;0;0;0;-11.85;-60.7
+191;Cana Brava;Lajeado;Norte;0.056;253;Tocantins;253;191;16;0;0;0;0;-13.40694444;-48.14166667
+204;Cachoeira Caldeirão;FGOMES;Norte;0.989;280;Araguari;280;204;2;0;0;0;0;0.85333333;-51.29166667
+227;Sinop;COLIDER;Norte;0.915;228;Teles Pires;228;227;17;0;0;0;0;-11.26666667;-55.45
+228;Colíder;COLIDER;Norte;0.085;229;Teles Pires;229;228;132;0;0;0;0;-10.98480528;-55.766005
+229;Teles Pires;SMANOEL;Norte;0.991;230;Teles Pires;230;229;7;0;0;0;0;-9.34904373;-56.77946033
+230;São Manoel;SMANOEL;Norte;0.009;0;Teles Pires;0;230;0;0;0;0;0;-9.19027541;-57.05222718
+253;São Salvador;Lajeado;Norte;0.055;257;Tocantins;257;253;16;0;0;0;0;-12.809167;-48.234722
+257;Peixe Angical;Lajeado;Norte;0.434;273;Tocantins;273;257;64;0;0;0;0;-12.233333;-48.366667
+269;Balbina;BALBINA;Norte;1;0;Uatuma;0;269;0;0;0;0;0;-1.904444;-59.468611
+270;Serra da Mesa;SMesa;Norte;1;191;Tocantins;191;270;10;0;0;0;0;-13.826187;-48.300833
+271;Estreito;Estreito;Norte;1;275;Tocantins;275;271;0;3;0.05027933;0.620111732;0.329608939;-6.586389;-47.4575
+273;Lajeado;Lajeado;Norte;0.455;271;Tocantins;271;273;0;3;0.34320707;0.366616629;0.290176301;-9.757222;-48.371389
+275;Tucuruí;Tucurui;Norte;1;0;Tocantins;0;275;0;0;0;0;0;-3.750805556;-49.6675
+277;Curua-Una;CURUAUNA;Norte;1;0;Curua-Una ;0;277;0;0;0;0;0;-2.789416667;-54.29138889
+279;Samuel;Samuel;Norte;1;0;Madeira;0;279;0;0;0;0;0;-8.779972;-63.516667
+280;Coaracy Nunes;FGOMES;Norte;0.003;297;Araguari;297;280;2;0;0;0;0;0.902778;-51.259722
+285;Jirau;Jirau2;Norte;1;287;Madeira;287;285;23;0;0;0;0;-9.266667;-64.653194
+287;Santo Antônio;S.Antonio;Norte;1;0;Madeira;0;287;0;0;0;0;0;-8.791944;-63.951944
+288;Pimental;PimentalT;Norte;1;0;Xingu;0;288;0;0;0;0;0;-3.438302;-51.945124
+290;Jari;STOANTJARI;Norte;1;0;Jari;0;290;0;0;0;0;0;-0.65;-52.516667
+291;Dardanelos;Dardanelos;Norte;1;0;Madeira;0;291;0;0;0;0;0;-10.163333;-59.45
+296;Guaporé;Guapore;Norte;1;0;Madeira;0;296;0;0;0;0;0;-15.11638889;-58.96638889
+297;Ferreira Gomes;FGOMES;Norte;0.008;0;Araguari;0;297;0;0;0;0;0;0.855628;-51.196833
+155;Retiro Baixo;RB-SMAP;NE;1;156;Sao Francisco;156;155;12;0;0;0;0;-18.894444;-44.781667
+156;Três Marias;TM-SMAP ;NE;1;169;Sao Francisco;169;156;360;0;0;0;0;-18.2125;-45.259167
+158;Queimado;QM      ;NE;1;169;Sao Francisco;169;158;360;0;0;0;0;-16.20916667;-47.32305556
+169;SOBRADINHO;SOBRADINHO;NE;1;0;Sao Francisco;0;169;0;0;0;0;0;-9.436083333;-40.82916667
+188;Itapebi;ITAPEBI ;NE;1;0;Jequitinhonha;0;188;10.52;0;0;0;0;-15.966462;-39.592739
+190;Boa Esperança;UBESP   ;NE;1;0;Parnaiba;0;190;0;0;0;0;0;-6.748333333;-43.565
+254;Pedra do Cavalo;PCAVALO ;NE;1;0;Paraguacu;0;254;0;0;0;0;0;-12.6;-38.98333333
+255;Irapé;IRAPE;NE;1;188;Jequitinhonha;188;255;0;5;0.166666667;0.666666667;0.166666667;-16.73026313;-42.56708091
+134;Salto Grande CM;PTOESTRELA ;OSE;1;263;Doce;263;134;2;0;0;0;0;-19.11527778;-42.71833333
+141;Baguari;MASCARENHA ;OSE;0.456;148;Doce;148;141;12;0;0;0;0;-19.033333;-42.116667
+144;Mascarenhas;MASCARENHA ;OSE;0.349;0;Doce;0;144;1;0;0;0;0;-19.501083;-40.918306
+148;Aimores;MASCARENHA ;OSE;0.195;144;Doce;144;148;1;0;0;0;0;-19.456389;-41.0975
+149;Candonga;CANDONGA   ;OSE;1;141;Doce;141;149;25;0;0;0;0;-20.20694444;-42.89166667
+183;Sá Carvalho;SACARV     ;OSE;0.022;141;Doce;141;183;23;0;0;0;0;-19.635556;-42.806111
+252;Itiquira II;ItiquiraI  ;OSE;0;0;Paraguai;0;252;0;0;0;0;0;-17.08305556;-54.83305556
+259;Itiquira I;ItiquiraI  ;OSE;1;252;Paraguai;252;259;0;0;0;0;0;-17.08305556;-54.83305556
+262;Guiman Amorim;SACARV     ;OSE;0.978;183;Doce;183;262;2;0;0;0;0;-19.70805556;-42.96
+263;Porto Estrela;PTOESTRELA ;OSE;0;141;Doce;141;263;24;0;0;0;0;-19.13361111;-42.66611111
+278;Manso;Manso      ;OSE;1;0;Paraguai;0;278;0;0;0;0;0;-14.875085;-55.788375
+281;Ponte de Pedra;PdePedra   ;OSE;1;0;Paraguai;0;281;0;0;0;0;0;-17.587139;-54.907778
+34;I. Solteira;IlhaEquiv ;Paranazao;0.94;245;Parana;45;34;5;0;0;0;0;-20.42222222;-51.34
+47;Jurumirim;Jurumirim ;Paranazao;1;48;Paranapanema;48;47;5.1;0;0;0;0;-23.22;-49.23833333
+48;Piraju;Chavantes ;Paranazao;0.046;49;Paranapanema;49;48;10.52;0;0;0;0;-23.18305556;-49.38333333
+49;Chavantes;Chavantes ;Paranazao;0.954;249;Paranapanema;249;49;3;0;0;0;0;-23.13194444;-49.73472222
+50;Salto Grande CS;CanoasI   ;Paranazao;0.778;51;Paranapanema;51;50;2.8;0;0;0;0;-19.11527778;-42.71833333
+51;Canoas II;CanoasI   ;Paranazao;0.061;52;Paranapanema;52;51;2.8;0;0;0;0;-22.93305556;-50.25
+52;Canoas I;CanoasI   ;Paranazao;0.13;61;Paranapanema;61;52;17.2;0;0;0;0;-22.93305556;-50.51666667
+57;Mauá;Maua      ;Paranazao;1;61;Paranapanema;61;57;31;0;0;0;0;-24.063333;-50.701389
+61;Capivara;Capivara  ;Paranazao;1;62;Paranapanema;62;61;9.3;0;0;0;0;-22.6575;-51.36083333
+62;Taquaruçu;Rosana    ;Paranazao;0.299;63;Paranapanema;63;62;13.9;0;0;0;0;-22.54416667;-52.01055556
+63;Rosana;Rosana    ;Paranazao;0.701;266;Paranapanema;66;63;56;0;0;0;0;-22.59972222;-52.86666667
+117;Guarapiranga;ESouza    ;Paranazao;0.12;161;Tiete;161;3;0;0;0;0;0;-23.41;-46.44
+301;Bill e Pedras;ESouza    ;Paranazao;0.183;161;Tiete;161;4;0;0;0;0;0;-23.41;-46.44
+154;São Domingos;SDO       ;Paranazao;1;246;Parana;46;154;32;0;0;0;0;-20.08333333;-53.17472222
+160;Ponte Nova;ESouza    ;Paranazao;0.073;0;Tiete;0;160;0;0;0;0;0;0;0
+161;E. S. + Pinheiros;ESouza    ;Paranazao;0.624;237;Tiete;37;161;42;0;0;0;0;-23.27;-46.54
+237;B. Bonita;BBonita   ;Paranazao;1;238;Tiete;38;37;12;0;0;0;0;-22.505;-48.545
+238;Bariri;Ibitinga  ;Paranazao;0.342;239;Tiete;39;38;12;0;0;0;0;-22.14972222;-48.75
+239;Ibitinga;Ibitinga  ;Paranazao;0.658;240;Tiete;40;39;29;0;0;0;0;-21.74972222;-49
+240;Promissão;NAvanhanda;Paranazao;0.717;242;Tiete;42;40;13;0;0;0;0;-21.29972222;-49.78333333
+242;N. Avanhandava;NAvanhanda;Paranazao;0.283;243;Tiete;43;42;42;0;0;0;0;-21.11638889;-50.2
+243;Três Irmãos;IlhaEquiv ;Paranazao;0.06;245;Parana;45;43;7;0;0;0;0;-20.65638889;-51.48277778
+245;Jupiá;Jupia     ;Paranazao;1;246;Parana;46;45;48;0;0;0;0;-20.79138889;-51.63361111
+246;Porto Primavera;PPRI;Paranazao;1;266;Parana;66;46;56;0;0;0;0;-22.48198411;-52.95610506
+249;Ourinhos;CanoasI   ;Paranazao;0.031;50;Paranapanema;50;249;3;0;0;0;0;-23.06638889;-49.85
+266;Itaipu;Itaipu;Paranazao;1;0;Parana;0;66;0;0;0;0;0;-25.42666667;-54.59277778
+71;Santa Clara - PR;StaClara  ;SUL;1;72;Iguacu;72;71;2;0;0;0;0;-17.896661;-40.201297
+72;Fundão;JordSeg   ;SUL;0.039;73;Iguacu;73;72;1.8;0;0;0;0;-25.708611;-51.998055
+73;Jordão;JordSeg   ;SUL;0.157;77;Iguacu;77;73;9.6;0;0;0;0;-25.45;-52.04
+74;G. B. Munhoz;FOA       ;SUL;1;76;Iguacu;75;74;12.7;0;0;0;0;-26;-51.6
+76;Segredo;JordSeg   ;SUL;0.804;77;Iguacu;77;75;11.7;0;0;0;0;-25.78111111;-52.10416667
+77;Salto Santiago;BaixoIg;SUL;0.205;78;Iguacu;78;77;10;0;0;0;0;-24.6;-52.616667
+78;Salto Osorio;BaixoIg;SUL;0.081;222;Iguacu;222;78;9.4;0;0;0;0;-25.538056;-53.009322
+81;Baixo Iguacu;BaixoIg;SUL;0.204;0;Iguacu;0;81;0;0;0;0;0;-25.50333;-53.671666
+89;Garibaldi;CN        ;SUL;0.165;216;Uruguai;216;89;6;0;0;0;0;-27.621389;-50.988056
+92;Itá;Ita       ;SUL;1;94;Uruguai;94;92;20.93;0;0;0;0;-27.2675;-52.398333
+93;Passo Fundo;Monjolinho;SUL;0.586;220;Uruguai;220;93;7.7;0;0;0;0;-27.55;-52.733333
+94;Foz Chapeco;FozChapeco;SUL;1;0;Uruguai;0;94;0;0;0;0;0;-27.14;-53.043333
+97;Monte Claro;14jul;SUL;0.887;284;Osul;284;97;4.5;0;0;0;0;-29.0166667;-51.5
+98;Castro Alves;CALVES    ;SUL;1;97;Osul;97;98;6;0;0;0;0;-29.00833333;-51.37916667
+101;Salto Pilão;SaltoPilao;SUL;1;0;Osul;0;101;0;0;0;0;0;-27.116667;-49.5
+102;São José;SJoao     ;SUL;0.963;103;Uruguai;103;102;8.47;0;0;0;0;-28.174444;-54.813056
+103;Passo São João;SJoao     ;SUL;0.037;0;Uruguai;0;103;0;0;0;0;0;-28.139444;-55.047778
+110;Ernestina;Ernestina ;SUL;1;111;Osul;111;110;19.8;0;0;0;0;-28.34;-52.33
+111;Passo Real;PassoReal ;SUL;1;112;Osul;112;111;1.3;0;0;0;0;-29.01694444;-53.18888889
+112;Jacui;DFRANC    ;SUL;0.02;113;Osul;113;112;6.2;0;0;0;0;-29.07916667;-53.2275
+113;Itauba;DFRANC    ;SUL;0.464;114;Osul;114;113;1;0;0;0;0;-29.25888889;-53.23388889
+114;D. Francisca;DFRANC    ;SUL;0.516;0;Osul;0;114;0;0;0;0;0;-29.44694444;-53.28055556
+115;G.P.Souza;GPSouza   ;SUL;1;0;Osul;0;115;0;0;0;0;0;-25.253333;-48.760556
+215;Barra Grande;BG        ;SUL;1;217;Uruguai;217;215;16.2;0;0;0;0;-27.766667;-51.216667
+216;Campos Novos;CN        ;SUL;0.09;217;Uruguai;217;216;12;0;0;0;0;-27.6;-51.31666667
+217;Machadinho;Machadinho;SUL;1;92;Uruguai;92;217;15.3;0;0;0;0;-27.523611;-51.78472222
+220;Monjolinho;Monjolinho;SUL;0.414;94;Uruguai;94;220;14.93;0;0;0;0;-27.328611;-52.734722
+222;Salto Caxias;BaixoIg;SUL;0.51;81;Iguacu;81;222;5;0;0;0;0;-25.54416667;-53.49222222
+283;Sta. Clara-MG;SCLARA     ;OSE;1;0;Mucuri;0;283;0;0;0;0;0;-25.647777;-51.966388
+284;14 de Julho;45121;SUL;0.113;0;Osul;0;284;0;0;0;0;0;-29.05;-51.666667
+286;Quebra Queixo;QQueixo   ;SUL;1;0;Uruguai;0;286;0;0;0;0;0;-26.66638889;-52.55
+88;São Roque;CN        ;SUL;0.745;89;Uruguai;89;88;24;0;0;0;0;0;0
+295;Jauru;Jauru      ;OSE;1;0;Paraguai;0;295;0;0;0;0;0;-15.233333;-58.716667
+196;Rosal;ROSAL      ;OSE;1;0;Itabapoana;0;196;0;0;0;0;0;-20.91638889;-41.7
+121;Paraibuna;StaBranca;OSE;0.873;122;Paraiba do Sul;122;121;6;0;0;0;0;-23.38305556;-45.66666667
+122;StaBranca;StaBranca;OSE;0.127;123;Paraiba do Sul;123;122;84;0;0;0;0;-23.37083333;-45.87083333
+123;FunilRJ;FunilRJ;OSE;1;125;Paraiba do Sul;21;123;24;0;0;0;0;-22.526586;-44.572512
+120;Jaguari;Jaguari;OSE;1;123;Paraiba do Sul;123;120;72;0;0;0;0;-23.2;-46.033333
+125;StaCecilia;StaCecilia;OSE;1;129;Paraiba do Sul;126;21;40;0;0;0;0;-22.28;-43.5
+197;Picada;Picada;OSE;1;198;Paraiba do Sul;198;197;5;0;0;0;0;-21.88333333;-43.55
+198;Sobragi;Sobragi;OSE;1;129;Paraiba do Sul;126;198;6;0;0;0;0;-21.96638889;-43.35
+130;IlhaP;IlhaP;OSE;0.289;0;Paraiba do Sul;0;299;0;0;0;0;0;-21.85;-42.583333
+201;Tocos;LajesTocos;OSE;0.68;203;Paraiba do Sul;304;19;0;0;0;0;0;-22.41;-44.05
+129;Simplicio;IlhaP;OSE;0.711;130;Paraiba do Sul;299;126;10;0;0;0;0;-21.921111;-42.790278
+202;Lajes;LajesTocos;OSE;0.32;0;Paraiba do Sul;303;132;8;0;0;0;0;-22.42;-43.52
+203;Santana;LajesTocos;OSE;0.317;129;Paraiba do Sul;126;304;10;0;0;0;0;-22.32;-43.49
+6000;PARAGUACU;PARAGUACU;posto_flu;1;6;posto_flu;6;6000;10;0;0;0;0;0;0
+6001;PBUENOS;PBUENOS;posto_flu;1;6;posto_flu;6;6001;12;0;0;0;0;0;0
+57000;CAPESCURO;CAPESCURO;posto_flu;1;57;posto_flu;57;57000;8;0;0;0;0;0;0
+33000;PASSAGEM;PASSAGEM;posto_flu;1;33;posto_flu;33;33000;16;0;0;0;0;0;0
+65000;RVerde;RVerde;posto_flu;1;65;posto_flu;65;65000;8;0;0;0;0;0;0
+246000;FZB       ;FZB       ;posto_flu;1;246;posto_flu;46;246000;26;0;0;0;0;0;0
+266000;Balsa     ;Balsa     ;posto_flu;1;266;posto_flu;66;266000;32;0;0;0;0;0;0
+266001;Flor+Estra;Flor+Estra;posto_flu;1;266;posto_flu;66;266000;33;0;0;0;0;0;0
+266002;Ivinhema  ;Ivinhema  ;posto_flu;1;266;posto_flu;66;266000;45;0;0;0;0;0;0
+266003;PTaquara  ;PTaquara  ;posto_flu;1;266;posto_flu;66;266000;36;0;0;0;0;0;0
+74000;UVitoria  ;UVitoria  ;posto_flu;1;74;posto_flu;74;74000;17.4;0;0;0;0;0;0
+271000;Porto Real;Porto Real;posto_flu;1;271;posto_flu;271;271000;0;2;0.235961558;0.622494757;0.141543686;0;0
+275001;Bandeirant;Bandeirant;posto_flu;1;275000;posto_flu;275000;275001;0;9;0.152775192;0.152775192;0.694449616;0;0
+275000;C.Araguaia;C.Araguaia;posto_flu;1;275;posto_flu;275;275000;0;3;0.032258065;0.612903226;0.35483871;0;0
+285000;P_da_Beira;P_da_Beira;posto_flu;1;285001;posto_flu;285001;285000;0;2;0.375;0.625;0;0;0
+285001;Guaj-mirim;Guaj-mirim;posto_flu;1;285002;posto_flu;285002;285001;14;0;0;0;0;0;0
+285002;Guaj-mirim2;Guaj-mirim;posto_flu;0;285;posto_flu;285;285002;0;2;0.375;0.625;0;0;0
