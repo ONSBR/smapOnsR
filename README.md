@@ -7,6 +7,7 @@
 
 [![R-CMD-check](https://github.com/felipe-treistman/smapOnsR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/felipe-treistman/smapOnsR/actions/workflows/R-CMD-check.yaml)
 [![test-coverage](https://github.com/felipe-treistman/smapOnsR/workflows/test-coverage/badge.svg)](https://github.com/felipe-treistman/smapOnsR/actions/workflows/test-coverage.yaml)
+[![codecov](https://codecov.io/gh/felipe-treistman/smapOnsR/graph/badge.svg?token=C7FF7ZNCER)](https://codecov.io/gh/felipe-treistman/smapOnsR)
 <!-- badges: end -->
 
 Pacote com a implementacao em R do modelo SMAP/ONS
