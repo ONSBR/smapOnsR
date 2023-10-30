@@ -1,31 +1,3 @@
-# LEITURA DO DADO VERIFICADO --------------------------------------------------------
-#' le_evapotranspiracao
-#' 
-#' Leitor de arquivo de normal climatologica de evapotranspiracao
-#' 
-#' Le arquivo evapotranspiracao utilizado no aplicativo SMAP/ONS
-#' 
-#' @param arq o arquivo do tipo "subbacia_EVAPOTRANSPIRACAO.txt"
-#' @importFrom  data.table data.table
-#' @return data.table evapotranspiracao com as colunas
-#'     \itemize{
-#'     \item{mes}{mes da NC}
-#'     \item{nome}{nome do posto}
-#'     \item{valor}{valor da NC de evapotranspiracao observada}
-#'     }
-#' @export
-le_evapotranspiracao <- function(arq) {
-    dat <- data.table::fread(arq)
-    aux <- strsplit(arq, split = "/")[[1]]
-    sb <- strsplit(aux[length(aux)], split = "_")[[1]]
-    dat$posto <- tolower(sb[1])
-
-    colnames(dat) <- c("mes", "valor", "nome")
-    data.table::setcolorder(dat, c("mes", "nome", "valor"))
-
-    dat
-}
-
 # LEITURA DE ARQUIVOS DE ENTRADA NOVOS SMAP---------------------------------
 
 #' le_parametros
