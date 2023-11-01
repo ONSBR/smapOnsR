@@ -36,11 +36,11 @@ le_parametros <- function(arq) {
     }
 
     if (any(is.na(dat$parametro) | dat$parametro == "")) {
-        stop("a coluna 'parametro' do arquivo ", arq, " possui valores nao numericos")
+        stop("a coluna 'parametro' do arquivo ", arq, " possui valores vazios")
     }
 
     if (any(is.na(dat$nome) | dat$nome == "")) {
-        stop("a coluna 'nome' do arquivo ", arq, " possui valores nao numericos")
+        stop("a coluna 'nome' do arquivo ", arq, " possui valores vazios")
     }
 
     if (any(dat$valor < 0)) {
@@ -144,7 +144,7 @@ le_historico_verificado <- function(arq) {
 #' Realiza a leitura do csv 'precipitacao_prevista.csv' com os dados iniciais
 #' 
 #' @param arq nome do arquivo "precipitacao_prevista.csv"
-#' @importFrom  data.table data.table
+#' @importFrom  data.table data.table as.IDate
 #' @return data.table com a precipitacao prevista com as colunas
 #'     \itemize{
 #'     \item{data_rodada}{data da rodada do modelo que gerou a previsao}
@@ -196,6 +196,7 @@ le_precipitacao_prevista <- function(arq) {
     }
 
     if (nrow(teste_completo) != 0) {
+        teste_completo[, V1 := data.table::as.IDate(V1)]
         stop(paste0("falta a data de previsao ", teste_completo$V1, " para o cenario ", teste_completo$cenario, " da sub-bacia ", teste_completo$nome, " do caso de ", teste_completo$data_rodada, "\n"))
     }
 
@@ -425,7 +426,7 @@ le_postos_plu <- function(arq) {
 
     if (any(dat[, sum(valor), by = "nome"]$V1 != 1)){
         soma <- dat[, .(valor = sum(valor)), by = nome]
-        stop("Somatorio dos Kes no arquivo ", arq, " diferente de 1 para a subbacia", soma[valor > 1, nome])
+        stop("Somatorio dos Kes no arquivo ", arq, " diferente de 1 para a subbacia ", soma[valor != 1, nome])
     }
 
     dat[, nome := tolower(nome)]
@@ -448,14 +449,36 @@ le_postos_plu <- function(arq) {
 #' @export
 le_evapotranspiracao_nc <- function(arq) {
 
-    if (missing("arq")) {
+    if (!file.exists(arq)) {
         stop(paste0("nao existe o arquivo ", arq))
     }
 
     dat <- data.table::fread(arq)
-    dat
+    dat[, valor := as.numeric(valor)]
+    dat[, mes := as.numeric(mes)]
+    if (any(colnames(dat) != c("mes", "nome", "valor"))) {
+        stop("o arquivo ", arq," deve deve possuir colunas 'mes', 'nome' e 'valor'")
+    }
 
-    colnames(dat) <- c("mes", "nome", "valor")
+    if (any(is.na(dat$valor))) {
+        stop("a coluna 'valor' do arquivo ", arq, " possui valores nao numericos")
+    }
+
+    if (any(dat$valor < 0)) {
+        stop("a coluna 'valor' do arquivo ", arq, " possui valores negativos")
+    }
+
+    if (any(is.na(dat$mes))) {
+        stop("a coluna 'mes' do arquivo ", arq, " possui valores nao numericos")
+    }
+
+    if (any(dat$mes > 12)) {
+        stop("a coluna 'mes' do arquivo ", arq, " possui valores maiores que 12")
+    }
+
+    if (any(dat$mes < 1)) {
+        stop("a coluna 'mes' do arquivo ", arq, " possui valores menores que 1")
+    }
     data.table::setcolorder(dat, c("mes", "nome", "valor"))
 
     dat
@@ -482,44 +505,44 @@ le_arq_entrada_novo <- function(pasta_entrada) {
     if (any(arquivos[, arquivo] == "PARAMETROS")) {
         parametros <- le_parametros(file.path(pasta_entrada,arquivos[arquivo == "PARAMETROS", nome_arquivo])) #[nome %in% sub_bacias$nome]
         if (!all(sub_bacias$nome %in% parametros[, nome])) {
-            stop("o arquivo 'parametros.csv' deve conter os mesmos nomes descritos no arquivo 'sub_bacias.csv'")
+            stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% parametros$nome, nome], " no arquivo ", arquivos[arquivo == "PARAMETROS", nome_arquivo]))
         }
     } else {
         stop("nao existe o arquivo de parametros")
     }
 
     if (any(arquivos[, arquivo] == "VAZAO_OBSERVADA")) {
-        vazao_observada <- le_historico_verificado(file.path(pasta_entrada,arquivos[arquivo == "VAZAO_OBSERVADA", nome_arquivo]))[posto %in% sub_bacias$nome]
+        vazao_observada <- le_historico_verificado(file.path(pasta_entrada, arquivos[arquivo == "VAZAO_OBSERVADA", nome_arquivo]))[posto %in% sub_bacias$nome]
         if (!all(sub_bacias$nome %in% vazao_observada$posto)) {
-            stop("o arquivo ", arquivos[arquivo == "VAZAO_OBSERVADA", nome_arquivo], " deve conter os mesmos nomes descritos no arquivo 'sub_bacias.csv'")
+            stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% vazao_observada$posto, nome], " no arquivo ", arquivos[arquivo == "VAZAO_OBSERVADA", nome_arquivo]))
         }
     } else {
         stop("nao existe o arquivo de vazoes observadas")
     }
 
-    bool_nc_evapotranspiracao <- any(arquivos[, arquivo] == "EVAPOTRANSPIRACAO_NC")
     evapotranspiracao_observada <- data.table::data.table()
     evapotranspiracao_nc <- data.table::data.table()
     evapotranspiracao_prevista <- data.table::data.table()
     
-    if (bool_nc_evapotranspiracao) {
+    if (any(arquivos[, arquivo] == "EVAPOTRANSPIRACAO_NC")) {
         evapotranspiracao_observada <- data.table::data.table()
-        evapotranspiracao_nc <- le_evapotranspiracao_nc(file.path(pasta_entrada,arquivos[arquivo == "EVAPOTRANSPIRACAO_NC", nome_arquivo]))
+        evapotranspiracao_nc <- le_evapotranspiracao_nc(file.path(pasta_entrada, arquivos[arquivo == "EVAPOTRANSPIRACAO_NC", nome_arquivo]))
+        if (!all(sub_bacias$nome %in% evapotranspiracao_nc$nome)) {
+            stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% evapotranspiracao_nc$nome, nome], " no arquivo ", arquivos[arquivo == "EVAPOTRANSPIRACAO_NC", nome_arquivo]))
+        }
     }
-    
-    bool_evapotranspiracao_observada <- any(arquivos[, arquivo] == "EVAPOTRANSPIRACAO_OBSERVADA")
 
-    if (bool_evapotranspiracao_observada) {
+    if (any(arquivos[, arquivo] == "EVAPOTRANSPIRACAO_OBSERVADA")) {
         evapotranspiracao_observada <- le_historico_verificado(file.path(pasta_entrada,arquivos[arquivo == "EVAPOTRANSPIRACAO_OBSERVADA", nome_arquivo]))[posto %in% sub_bacias$nome]
         if (!all(sub_bacias$nome %in% evapotranspiracao_observada$posto)) {
-            stop("o arquivo ", arquivos[arquivo == "EVAPOTRANSPIRACAO_OBSERVADA", nome_arquivo], " deve conter os mesmos nomes descritos no arquivo 'sub_bacias.csv'")
+            stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% evapotranspiracao_observada$posto, nome], " no arquivo ", arquivos[arquivo == "EVAPOTRANSPIRACAO_OBSERVADA", nome_arquivo]))
         }
     }
 
     if (any(arquivos[, arquivo] == "POSTOS_PLUVIOMETRICOS")) {
         postos_plu <- le_postos_plu(file.path(pasta_entrada, arquivos[arquivo == "POSTOS_PLUVIOMETRICOS", nome_arquivo]))
         if (!all(sub_bacias$nome %in% postos_plu$nome)) {
-            stop("o arquivo 'postos_plu.csv' deve conter os mesmos nomes descritos no arquivo 'sub_bacias.csv'")
+            stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% postos_plu$nome, nome], " no arquivo ", arquivos[arquivo == "POSTOS_PLUVIOMETRICOS", nome_arquivo]))
         }
     } else{
         stop("nao existe o arquivo de postos pluviometricos")
@@ -528,17 +551,21 @@ le_arq_entrada_novo <- function(pasta_entrada) {
     if (any(arquivos[, arquivo] == "PRECIPITACAO_OBSERVADA")) {
         precipitacao_observada <- le_historico_verificado(file.path(pasta_entrada,arquivos[arquivo == "PRECIPITACAO_OBSERVADA", nome_arquivo]))[posto %in% postos_plu$posto]
         if (!all(sub_bacias$nome %in% postos_plu[precipitacao_observada[, unique(posto)] %in% posto, nome])) {
-            stop("o arquivo ", arquivos[arquivo == "PRECIPITACAO_OBSERVADA", nome_arquivo], " deve conter os mesmos nomes descritos no arquivo 'sub_bacias.csv'")
+            stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% postos_plu[precipitacao_observada[, unique(posto)] %in% posto, nome], nome], " no arquivo ", arquivos[arquivo == "PRECIPITACAO_OBSERVADA", nome_arquivo]))
         }
     } else {
         stop("nao existe o arquivo de precipitacao observada")
     }
+    
+    precipitacao_observada <- data.table::rbindlist(lapply(sub_bacias$nome, function(sub_bacia) {
+  ponderacao_espacial(precipitacao_observada, postos_plu[nome %in% sub_bacia])
+        }))
 
     if (any(arquivos[, arquivo] == "INICIALIZACAO")) {
         inicializacao <-  le_inicializacao(file.path(pasta_entrada,arquivos[arquivo == "INICIALIZACAO", nome_arquivo]))
         inicializacao[variavel == "Tuin", valor := valor / 100]
         if (!all(sub_bacias$nome %in% inicializacao$nome)) {
-            stop("o arquivo 'inicializacao.csv' deve conter os mesmos nomes descritos no arquivo 'sub_bacias.csv'")
+            stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% inicializacao$nome, nome], " no arquivo ", arquivos[arquivo == "INICIALIZACAO", nome_arquivo]))
         }
     } else {
         stop("nao existe o arquivo de estados iniciais do smap")
@@ -550,14 +577,10 @@ le_arq_entrada_novo <- function(pasta_entrada) {
         stop("nao existe o arquivo de datas a serem executadas")
     }
 
-    precipitacao_observada <- data.table::rbindlist(lapply(sub_bacias$nome, function(sub_bacia) {
-  ponderacao_espacial(precipitacao_observada, postos_plu[nome %in% sub_bacia])
-        }))
-
     if (any(arquivos[, arquivo] == "PRECIPITACAO_PREVISTA")) {
         precipitacao_prevista <- le_precipitacao_prevista(file.path(pasta_entrada,arquivos[arquivo == "PRECIPITACAO_PREVISTA", nome_arquivo]))
         if (!all(sub_bacias$nome %in% precipitacao_prevista$nome)) {
-            stop("o arquivo precipitacao prevista deve conter os mesmos nomes descritos no arquivo 'sub_bacias.csv'")
+            stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% precipitacao_prevista$nome, nome], " no arquivo ", arquivos[arquivo == "PRECIPITACAO_PREVISTA", nome_arquivo]))
         }
     } else {
         print("nao existe arquivo de previsao de precipitacao, serao utilizados dados historicos")
@@ -566,14 +589,10 @@ le_arq_entrada_novo <- function(pasta_entrada) {
         precipitacao_prevista <- transforma_historico_previsao(precipitacao_prevista, datas_rodadas)
     }
 
-    
-
-    bool_evapotranspiracao_prevista <- any(arquivos[, arquivo] == "EVAPOTRANSPIRACAO_PREVISTA")
-
-    if (bool_nc_evapotranspiracao) {
+    if (any(arquivos[, arquivo] == "EVAPOTRANSPIRACAO_NC")) {
 
     } else {
-        if (bool_evapotranspiracao_prevista) {
+        if (any(arquivos[, arquivo] == "EVAPOTRANSPIRACAO_PREVISTA")) {
 
         } else {
             print("nao existe arquivo de previsao de evapotranspiracao, serao utilizados dados historicos")
