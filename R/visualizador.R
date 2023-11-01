@@ -891,26 +891,65 @@ executa_visualizador_calibracao <- function(){
 ##### VISUALIZADOR DE CASOS EXECUTADOS ############
 
 
-executa_visualizador_previsao <- function(previsoes, assimilacao, precipitacao, funcao_objetivo, historico_vazao){
+#' Visualizador GHCen
+#' 
+#' Visualiza os cenarios gerados pelo modelo GHCen
+#'
+#' @param previsoes contendo as seguintes colunas:
+#'     \itemize{
+#'     \item{data_caso}{data da rodada}
+#'     \item{data_previsao}{data da previsao}
+#'     \item{cenario}{nome do cenario}
+#'     \item{nome}{nome da sub-bacia}
+#'     \item{variavel}{nome da variavel}
+#'     \item{valor}{valor da variavel}
+#'     }
+#' @param assimilacao data table com as colunas:
+#' \itemize{
+#'     \item{data_caso}{data da rodada}
+#'     \item{data_assimilacao}{data da assimilacao}
+#'     \item{cenario}{nome do cenario}
+#'     \item{nome}{nome da sub-bacia}
+#'     \item{variavel}{nome da variavel}
+#'     \item{valor}{valor da variavel}
+#'     }
+#' @param precipitacao data table contendo precipitacao observada e previsata com as colunas:
+#' \itemize{
+#'     \item{data_previsao}{data da precipitacao}
+#'     \item{data_rodada}{data da rodada}
+#'     \item{cenario}{nome do cenario}
+#'     \item{nome}{nome da sub-bacia}
+#'     \item{variavel}{nome da variavel}
+#'     \item{valor}{valor da variavel}
+#'     }
+#' @param funcao_objetivo data table com as colunas:
+#' \itemize{
+#'     \item{funcao_objetivo - valor obtido da funcao objetivo durante a assimilacao}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{data_caso - data do caso executado}
+#'     }
+#' @export
+
+executa_visualizador_previsao <- function(previsoes, assimilacao, precipitacao, funcao_objetivo){
     `%>%` <- magrittr::`%>%`
     
     ui_previsao <- shiny::fluidPage(
         shinyjs::useShinyjs(),
-        shiny::titlePanel("Visualizador de previsoes do SMAP/ONS"),
+        shiny::titlePanel("Visualizador de cenarios do SMAP/ONS"),
         shiny::tabsetPanel(
-            shiny::tabPanel("Previsao SMAP/ONS",
+            shiny::tabPanel("Cenarios SMAP/ONS",
                 shiny::sidebarLayout(
                     shiny::sidebarPanel(
                         shiny::fluidRow(
-                            shiny::selectInput("data_caso", h3("Data do Caso"), 
+                            shiny::selectInput("data_caso", shiny::h3("Data do Caso"), 
                             choices = unique(previsoes[, data_caso]), selected = NULL),
-                            shiny::selectInput("sub_bacia", h3("Sub-bacia"), 
-                            choices = unique(previsoes[, nome]), selected = NULL)
+                            shiny::selectInput("sub_bacia", shiny::h3("Sub-bacia"), 
+                            choices = unique(previsoes[, nome]), selected = NULL),
                         )
                     ),
                     shiny::mainPanel(
                         shiny::fluidRow(
-                            dygraphs::dygraphOutput("dygraph", heigh = "600px"),
+                            plotly::plotlyOutput("plotly", heigh = "600px"),
                             shiny::textOutput("funcao_objetivo")
                         )
                     )
@@ -927,52 +966,109 @@ executa_visualizador_previsao <- function(previsoes, assimilacao, precipitacao, 
 
     servidor_previsao <- function(input, output, session) {
 
+        previsoes_sub_bacia <- shiny::reactive({
+            previsoes[nome == input$sub_bacia & data_caso == input$data_caso]
+            previsoes
+        })
+
+        precipitacao_sub_bacia <- shiny::reactive({
+            precipitacao[nome == input$sub_bacia & data_rodada == input$data_caso]
+            precipitacao
+        })
+
         output$tabela_previsao <- DT::renderDataTable(previsoes)
 
         output$tabela_assimilacao <- DT::renderDataTable(assimilacao)
 
-        output$dygraph <- dygraphs::renderDygraph({
-            variaveis_grafico <- c("Qcalc", "Qbase")
-            datas_previsao <- previsoes$data_previsao[which((previsoes$variavel == "Qcalc") & (previsoes$nome == input$sub_bacia) & (previsoes$data_caso == input$data_caso))]
+        output$plotly <- plotly::renderPlotly({
+            formata_label <- function(breaks) formatC(breaks, format = "d", width = 6, flag = " ")
 
-            simulacao <- xts::xts()
-            for (variaveis in variaveis_grafico){
-                simulacao <- cbind(simulacao, xts::xts(previsoes$valor[which((previsoes$variavel == variaveis) & (previsoes$nome == input$sub_bacia) & (previsoes$data_caso == input$data_caso))], order.by = datas_previsao))
-            }
-            colnames(simulacao) <- variaveis_grafico
-            
-            datas_assimilacao <- assimilacao$data_assimilacao[which((assimilacao$variavel == variaveis) & (assimilacao$nome == input$sub_bacia) & (assimilacao$data_caso == input$data_caso))]
-            
-            assimilacao_aux <- xts::xts()
-            for (variaveis in variaveis_grafico){
-                assimilacao_aux <- cbind(assimilacao_aux, xts::xts(assimilacao$valor[which((assimilacao$variavel == variaveis) & (assimilacao$nome == input$sub_bacia) & (assimilacao$data_caso == input$data_caso))], order.by = datas_assimilacao))
-            }
-            colnames(assimilacao_aux) <- variaveis_grafico
+            previsoes_sub_bacia <- previsoes_sub_bacia()
+            precipitacao_sub_bacia <- precipitacao_sub_bacia()
 
-            simulacao <- rbind(simulacao, assimilacao_aux)
-            datas_precipitacao <- precipitacao$data_previsao[which((precipitacao$data_rodada == input$data_caso) & (precipitacao$nome == input$sub_bacia) & (precipitacao$data_previsao >= min(datas_assimilacao)) & (precipitacao$data_previsao <= max(datas_previsao)))]
-            prec_aux <- xts::xts(x = precipitacao$valor[which((precipitacao$data_rodada == input$data_caso) & (precipitacao$nome == input$sub_bacia) & (precipitacao$data_previsao %in% datas_precipitacao))], order.by = datas_precipitacao)
-            colnames(prec_aux) <- "Precipitacao"
+            mediana <- previsoes_sub_bacia[variavel == "Qcalc", median(valor), by = c("data_previsao", "nome")]
+            data.table::setnames(mediana, "V1", "mediana")
+            minimo <- previsoes_sub_bacia[variavel == "Qcalc", min(valor), by = c("data_previsao", "nome")]
+            data.table::setnames(minimo, "V1", "minimo")
+            per_0_05 <- previsoes_sub_bacia[variavel == "Qcalc", quantile(valor, 0.05), by = c("data_previsao", "nome")]
+            data.table::setnames(per_0_05, "V1", "per_0_05")
+            per_0_25 <- previsoes_sub_bacia[variavel == "Qcalc", quantile(valor, 0.25), by = c("data_previsao", "nome")]
+            data.table::setnames(per_0_25, "V1", "per_0_25")
+            per_0_75 <- previsoes_sub_bacia[variavel == "Qcalc", quantile(valor, 0.75), by = c("data_previsao", "nome")]
+            data.table::setnames(per_0_75, "V1", "per_0_75")
+            per_0_95 <- previsoes_sub_bacia[variavel == "Qcalc", quantile(valor, 0.95), by = c("data_previsao", "nome")]
+            data.table::setnames(per_0_95, "V1", "per_0_95")
+            maximo <- previsoes_sub_bacia[variavel == "Qcalc", max(valor), by = c("data_previsao", "nome")]
+            data.table::setnames(maximo, "V1", "maximo")
 
-            datas_vazao <- historico_vazao$data[(historico_vazao$posto == input$sub_bacia) & (historico_vazao$data <= max(datas_precipitacao)) & (historico_vazao$data >= min(datas_precipitacao))]
-            vazao_observada <- xts::xts(x = historico_vazao$valor[which((historico_vazao$posto == input$sub_bacia) & (historico_vazao$data %in% datas_vazao))], order.by = datas_vazao)
-            colnames(vazao_observada) <- "vazao_observada"
+            quantis <- merge(mediana, per_0_25, by = c("data_previsao", "nome"))
+            quantis <- merge(quantis, per_0_75, by = c("data_previsao", "nome"))
+            quantis <- merge(quantis, per_0_95, by = c("data_previsao", "nome"))
+            quantis <- merge(quantis, per_0_05, by = c("data_previsao", "nome"))
+            quantis <- merge(quantis, minimo, by = c("data_previsao", "nome"))
+            quantis <- merge(quantis, maximo, by = c("data_previsao", "nome"))
 
-            dygraphs::dygraph(cbind(simulacao, prec_aux, vazao_observada),
-                            main = input$sub_bacia) %>%
-            dygraphs::dyHighlight(highlightCircleSize = 5,
-                                highlightSeriesBackgroundAlpha = 0.2,
-                                hideOnMouseOut = FALSE,
-                                highlightSeriesOpts = list(strokeWidth = 2)) %>% 
-            dygraphs::dyRangeSelector() %>%
-            dygraphs::dyAxis("y", label = "Vazao (m3/s)", independentTicks = TRUE) %>%
-            dygraphs::dySeries("vazao_observada", color = "#0c2ad3") %>%
-            dygraphs::dySeries("Precipitacao", stepPlot = TRUE, fillGraph = TRUE, axis = 'y2', color = "#0f610f") %>%
-            dygraphs::dyAxis("y2", label = "Precipitacao (mm)", valueRange = c(200, 0)) %>%
-            dygraphs::dySeries("Qcalc", color = "red") %>%
-            dygraphs::dyEvent(min(datas_previsao), "Previsao", labelLoc = "bottom") %>%
-            dygraphs::dySeries("Qbase", color = "#e4c356") %>%
-            dygraphs::dyLegend(show = "follow")
+
+            grafico_vazao <- ggplot2::ggplot(data = quantis[nome == input$sub_bacia], ggplot2::aes(x = data_previsao)) +
+                ggplot2::geom_ribbon(ggplot2::aes(x = data_previsao, ymin = minimo, ymax = per_0_05, fill = "0%-5%"), alpha = 0.7) +
+                ggplot2::geom_ribbon(ggplot2::aes(x = data_previsao, ymin = per_0_05, ymax = per_0_25, fill = "5%-25%"), alpha = 0.8) +
+                ggplot2::geom_ribbon(ggplot2::aes(x = data_previsao, ymin = per_0_25, ymax = per_0_75, fill = "25%-75%"), alpha = 1) +
+                ggplot2::geom_ribbon(ggplot2::aes(x = data_previsao, ymin = per_0_75, ymax = per_0_95, fill = "75%-95%"), alpha = 0.8) +
+                ggplot2::geom_ribbon(ggplot2::aes(x = data_previsao, ymin = per_0_95, ymax = maximo, fill = "95%-100%"), alpha = 1) +
+                ggplot2::geom_line(ggplot2::aes(y = mediana, color = "mediana"), linetype = "dotted",size=1.3) + 
+                ggplot2::ylab("Vazao Incremental (m3/s)") +
+                ggplot2::theme_light() +
+                ggplot2::scale_fill_manual(values=c("0%-5%" = '#FF6D6D', "5%-25%" = '#F4B183',
+                                        "25%-75%" = '#C5E0B4', "75%-95%" = '#BDD7EE',
+                                        '95%-100%' = '#5B9BD5'), name = "")+
+                
+                ggplot2::scale_color_manual(values=c('Observado'='black','mediana'='red'),name="")+
+                
+                ggplot2::theme(legend.position="bottom",legend.text = ggplot2::element_text(size = 8),axis.title.x = ggplot2::element_blank(),axis.text.y = ggplot2::element_text(family = "mono"))+
+                
+                ggplot2::scale_x_date(date_breaks = "3 day", date_labels = "%d/%b") +
+                ggplot2::scale_y_continuous(labels = formata_label)
+
+            mediana <- precipitacao_sub_bacia[data_previsao >= previsoes_sub_bacia[, min(data_previsao)] & data_previsao <= previsoes_sub_bacia[, max(data_previsao)], median(valor), by = c("data_previsao", "nome")]
+            data.table::setnames(mediana, "V1", "mediana")
+            minimo <- precipitacao_sub_bacia[data_previsao >= previsoes_sub_bacia[, min(data_previsao)] & data_previsao <= previsoes_sub_bacia[, max(data_previsao)], min(valor), by = c("data_previsao", "nome")]
+            data.table::setnames(minimo, "V1", "minimo")
+            p5 <- precipitacao_sub_bacia[data_previsao >= previsoes_sub_bacia[, min(data_previsao)] & data_previsao <= previsoes_sub_bacia[, max(data_previsao)], quantile(valor, 0.05), by = c("data_previsao", "nome")]
+            data.table::setnames(p5, "V1", "5%")
+            p25 <- precipitacao_sub_bacia[data_previsao >= previsoes_sub_bacia[, min(data_previsao)] & data_previsao <= previsoes_sub_bacia[, max(data_previsao)], quantile(valor, 0.25), by = c("data_previsao", "nome")]
+            data.table::setnames(p25, "V1", "25%")
+            p75 <- precipitacao_sub_bacia[data_previsao >= previsoes_sub_bacia[, min(data_previsao)] & data_previsao <= previsoes_sub_bacia[, max(data_previsao)], quantile(valor, 0.75), by = c("data_previsao", "nome")]
+            data.table::setnames(p75, "V1", "75%")
+            p95 <- precipitacao_sub_bacia[data_previsao >= previsoes_sub_bacia[, min(data_previsao)] & data_previsao <= previsoes_sub_bacia[, max(data_previsao)], quantile(valor, 0.95), by = c("data_previsao", "nome")]
+            data.table::setnames(p95, "V1", "95%")
+            p100 <- precipitacao_sub_bacia[data_previsao >= previsoes_sub_bacia[, min(data_previsao)] & data_previsao <= previsoes_sub_bacia[, max(data_previsao)], max(valor), by = c("data_previsao", "nome")]
+            data.table::setnames(p100, "V1", "100%")
+
+            quantis_prec <- merge(p75, p5, by = c("data_previsao", "nome"))
+            quantis_prec <- merge(quantis_prec, p95, by = c("data_previsao", "nome"))
+            quantis_prec <- merge(quantis_prec, p25, by = c("data_previsao", "nome"))
+            quantis_prec <- merge(quantis_prec, p100, by = c("data_previsao", "nome"))
+
+            quantis_prec <- data.table::melt(quantis_prec, id.vars = c("data_previsao", "nome"), variable.name = "variavel", value.name = "valor")
+            quantis_prec$variavel <- factor(quantis_prec$variavel, , levels = c("100%", "95%", "75%", "25%","5%"))
+
+
+            grafico_prec <- ggplot2::ggplot(data = quantis_prec[nome == input$sub_bacia], ggplot2::aes(x = data_previsao, y = valor, fill = variavel)) +
+                ggplot2::geom_bar(data = quantis_prec[nome == input$sub_bacia], ggplot2::aes(x = data_previsao, y = valor, fill = variavel), stat = "identity") +
+                ggplot2::scale_fill_manual(values = c( "5%" = '#FF6D6D', "25%" = '#F4B183', "75%" = '#C5E0B4', 
+                                            "95%" = '#BDD7EE', "100%" = '#5B9BD5'))  +
+            ggplot2::theme_light() +
+            ggplot2::ylab("Prec (mm/dia)")+
+            ggplot2::ggtitle(input$sub_bacia)+
+                ggplot2::scale_x_date(date_breaks= "3 day", date_labels = "%d/%b", position = "top") +
+                ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5, size = 24, face = 'bold'), axis.title.x = ggplot2::element_blank(), axis.text.y = ggplot2::element_text(family = "mono"),
+                    legend.position = "top")+ ggplot2::guides(fill = ggplot2::guide_legend(nrow = 1)) + ggplot2::scale_y_reverse(labels = formata_label, limits = c(100, 0)) 
+
+            grafico_vazao_plotly <- plotly::ggplotly(grafico_vazao)
+            grafico_prec_plotly <- plotly::ggplotly(grafico_prec)
+
+            layout <- plotly::subplot(grafico_prec_plotly, grafico_vazao_plotly, nrows = 2, heights = c(0.2, 0.8))
+            layout
         })
 
         output$tabela <- DT::renderDataTable(previsoes)

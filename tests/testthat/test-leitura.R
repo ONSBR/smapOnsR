@@ -218,3 +218,38 @@ test_that("testa vazoes.csv", {
 
     unlink(system.file("extdata", "validacao_arq_entrada_novo", package = "smapOnsR"), recursive = TRUE)
 })
+
+
+test_that("testa evapotranspiracao_nc.csv", {
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN08", "CT8.1", "evapotranspiracao_nc.csv", package = "smapOnsR")
+    expect_error(le_evapotranspiracao_nc(arq))
+
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN08", "CT8.2", "evapotranspiracao_nc.csv", package = "smapOnsR")
+    expect_error(le_evapotranspiracao_nc(arq))
+
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN08", "CT8.3", "evapotranspiracao_nc.csv", package = "smapOnsR")
+    expect_error(le_evapotranspiracao_nc(arq))
+
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN08", "CT8.4", "evapotranspiracao_nc.csv", package = "smapOnsR")
+    expect_error(suppressWarnings(le_evapotranspiracao_nc(arq)))
+
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN08", "CT8.5", "evapotranspiracao_nc.csv", package = "smapOnsR")
+    expect_error(suppressWarnings(le_evapotranspiracao_nc(arq)))
+
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN08", "CT8.6", "evapotranspiracao_nc.csv", package = "smapOnsR")
+    expect_error(le_evapotranspiracao_nc(arq))
+
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN08", "CT8.7", "evapotranspiracao_nc.csv", package = "smapOnsR")
+    expect_error(le_evapotranspiracao_nc(arq))
+
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN08", "CT8.8", "evapotranspiracao_nc.csv", package = "smapOnsR")
+    expect_error(le_evapotranspiracao_nc(arq))
+
+    pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN08", "CT8.9", package = "smapOnsR")
+    expect_error(suppressWarnings(le_arq_entrada_novo(pasta_entrada)))
+
+    pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN08", "CT8.10", package = "smapOnsR")
+    expect_error(suppressWarnings(le_arq_entrada_novo(pasta_entrada)))
+
+    unlink(system.file("extdata", "validacao_arq_entrada_novo", package = "smapOnsR"), recursive = TRUE)
+})

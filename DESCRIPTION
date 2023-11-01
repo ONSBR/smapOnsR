@@ -23,6 +23,7 @@ Imports:
     magrittr,
     funcaoSmapCpp,
     plotly,
+    ggplot2,
     zip,
     zoo
 Remotes: felipe-treistman/funcaoSmapCpp
