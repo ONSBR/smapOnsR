@@ -22,9 +22,10 @@ test_that("testa execucao novo formato", {
   secao <- sessionInfo()
   
   if (secao$R.version$os == "mingw32") {
-    expect_true(abs(round(saida$previsao[nome == "avermelha" & variavel == "Qcalc" & cenario == "historico", valor][27], 0) - 733) < 733 * 0.01)
-  } else {
     expect_equal(round(saida$previsao[nome == "avermelha" & variavel == "Qcalc" & cenario == "historico", valor][27], 0), 733)
+  } else {
+    expect_true(abs(round(saida$previsao[nome == "avermelha" & variavel == "Qcalc" & cenario == "historico", valor][27], 0) - 733) < 733 * 0.01)
+    
   }
 
   unlink(system.file("extdata", "Arq_Entrada", package = "smapOnsR"), recursive = TRUE)
