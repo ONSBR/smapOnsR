@@ -238,7 +238,7 @@ test_that("testa evapotranspiracao_nc.csv", {
     expect_error(le_evapotranspiracao_nc(arq))
 
     arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN08", "CT8.7", "evapotranspiracao_nc.csv", package = "smapOnsR")
-    expect_error(le_evapotranspiracao_nc(arq))
+    expect_error(suppressWarnings(le_evapotranspiracao_nc(arq)))
 
     arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN08", "CT8.8", "evapotranspiracao_nc.csv", package = "smapOnsR")
     expect_error(le_evapotranspiracao_nc(arq))
