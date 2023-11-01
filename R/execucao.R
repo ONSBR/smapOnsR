@@ -93,7 +93,7 @@ executa_caso_oficial_novo <- function(pasta_entrada){
 
     saida <- rodada_encadeada_oficial(entrada$parametros,
           entrada$inicializacao, entrada$precipitacao_observada, entrada$precipitacao_prevista, entrada$evapotranspiracao_nc, entrada$vazao,
-          entrada$postos_plu, entrada$datas_rodadas, length(unique(entrada$precipitacao_prevista[, cenario])), entrada$sub_bacias)
+          entrada$postos_plu, entrada$datas_rodadas, length(unique(entrada$precipitacao_prevista[, cenario])), entrada$sub_bacias$nome)
 
     saida
 }
@@ -144,7 +144,7 @@ executa_caso_etp <- function(pasta_entrada){
     saida <- rodada_encadeada_etp(entrada$parametros,
         entrada$inicializacao, entrada$precipitacao_observada, entrada$precipitacao_prevista, entrada$evapotranspiracao_observada, 
         entrada$evapotranspiracao_prevista, entrada$vazao_observada,
-        entrada$postos_plu, entrada$datas_rodadas, length(unique(entrada$precipitacao_prevista[, cenario])), entrada$sub_bacias)
+        entrada$postos_plu, entrada$datas_rodadas, length(unique(entrada$precipitacao_prevista[, cenario])), entrada$sub_bacias$nome)
 
     saida
 }
