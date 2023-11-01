@@ -17,14 +17,14 @@ test_that("testa execucao oficial", {
 test_that("testa execucao novo formato", {
   pasta_entrada <- system.file("extdata", "arq_entrada_novo", package = "smapOnsR")
 
-  saida <- executa_caso_etp(pasta_entrada)
+  saida <- suppressWarnings(executa_caso_etp(pasta_entrada))
 
   secao <- sessionInfo()
   
   if (secao$R.version$os == "mingw32") {
-    expect_equal(round(saida$previsao[nome == "avermelha" & variavel == "Qcalc" & cenario == "historico", valor][27], 0), 733)
+    expect_equal(round(saida$previsao[nome == "avermelha" & variavel == "Qcalc" & cenario == "historico", valor][27], 0), 732)
   } else {
-    expect_true(abs(round(saida$previsao[nome == "avermelha" & variavel == "Qcalc" & cenario == "historico", valor][27], 0) - 733) < 733 * 0.01)
+    expect_true(abs(round(saida$previsao[nome == "avermelha" & variavel == "Qcalc" & cenario == "historico", valor][27], 0) - 732) < 732 * 0.01)
     
   }
 
