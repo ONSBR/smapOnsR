@@ -410,11 +410,6 @@ le_postos_plu <- function(arq) {
     if (valor_maior) {
         stop("a coluna 'valor' do arquivo ", arq, " possui valores maiores do que 1")
     }
-    
-    valor_zero <- any(dat$valor == 0)
-    if (valor_zero) {
-        stop("a coluna 'valor' do arquivo ", arq, " possui valores iguais a zero")
-    }
 
     if (any(is.na(dat$posto) | dat$posto == "")) {
         stop("no arquivo ", arq, " a coluna 'posto' possui valores vazios")
@@ -424,9 +419,14 @@ le_postos_plu <- function(arq) {
         stop("no arquivo ", arq, " a coluna 'nome' possui valores vazios")
     }
 
-    if (any(dat[, sum(valor), by = "nome"]$V1 != 1)){
+    if (any(dat[, sum(valor), by = "nome"]$V1 > 1.005)){
         soma <- dat[, .(valor = sum(valor)), by = nome]
-        stop("Somatorio dos Kes no arquivo ", arq, " diferente de 1 para a subbacia ", soma[valor != 1, nome])
+        stop("Somatorio dos Kes no arquivo ", arq, " maior do que 1.005 para a subbacia ", soma[valor > 1.005, nome])
+    }
+
+    if (any(dat[, sum(valor), by = "nome"]$V1 < 0.995)){
+        soma <- dat[, .(valor = sum(valor)), by = nome]
+        stop("Somatorio dos Kes no arquivo ", arq, " maior do que 1.005 para a subbacia ", soma[valor < 0.995, nome])
     }
 
     dat[, nome := tolower(nome)]

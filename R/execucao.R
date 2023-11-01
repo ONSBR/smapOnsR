@@ -46,7 +46,7 @@ executa_caso_oficial <- function(pasta_entrada){
         entrada$postos_plu, entrada$datas_rodadas, length(unique(entrada$previsao_precipitacao[, cenario])), entrada$caso$nome_subbacia)
 
     if (length(unique(entrada$previsao_precipitacao[, cenario])) == 1) {
-        executa_visualizador_previsao(saida$previsoes, saida$assimilacao, saida$precipitacao, 
+        executa_visualizador_previsao(saida$previsao, saida$assimilacao, saida$precipitacao, 
         saida$funcao_objetivo, entrada$vazao)
     }
 
@@ -159,7 +159,7 @@ executa_caso_etp <- function(pasta_entrada){
     saida
 }
 
-####RODADA ENCADEADA NOVO FORMATO
+#####RODADA ENCADEADA NOVO FORMATO
 #entrada <- le_arq_entrada_novo(pasta_entrada)
 #
 #set.seed(129852)
@@ -231,11 +231,11 @@ executa_caso_etp <- function(pasta_entrada){
 #            vazao_observada, postos_plu, datas_rodadas, numero_cenarios, sub_bacias)
 #})
 #parallel::stopCluster(cl)
-#previsao <- data.table::rbindlist(lapply(saida, "[[", "previsao"))
-#otimizacao <- data.table::rbindlist(lapply(saida, "[[", "otimizacao"))
-#assimilacao <- data.table::rbindlist(lapply(saida, "[[", "assimilacao"))
-#precipitacao <- data.table::rbindlist(lapply(saida, "[[", "precipitacao"))
-#funcao_objetivo <- data.table::rbindlist(lapply(saida, "[[", "funcao_objetivo"))
+#previsao <- data.table::rbindlist(lapply(results, "[[", "previsao"))
+#otimizacao <- data.table::rbindlist(lapply(results, "[[", "otimizacao"))
+#assimilacao <- data.table::rbindlist(lapply(results, "[[", "assimilacao"))
+#precipitacao <- data.table::rbindlist(lapply(results, "[[", "precipitacao"))
+#funcao_objetivo <- data.table::rbindlist(lapply(results, "[[", "funcao_objetivo"))
 #
 #saida <- list(previsao = previsao, otimizacao = otimizacao, assimilacao = assimilacao, precipitacao = precipitacao,
 #    funcao_objetivo = funcao_objetivo)
@@ -260,10 +260,11 @@ executa_caso_etp <- function(pasta_entrada){
 #evapotranspiracao_prevista <- entrada$evapotranspiracao_prevista
 #vazao_observada <- entrada$vazao_observada
 #postos_plu <- entrada$postos_plu
-#datas_rodadas <- entrada$datas_rodadas[1]
+#datas_rodadas <- entrada$datas_rodadas
 #nome_cenario <- unique(precipitacao_prevista[, cenario])
 #numero_cenarios <- length(nome_cenario)
 #sub_bacias <- entrada$sub_bacias$nome
+#vetor_modelo_assimilado <- 0
 ## Create a cluster object with the desired number of cores/workers
 #
 #cores <- parallel::detectCores()
@@ -278,19 +279,21 @@ executa_caso_etp <- function(pasta_entrada){
 #                    "postos_plu", "datas_rodadas", "numero_cenarios", 
 #                    "new_modelo_smap_ons", "combina_observacao_previsao", "assimilacao_evapotranspiracao",
 #              "ponderacao_temporal", "funcao_objetivo_assimilacao_evapotranspiracao",
-#              "transforma_NC_serie", "inicializacao_smap", 
+#              "transforma_NC_serie", "inicializacao_smap", "vetor_modelo_assimilado",
 #              "calcula_dm", "calcula_nse", "calcula_mape", "rodada_encadeada_etp",
 #                    "process_sub_bacia"))
 #
 ## Use parLapply to process each sub_bacia in parallel
 #results <- parallel::parLapply(cl, sub_bacias, process_sub_bacia)
 #
-## Stop the cluster
-#parallel::stopCluster(cl)
-#
 ## Merge the results, assuming each result is a list with the same structure
-#saida <- do.call(rbind, lapply(results, "[[", "saida"))
-#saida_ajuste_otimizacao <- do.call(rbind, lapply(results, "[[", "ajuste_otimizacao"))
-#saida_ajuste_assimilacao <- do.call(rbind, lapply(results, "[[", "ajuste_assimilacao"))
-#saida_precipitacao <- do.call(rbind, lapply(results, "[[", "precipitacao"))
+#parallel::stopCluster(cl)
+#previsao <- data.table::rbindlist(lapply(results, "[[", "previsao"))
+#otimizacao <- data.table::rbindlist(lapply(results, "[[", "otimizacao"))
+#assimilacao <- data.table::rbindlist(lapply(results, "[[", "assimilacao"))
+#precipitacao <- data.table::rbindlist(lapply(results, "[[", "precipitacao"))
+#funcao_objetivo <- data.table::rbindlist(lapply(results, "[[", "funcao_objetivo"))
 #
+#saida <- list(previsao = previsao, otimizacao = otimizacao, assimilacao = assimilacao, precipitacao = precipitacao,
+#    funcao_objetivo = funcao_objetivo)
+    
