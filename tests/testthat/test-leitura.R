@@ -215,8 +215,6 @@ test_that("testa vazoes.csv", {
 
     arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN07", "CT7.9", "Arq_Entrada", "vazoes.csv", package = "smapOnsR")
     expect_error(le_historico_verificado(arq))
-
-    unlink(system.file("extdata", "validacao_arq_entrada_novo", package = "smapOnsR"), recursive = TRUE)
 })
 
 
