@@ -120,7 +120,7 @@ assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, preci
 
 funcao_objetivo_assimilacao_oficial <- function(vetor_variaveis, vetor_modelo, TuInic,
       precipitacao_ponderada, evapotranspiracao, evapotranspiracao_planicie, vazao, area,
-      numero_dias_assimilacao, pesos_funcao_objetivo = rep((1 / numero_dias_assimilacao))){
+      numero_dias_assimilacao, pesos_funcao_objetivo = rep((1 / numero_dias_assimilacao), numero_dias_assimilacao)){
 
   EbInic <- vetor_variaveis[numero_dias_assimilacao + 1]
   Supin <- vetor_variaveis[numero_dias_assimilacao + 2]
@@ -266,7 +266,7 @@ assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Su
 
 funcao_objetivo_assimilacao_evapotranspiracao <- function(vetor_variaveis, vetor_modelo, TuInic,
       precipitacao_ponderada, evapotranspiracao, evapotranspiracao_planicie, vazao, area,
-      numero_dias_assimilacao, pesos_funcao_objetivo = rep((1 / numero_dias_assimilacao))){
+      numero_dias_assimilacao, pesos_funcao_objetivo = rep((1 / numero_dias_assimilacao), numero_dias_assimilacao)){
 
   EbInic <- vetor_variaveis[numero_dias_assimilacao * 2 + 1]
   Supin <- vetor_variaveis[numero_dias_assimilacao * 2 + 2]

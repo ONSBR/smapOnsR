@@ -107,7 +107,10 @@ executa_visualizador_calibracao <- function(){
                         ),
                         shiny::hr(),
                         shiny::fluidRow(
-                            shiny::dateRangeInput(inputId = "periodo_calibracao", label = "Periodo de calibracao", start = NULL, end = NULL, min = NULL, max = NULL)
+                            shiny::dateRangeInput(inputId = "periodo_simulacao", label = "Periodo de simulacao", start = NULL, end = NULL, min = NULL, max = NULL),
+                            shiny::dateRangeInput(inputId = "periodo_calibracao", label = "Periodo de calibracao", start = NULL, end = NULL, min = NULL, max = NULL),
+                            shiny::numericInput(inputId = "numero_periodo_desconsiderado", label = "Periodos desconsiderados", value = 0),
+                            shiny::uiOutput("periodos_desconsiderados")
                         ),
                     ),
 
@@ -207,9 +210,32 @@ executa_visualizador_calibracao <- function(){
                 precipitacao <- precipitacao_posto()
                 data_minimo <- (min(precipitacao$data) + kt_min)
                 data_maximo <- (max(precipitacao$data) - kt_max)
+                shiny::updateDateRangeInput(session, "periodo_simulacao", start = data_minimo, end = data_maximo, min = data_minimo, max = data_maximo)
                 shiny::updateDateRangeInput(session, "periodo_calibracao", start = data_minimo, end = data_maximo, min = data_minimo, max = data_maximo)
                 shiny::updateDateRangeInput(session, "zoom_calibracao", start = data_minimo, end = data_maximo, min = data_minimo, max = data_maximo)
             }
+        })
+
+        shiny::observe({
+            if (input$numero_periodo_desconsiderado >= 1) {
+                input_periodos_desconsiderados <- lapply(1:input$numero_periodo_desconsiderado, function(i) {
+                dateRangeInput(
+                    inputId = paste0("periodo_desconsiderado_", i),
+                    label = paste("Periodo desconsiderado ", i),
+                    start = NULL, end = NULL
+                )
+                })
+                output$periodos_desconsiderados <- shiny::renderUI(input_periodos_desconsiderados)
+            } else {
+                output$periodos_desconsiderados <- NULL
+            }
+        })
+
+        shiny::observeEvent(input$periodo_simulacao, {
+            data_minimo <- input$periodo_simulacao[1]
+            data_maximo <- input$periodo_simulacao[2]
+            shiny::updateDateRangeInput(session, "periodo_calibracao", start = data_minimo, end = data_maximo, min = data_minimo, max = data_maximo)
+            shiny::updateDateRangeInput(session, "zoom_calibracao", start = data_minimo, end = data_maximo, min = data_minimo, max = data_maximo)
         })
 
         shiny::observeEvent(input$kt_min, {
@@ -221,7 +247,7 @@ executa_visualizador_calibracao <- function(){
                 kt_max <- input$kt_max
                 data_minimo <- (min(precipitacao$data) + kt_min)
                 data_maximo <- (max(precipitacao$data) - kt_max)
-                shiny::updateDateRangeInput(session, "periodo_calibracao", start = data_minimo, end = data_maximo, min = data_minimo, max = data_maximo)
+                shiny::updateDateRangeInput(session, "periodo_simulacao", start = data_minimo, end = data_maximo, min = data_minimo, max = data_maximo)
                 shiny::updateDateRangeInput(session, "zoom_calibracao", start = data_minimo, end = data_maximo, min = data_minimo, max = data_maximo)
             }
         })
@@ -235,7 +261,7 @@ executa_visualizador_calibracao <- function(){
                 kt_max <- input$kt_max
                 data_minimo <- (min(precipitacao$data) + kt_min)
                 data_maximo <- (max(precipitacao$data) - kt_max)
-                shiny::updateDateRangeInput(session, "periodo_calibracao", start = data_minimo, end = data_maximo, min = data_minimo, max = data_maximo)
+                shiny::updateDateRangeInput(session, "periodo_simulacao", start = data_minimo, end = data_maximo, min = data_minimo, max = data_maximo)
                 shiny::updateDateRangeInput(session, "zoom_calibracao", start = data_minimo, end = data_maximo, min = data_minimo, max = data_maximo)
             }
         })
@@ -502,10 +528,15 @@ executa_visualizador_calibracao <- function(){
                 Supin <- input$Supin
                 area <- area()
                 postos_plu <- postos_plu()
+                data_inicio_simulacao <- input$periodo_simulacao[1]
+                data_fim_simulacao <- input$periodo_simulacao[2]
+                data_inicio_simulacao <- data_inicio_simulacao - kt_min
+                data_fim_simulacao <- data_fim_simulacao + kt_max
+
+                precipitacao <- precipitacao[data >= data_inicio_simulacao & data <= data_fim_simulacao]
+                evapotranspiracao <- evapotranspiracao[data >= data_inicio_simulacao + kt_min & data <= data_fim_simulacao - kt_max]
                 
                 kt <- cria_kt(kt_max, kt_min, vetor_modelo[15], vetor_modelo[16])
-                
-                numero_dias <- nrow(evapotranspiracao)
                 
                 inicializacao <- inicializacao_smap(vetor_modelo, area, Ebin, Tuin, Supin)
                 
@@ -522,8 +553,8 @@ executa_visualizador_calibracao <- function(){
                 precipitacao_ponderada <- precipitacao_ponderada$valor * vetor_modelo[12]
                 precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada, kt, kt_max, kt_min)
                 
-                data_inicio_simulacao <- (min(precipitacao$data) + kt_min)
-                data_fim_simulacao <- (max(precipitacao$data) - kt_max)
+                data_inicio_simulacao <- data_inicio_simulacao + kt_min
+                data_fim_simulacao <- data_fim_simulacao - kt_max
                 evapotranspiracao_ponderada <- data.table::data.table(evapotranspiracao[which((evapotranspiracao$data >= data_inicio_simulacao)
                                             & (evapotranspiracao$data <= data_fim_simulacao))])
                 evapotranspiracao_ponderada <- evapotranspiracao_ponderada$valor * vetor_modelo[13]
@@ -559,9 +590,12 @@ executa_visualizador_calibracao <- function(){
             if (!is.null(saida())) {
                 variaveis_grafico <- c("Qcalc", "Qbase", input$variaveis)
                 vazao <- vazao_posto()
-                evapotranspiracao <- evapotranspiracao_posto()
                 precipitacao <- precipitacao_posto()
                 postos_plu <- postos_plu()
+                data_inicio_simulacao <- input$periodo_simulacao[1]
+                data_fim_simulacao <- input$periodo_simulacao[2]
+
+                precipitacao <- precipitacao[data >= data_inicio_simulacao & data <= data_fim_simulacao]
 
                 precipitacao <- ponderacao_espacial(precipitacao, postos_plu[postos_plu$nome == input$sub_bacia])
                 saida <- saida()
@@ -572,14 +606,14 @@ executa_visualizador_calibracao <- function(){
                     simulacao <- cbind(simulacao, xts::xts(saida$valor[which(saida$variavel == variaveis)], order.by = saida$data[which(saida$variavel == variaveis)]))
                 }
                 colnames(simulacao) <- variaveis_grafico
-                observacao <- xts::xts(x = vazao$valor, order.by =  vazao$data)
+                observacao <- xts::xts(x = vazao$valor[which((vazao$data >= data_inicio_simulacao) & (vazao$data <= data_fim_simulacao))], order.by =  vazao$data[which((vazao$data >= data_inicio_simulacao) & (vazao$data <= data_fim_simulacao))])
                 colnames(observacao) <- "vazao observada"
 
                 prec_aux <- xts::xts(x = precipitacao$valor, order.by =  precipitacao$data)
                 colnames(prec_aux) <- "Precipitacao"
 
                 dygraphs::dygraph(cbind(simulacao, observacao, prec_aux),
-                                main = input$sub_bacia, ) %>%
+                                main = input$sub_bacia) %>%
                 dygraphs::dyHighlight(highlightCircleSize = 5,
                                     highlightSeriesBackgroundAlpha = 0.2,
                                     hideOnMouseOut = FALSE,
@@ -602,6 +636,11 @@ executa_visualizador_calibracao <- function(){
                 evapotranspiracao <- evapotranspiracao_posto()
                 precipitacao <- precipitacao_posto()
                 postos_plu <- postos_plu()
+                data_inicio_simulacao <- input$periodo_simulacao[1]
+                data_fim_simulacao <- input$periodo_simulacao[2]
+
+                precipitacao <- precipitacao[data >= data_inicio_simulacao & data <= data_fim_simulacao]
+                evapotranspiracao <- evapotranspiracao[data >= data_inicio_simulacao & data <= data_fim_simulacao]
 
                 precipitacao <- ponderacao_espacial(precipitacao, postos_plu[postos_plu$nome == input$sub_bacia])
                 saida <- saida()
@@ -658,8 +697,6 @@ executa_visualizador_calibracao <- function(){
                 vetor_modelo[16] <- input$beta
                 data_inicio_objetivo <- input$periodo_calibracao[1]
                 data_fim_objetivo <- input$periodo_calibracao[2]
-                kt_max <- input$kt_max
-                kt_min <- input$kt_min
                 Ebin <- input$Ebin
                 Tuin <- input$Tuin
                 Supin <- input$Supin
@@ -668,6 +705,16 @@ executa_visualizador_calibracao <- function(){
                 evapotranspiracao <- evapotranspiracao_posto()
                 precipitacao <- precipitacao_posto()
                 postos_plu <- postos_plu()
+                kt_max <- input$kt_max
+                kt_min <- input$kt_min
+                data_inicio_simulacao <- input$periodo_simulacao[1]
+                data_fim_simulacao <- input$periodo_simulacao[2]
+                data_inicio_simulacao <- data_inicio_simulacao - kt_min
+                data_fim_simulacao <- data_fim_simulacao + kt_max
+                
+                precipitacao <- precipitacao[data >= data_inicio_simulacao & data <= data_fim_simulacao]
+
+                evapotranspiracao_fo <- data.table::data.table(evapotranspiracao[data >= data_inicio_simulacao + kt_min & data <= data_fim_simulacao - kt_max])
 
                 numero_postos_plu <- nrow(postos_plu[postos_plu$nome == input$sub_bacia])
                 if (numero_postos_plu > 1) {
@@ -679,21 +726,20 @@ executa_visualizador_calibracao <- function(){
 
                 vetor_modelo[17:(16 + numero_postos_plu)] <- postos_plu$valor[postos_plu$nome == input$sub_bacia]
 
-                kt <- cria_kt(kt_max, kt_min, vetor_modelo[15], vetor_modelo[16])
-                
-                numero_dias <- nrow(evapotranspiracao)
-                
-                inicializacao <- inicializacao_smap(vetor_modelo, area, Ebin, Tuin, Supin)
-                
-                evapotranspiracao_fo <- data.table::data.table(evapotranspiracao[which((evapotranspiracao$data >= (min(precipitacao$data) + kt_min))
-                                            & (evapotranspiracao$data <= (max(precipitacao$data) - kt_max)))])
-                
                 vazao_fo <- vazao[which((vazao$data >= data_inicio_objetivo) & (vazao$data <= data_fim_objetivo))]
 
-                vetor_inicializacao <- unlist(inicializacao)
+                vazao_fo[, peso := 1 / .N]
+
+                if (input$numero_periodo_desconsiderado >= 1) {
+                    for (iperiodo in 1:input$numero_periodo_desconsiderado){
+                        vazao_fo[data >= input[[paste0("periodo_desconsiderado_", iperiodo)]][1] & data <= input[[paste0("periodo_desconsiderado_", iperiodo)]][2], peso := 0]
+                    }
+                    vazao_fo[peso != 0, peso := 1 / .N]
+                }
+                
                 funcao_objetivo <- funcao_objetivo_calibracao(vetor_modelo, kt_min, kt_max, area, Ebin, Tuin, Supin, precipitacao,
                                                                     evapotranspiracao_fo, vazao_fo, data_inicio_objetivo, data_fim_objetivo,
-                                                                    postos_plu[postos_plu$nome == input$sub_bacia])
+                                                                    postos_plu[postos_plu$nome == input$sub_bacia], vazao_fo[, peso])
                 paste0("funcao objetivo = ", funcao_objetivo)
             }
         })
@@ -762,6 +808,10 @@ executa_visualizador_calibracao <- function(){
             data_fim_objetivo <- input$periodo_calibracao[2]
             kt_max <- input$kt_max
             kt_min <- input$kt_min
+            data_inicio_simulacao <- input$periodo_simulacao[1]
+            data_fim_simulacao <- input$periodo_simulacao[2]
+            data_inicio_simulacao <- data_inicio_simulacao - kt_min
+            data_fim_simulacao <- data_fim_simulacao + kt_max
 
             vazao <- vazao_posto()
             evapotranspiracao <- evapotranspiracao_posto()
@@ -776,11 +826,21 @@ executa_visualizador_calibracao <- function(){
                     limite_inferior[(16 + iposto)] <- input[[paste0("limite_inferior_posto_plu_", iposto)]]
                 }
             }
+            
+            precipitacao <- precipitacao[data >= data_inicio_simulacao & data <= data_fim_simulacao]
 
-            evapotranspiracao_fo <- data.table::data.table(evapotranspiracao[which((evapotranspiracao$data >= (min(precipitacao$data) + kt_min))
-                                         & (evapotranspiracao$data <= (max(precipitacao$data) - kt_max)))])
+            evapotranspiracao_fo <- data.table::data.table(evapotranspiracao[data >= data_inicio_simulacao + kt_min & data <= data_fim_simulacao - kt_max])
 
             vazao_fo <- vazao[which((vazao$data >= data_inicio_objetivo) & (vazao$data <= data_fim_objetivo))]
+            
+            vazao_fo[, peso := 1 / .N]
+
+            if (input$numero_periodo_desconsiderado >= 1) {
+                for (iperiodo in 1:input$numero_periodo_desconsiderado){
+                    vazao_fo[data >= input[[paste0("periodo_desconsiderado_", iperiodo)]][1] & data <= input[[paste0("periodo_desconsiderado_", iperiodo)]][2], peso := 0]
+                }
+                vazao_fo[peso != 0, peso := 1 / .N]
+            }
 
             # Disable the run button
             shiny::updateActionButton(session, "botao_calibracao", label = "Calibrando...aguarde")
@@ -791,7 +851,8 @@ executa_visualizador_calibracao <- function(){
             par <- future::future({
                 calibracao(vetor_modelo, kt_min, kt_max, area, Ebin, Tuin, Supin, precipitacao,
                                     evapotranspiracao_fo, vazao_fo, data_inicio_objetivo, data_fim_objetivo,
-                                    limite_inferior, limite_superior, postos_plu[postos_plu$nome == input$sub_bacia])
+                                    limite_inferior, limite_superior, postos_plu[postos_plu$nome == input$sub_bacia],
+                                    vazao[, peso])
             })
             
             shiny::observe({

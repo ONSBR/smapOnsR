@@ -7,12 +7,13 @@
 #' @param simulacao vetor com os valores da serie simulada
 #' @param observacao vetor com os valores da serie simulada
 #' @param pesos pesos a serem utilizados para cada data
+#' @importFrom stats weighted.mean
 #' @return nse
 #' @export
 
-calcula_nse <- function(simulacao, observacao, pesos = rep(1 /length(observacao), length(observacao))){
+calcula_nse <- function(simulacao, observacao, pesos = rep(1 / length(observacao), length(observacao))){
     erro_previsao <- sum((observacao - simulacao) ^ 2 * pesos)
-    erro_media <- sum((observacao - mean(observacao)) ^ 2 * pesos)
+    erro_media <- sum((observacao - stats::weighted.mean(observacao, pesos)) ^ 2 * pesos)
     nse <- 1 - erro_previsao / erro_media
     nse
 }

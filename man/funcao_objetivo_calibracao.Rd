@@ -17,7 +17,8 @@ funcao_objetivo_calibracao(
   vazao,
   data_inicio_objetivo,
   data_fim_objetivo,
-  postos_plu
+  postos_plu,
+  pesos = rep(1/length(vazao[, valor]), length(vazao[, valor]))
 )
 }
 \arguments{
@@ -69,6 +70,8 @@ funcao_objetivo_calibracao(
 \item{posto}{nome do posto plu}
 \item{valor}{peso do posto plu}
 }}
+
+\item{pesos}{vetor de pesos a serem utilizados para cada data durante a calibracao}
 }
 \value{
 objetivo valor da funcao objetivo

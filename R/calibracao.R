@@ -36,6 +36,7 @@
 #'     \item{posto}{nome do posto plu}
 #'     \item{valor}{peso do posto plu}
 #'     }
+#' @param pesos vetor de pesos a serem utilizados para cada data durante a calibracao
 #' @param data_inicio_objetivo data inicial da avaliacao da funcao objetivo
 #' @param data_fim_objetivo data final da avaliacao da funcao objetivo
 #' @importFrom data.table data.table
@@ -45,7 +46,7 @@
 
 funcao_objetivo_calibracao <- function(vetor_modelo, kt_min, kt_max, area, EbInic, TuInic, Supin, 
       precipitacao, evapotranspiracao, vazao, data_inicio_objetivo, data_fim_objetivo,
-      postos_plu){
+      postos_plu, pesos = rep(1 / length(vazao[, valor]), length(vazao[, valor]))){
 
   kt <- cria_kt(kt_max, kt_min, vetor_modelo[15], vetor_modelo[16])
 
@@ -78,7 +79,7 @@ funcao_objetivo_calibracao <- function(vetor_modelo, kt_min, kt_max, area, EbIni
   dat[, data := evapotranspiracao_ponderada[, data]]
 
   objetivo <- calcula_dm(dat[data >= data_inicio_objetivo & data <= data_fim_objetivo, Qcalc],
-                         vazao[, valor])
+                         vazao[, valor], pesos)
   objetivo
 }
 
@@ -148,15 +149,16 @@ cria_kt <- function(kt_max, kt_min, alfa, beta){
 #'     \item{posto}{nome do posto plu}
 #'     \item{valor}{peso do posto plu}
 #'     }
+#' @param pesos vetor de pesos a serem utilizados para cada data durante a calibracao
 #' @importFrom data.table data.table
 #' @return objetivo valor da funcao objetivo
 #' @export
 #'
 calibracao <- function(vetor_modelo, kt_min, kt_max, area, EbInic, TuInic, Supin, precipitacao,
       evapotranspiracao, vazao, data_inicio_objetivo, data_fim_objetivo,
-      limite_inferior, limite_superior, postos_plu){
+      limite_inferior, limite_superior, postos_plu, pesos = rep(1 / length(vazao[, valor]), length(vazao[, valor]))){
 
-  if(length(unique(limite_inferior == limite_superior)) == 2){
+  if (length(unique(limite_inferior == limite_superior)) == 2) {
     limite_superior[limite_inferior == limite_superior] <- limite_superior[limite_inferior == limite_superior] + 0.000001
   }
 
@@ -173,6 +175,7 @@ calibracao <- function(vetor_modelo, kt_min, kt_max, area, EbInic, TuInic, Supin
               data_inicio_objetivo = data_inicio_objetivo,
               data_fim_objetivo = data_fim_objetivo,
               postos_plu = postos_plu,
+              pesos = pesos,
               control = list(fnscale = 1))
   
   numero_postos_plu <- nrow(postos_plu)

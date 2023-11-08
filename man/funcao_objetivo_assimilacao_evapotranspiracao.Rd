@@ -14,7 +14,7 @@ funcao_objetivo_assimilacao_evapotranspiracao(
   vazao,
   area,
   numero_dias_assimilacao,
-  pesos_funcao_objetivo = rep((1/numero_dias_assimilacao))
+  pesos_funcao_objetivo = rep((1/numero_dias_assimilacao), numero_dias_assimilacao)
 )
 }
 \arguments{
