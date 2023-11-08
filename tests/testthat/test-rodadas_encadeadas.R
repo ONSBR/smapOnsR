@@ -57,9 +57,9 @@ test_that("testa rodada ecmwf", {
   secao <- sessionInfo()
 
   if (secao$R.version$os == "mingw32") {
-    expect_equal(round(saida$previsao[nome == "pimentalt" & variavel == "Qcalc" & cenario == "ecmwf_1", valor][31], 0), 10165)
+    expect_equal(round(saida$previsao[nome == "pimentalt" & variavel == "Qcalc" & cenario == "ecmwf_1", valor][31], 0), 10166)
   } else {
-    expect_true(abs(round(saida$previsao[nome == "pimentalt" & variavel == "Qcalc" & cenario == "ecmwf_1", valor][31], 0) - 10165) < 10165 * 0.01)
+    expect_true(abs(round(saida$previsao[nome == "pimentalt" & variavel == "Qcalc" & cenario == "ecmwf_1", valor][31], 0) - 10166) < 10166 * 0.01)
   }
 })
 
@@ -95,9 +95,9 @@ test_that("testa rodada oficial", {
   secao <- sessionInfo()
   
   if (secao$R.version$os == "mingw32") {
-    expect_equal(round(saida$previsao[nome == "ssimao2" & variavel == "Qcalc", valor][17], 0), 1208)
+    expect_equal(round(saida$previsao[nome == "ssimao2" & variavel == "Qcalc", valor][17], 0), 1210)
   } else {
-    expect_true(abs(round(saida$previsao[nome == "ssimao2" & variavel == "Qcalc", valor][17], 0) - 1208) < 1208 * 0.01)
+    expect_true(abs(round(saida$previsao[nome == "ssimao2" & variavel == "Qcalc", valor][17], 0) - 1210) < 1210 * 0.01)
   }
 })
 

@@ -109,7 +109,7 @@ executa_visualizador_calibracao <- function(){
                         shiny::fluidRow(
                             shiny::dateRangeInput(inputId = "periodo_simulacao", label = "Periodo de simulacao", start = NULL, end = NULL, min = NULL, max = NULL),
                             shiny::dateRangeInput(inputId = "periodo_calibracao", label = "Periodo de calibracao", start = NULL, end = NULL, min = NULL, max = NULL),
-                            shiny::numericInput(inputId = "numero_periodo_desconsiderado", label = "Periodos desconsiderados", value = 0),
+                            shiny::numericInput(inputId = "numero_periodo_desconsiderado", label = "Periodos desconsiderados", value = 0, min = 0),
                             shiny::uiOutput("periodos_desconsiderados")
                         ),
                     ),
@@ -678,53 +678,9 @@ executa_visualizador_calibracao <- function(){
 
         output$funcao_objetivo <- shiny::renderText({
             if (!is.null(input[[paste0("posto_plu_1")]])) {
-                vetor_modelo <- vetor_modelo()
-                vetor_modelo[1] <- input$str
-                vetor_modelo[2] <- input$k2t
-                vetor_modelo[3] <- input$crec
-                vetor_modelo[4] <- input$capc
-                vetor_modelo[5] <- input$k_kt
-                vetor_modelo[6] <- input$h1
-                vetor_modelo[7] <- input$k2t2
-                vetor_modelo[8] <- input$ai
-                vetor_modelo[9] <- input$h
-                vetor_modelo[10] <- input$k1t
-                vetor_modelo[11] <- input$k3t
-                vetor_modelo[12] <- input$pcof
-                vetor_modelo[13] <- input$ecof
-                vetor_modelo[14] <- input$ecof2
-                vetor_modelo[15] <- input$alfa
-                vetor_modelo[16] <- input$beta
                 data_inicio_objetivo <- input$periodo_calibracao[1]
                 data_fim_objetivo <- input$periodo_calibracao[2]
-                Ebin <- input$Ebin
-                Tuin <- input$Tuin
-                Supin <- input$Supin
-                area <- area()
                 vazao <- vazao_posto()
-                evapotranspiracao <- evapotranspiracao_posto()
-                precipitacao <- precipitacao_posto()
-                postos_plu <- postos_plu()
-                kt_max <- input$kt_max
-                kt_min <- input$kt_min
-                data_inicio_simulacao <- input$periodo_simulacao[1]
-                data_fim_simulacao <- input$periodo_simulacao[2]
-                data_inicio_simulacao <- data_inicio_simulacao - kt_min
-                data_fim_simulacao <- data_fim_simulacao + kt_max
-                
-                precipitacao <- precipitacao[data >= data_inicio_simulacao & data <= data_fim_simulacao]
-
-                evapotranspiracao_fo <- data.table::data.table(evapotranspiracao[data >= data_inicio_simulacao + kt_min & data <= data_fim_simulacao - kt_max])
-
-                numero_postos_plu <- nrow(postos_plu[postos_plu$nome == input$sub_bacia])
-                if (numero_postos_plu > 1) {
-                    for (iposto in 1: numero_postos_plu){
-                        vetor_modelo[16 + iposto] <- input[[paste0("posto_plu_", iposto)]]
-                        postos_plu[postos_plu$nome == input$sub_bacia]$valor[iposto] <- input[[paste0("posto_plu_", iposto)]]
-                    }
-                }
-
-                vetor_modelo[17:(16 + numero_postos_plu)] <- postos_plu$valor[postos_plu$nome == input$sub_bacia]
 
                 vazao_fo <- vazao[which((vazao$data >= data_inicio_objetivo) & (vazao$data <= data_fim_objetivo))]
 
@@ -736,10 +692,8 @@ executa_visualizador_calibracao <- function(){
                     }
                     vazao_fo[peso != 0, peso := 1 / .N]
                 }
-                
-                funcao_objetivo <- funcao_objetivo_calibracao(vetor_modelo, kt_min, kt_max, area, Ebin, Tuin, Supin, precipitacao,
-                                                                    evapotranspiracao_fo, vazao_fo, data_inicio_objetivo, data_fim_objetivo,
-                                                                    postos_plu[postos_plu$nome == input$sub_bacia], vazao_fo[, peso])
+
+                funcao_objetivo <- calcula_dm(saida()[data >= data_inicio_objetivo & data <= data_fim_objetivo, Qcalc], vazao_fo[, valor], vazao_fo[, peso])
                 paste0("funcao objetivo = ", funcao_objetivo)
             }
         })
@@ -852,7 +806,7 @@ executa_visualizador_calibracao <- function(){
                 calibracao(vetor_modelo, kt_min, kt_max, area, Ebin, Tuin, Supin, precipitacao,
                                     evapotranspiracao_fo, vazao_fo, data_inicio_objetivo, data_fim_objetivo,
                                     limite_inferior, limite_superior, postos_plu[postos_plu$nome == input$sub_bacia],
-                                    vazao[, peso])
+                                    vazao_fo[, peso])
             })
             
             shiny::observe({
