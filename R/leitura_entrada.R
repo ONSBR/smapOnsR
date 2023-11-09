@@ -484,17 +484,14 @@ le_entrada_modelos_precipitacao <- function(pasta_entrada) {
     
     duplicados <- dat[duplicated(V1) | duplicated(V1, fromLast = TRUE), V1]
 
-    if (length(duplicados) > 0) stop(paste0("A sub-bacia ", unique(duplicados), " esta duplicada no arquivo modelos_precipitacao.dat"))
+    if (length(duplicados) > 0) stop(paste0("O cenario ", unique(duplicados), " esta duplicado no arquivo modelos_precipitacao.dat"))
 
+    nome_cenario <- dat[2:nrow(dat)]
+    nome_cenario[, nome_cenario_1 := unlist(strsplit(V1, split = "_"))[1], by = V1]
+    nome_cenario[, nome_cenario_2 := unlist(strsplit(V1, split = "_"))[2], by = V1]
+    nome_cenario[is.na(nome_cenario_2), nome_cenario_2 := ""]
+    data.table::setnames(nome_cenario, "V1", "nome_cenario_completo")
 
-    nome_cenario <- ""
-    for (icenario in 2:nrow(dat)){
-        nome_cenario[icenario - 1] <- tolower(as.character(dat[icenario]))
-    }
-
-    nome_cenario_1 <- unlist(strsplit(nome_cenario, split = "_"))[2 * (1:numero_cenarios) - 1]
-    nome_cenario_2 <- unlist(strsplit(nome_cenario, split = "_"))[2 * (1:numero_cenarios)]
-    nome_cenario <- data.table::data.table(nome_cenario_1 = nome_cenario_1, nome_cenario_2 = nome_cenario_2)
     modelos_precipitacao <- list(numero_cenarios = numero_cenarios, nome_cenario = nome_cenario)
     
     modelos_precipitacao
@@ -543,7 +540,7 @@ le_entrada_pontos_grade <- function(pasta_entrada, nome_subbacia, modelos_precip
         aux <- trimws(aux)
         aux <- strsplit(aux, "\\s+")
         
-        aux_pontos_grade <- data.table::copy(modelos_precipitacao$nome_cenario)
+        aux_pontos_grade <- data.table::copy(modelos_precipitacao$nome_cenario[nome_cenario_1 == cenario])
         aux_pontos_grade[, longitude := as.numeric(aux[[2]][1])]
         aux_pontos_grade[, latitude := as.numeric(aux[[2]][2])]
         aux_pontos_grade[, nome := nome_subbacia]
@@ -836,15 +833,13 @@ le_entrada_previsao_precipitacao_0 <- function(pasta_entrada, datas_rodadas, dat
         colnames(previsao_precipitacao)[3] <- as.character(data_previsao)
         previsao_precipitacao$cenario <- nome_cenario
         previsao_precipitacao[, cenario := tolower(cenario)]
-        
-        nome_1 <- strsplit(nome_cenario, split = "_")[[1]][1]
-        nome_2 <- strsplit(nome_cenario, split = "_")[[1]][2]
 
-        previsao_precipitacao <- merge(previsao_precipitacao, pontos_grade[nome_cenario_1 == nome_1 & nome_cenario_2 == nome_2], by = c("latitude", "longitude"))
-        if(nrow(previsao_precipitacao) != nrow(pontos_grade)) stop(paste0("Numero de pontos de grade declarado anteriormente e diferente no arquivo ", arq))
+        previsao_precipitacao <- merge(previsao_precipitacao, pontos_grade[nome_cenario_completo == nome_cenario], by = c("latitude", "longitude"))
+        if(nrow(previsao_precipitacao) != nrow(pontos_grade[nome_cenario_completo == nome_cenario])) stop(paste0("Numero de pontos de grade declarado anteriormente e diferente no arquivo ", arq))
 
         previsao_precipitacao[, nome_cenario_1 := NULL]
         previsao_precipitacao[, nome_cenario_2 := NULL]
+        previsao_precipitacao[, nome_cenario_completo := NULL]
         previsao_precipitacao[, latitude := NULL]
         previsao_precipitacao[, longitude := NULL]
 
@@ -1001,14 +996,13 @@ le_arq_entrada <- function(pasta_entrada) {
     if (tipo_previsao == 2) {
         previsao_precipitacao <- le_entrada_previsao_precipitacao_2(pasta_entrada, datas_rodadas, pontos_grade)
     } else if (tipo_previsao == 1) {
-        cenarios <- data.table::as.data.table(paste0(unique(pontos_grade$nome_cenario_1),"_",unique(pontos_grade$nome_cenario_2)))
-        previsao_precipitacao <- data.table::rbindlist(lapply(cenarios$V1, function(nome_cenario) {
+        modelos_precipitacao$nome_cenario[, nome_cenario_completo]
+        previsao_precipitacao <- data.table::rbindlist(lapply(modelos_precipitacao$nome_cenario$nome_cenario_completo, function(nome_cenario) {
             le_entrada_previsao_precipitacao_1(pasta_entrada, datas_rodadas, pontos_grade, nome_cenario)
             }))
     } else {
         datas <- data.table::as.data.table(seq.Date(datas_rodadas$data + 1, datas_rodadas$data + datas_rodadas$numero_dias_previsao, 1))
-        cenarios <- data.table::as.data.table(paste0(unique(pontos_grade$nome_cenario_1),"_",unique(pontos_grade$nome_cenario_2)))
-        previsao_precipitacao <- data.table::rbindlist(lapply(cenarios$V1, function(nome_cenario) {
+        previsao_precipitacao <- data.table::rbindlist(lapply(modelos_precipitacao$nome_cenario$nome_cenario_completo, function(nome_cenario) {
             data.table::rbindlist(lapply(datas$V1, function(data_previsao) {
                 le_entrada_previsao_precipitacao_0(pasta_entrada, datas_rodadas, data_previsao, pontos_grade, nome_cenario)
             }))
