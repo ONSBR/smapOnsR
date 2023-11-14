@@ -469,6 +469,7 @@ le_entrada_modelos_precipitacao <- function(pasta_entrada) {
     }
 
     dat <- data.table::fread(arq, header = FALSE)
+    dat[, V1 := tolower(V1)]
     numero_cenarios <- as.numeric(dat[1])
     
     if (is.na(numero_cenarios)) stop("Valor nao numerico de cenarios no arquivo modelos_precipitacao.txt")
@@ -654,14 +655,14 @@ le_entrada_previsao_precipitacao_2 <- function(pasta_entrada, datas_rodadas, pon
     previsao_precipitacao <- data.table::fread(arq, header = FALSE)
     colnames(previsao_precipitacao)[1:3] <- c("cenario", "longitude", "latitude")
     previsao_precipitacao[, cenario := tolower(cenario)]
+    data.table::setnames(previsao_precipitacao, "cenario", "nome_cenario_completo")
     colnames(previsao_precipitacao)[4:ncol(previsao_precipitacao)] <- as.character(seq.Date(datas_rodadas$data + 1, datas_rodadas$data + ncol(previsao_precipitacao) - 3, 1))
-    previsao_precipitacao[, nome_cenario_1 := strsplit(cenario, split = "_")[[1]][1]]
-    previsao_precipitacao[, nome_cenario_2 := strsplit(cenario, split = "_")[[1]][2]]
     
-    previsao_precipitacao <- merge(previsao_precipitacao, pontos_grade, by = c("latitude", "longitude", "nome_cenario_1", "nome_cenario_2"))
+    previsao_precipitacao <- merge(previsao_precipitacao, pontos_grade, by = c("latitude", "longitude", "nome_cenario_completo"))
 
     previsao_precipitacao[, nome_cenario_1 := NULL]
     previsao_precipitacao[, nome_cenario_2 := NULL]
+    data.table::setnames(previsao_precipitacao, "nome_cenario_completo", "cenario")
     previsao_precipitacao[, latitude := NULL]
     previsao_precipitacao[, longitude := NULL]
 
