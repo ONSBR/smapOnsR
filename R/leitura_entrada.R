@@ -735,14 +735,12 @@ le_entrada_previsao_precipitacao_1 <- function(pasta_entrada, datas_rodadas, pon
     colnames(previsao_precipitacao)[3:ncol(previsao_precipitacao)] <- as.character(seq.Date(datas_rodadas$data + 1, datas_rodadas$data + ncol(previsao_precipitacao) - 2, 1))
     previsao_precipitacao$cenario <- nome_cenario
     previsao_precipitacao[, cenario := tolower(cenario)]
-    
-    nome_1 <- strsplit(nome_cenario, split = "_")[[1]][1]
-    nome_2 <- strsplit(nome_cenario, split = "_")[[1]][2]
 
-    previsao_precipitacao <- merge(previsao_precipitacao, pontos_grade[nome_cenario_1 == nome_1 & nome_cenario_2 == nome_2], by = c("latitude", "longitude"))
+    previsao_precipitacao <- merge(previsao_precipitacao, pontos_grade[nome_cenario_completo == nome_cenario], by = c("latitude", "longitude"))
 
     previsao_precipitacao[, nome_cenario_1 := NULL]
     previsao_precipitacao[, nome_cenario_2 := NULL]
+    previsao_precipitacao[, nome_cenario_completo := NULL]
     previsao_precipitacao[, latitude := NULL]
     previsao_precipitacao[, longitude := NULL]
 

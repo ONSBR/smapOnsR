@@ -29,7 +29,6 @@ le_parametros <- function(arq) {
     }
 
     dat[, valor := as.numeric(valor)]
-    dat[, nome := tolower(nome)]
 
     if (any(is.na(dat$valor))) {
         stop("a coluna 'valor' do arquivo ", arq, " possui valores nao numericos")
@@ -115,13 +114,16 @@ le_historico_verificado <- function(arq) {
     }
     dat[, data := as.Date(data, format = "%d/%m/%Y")]
     
+    if (any(duplicated(dat[, data]))) {
+         stop(paste0("a data ", dat[duplicated(data), data], ", esta duplicada no arquivo ", arq, "\n"))
+    }
+
     dat <- data.table::melt(dat, id.vars = "data", variable.name = "posto",
           value.name = "valor")
     colnames(dat)[1] <- "data"
 
     data.table::setorder(dat, posto, data)
     data.table::setcolorder(dat, c("data", "posto", "valor"))
-    dat[, posto := tolower(posto)]
     dat[, valor := as.numeric(valor)]
 
     if (any(is.na(dat$data))) {
@@ -166,8 +168,6 @@ le_precipitacao_prevista <- function(arq) {
     }
 
     dat[, valor := as.numeric(valor)]
-    dat[, nome := tolower(nome)]
-    dat[, cenario := tolower(cenario)]
     dat[, data_previsao := as.Date(data_previsao, format = "%d/%m/%Y")]
     dat[, data_rodada := as.Date(data_rodada, format = "%d/%m/%Y")]
 
@@ -227,7 +227,6 @@ le_inicializacao <- function(arq) {
         stop("o arquivo deve possuir as seguintes colunas 'nome', 'variavel', 'valor'")
     }
     dat[, valor := as.numeric(valor)]
-    dat[, nome := tolower(nome)]
 
     if (any(is.na(dat$valor))) {
         stop("a coluna 'valor' do arquivo ", arq, " possui valores nao numericos")
@@ -429,8 +428,6 @@ le_postos_plu <- function(arq) {
         stop("Somatorio dos Kes no arquivo ", arq, " maior do que 1.005 para a subbacia ", soma[valor < 0.995, nome])
     }
 
-    dat[, nome := tolower(nome)]
-
     dat
 }
 
@@ -497,7 +494,6 @@ le_arq_entrada_novo <- function(pasta_entrada) {
 
     if (any(arquivos[, arquivo] == "SUB_BACIAS")) {
         sub_bacias <- data.table::fread(file.path(pasta_entrada,arquivos[arquivo == "SUB_BACIAS", nome_arquivo]), sep = ";")
-        sub_bacias[, nome := tolower(nome)]
     } else {
         stop("nao existe o arquivo de sub-bacias")
     }
