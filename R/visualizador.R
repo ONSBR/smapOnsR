@@ -299,7 +299,17 @@ executa_visualizador_calibracao <- function(){
                 parametros_posto <- parametros_posto()
                 modelo <- new_modelo_smap_ons(parametros_posto, postos_plu[postos_plu$nome == input$sub_bacia])
                 vetor_modelo <- unlist(modelo)
-                vetor_modelo <- as.numeric(c(vetor_modelo[1:11], vetor_modelo[75:77], 5, 5))
+                if (any(parametros_posto$parametro == "Alfa")){
+                    alfa <- parametros_posto[parametros_posto$parametro == "Alfa"]$valor
+                } else{
+                    alfa <- 5
+                }
+                if (any(parametros_posto$parametro == "Beta")){
+                    beta <- parametros_posto[parametros_posto$parametro == "Beta"]$valor
+                } else{
+                    beta <- 5
+                }
+                vetor_modelo <- as.numeric(c(vetor_modelo[1:11], vetor_modelo[75:77], alfa, beta))
                 return(vetor_modelo)
             }
         })
@@ -308,7 +318,10 @@ executa_visualizador_calibracao <- function(){
             arquivo_vazao <- input$arquivo_vazao$datapath
             if (!is.null(arquivo_vazao)) {
                 historico_vazao <- le_historico_verificado(arquivo_vazao)
-                sub_bacias <- unique(historico_vazao$posto)
+                sub_bacias <- as.vector(unique(historico_vazao$posto))
+                aux <- sub_bacias
+                sub_bacias[1] <- "    "
+                sub_bacias[2:(length(sub_bacias) + 1)] <- aux
                 shiny::updateSelectInput(session, "sub_bacia", choices = sub_bacias)
             }
         })
@@ -861,6 +874,8 @@ executa_visualizador_calibracao <- function(){
             parametros$valor[parametros$parametro == "Area"] <- area()
             parametros$valor[parametros$parametro == "ktMin"] <- input$kt_min
             parametros$valor[parametros$parametro == "ktMax"] <- input$kt_max
+            parametros <- data.table::rbindlist(list(parametros, data.table::data.table(nome = parametros[, unique(nome)], parametro = "Alfa", valor = input$alfa)))
+            parametros <- data.table::rbindlist(list(parametros, data.table::data.table(nome = parametros[, unique(nome)], parametro = "Beta", valor = input$beta)))
 
             kt <- cria_kt(input$kt_max, input$kt_min, input$alfa, input$beta)
             parametros$valor[parametros$parametro %in% paste0("Kt", 2:-60)] <- kt
@@ -885,7 +900,7 @@ executa_visualizador_calibracao <- function(){
                 paste0("parametros_", input$sub_bacia, ".csv")
             },
             content = function(file) {
-                utils::write.csv(parametros_exportacao(), file, quote = FALSE, row.names = FALSE, sep = ";")
+                utils::write.table(parametros_exportacao(), file, quote = FALSE, row.names = FALSE, sep = ";")
             }
         )
 
@@ -894,7 +909,7 @@ executa_visualizador_calibracao <- function(){
                 paste0("postos_plu_", input$sub_bacia, ".csv")
             },
             content = function(file) {
-                utils::write.csv(postos_plu_exportacao(), file, quote = FALSE, row.names = FALSE, sep = ";")
+                utils::write.table(postos_plu_exportacao(), file, quote = FALSE, row.names = FALSE, sep = ";")
             }
         )
     }
