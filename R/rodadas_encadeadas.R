@@ -114,8 +114,9 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
 
         modelo <- new_modelo_smap_ons(parametros[nome == sub_bacia], postos_plu[nome %in% sub_bacia])
         kt <- modelo$kt
-        kt_max <- parametros[nome == sub_bacia & parametro == "ktMax", valor]
-        kt_min <- parametros[nome == sub_bacia & parametro == "ktMin", valor]
+        kt_max <- sum(modelo$kt[1:2] > 0)
+        kt_min <- sum(modelo$kt[4:63] > 0)
+    
         vetor_modelo <- unlist(modelo)
         area <- attributes(modelo)$area
 
@@ -130,7 +131,7 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
 
             vazao <- vazao_observada[data < dataRodada & data >= (dataRodada - numero_dias_assimilacao) 
                           & posto == sub_bacia, valor]
-                          
+
             normal_climatologica <- evapotranspiracao_nc[nome == sub_bacia]
 
             precipitacao <- data.table::data.table(precipitacao_observada[nome == sub_bacia &
@@ -361,8 +362,8 @@ rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observa
 
         modelo <- new_modelo_smap_ons(parametros[nome == sub_bacia], postos_plu[nome %in% sub_bacia])
         kt <- modelo$kt
-        kt_max <- parametros[nome == sub_bacia & parametro == "ktMax", valor]
-        kt_min <- parametros[nome == sub_bacia & parametro == "ktMin", valor]
+        kt_max <- sum(modelo$kt[1:2] > 0)
+        kt_min <- sum(modelo$kt[4:63] > 0)
         vetor_modelo <- unlist(modelo)
         area <- attributes(modelo)$area
 
