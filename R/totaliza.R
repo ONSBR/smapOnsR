@@ -5,24 +5,24 @@
 #' 
 #' @param previsao data.table previsao contendo as seguintes colunas:
 #'     \itemize{
-#'     \item{data_caso}{data da rodada}
-#'     \item{data_previsao}{data da previsao}
-#'     \item{cenario}{nome do cenario}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{variavel}{nome da variavel}
-#'     \item{valor}{valor da variavel}
+#'     \item{data_caso - data da rodada}
+#'     \item{data_previsao - data da previsao}
+#'     \item{cenario - nome do cenario}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{variavel - nome da variavel}
+#'     \item{valor - valor da variavel}
 #'     }
 #' @param vazao_observada data.table com as colunas
 #'     \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{valor}{valor da precipitacao observada}
+#'     \item{data - data da observacao}
+#'     \item{posto - nome do posto}
+#'     \item{valor - valor da precipitacao observada}
 #'     }
 #' @param configuracao data.table com as colunas
 #'     \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{valor}{valor da precipitacao observada}
+#'     \item{data - data da observacao}
+#'     \item{posto - nome do posto}
+#'     \item{valor - valor da precipitacao observada}
 #'     }
 #' @return previsao_totalizada - data.table contendo as seguintes colunas
 #' \itemize{
@@ -30,10 +30,10 @@
 #'     \item{data_previsao - data da previsao realizada}
 #'     \item{nome - nome da UHE}
 #'     \item{cenario - nome do cenario}
-#'     \item{previsao_distribuida}{valor da vazao apos o processo de distribuicao de incrementais agrupadas previstas}
-#'     \item{previsao_incremental}{valor da vazao incremental prevista}
-#'     \item{previsao_total}{valor da vazao total prevista, considerando o tempo de viagem entre as UHES}
-#'     \item{previsao_total_sem_tv}{valor da vazao total prevista, sem copnsiderar o tempo de viagem entre as UHES}
+#'     \item{previsao_distribuida - valor da vazao apos o processo de distribuicao de incrementais agrupadas previstas}
+#'     \item{previsao_incremental - valor da vazao incremental prevista}
+#'     \item{previsao_total - valor da vazao total prevista, considerando o tempo de viagem entre as UHES}
+#'     \item{previsao_total_sem_tv - valor da vazao total prevista, sem copnsiderar o tempo de viagem entre as UHES}
 #'     }
 #' @export
 totaliza_previsao <- function(previsao, vazao_observada, configuracao) {

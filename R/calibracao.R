@@ -11,30 +11,30 @@
 #' @param Supin vazao superficial inicial
 #' @param precipitacao data table com a precipitacao a ser ponderada com as colunas
 #'     \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{id}{id do posto}
-#'     \item{valor}{valor da variavel}
+#'     \item{data - data da observacao}
+#'     \item{posto - nome do posto}
+#'     \item{id - id do posto}
+#'     \item{valor - valor da variavel}
 #'     }
 #' @param evapotranspiracao data table com a evapotranspiracao a ser ponderada com as colunas
 #'     \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{id}{id do posto}
-#'     \item{valor}{valor da variavel}
+#'     \item{data - data da observacao}
+#'     \item{posto - nome do posto}
+#'     \item{id - id do posto}
+#'     \item{valor - valor da variavel}
 #'     }
 #' @param vazao data table com a vazao a avaliada
 #'      \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{id}{id do posto}
-#'     \item{valor}{valor da variavel}
+#'     \item{data - data da observacao}
+#'     \item{posto - nome do posto}
+#'     \item{id - id do posto}
+#'     \item{valor - valor da variavel}
 #'     }
 #' @param postos_plu data.table com as colunas
 #'     \itemize{
-#'     \item{nome}{nome da sub_bacia}
-#'     \item{posto}{nome do posto plu}
-#'     \item{valor}{peso do posto plu}
+#'     \item{nome - nome da sub_bacia}
+#'     \item{posto - nome do posto plu}
+#'     \item{valor - peso do posto plu}
 #'     }
 #' @param pesos vetor de pesos a serem utilizados para cada data durante a calibracao
 #' @param inicio_objetivo inicio do calculo da funcao objetivo
@@ -118,24 +118,24 @@ cria_kt <- function(kt_max, kt_min, alfa, beta){
 #' @param Supin vazao superficial inicial
 #' @param precipitacao data table com a precipitacao a ser ponderada com as colunas
 #'     \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{id}{id do posto}
-#'     \item{valor}{valor da variavel}
+#'     \item{data - data da observacao}
+#'     \item{posto - nome do posto}
+#'     \item{id - id do posto}
+#'     \item{valor - valor da variavel}
 #'     }
 #' @param evapotranspiracao data table com a evapotranspiracao a ser ponderada com as colunas
 #'     \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{id}{id do posto}
-#'     \item{valor}{valor da variavel}
+#'     \item{data - data da observacao}
+#'     \item{posto - nome do posto}
+#'     \item{id - id do posto}
+#'     \item{valor - valor da variavel}
 #'     }
 #' @param vazao data table com a vazao a avaliada
 #'      \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{id}{id do posto}
-#'     \item{valor}{valor da variavel}
+#'     \item{data - data da observacao}
+#'     \item{posto - nome do posto}
+#'     \item{id - id do posto}
+#'     \item{valor - valor da variavel}
 #'     }
 #' 
 #' @param data_inicio_objetivo data inicial da avaliacao da funcao objetivo
@@ -144,9 +144,9 @@ cria_kt <- function(kt_max, kt_min, alfa, beta){
 #' @param limite_superior vetor com o limite superior dos parametros
 #' @param postos_plu data.table com as colunas
 #'     \itemize{
-#'     \item{nome}{nome da sub_bacia}
-#'     \item{posto}{nome do posto plu}
-#'     \item{valor}{peso do posto plu}
+#'     \item{nome - nome da sub_bacia}
+#'     \item{posto - nome do posto plu}
+#'     \item{valor - peso do posto plu}
 #'     }
 #' @param pesos vetor de pesos a serem utilizados para cada data durante a calibracao
 #' @importFrom data.table data.table

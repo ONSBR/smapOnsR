@@ -10,9 +10,9 @@
 A data table com 8910 linhas and 3 colunas:
 \describe{
 \itemize{
-\item{nome}{nome da sub-bacia}
-\item{parametros}{nome do parametros}
-\item{valor}{valor do parametro}
+\item{nome - nome da sub-bacia}
+\item{parametros - nome do parametros}
+\item{valor - valor do parametro}
 }
 }
 }

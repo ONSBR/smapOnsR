@@ -40,26 +40,26 @@ funcao_objetivo_calibracao(
 
 \item{precipitacao}{data table com a precipitacao a ser ponderada com as colunas
 \itemize{
-\item{data}{data da observacao}
-\item{posto}{nome do posto}
-\item{id}{id do posto}
-\item{valor}{valor da variavel}
+\item{data - data da observacao}
+\item{posto - nome do posto}
+\item{id - id do posto}
+\item{valor - valor da variavel}
 }}
 
 \item{evapotranspiracao}{data table com a evapotranspiracao a ser ponderada com as colunas
 \itemize{
-\item{data}{data da observacao}
-\item{posto}{nome do posto}
-\item{id}{id do posto}
-\item{valor}{valor da variavel}
+\item{data - data da observacao}
+\item{posto - nome do posto}
+\item{id - id do posto}
+\item{valor - valor da variavel}
 }}
 
 \item{vazao}{data table com a vazao a avaliada
 \itemize{
-\item{data}{data da observacao}
-\item{posto}{nome do posto}
-\item{id}{id do posto}
-\item{valor}{valor da variavel}
+\item{data - data da observacao}
+\item{posto - nome do posto}
+\item{id - id do posto}
+\item{valor - valor da variavel}
 }}
 
 \item{inicio_objetivo}{inicio do calculo da funcao objetivo}
@@ -68,9 +68,9 @@ funcao_objetivo_calibracao(
 
 \item{postos_plu}{data.table com as colunas
 \itemize{
-\item{nome}{nome da sub_bacia}
-\item{posto}{nome do posto plu}
-\item{valor}{peso do posto plu}
+\item{nome - nome da sub_bacia}
+\item{posto - nome do posto plu}
+\item{valor - peso do posto plu}
 }}
 
 \item{pesos}{vetor de pesos a serem utilizados para cada data durante a calibracao}

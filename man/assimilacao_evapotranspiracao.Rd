@@ -34,10 +34,10 @@ assimilacao_evapotranspiracao(
 
 \item{precipitacao_assimilacao}{data table com a precipitacao a ser ponderada com as colunas
 \itemize{
-\item{data}{data da observacao}
-\item{posto}{nome do posto}
-\item{id}{id do posto}
-\item{valor}{valor da variavel}
+\item{data - data da observacao}
+\item{posto - nome do posto}
+\item{id - id do posto}
+\item{valor - valor da variavel}
 }}
 
 \item{evapotranspiracao}{vetor de evapotranspiracao}
@@ -59,10 +59,10 @@ assimilacao_evapotranspiracao(
 \value{
 ajuste lista contendo
 \itemize{
-\item{par}{parametros otimizados}
-\item{value}{valor da funcao objetivo utilizado}
-\item{id}{id do posto}
-\item{valor}{valor da variavel}
+\item{par - parametros otimizados}
+\item{value - valor da funcao objetivo utilizado}
+\item{id - id do posto}
+\item{valor - valor da variavel}
 }
 }
 \description{

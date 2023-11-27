@@ -12,8 +12,8 @@ le_arquivos(pasta_entrada)
 \value{
 data table contendo as datas dos casos a serem executados e seus respectivos horizontes:
 \itemize{
-\item{data}{data do caso}
-\item{numero_dias_previsao}{horizonte do caso}
+\item{data - data do caso}
+\item{numero_dias_previsao - horizonte do caso}
 }
 }
 \description{

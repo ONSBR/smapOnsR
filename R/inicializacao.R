@@ -13,13 +13,13 @@
 #'
 #' @return List com os parametros:
 #'     \itemize{
-#'     \item{EbInic}{vazao de base inicial}
-#'     \item{TuInic}{percentual de umidade do solo inicial}
-#'     \item{Supin}{vazao superficial inicial}
-#'     \item{Rsup2Inic}{valor do reservatorio de planicie inicial}
-#'     \item{RsoloInic}{valor do reservatorio de solo inicial}
-#'     \item{RsupInic}{valor do reservatorio superficial inicial}
-#'     \item{RsubInic}{valor do reservatorio subterraneo inicial}
+#'     \item{EbInic - vazao de base inicial}
+#'     \item{TuInic - percentual de umidade do solo inicial}
+#'     \item{Supin - vazao superficial inicial}
+#'     \item{Rsup2Inic - valor do reservatorio de planicie inicial}
+#'     \item{RsoloInic - valor do reservatorio de solo inicial}
+#'     \item{RsupInic - valor do reservatorio superficial inicial}
+#'     \item{RsubInic - valor do reservatorio subterraneo inicial}
 #'     }
 #' @export
 inicializacao_smap <- function(vetor_modelo, area, EbInic = 0, TuInic = 0.3, Supin = 100, Rsup2Inic = 0){

@@ -11,10 +11,10 @@
 #' @param TuInic Taxa de umidade inicial do solo
 #' @param precipitacao_assimilacao data table com a precipitacao a ser ponderada com as colunas
 #'     \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{id}{id do posto}
-#'     \item{valor}{valor da variavel}
+#'     \item{data - data da observacao}
+#'     \item{posto - nome do posto}
+#'     \item{id - id do posto}
+#'     \item{valor - valor da variavel}
 #'     }
 #' @param evapotranspiracao vetor de evapotranspiracao
 #' @param evapotranspiracao_planicie vetor de evapotranspiracao do reservatorio de planicie
@@ -25,12 +25,12 @@
 #' @param limite_supin limites mínimo e máximo da vazao superficial inicial
 #'
 #' @importFrom funcaoSmapCpp rodada_varios_dias_cpp2
-#' @return ajuste lista contendo
+#' @return lista contendo
 #' \itemize{
-#'     \item{par}{parametros otimizados send}
-#'     \item{value}{valor da funcao objetivo utilizado}
-#'     \item{id}{id do posto}
-#'     \item{valor}{valor da variavel}
+#'     \item{par - parametros otimizados send}
+#'     \item{value - valor da funcao objetivo utilizado}
+#'     \item{id - id do posto}
+#'     \item{valor - valor da variavel}
 #'     }
 #' @export
 #' 
@@ -38,7 +38,7 @@
 assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao_assimilacao,
       evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias_assimilacao,
       limite_prec = c(0.5, 2), limite_ebin = c(0.8, 1.2),
-      limite_supin = c(0, 2)){
+      limite_supin = c(0, 2)) {
     
     kt <- vetor_modelo[12:74]
     kt_max <- sum(vetor_modelo[12:13] > 0)
@@ -47,7 +47,7 @@ assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, preci
     precipitacao_ponderada[, valor := valor * vetor_modelo[75]]
     precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada[, valor], kt,
                                                     kt_max, kt_min)
-    vazao_observada_maxima <- max(vazao)  
+    vazao_observada_maxima <- max(vazao)
     pesos <- rep(1, numero_dias_assimilacao)
     limite_inferior <- c(rep(limite_prec[1],numero_dias_assimilacao), limite_ebin[1] * EbInic, limite_supin[1] * vazao_observada_maxima)
     limite_superior <- c(rep(limite_prec[2],numero_dias_assimilacao), limite_ebin[2] * EbInic, limite_supin[2] * vazao_observada_maxima)
@@ -102,9 +102,9 @@ assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, preci
 #' @param vetor_modelo vetor resultante de unlist do objeto de classe smap_ons
 #' @param vetor_variaveis vetor com os parametros:
 #' \itemize{
-#'     \item{pesos}{pesos da ponderacao da precipitacao}
-#'     \item{Ebin}{vazao de base inicial}
-#'     \item{Supin}{vazao superficial inicial}
+#'     \item{pesos - pesos da ponderacao da precipitacao}
+#'     \item{Ebin - vazao de base inicial}
+#'     \item{Supin - vazao superficial inicial}
 #' }
 #' @param pesos_funcao_objetivo vetor de pesos da funcao objetivo
 #' @param TuInic umidade do solo inicial
@@ -153,10 +153,10 @@ funcao_objetivo_assimilacao_oficial <- function(vetor_variaveis, vetor_modelo, T
 #' @param TuInic Taxa de umidade inicial do solo
 #' @param precipitacao_assimilacao data table com a precipitacao a ser ponderada com as colunas
 #'     \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{id}{id do posto}
-#'     \item{valor}{valor da variavel}
+#'     \item{data - data da observacao}
+#'     \item{posto - nome do posto}
+#'     \item{id - id do posto}
+#'     \item{valor - valor da variavel}
 #'     }
 #' @param evapotranspiracao vetor de evapotranspiracao
 #' @param evapotranspiracao_planicie vetor de evapotranspiracao do reservatorio de planicie
@@ -169,10 +169,10 @@ funcao_objetivo_assimilacao_oficial <- function(vetor_variaveis, vetor_modelo, T
 #'
 #' @return ajuste lista contendo
 #' \itemize{
-#'     \item{par}{parametros otimizados}
-#'     \item{value}{valor da funcao objetivo utilizado}
-#'     \item{id}{id do posto}
-#'     \item{valor}{valor da variavel}
+#'     \item{par - parametros otimizados}
+#'     \item{value - valor da funcao objetivo utilizado}
+#'     \item{id - id do posto}
+#'     \item{valor - valor da variavel}
 #'     }
 #' @export
 #' 
@@ -248,9 +248,9 @@ assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Su
 #' @param vetor_modelo vetor resultante de unlist do objeto de classe smap_ons
 #' @param vetor_variaveis vetor com os parametros:
 #' \itemize{
-#'     \item{pesos}{pesos da ponderacao da precipitacao}
-#'     \item{Ebin}{vazao de base inicial}
-#'     \item{Supin}{vazao superficial inicial}
+#'     \item{pesos - pesos da ponderacao da precipitacao}
+#'     \item{Ebin - vazao de base inicial}
+#'     \item{Supin - vazao superficial inicial}
 #' }
 #' @param pesos_funcao_objetivo vetor de pesos da funcao objetivo
 #' @param TuInic umidade do solo inicial

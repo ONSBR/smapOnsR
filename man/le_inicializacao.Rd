@@ -12,9 +12,9 @@ le_inicializacao(arq)
 \value{
 data.table com a inicializacao com as colunas
 \itemize{
-\item{nome}{nome da sub_bacia}
-\item{variavel}{nome da variavel}
-\item{valor}{valor da variavel}
+\item{nome - nome da sub_bacia}
+\item{variavel - nome da variavel}
+\item{valor - valor da variavel}
 }
 }
 \description{

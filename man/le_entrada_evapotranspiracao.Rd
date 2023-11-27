@@ -14,9 +14,9 @@ le_entrada_evapotranspiracao(pasta_entrada, nome_subbacia)
 \value{
 data.table evapotranspiracao com as colunas
 \itemize{
-\item{mes}{mes da NC}
-\item{posto}{nome do posto}
-\item{valor}{valor da NC de evapotranspiracao observada}
+\item{mes - mes da NC}
+\item{posto - nome da sub-bacia}
+\item{valor - valor da NC de evapotranspiracao observada}
 }
 }
 \description{

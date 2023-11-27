@@ -4,88 +4,88 @@
 #'
 #' @param parametros data table com os parametros dos modelos
 #'     \itemize{
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{parametro}{nome do parametro}
-#'     \item{valor}{valor do parametro}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{parametro - nome do parametro}
+#'     \item{valor - valor do parametro}
 #'     }
 #' @param inicializacao data.table com a inicializacao com as colunas:
 #'     \itemize{
-#'     \item{nome}{nome da sub_bacia}
-#'     \item{variavel}{vazao de base inicial}
-#'     \item{valor}{valor da variavel}
+#'     \item{nome - nome da sub_bacia}
+#'     \item{variavel - vazao de base inicial}
+#'     \item{valor - valor da variavel}
 #'     }
 #' @param precipitacao_observada data table com o historico de precipitacao com as colunas:
 #'     \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{valor}{valor da variavel}
+#'     \item{data - data da observacao}
+#'     \item{posto - nome do posto}
+#'     \item{valor - valor da variavel}
 #'     }
 #' @param precipitacao_prevista data.table com a previsao de precipitacao com as colunas:
 #'     \itemize{
-#'     \item{data_rodada}{data da rodada}
-#'     \item{data_previsao}{data da previsao}
-#'     \item{cenario}{nome do cenario}
-#'     \item{posto}{nome do posto}
-#'     \item{valor}{valor da previsao}
+#'     \item{data_rodada - data da rodada}
+#'     \item{data_previsao - data da previsao}
+#'     \item{cenario - nome do cenario}
+#'     \item{posto - nome do posto}
+#'     \item{valor - valor da previsao}
 #'     }
 #' @param evapotranspiracao_nc data.table com o historico de NC deevapotranspiracao com as colunas:
 #'     \itemize{
-#'     \item{mes}{mes da NC}
-#'     \item{posto}{nome do posto}
-#'     \item{valor}{valor da NC de evapotranspiracao observada}
+#'     \item{mes - mes da NC}
+#'     \item{posto - nome do posto}
+#'     \item{valor - valor da NC de evapotranspiracao observada}
 #'     }
 #' @param vazao_observada data table com o historico de vazao com as colunas:
 #'     \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{valor}{valor da variavel}
+#'     \item{data - data da observacao}
+#'     \item{posto - nome do posto}
+#'     \item{valor - valor da variavel}
 #'     }
 #' @param postos_plu data table contendo a relacao sub-bacia x postos_plu com as colunas:
 #'     \itemize{
-#'     \item{nome}{nome da sub_bacia}
-#'     \item{posto}{nome do posto plu}
-#'     \item{valor}{peso do posto plu}
+#'     \item{nome - nome da sub_bacia}
+#'     \item{posto - nome do posto plu}
+#'     \item{valor - peso do posto plu}
 #'     }
 #' @param datas_rodadas data table contendo as datas dos casos a serem executados e seus respectivos horizontes:
 #'     \itemize{
-#'     \item{data}{data do caso}
-#'     \item{numero_dias_previsao}{horizonte do caso}
+#'     \item{data - data do caso}
+#'     \item{numero_dias_previsao - horizonte do caso}
 #'     }
 #' @param numero_cenarios numero de cenarios a serem gerados
 #' @param sub_bacias vetor com o nome das sub-bacias a serem consideradas
 #' @importFrom data.table data.table
 #' @return saida lista com o data.table previsao contendo as seguintes colunas:
 #'     \itemize{
-#'     \item{data_caso}{data da rodada}
-#'     \item{data_previsao}{data da previsao}
-#'     \item{cenario}{nome do cenario}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{variavel}{nome da variavel}
-#'     \item{valor}{valor da variavel}
+#'     \item{data_caso - data da rodada}
+#'     \item{data_previsao - data da previsao}
+#'     \item{cenario - nome do cenario}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{variavel - nome da variavel}
+#'     \item{valor - valor da variavel}
 #'     }
 #'  otimizacao data table com as colunas:
 #' \itemize{
-#'     \item{otimizacao}{valor das variaveis da otimizacao}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{data_caso}{data do caso}
+#'     \item{otimizacao - valor das variaveis da otimizacao}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{data_caso - data do caso}
 #'     }
 #'  assimilacao data table com as colunas:
 #' \itemize{
-#'     \item{data_caso}{data da rodada}
-#'     \item{data_assimilacao}{data da assimilacao}
-#'     \item{cenario}{nome do cenario}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{variavel}{nome da variavel}
-#'     \item{valor}{valor da variavel}
+#'     \item{data_caso - data da rodada}
+#'     \item{data_assimilacao - data da assimilacao}
+#'     \item{cenario - nome do cenario}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{variavel - nome da variavel}
+#'     \item{valor - valor da variavel}
 #'     }
 #' precipitacao data table contendo precipitacao observada e previsata com as colunas:
 #' \itemize{
-#'     \item{data_previsao}{data da precipitacao}
-#'     \item{data_rodada}{data da rodada}
-#'     \item{cenario}{nome do cenario}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{variavel}{nome da variavel}
-#'     \item{valor}{valor da variavel}
+#'     \item{data_previsao - data da precipitacao}
+#'     \item{data_rodada - data da rodada}
+#'     \item{cenario - nome do cenario}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{variavel - nome da variavel}
+#'     \item{valor - valor da variavel}
 #'     }
 #' @export
 #' 
@@ -245,96 +245,96 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
 #'
 #' @param parametros data table com os parametros dos modelos
 #'     \itemize{
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{parametro}{nome do parametro}
-#'     \item{valor}{valor do parametro}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{parametro - nome do parametro}
+#'     \item{valor - valor do parametro}
 #'     }
 #' @param inicializacao data.table com a inicializacao com as colunas:
 #'     \itemize{
-#'     \item{nome}{nome da sub_bacia}
-#'     \item{variavel}{vazao de base inicial}
-#'     \item{valor}{valor da variavel}
+#'     \item{nome - nome da sub_bacia}
+#'     \item{variavel - vazao de base inicial}
+#'     \item{valor - valor da variavel}
 #'     }
 #' @param precipitacao_observada data table com o historico de precipitacao com as colunas:
 #'     \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{valor}{valor da variavel}
+#'     \item{data - data da observacao}
+#'     \item{posto - nome do posto}
+#'     \item{valor - valor da variavel}
 #'     }
 #' @param precipitacao_prevista data.table com a previsao de precipitacao com as colunas:
 #'     \itemize{
-#'     \item{data_rodada}{data da rodada}
-#'     \item{data_previsao}{data da previsao}
-#'     \item{cenario}{nome do cenario}
-#'     \item{posto}{nome do posto}
-#'     \item{valor}{valor da previsao}
+#'     \item{data_rodada - data da rodada}
+#'     \item{data_previsao - data da previsao}
+#'     \item{cenario - nome do cenario}
+#'     \item{posto - nome do posto}
+#'     \item{valor - valor da previsao}
 #'     }
 #' @param evapotranspiracao_observada data.table com o historico de evapotranspiracao com as colunas:
 #'     \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{valor}{valor da variavel}
+#'     \item{data - data da observacao}
+#'     \item{posto - nome do posto}
+#'     \item{valor - valor da variavel}
 #'     }
 #' @param evapotranspiracao_prevista data.table com a previsao de evapotranspiracao com as colunas:
 #'     \itemize{
-#'     \item{data_rodada}{data da rodada}
-#'     \item{data_previsao}{data da previsao}
-#'     \item{cenario}{nome do cenario}
-#'     \item{posto}{nome do posto}
-#'     \item{valor}{valor da previsao}
+#'     \item{data_rodada - data da rodada}
+#'     \item{data_previsao - data da previsao}
+#'     \item{cenario - nome do cenario}
+#'     \item{posto - nome do posto}
+#'     \item{valor - valor da previsao}
 #'     }
 #' @param vazao_observada data table com o historico de vazao com as colunas:
 #'     \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{valor}{valor da variavel}
+#'     \item{data - data da observacao}
+#'     \item{posto - nome do posto}
+#'     \item{valor - valor da variavel}
 #'     }
 #' @param postos_plu data table contendo a relacao sub-bacia x postos_plu com as colunas:
 #'     \itemize{
-#'     \item{nome}{nome da sub_bacia}
-#'     \item{posto}{nome do posto plu}
-#'     \item{valor}{peso do posto plu}
+#'     \item{nome - nome da sub_bacia}
+#'     \item{posto - nome do posto plu}
+#'     \item{valor - peso do posto plu}
 #'     }
 #' @param datas_rodadas data table contendo as datas dos casos a serem executados e seus respectivos horizontes:
 #'     \itemize{
-#'     \item{data}{data do caso}
-#'     \item{numero_dias_previsao}{horizonte do caso}
+#'     \item{data - data do caso}
+#'     \item{numero_dias_previsao - horizonte do caso}
 #'     }
 #' @param numero_cenarios numero de cenarios a serem gerados
 #' @param sub_bacias vetor com o nome das sub-bacias a serem consideradas
 #' @importFrom data.table data.table
 #' @return saida lista com o data.table previsao contendo as seguintes colunas:
 #'     \itemize{
-#'     \item{data_caso}{data da rodada}
-#'     \item{data_previsao}{data da previsao}
-#'     \item{cenario}{nome do cenario}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{variavel}{nome da variavel}
-#'     \item{valor}{valor da variavel}
+#'     \item{data_caso - data da rodada}
+#'     \item{data_previsao - data da previsao}
+#'     \item{cenario - nome do cenario}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{variavel - nome da variavel}
+#'     \item{valor - valor da variavel}
 #'     }
 #'  otimizacao data table com as colunas:
 #' \itemize{
-#'     \item{otimizacao}{valor das variaveis da otimizacao}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{data_caso}{data do caso}
+#'     \item{otimizacao - valor das variaveis da otimizacao}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{data_caso - data do caso}
 #'     }
 #'  assimilacao data table com as colunas:
 #' \itemize{
-#'     \item{data_caso}{data da rodada}
-#'     \item{data_assimilacao}{data da assimilacao}
-#'     \item{cenario}{nome do cenario}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{variavel}{nome da variavel}
-#'     \item{valor}{valor da variavel}
+#'     \item{data_caso - data da rodada}
+#'     \item{data_assimilacao - data da assimilacao}
+#'     \item{cenario - nome do cenario}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{variavel - nome da variavel}
+#'     \item{valor - valor da variavel}
 #'     }
 #' precipitacao data table contendo precipitacao observada e previsata com as colunas:
 #' \itemize{
-#'     \item{data_previsao}{data da precipitacao}
-#'     \item{data_rodada}{data da rodada}
-#'     \item{cenario}{nome do cenario}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{variavel}{nome da variavel}
-#'     \item{valor}{valor da variavel}
+#'     \item{data_previsao - data da precipitacao}
+#'     \item{data_rodada - data da rodada}
+#'     \item{cenario - nome do cenario}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{variavel - nome da variavel}
+#'     \item{valor - valor da variavel}
 #'     }
 #' @export
 #' 
@@ -493,52 +493,52 @@ rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observa
 #'
 #' @param parametros data table com os parametros dos modelos
 #'     \itemize{
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{parametro}{nome do parametro}
-#'     \item{valor}{valor do parametro}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{parametro - nome do parametro}
+#'     \item{valor - valor do parametro}
 #'     }
 #' @param inicializacao data.table com a inicializacao com as colunas:
 #'     \itemize{
-#'     \item{nome}{nome da sub_bacia}
-#'     \item{variavel}{vazao de base inicial}
-#'     \item{valor}{valor da variavel}
+#'     \item{nome - nome da sub_bacia}
+#'     \item{variavel - vazao de base inicial}
+#'     \item{valor - valor da variavel}
 #'     }
 #' @param precipitacao_observada data table com o historico de precipitacao com as colunas:
 #'     \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{valor}{valor da variavel}
+#'     \item{data - data da observacao}
+#'     \item{posto - nome do posto}
+#'     \item{valor - valor da variavel}
 #'     }
 #' @param precipitacao_prevista data.table com a previsao de precipitacao com as colunas:
 #'     \itemize{
-#'     \item{data_rodada}{data da rodada}
-#'     \item{data_previsao}{data da previsao}
-#'     \item{cenario}{nome do cenario}
-#'     \item{posto}{nome do posto}
-#'     \item{valor}{valor da previsao}
+#'     \item{data_rodada - data da rodada}
+#'     \item{data_previsao - data da previsao}
+#'     \item{cenario - nome do cenario}
+#'     \item{posto - nome do posto}
+#'     \item{valor - valor da previsao}
 #'     }
 #' @param evapotranspiracao_nc data.table com o historico de NC deevapotranspiracao com as colunas:
 #'     \itemize{
-#'     \item{mes}{mes da NC}
-#'     \item{posto}{nome do posto}
-#'     \item{valor}{valor da NC de evapotranspiracao observada}
+#'     \item{mes - mes da NC}
+#'     \item{posto - nome do posto}
+#'     \item{valor - valor da NC de evapotranspiracao observada}
 #'     }
 #' @param vazao_observada data table com o historico de vazao com as colunas:
 #'     \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{valor}{valor da variavel}
+#'     \item{data - data da observacao}
+#'     \item{posto - nome do posto}
+#'     \item{valor - valor da variavel}
 #'     }
 #' @param postos_plu data table contendo a relacao sub-bacia x postos_plu com as colunas:
 #'     \itemize{
-#'     \item{nome}{nome da sub_bacia}
-#'     \item{posto}{nome do posto plu}
-#'     \item{valor}{peso do posto plu}
+#'     \item{nome - nome da sub_bacia}
+#'     \item{posto - nome do posto plu}
+#'     \item{valor - peso do posto plu}
 #'     }
 #' @param datas_rodadas data table contendo as datas dos casos a serem executados e seus respectivos horizontes:
 #'     \itemize{
-#'     \item{data}{data do caso}
-#'     \item{numero_dias_previsao}{horizonte do caso}
+#'     \item{data - data do caso}
+#'     \item{numero_dias_previsao - horizonte do caso}
 #'     }
 #' @param execucao data table contendo as informacoes do arquivo execucao.txt gerado pelo aplicativo SMAP/ONS original com o seguinte formato:
 #'     \itemize{
@@ -560,36 +560,36 @@ rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observa
 #' @importFrom data.table data.table
 #' @return saida lista com o data.table previsao contendo as seguintes colunas:
 #'     \itemize{
-#'     \item{data_caso}{data da rodada}
-#'     \item{data_previsao}{data da previsao}
-#'     \item{cenario}{nome do cenario}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{variavel}{nome da variavel}
-#'     \item{valor}{valor da variavel}
+#'     \item{data_caso - data da rodada}
+#'     \item{data_previsao - data da previsao}
+#'     \item{cenario - nome do cenario}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{variavel - nome da variavel}
+#'     \item{valor - valor da variavel}
 #'     }
 #'  otimizacao data table com as colunas:
 #' \itemize{
-#'     \item{otimizacao}{valor das variaveis da otimizacao}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{data_caso}{data do caso}
+#'     \item{otimizacao - valor das variaveis da otimizacao}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{data_caso - data do caso}
 #'     }
 #'  assimilacao data table com as colunas:
 #' \itemize{
-#'     \item{data_caso}{data da rodada}
-#'     \item{data_assimilacao}{data da assimilacao}
-#'     \item{cenario}{nome do cenario}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{variavel}{nome da variavel}
-#'     \item{valor}{valor da variavel}
+#'     \item{data_caso - data da rodada}
+#'     \item{data_assimilacao - data da assimilacao}
+#'     \item{cenario - nome do cenario}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{variavel - nome da variavel}
+#'     \item{valor - valor da variavel}
 #'     }
 #' precipitacao data table contendo precipitacao observada e previsata com as colunas:
 #' \itemize{
-#'     \item{data_previsao}{data da precipitacao}
-#'     \item{data_rodada}{data da rodada}
-#'     \item{cenario}{nome do cenario}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{variavel}{nome da variavel}
-#'     \item{valor}{valor da variavel}
+#'     \item{data_previsao - data da precipitacao}
+#'     \item{data_rodada - data da rodada}
+#'     \item{cenario - nome do cenario}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{variavel - nome da variavel}
+#'     \item{valor - valor da variavel}
 #'     }
 #' @export
 #' 

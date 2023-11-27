@@ -20,9 +20,9 @@ funcao_objetivo_assimilacao_evapotranspiracao(
 \arguments{
 \item{vetor_variaveis}{vetor com os parametros:
 \itemize{
-\item{pesos}{pesos da ponderacao da precipitacao}
-\item{Ebin}{vazao de base inicial}
-\item{Supin}{vazao superficial inicial}
+\item{pesos - pesos da ponderacao da precipitacao}
+\item{Ebin - vazao de base inicial}
+\item{Supin - vazao superficial inicial}
 }}
 
 \item{vetor_modelo}{vetor resultante de unlist do objeto de classe smap_ons}

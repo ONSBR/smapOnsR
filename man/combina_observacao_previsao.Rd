@@ -9,31 +9,31 @@ combina_observacao_previsao(observado, previsto)
 \arguments{
 \item{observado}{data.table com as colunas
 \itemize{
-\item{data}{data da observacao}
-\item{posto}{nome do posto}
-\item{id}{id do posto}
-\item{valor}{valor da serie_temporal observada}
+\item{data - data da observacao}
+\item{posto - nome do posto}
+\item{id - id do posto}
+\item{valor - valor da serie_temporal observada}
 }}
 
 \item{previsto}{data.table com as colunas
 \itemize{
-\item{data_rodada}{data da rodada}
-\item{data_previsao}{data da previsao}
-\item{cenario}{nome do cenario}
-\item{posto}{nome do posto}
-\item{id}{id do posto}
-\item{valor}{valor da previsao}
+\item{data_rodada - data da rodada}
+\item{data_previsao - data da previsao}
+\item{cenario - nome do cenario}
+\item{posto - nome do posto}
+\item{id - id do posto}
+\item{valor - valor da previsao}
 }}
 }
 \value{
 serie_temporal data.table com as colunas
 \itemize{
-\item{data_rodada}{data da rodada}
-\item{data_previsao}{data da previsao}
-\item{cenario}{nome do cenario}
-\item{posto}{nome do posto}
-\item{id}{id do posto}
-\item{valor}{valor da previsao}
+\item{data_rodada - data da rodada}
+\item{data_previsao - data da previsao}
+\item{cenario - nome do cenario}
+\item{posto - nome do posto}
+\item{id - id do posto}
+\item{valor - valor da previsao}
 }
 }
 \description{

@@ -14,9 +14,9 @@ le_entrada_posto_plu(pasta_entrada, nome_subbacia)
 \value{
 data.table postos_plu com as colunas
 \itemize{
-\item{nome}{nome da sub_bacia}
-\item{posto}{nome do posto plu}
-\item{valor}{peso do posto plu}
+\item{nome - nome da sub_bacia}
+\item{posto - nome do posto plu}
+\item{valor - peso do posto plu}
 }
 }
 \description{

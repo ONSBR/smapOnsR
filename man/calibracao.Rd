@@ -40,26 +40,26 @@ calibracao(
 
 \item{precipitacao}{data table com a precipitacao a ser ponderada com as colunas
 \itemize{
-\item{data}{data da observacao}
-\item{posto}{nome do posto}
-\item{id}{id do posto}
-\item{valor}{valor da variavel}
+\item{data - data da observacao}
+\item{posto - nome do posto}
+\item{id - id do posto}
+\item{valor - valor da variavel}
 }}
 
 \item{evapotranspiracao}{data table com a evapotranspiracao a ser ponderada com as colunas
 \itemize{
-\item{data}{data da observacao}
-\item{posto}{nome do posto}
-\item{id}{id do posto}
-\item{valor}{valor da variavel}
+\item{data - data da observacao}
+\item{posto - nome do posto}
+\item{id - id do posto}
+\item{valor - valor da variavel}
 }}
 
 \item{vazao}{data table com a vazao a avaliada
 \itemize{
-\item{data}{data da observacao}
-\item{posto}{nome do posto}
-\item{id}{id do posto}
-\item{valor}{valor da variavel}
+\item{data - data da observacao}
+\item{posto - nome do posto}
+\item{id - id do posto}
+\item{valor - valor da variavel}
 }}
 
 \item{data_inicio_objetivo}{data inicial da avaliacao da funcao objetivo}
@@ -72,15 +72,15 @@ calibracao(
 
 \item{postos_plu}{data.table com as colunas
 \itemize{
-\item{nome}{nome da sub_bacia}
-\item{posto}{nome do posto plu}
-\item{valor}{peso do posto plu}
+\item{nome - nome da sub_bacia}
+\item{posto - nome do posto plu}
+\item{valor - peso do posto plu}
 }}
 
 \item{pesos}{vetor de pesos a serem utilizados para cada data durante a calibracao}
 }
 \value{
-objetivo valor da funcao objetivo
+ajuste valor da funcao objetivo
 }
 \description{
 Raliza a calibracao de calibracao do SMAP/ONS dado um vetor inicial de pearametros e seus limites superiores e inferiores

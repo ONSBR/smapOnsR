@@ -23,24 +23,24 @@ ponderacao_temporal <- function(serie_temporal, kt, kt_max, kt_min) {
 #'
 #' @param historico_precipitacao data table com a precipitacao a ser ponderada com as colunas
 #'     \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto plu}
-#'     \item{id}{id do posto}
-#'     \item{valor}{valor da variavel}
+#'     \item{data - data da observacao}
+#'     \item{posto - nome do posto plu}
+#'     \item{id - id do posto}
+#'     \item{valor - valor da variavel}
 #'     }
 #' @param postos_plu data.table postos_plu com as colunas
 #'     \itemize{
-#'     \item{posto}{nome da sub_bacia}
-#'     \item{psat}{nome do posto plu}
-#'     \item{valor}{peso do posto plu}
+#'     \item{posto - nome da sub_bacia}
+#'     \item{psat - nome do posto plu}
+#'     \item{valor - peso do posto plu}
 #'     }
 #' @importFrom data.table setcolorder
 #' @return precipitacao data table com a precipitacao a ser ponderada com as colunas
 #'     \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{sub_bacia}{nome da sub_bacia}
-#'     \item{id}{id da sub_bacia}
-#'     \item{valor}{valor da precipitacao ponderada}
+#'     \item{data - data da observacao}
+#'     \item{sub_bacia - nome da sub_bacia}
+#'     \item{id - id da sub_bacia}
+#'     \item{valor - valor da precipitacao ponderada}
 #'     }
 #' @export
 ponderacao_espacial <- function(historico_precipitacao, postos_plu) {

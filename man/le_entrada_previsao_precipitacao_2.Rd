@@ -11,27 +11,27 @@ le_entrada_previsao_precipitacao_2(pasta_entrada, datas_rodadas, pontos_grade)
 
 \item{datas_rodadas}{data table com as colunas
 \itemize{
-\item{data}{data da rodada}
-\item{numero_dias_previsao}{numero de dias de previsao}
+\item{data - data da rodada}
+\item{numero_dias_previsao - numero de dias de previsao}
 }}
 
 \item{pontos_grade}{data.table com as colunas
 \itemize{
-\item{nome}{nome da sub_bacia}
-\item{nome_cenario_1}{primeira parte do nome dos cenarios de precipitacao considerados o caso}
-\item{nome_cenario_2}{segunda parte do nome dos cenarios de precipitacao considerados o caso}
-\item{latitude}{latitude do ponto de grade do cenario}
-\item{longitude}{longitude do ponto de grade do cenario}
+\item{nome - nome da sub_bacia}
+\item{nome_cenario_1 - primeira parte do nome dos cenarios de precipitacao considerados o caso}
+\item{nome_cenario_2 - segunda parte do nome dos cenarios de precipitacao considerados o caso}
+\item{latitude - latitude do ponto de grade do cenario}
+\item{longitude - longitude do ponto de grade do cenario}
 }}
 }
 \value{
 previsao_precipitacao data.table com as colunas
 \itemize{
-\item{data_rodada}{data da rodada}
-\item{data_previsao}{data da previsao}
-\item{cenario}{nome do cenario}
-\item{nome}{nome da sub-bacia}
-\item{valor}{valor da previsao}
+\item{data_rodada - data da rodada}
+\item{data_previsao - data da previsao}
+\item{cenario - nome do cenario}
+\item{nome - nome da sub-bacia}
+\item{valor - valor da previsao}
 }
 }
 \description{

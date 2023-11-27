@@ -12,8 +12,8 @@ le_entrada_caso(pasta_entrada)
 \value{
 caso lista contendo os seguintes parametros
 \itemize{
-\item{numero_subbacias}{numero de sub-bacias do caso}
-\item{nome_subbacia}{vetor com o nome das sub-bacias}
+\item{numero_subbacias- numero de sub-bacias do caso}
+\item{nome_subbacia - vetor com o nome das sub-bacias}
 }
 }
 \description{

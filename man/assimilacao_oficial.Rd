@@ -33,10 +33,10 @@ assimilacao_oficial(
 
 \item{precipitacao_assimilacao}{data table com a precipitacao a ser ponderada com as colunas
 \itemize{
-\item{data}{data da observacao}
-\item{posto}{nome do posto}
-\item{id}{id do posto}
-\item{valor}{valor da variavel}
+\item{data - data da observacao}
+\item{posto - nome do posto}
+\item{id - id do posto}
+\item{valor - valor da variavel}
 }}
 
 \item{evapotranspiracao}{vetor de evapotranspiracao}
@@ -54,12 +54,12 @@ assimilacao_oficial(
 \item{limite_supin}{limites mínimo e máximo da vazao superficial inicial}
 }
 \value{
-ajuste lista contendo
+lista contendo
 \itemize{
-\item{par}{parametros otimizados send}
-\item{value}{valor da funcao objetivo utilizado}
-\item{id}{id do posto}
-\item{valor}{valor da variavel}
+\item{par - parametros otimizados send}
+\item{value - valor da funcao objetivo utilizado}
+\item{id - id do posto}
+\item{valor - valor da variavel}
 }
 }
 \description{

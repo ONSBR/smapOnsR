@@ -56,13 +56,15 @@ test_that("Testa a funcao de calibracao", {
   expect_equal((par$value < fo), TRUE)
 
   data_inicio_objetivo <- evapotranspiracao[, min(data)]
+  inicio_objetivo <- evapotranspiracao[data <= data_inicio_objetivo, .N]
   vazao <- historico_vazao[data >= data_inicio_objetivo & data <= data_fim_objetivo & posto == nome2]
   vazao[, peso := 1 / .N]
   vazao[data < "2011-01-01", peso := 0]
   vazao[peso != 0, peso := 1 / .N]
 
   fo2 <- funcao_objetivo_calibracao(vetor_modelo, kt_min, kt_max, area, EbInic, TuInic, Supin, precipitacao,
-      evapotranspiracao, vazao, data_inicio_objetivo, data_fim_objetivo, postos_plu[nome == nome2], vazao[, peso])
+      evapotranspiracao, vazao, inicio_objetivo, fim_objetivo, postos_plu[nome == nome2], vazao[, peso], 
+      numero_dias, numero_postos_plu)
 
   expect_equal(fo, fo2)
 })

@@ -9,17 +9,17 @@ completa_previsao(previsao_precipitacao, datas_rodadas, numero_dias = 2)
 \arguments{
 \item{previsao_precipitacao}{data.table com as colunas
 \itemize{
-\item{data_rodada}{data da rodada}
-\item{data_previsao}{data da previsao}
-\item{cenario}{nome do cenario}
-\item{nome}{nome da sub-bacia}
-\item{valor}{valor da previsao}
+\item{data_rodada - data da rodada}
+\item{data_previsao - data da previsao}
+\item{cenario - nome do cenario}
+\item{nome - nome da sub-bacia}
+\item{valor - valor da previsao}
 }}
 
 \item{datas_rodadas}{data table com as colunas
 \itemize{
-\item{data}{data da rodada}
-\item{numero_dias_previsao}{numero de dias de previsão}
+\item{data - data da rodada}
+\item{numero_dias_previsao - numero de dias de previsão}
 }}
 
 \item{numero_dias}{numero de dias alem da data final da previsao a ser verificado}
@@ -27,11 +27,11 @@ completa_previsao(previsao_precipitacao, datas_rodadas, numero_dias = 2)
 \value{
 previsao_precipitacao data.table com as colunas
 \itemize{
-\item{data_rodada}{data da rodada}
-\item{data_previsao}{data da previsao}
-\item{cenario}{nome do cenario}
-\item{nome}{nome da sub-bacia}
-\item{valor}{valor da previsao}
+\item{data_rodada - data da rodada}
+\item{data_previsao - data da previsao}
+\item{cenario - nome do cenario}
+\item{nome - nome da sub-bacia}
+\item{valor - valor da previsao}
 }
 }
 \description{
