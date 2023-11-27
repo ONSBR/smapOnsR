@@ -37,23 +37,23 @@
 #'     \item{valor}{peso do posto plu}
 #'     }
 #' @param pesos vetor de pesos a serem utilizados para cada data durante a calibracao
-#' @param data_inicio_objetivo data inicial da avaliacao da funcao objetivo
-#' @param data_fim_objetivo data final da avaliacao da funcao objetivo
+#' @param inicio_objetivo inicio do calculo da funcao objetivo
+#' @param fim_objetivo fim do calculo da funcao objetivo
+#' @param numero_dias numero de dias da simulacao para a calibracao
+#' @param numero_postos_plu numero de posto_plu considerados
 #' @importFrom data.table data.table
 #' @importFrom stats dbeta
 #' @return objetivo valor da funcao objetivo
 #' @export
 
 funcao_objetivo_calibracao <- function(vetor_modelo, kt_min, kt_max, area, EbInic, TuInic, Supin, 
-      precipitacao, evapotranspiracao, vazao, data_inicio_objetivo, data_fim_objetivo,
-      postos_plu, pesos = rep(1 / length(vazao[, valor]), length(vazao[, valor]))){
+      precipitacao, evapotranspiracao, vazao, inicio_objetivo, fim_objetivo,
+      postos_plu, pesos = rep(1 / length(vazao[, valor]), length(vazao[, valor])), numero_dias,
+      numero_postos_plu) {
 
   kt <- cria_kt(kt_max, kt_min, vetor_modelo[15], vetor_modelo[16])
 
-  numero_dias <- nrow(evapotranspiracao)
-
   inicializacao <- inicializacao_smap(vetor_modelo, area, EbInic, TuInic, Supin)
-  numero_postos_plu <- nrow(postos_plu)
   if (numero_postos_plu > 1) {
     vetor_modelo[17:(16 + numero_postos_plu)] <- vetor_modelo[17:(16 + numero_postos_plu)] / sum(vetor_modelo[17:(16 + numero_postos_plu)])
     postos_plu$valor <- vetor_modelo[17:(16 + numero_postos_plu)]
@@ -64,9 +64,9 @@ funcao_objetivo_calibracao <- function(vetor_modelo, kt_min, kt_max, area, EbIni
   precipitacao_ponderada[, valor := valor * vetor_modelo[12]]
   precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada[, valor], kt, kt_max, kt_min)
 
-  evapotranspiracao_ponderada <- data.table::data.table(evapotranspiracao)
+  evapotranspiracao_ponderada <- data.table::copy(evapotranspiracao)
   evapotranspiracao_ponderada[, valor := valor * vetor_modelo[13]]
-  evapotranspiracao_planicie_ponderada <- data.table::data.table(evapotranspiracao)
+  evapotranspiracao_planicie_ponderada <- data.table::copy(evapotranspiracao)
   evapotranspiracao_planicie_ponderada[, valor := valor * vetor_modelo[14]]
 
   vetor_inicializacao <- unlist(inicializacao)
@@ -76,9 +76,8 @@ funcao_objetivo_calibracao <- function(vetor_modelo, kt_min, kt_max, area, EbIni
             evapotranspiracao_ponderada[, valor], evapotranspiracao_planicie_ponderada[, valor], numero_dias)
   
   dat <- data.table::data.table(saida)
-  dat[, data := evapotranspiracao_ponderada[, data]]
 
-  objetivo <- calcula_dm(dat[data >= data_inicio_objetivo & data <= data_fim_objetivo, Qcalc],
+  objetivo <- calcula_dm(dat[inicio_objetivo:fim_objetivo, Qcalc],
                          vazao[, valor], pesos)
   objetivo
 }
@@ -151,7 +150,7 @@ cria_kt <- function(kt_max, kt_min, alfa, beta){
 #'     }
 #' @param pesos vetor de pesos a serem utilizados para cada data durante a calibracao
 #' @importFrom data.table data.table
-#' @return objetivo valor da funcao objetivo
+#' @return ajuste valor da funcao objetivo
 #' @export
 #'
 calibracao <- function(vetor_modelo, kt_min, kt_max, area, EbInic, TuInic, Supin, precipitacao,
@@ -161,6 +160,11 @@ calibracao <- function(vetor_modelo, kt_min, kt_max, area, EbInic, TuInic, Supin
   if (length(unique(limite_inferior == limite_superior)) == 2) {
     limite_superior[limite_inferior == limite_superior] <- limite_superior[limite_inferior == limite_superior] + 0.000001
   }
+
+  numero_postos_plu <- nrow(postos_plu)
+  numero_dias <- nrow(evapotranspiracao)
+  inicio_objetivo <- evapotranspiracao[data <= data_inicio_objetivo, .N]
+  fim_objetivo <- evapotranspiracao[data <= data_fim_objetivo, .N]
 
   ajuste <- stats::optim(par = vetor_modelo, method = "L-BFGS-B",
               lower = limite_inferior, upper = limite_superior,
@@ -172,10 +176,12 @@ calibracao <- function(vetor_modelo, kt_min, kt_max, area, EbInic, TuInic, Supin
               precipitacao = precipitacao,
               evapotranspiracao = evapotranspiracao,
               vazao = vazao,
-              data_inicio_objetivo = data_inicio_objetivo,
-              data_fim_objetivo = data_fim_objetivo,
+              inicio_objetivo = inicio_objetivo,
+              fim_objetivo = fim_objetivo,
               postos_plu = postos_plu,
               pesos = pesos,
+              numero_dias = numero_dias,
+              numero_postos_plu = numero_postos_plu,
               control = list(fnscale = 1))
   
   numero_postos_plu <- nrow(postos_plu)

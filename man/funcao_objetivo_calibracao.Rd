@@ -15,10 +15,12 @@ funcao_objetivo_calibracao(
   precipitacao,
   evapotranspiracao,
   vazao,
-  data_inicio_objetivo,
-  data_fim_objetivo,
+  inicio_objetivo,
+  fim_objetivo,
   postos_plu,
-  pesos = rep(1/length(vazao[, valor]), length(vazao[, valor]))
+  pesos = rep(1/length(vazao[, valor]), length(vazao[, valor])),
+  numero_dias,
+  numero_postos_plu
 )
 }
 \arguments{
@@ -60,9 +62,9 @@ funcao_objetivo_calibracao(
 \item{valor}{valor da variavel}
 }}
 
-\item{data_inicio_objetivo}{data inicial da avaliacao da funcao objetivo}
+\item{inicio_objetivo}{inicio do calculo da funcao objetivo}
 
-\item{data_fim_objetivo}{data final da avaliacao da funcao objetivo}
+\item{fim_objetivo}{fim do calculo da funcao objetivo}
 
 \item{postos_plu}{data.table com as colunas
 \itemize{
@@ -72,6 +74,10 @@ funcao_objetivo_calibracao(
 }}
 
 \item{pesos}{vetor de pesos a serem utilizados para cada data durante a calibracao}
+
+\item{numero_dias}{numero de dias da simulacao para a calibracao}
+
+\item{numero_postos_plu}{numero de posto_plu considerados}
 }
 \value{
 objetivo valor da funcao objetivo
