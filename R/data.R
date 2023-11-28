@@ -7,9 +7,9 @@
 #' A data table com 552,258 linhas and 4 colunas:
 #' \describe{
 #'   \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{valor}{valor de precipitacao observada}
+#'     \item{data - data da observacao}
+#'     \item{posto - nome do posto}
+#'     \item{valor - valor de precipitacao observada}
 #'  }
 #' }
 #' @source ONS
@@ -24,9 +24,9 @@
 #' A data table com 486,513 linhas and 4 colunas:
 #' \describe{
 #'   \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{valor}{valor de vazao observada}
+#'     \item{data - data da observacao}
+#'     \item{posto - nome do posto}
+#'     \item{valor - valor de vazao observada}
 #'  }
 #' }
 #' @source ONS
@@ -41,9 +41,9 @@
 #' A data table com 163,632 linhas and 4 colunas:
 #' \describe{
 #'   \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{nome}{nome do posto}
-#'     \item{valor}{valor de evapotranspiracao potencial observada}
+#'     \item{data - data da observacao}
+#'     \item{nome - nome do posto}
+#'     \item{valor - valor de evapotranspiracao potencial observada}
 #'  }
 #' }
 #' @source ONS
@@ -57,9 +57,9 @@
 #' A data table com 8910 linhas and 3 colunas:
 #' \describe{
 #'   \itemize{
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{parametros}{nome do parametros}
-#'     \item{valor}{valor do parametro}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{parametros - nome do parametros}
+#'     \item{valor - valor do parametro}
 #'     }
 #' }
 #' @source ONS
@@ -74,9 +74,9 @@
 #' Data table com 1,320 linhas and 4 colunas:
 #' \describe{
 #'   \itemize{
-#'     \item{mes}{data da observacao}
-#'     \item{nome}{nome do posto}
-#'     \item{valor}{valor de evapotranspiracao potencial observada}
+#'     \item{mes - data da observacao}
+#'     \item{nome - nome do posto}
+#'     \item{valor - valor de evapotranspiracao potencial observada}
 #'  }
 #' }
 #' @source ONS
@@ -90,9 +90,9 @@
 #' @format ## 'postos_plu'
 #' data table com as colunas
 #'     \itemize{
-#'     \item{nome}{nome da sub_bacia}
-#'     \item{posto}{nome do posto plu}
-#'     \item{valor}{peso do posto plu}
+#'     \item{nome - nome da sub_bacia}
+#'     \item{posto - nome do posto plu}
+#'     \item{valor - peso do posto plu}
 #'     }
 #' @source ONS
 "postos_plu"

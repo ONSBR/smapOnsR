@@ -12,11 +12,11 @@ le_precipitacao_prevista(arq)
 \value{
 data.table com a precipitacao prevista com as colunas
 \itemize{
-\item{data_rodada}{data da rodada do modelo que gerou a previsao}
-\item{data_previsao}{data da previsao}
-\item{cenario}{codigo do cenario}
-\item{nome}{nome da sub bacia}
-\item{valor}{valor da previsao de precipitacao}
+\item{data_rodada - data da rodada do modelo que gerou a previsao}
+\item{data_previsao - data da previsao}
+\item{cenario - codigo do cenario}
+\item{nome - nome da sub bacia}
+\item{valor - valor da previsao de precipitacao}
 }
 }
 \description{

@@ -11,19 +11,26 @@ transforma_NC_serie(serie_temporal, normal_climatologica)
 
 \item{normal_climatologica}{data.table com NC de evapotranspiracao com as colunas
 \itemize{
-\item{mes}{mes da NC}
-\item{posto}{nome do posto}
-\item{valor}{valor da NC de evapotranspiracao observada}
+\item{mes - mes da NC}
+\item{posto - nome do posto}
+\item{valor - valor da NC de evapotranspiracao observada}
 }}
 }
 \value{
 data.table com as colunas
 \itemize{
-\item{data}{data da observacao}
-\item{posto}{nome do posto}
-\item{valor}{valor da serie temporal}
+\item{data - data da observacao}
+\item{posto - nome do posto}
+\item{valor - valor da serie temporal}
 }
 }
 \description{
 transforma normal climatologica de evapotranspiracao em uma serie temporal
+}
+\examples{
+nome2 <- "baixoig"
+normal_climatologica <- historico_etp_NC[nome == nome2]
+serie_temporal <- historico_precipitacao[posto == postos_plu[nome == nome2, posto]]
+serie_temporal <- ponderacao_espacial(serie_temporal, postos_plu[nome == nome2])
+serie_temporal_NC <- transforma_NC_serie(serie_temporal, normal_climatologica)
 }

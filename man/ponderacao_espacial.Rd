@@ -9,28 +9,41 @@ ponderacao_espacial(historico_precipitacao, postos_plu)
 \arguments{
 \item{historico_precipitacao}{data table com a precipitacao a ser ponderada com as colunas
 \itemize{
-\item{data}{data da observacao}
-\item{posto}{nome do posto plu}
-\item{id}{id do posto}
-\item{valor}{valor da variavel}
+\item{data - data da observacao}
+\item{posto - nome do posto plu}
+\item{id - id do posto}
+\item{valor - valor da variavel}
 }}
 
 \item{postos_plu}{data.table postos_plu com as colunas
 \itemize{
-\item{posto}{nome da sub_bacia}
-\item{psat}{nome do posto plu}
-\item{valor}{peso do posto plu}
+\item{posto - nome da sub_bacia}
+\item{psat - nome do posto plu}
+\item{valor - peso do posto plu}
 }}
 }
 \value{
 precipitacao data table com a precipitacao a ser ponderada com as colunas
 \itemize{
-\item{data}{data da observacao}
-\item{sub_bacia}{nome da sub_bacia}
-\item{id}{id da sub_bacia}
-\item{valor}{valor da precipitacao ponderada}
+\item{data - data da observacao}
+\item{sub_bacia - nome da sub_bacia}
+\item{id - id da sub_bacia}
+\item{valor - valor da precipitacao ponderada}
 }
 }
 \description{
 Realiza a ponderacao espacial de precipitacao atraves dos pesos de cada sub_bacia
+}
+\examples{
+sub_bacia <- "pimentalt"
+modelo <- new_modelo_smap_ons(parametros[nome == sub_bacia], postos_plu[nome == sub_bacia])
+kt <- unlist(modelo)[12:74]
+kt_min <- sum(kt[4:63] > 0)
+kt_max <- sum(kt[1:2] > 0)
+data_inicio <- as.Date("2021-12-01")
+data_fim <- as.Date("2021-12-29")
+precipitacao <- historico_precipitacao[data <= (data_fim + kt_max) &
+          data >= (data_inicio - kt_min) & posto \%in\% postos_plu[nome == sub_bacia, posto]]
+
+precipitacao_ponderada <- ponderacao_espacial(precipitacao, postos_plu[nome == sub_bacia])
 }

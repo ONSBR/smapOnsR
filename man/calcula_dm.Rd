@@ -23,3 +23,8 @@ dm distancia multicriterio
 \description{
 Realiza o calculo da DM
 }
+\examples{
+observacao <- 1:30
+simulacao <- observacao - 0.5
+nse <- calcula_dm(simulacao, observacao)
+}

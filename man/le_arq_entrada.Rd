@@ -12,57 +12,57 @@ le_arq_entrada(pasta_entrada)
 \value{
 saida lista com as variaveis: parametros data table com os parametros dos modelos
 \itemize{
-\item{nome}{nome da sub-bacia}
-\item{parametro}{nome do parametro}
-\item{valor}{valor do parametro}
+\item{nome - nome da sub-bacia}
+\item{parametro - nome do parametro}
+\item{valor - valor do parametro}
 }
 inicializacao data.table com a inicializacao com as colunas:
 \itemize{
-\item{nome}{nome da sub_bacia}
-\item{variavel}{vazao de base inicial}
-\item{valor}{valor da variavel}
+\item{nome - nome da sub_bacia}
+\item{variavel - vazao de base inicial}
+\item{valor - valor da variavel}
 }
 precipitacao data table com o historico de precipitacao com as colunas:
 \itemize{
-\item{data}{data da observacao}
-\item{posto}{nome do posto}
-\item{valor}{valor da variavel}
+\item{data - data da observacao}
+\item{posto - nome do posto}
+\item{valor - valor da variavel}
 }
 previsao_precipitacao data.table com a previsao de precipitacao com as colunas:
 \itemize{
-\item{data_rodada}{data da rodada}
-\item{data_previsao}{data da previsao}
-\item{cenario}{nome do cenario}
-\item{posto}{nome do posto}
-\item{valor}{valor da previsao}
+\item{data_rodada - data da rodada}
+\item{data_previsao - data da previsao}
+\item{cenario - nome do cenario}
+\item{posto - nome do posto}
+\item{valor - valor da previsao}
 }
 evapotranspiracao data.table com o historico de NC deevapotranspiracao com as colunas:
 \itemize{
-\item{mes}{mes da NC}
-\item{posto}{nome do posto}
-\item{valor}{valor da NC de evapotranspiracao observada}
+\item{mes - mes da NC}
+\item{posto - nome do posto}
+\item{valor - valor da NC de evapotranspiracao observada}
 }
 vazao data table com o historico de vazao com as colunas:
 \itemize{
-\item{data}{data da observacao}
-\item{posto}{nome do posto}
-\item{valor}{valor da variavel}
+\item{data - data da observacao}
+\item{posto - nome do posto}
+\item{valor - valor da variavel}
 }
 postos_plu data table contendo a relacao sub-bacia x postos_plu com as colunas:
 \itemize{
-\item{nome}{nome da sub_bacia}
-\item{posto}{nome do posto plu}
-\item{valor}{peso do posto plu}
+\item{nome - nome da sub_bacia}
+\item{posto - nome do posto plu}
+\item{valor - peso do posto plu}
 }
 datas_rodadas data table contendo as datas dos casos a serem executados e seus respectivos horizontes:
 \itemize{
-\item{data}{data do caso}
-\item{numero_dias_previsao}{horizonte do caso}
+\item{data - data do caso}
+\item{numero_dias_previsao - horizonte do caso}
 }
 caso lista contendo os seguintes parametros
 \itemize{
-\item{numero_subbacias}{numero de sub-bacias do caso}
-\item{nome_subbacia}{vetor com o nome das sub-bacias}
+\item{numero_subbacias - numero de sub-bacias do caso}
+\item{nome_subbacia - vetor com o nome das sub-bacias}
 }
 }
 \description{

@@ -11,17 +11,17 @@ le_entrada_precipitacao(pasta_entrada, postos_plu)
 
 \item{postos_plu}{data.table postos_plu com as colunas
 \itemize{
-\item{nome}{nome da sub_bacia}
-\item{posto}{nome do posto plu}
-\item{valor}{peso do posto plu}
+\item{nome - nome da sub_bacia}
+\item{posto - nome do posto plu}
+\item{valor - peso do posto plu}
 }}
 }
 \value{
-data.table vazao com as colunas
+data.table precipitacao com as colunas
 \itemize{
-\item{data}{data da observacao}
-\item{posto}{nome do posto}
-\item{valor}{valor da precipitacao observada}
+\item{data - data da observacao}
+\item{posto - nome do posto plu}
+\item{valor - valor da precipitacao observada}
 }
 }
 \description{

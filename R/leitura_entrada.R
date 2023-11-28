@@ -73,9 +73,9 @@ le_entrada_parametros <- function(pasta_entrada, nome_subbacia) {
 #' @importFrom  data.table fread setcolorder
 #' @return data.table evapotranspiracao com as colunas
 #'     \itemize{
-#'     \item{mes}{mes da NC}
-#'     \item{posto}{nome do posto}
-#'     \item{valor}{valor da NC de evapotranspiracao observada}
+#'     \item{mes - mes da NC}
+#'     \item{posto - nome da sub-bacia}
+#'     \item{valor - valor da NC de evapotranspiracao observada}
 #'     }
 #' @export
 le_entrada_evapotranspiracao <- function(pasta_entrada, nome_subbacia) {
@@ -125,8 +125,8 @@ le_entrada_evapotranspiracao <- function(pasta_entrada, nome_subbacia) {
 #' @importFrom  data.table fread
 #' @return caso lista contendo os seguintes parametros
 #'     \itemize{
-#'     \item{numero_subbacias}{numero de sub-bacias do caso}
-#'     \item{nome_subbacia}{vetor com o nome das sub-bacias}
+#'     \item{numero_subbacias- numero de sub-bacias do caso}
+#'     \item{nome_subbacia - vetor com o nome das sub-bacias}
 #'     }
 #' @export
 le_entrada_caso <- function(pasta_entrada) {
@@ -172,14 +172,14 @@ le_entrada_caso <- function(pasta_entrada) {
 #' @importFrom  data.table fread setcolorder
 #' @return lista com o data.table inicializacao com as colunas
 #'     \itemize{
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{variavel}{nome da variavel}
-#'     \item{valor}{valor da variavel}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{variavel - nome da variavel}
+#'     \item{valor - valor da variavel}
 #'     }
 #' e data table datas_rodadas com as colunas
 #'     \itemize{
-#'     \item{data}{data da rodada}
-#'     \item{numero_dias_previsao}{numero de dias de previsao}
+#'     \item{data - data do caso}
+#'     \item{numero_dias_previsao - numero de dias de previsao de cada caso}
 #'     }
 #' @export
 le_entrada_inicializacao <- function(pasta_entrada, nome_subbacia) {
@@ -252,9 +252,9 @@ le_entrada_inicializacao <- function(pasta_entrada, nome_subbacia) {
 #' @importFrom lubridate year
 #' @return data.table vazao com as colunas
 #'     \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{valor}{valor da precipitacao observada}
+#'     \item{data - data da observacao}
+#'     \item{posto - nome da sub-bacia}
+#'     \item{valor - valor da vazao observada}
 #'     }
 #' @export
 le_entrada_vazao <- function(pasta_entrada, nome_subbacia) {
@@ -308,9 +308,9 @@ le_entrada_vazao <- function(pasta_entrada, nome_subbacia) {
 #' @importFrom  data.table fread setcolorder
 #' @return data.table postos_plu com as colunas
 #'     \itemize{
-#'     \item{nome}{nome da sub_bacia}
-#'     \item{posto}{nome do posto plu}
-#'     \item{valor}{peso do posto plu}
+#'     \item{nome - nome da sub_bacia}
+#'     \item{posto - nome do posto plu}
+#'     \item{valor - peso do posto plu}
 #'     }
 #' @export
 le_entrada_posto_plu <- function(pasta_entrada, nome_subbacia) {
@@ -370,17 +370,17 @@ le_entrada_posto_plu <- function(pasta_entrada, nome_subbacia) {
 #' @param pasta_entrada caminho da pasta  "arq_entrada"
 #' @param postos_plu data.table postos_plu com as colunas
 #'     \itemize{
-#'     \item{nome}{nome da sub_bacia}
-#'     \item{posto}{nome do posto plu}
-#'     \item{valor}{peso do posto plu}
+#'     \item{nome - nome da sub_bacia}
+#'     \item{posto - nome do posto plu}
+#'     \item{valor - peso do posto plu}
 #'     }
 #' @importFrom  data.table fread setcolorder
 #' @importFrom stats na.omit
-#' @return data.table vazao com as colunas
+#' @return data.table precipitacao com as colunas
 #'     \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{valor}{valor da precipitacao observada}
+#'     \item{data - data da observacao}
+#'     \item{posto - nome do posto plu}
+#'     \item{valor - valor da precipitacao observada}
 #'     }
 #' @export
 le_entrada_precipitacao <- function(pasta_entrada, postos_plu) {
@@ -448,11 +448,12 @@ le_entrada_precipitacao <- function(pasta_entrada, postos_plu) {
 #' @importFrom  data.table fread
 #' @return modelos_precipitacao lista contendo os seguintes parametros
 #'     \itemize{
-#'     \item{numero_cenario}{numero de cenarios do caso}
-#'     \item{nome_cenario}{data table contendo os seguintes parametros}
+#'     \item{numero_cenario - numero de cenarios do caso}
+#'     \item{nome_cenario - data table contendo os seguintes parametros}
 #'     \itemize{
-#'     \item{primeira parte do nome dos cenarios de precipitacao considerados o caso}
-#'     \item{nome_cenario_2}{segunda parte do nome dos cenarios de precipitacao considerados o caso}
+#'     \item{nome_cenario_completo - nome completo dos cenarios de precipitacao considerados o caso}
+#'     \item{nome_cenario_1 - primeira parte do nome dos cenarios de precipitacao considerados o caso}
+#'     \item{nome_cenario_2 - segunda parte do nome dos cenarios de precipitacao considerados o caso}
 #'      }
 #'     }
 #' @export
@@ -468,9 +469,10 @@ le_entrada_modelos_precipitacao <- function(pasta_entrada) {
         stop("nao existe o arquivo do tipo modelos_precipitacao.txt")
     }
 
-    dat <- data.table::fread(arq, header = FALSE)
+    dat <- data.table::fread(arq, header = FALSE, sep = "'")
     dat[, V1 := tolower(V1)]
-    numero_cenarios <- as.numeric(dat[1])
+    numero_cenarios <- as.numeric(dat[1, V1])
+    dat <- data.table::data.table(dat[, V1])
     
     if (is.na(numero_cenarios)) stop("Valor nao numerico de cenarios no arquivo modelos_precipitacao.txt")
     
@@ -506,19 +508,21 @@ le_entrada_modelos_precipitacao <- function(pasta_entrada) {
 #' @param nome_subbacia nome da sub-bacia
 #' @param modelos_precipitacao lista contendo os seguintes parametros
 #'     \itemize{
-#'     \item{nome_cenario_1}{primeira parte do nome dos cenarios de precipitacao considerados o caso}
-#'     \item{nome_cenario_2}{segunda parte do nome dos cenarios de precipitacao considerados o caso}
-#'     \item{numero_cenario}{numero de cenarios do caso}
+#'     \item{nome_cenario_completo - nome completo dos cenarios de precipitacao considerados o caso}
+#'     \item{nome_cenario_1 - primeira parte do nome dos cenarios de precipitacao considerados o caso}
+#'     \item{nome_cenario_2 - segunda parte do nome dos cenarios de precipitacao considerados o caso}
+#'     \item{numero_cenario - numero de cenarios do caso}
 #'     }
 #' @importFrom  data.table fread setcolorder data.table
 #' @importFrom utils read.table
 #' @return data.table pontos_grade com as colunas
 #'     \itemize{
-#'     \item{nome}{nome da sub_bacia}
-#'     \item{nome_cenario_1}{primeira parte do nome dos cenarios de precipitacao considerados o caso}
-#'     \item{nome_cenario_2}{segunda parte do nome dos cenarios de precipitacao considerados o caso}
-#'     \item{latitude}{latitude do ponto de grade do cenario}
-#'     \item{longitude}{longitude do ponto de grade do cenario}
+#'     \item{nome - nome da sub_bacia}
+#'     \item{nome_cenario_completo - nome completo dos cenarios de precipitacao considerados o caso}
+#'     \item{nome_cenario_1 - primeira parte do nome dos cenarios de precipitacao considerados o caso}
+#'     \item{nome_cenario_2 - segunda parte do nome dos cenarios de precipitacao considerados o caso}
+#'     \item{latitude - latitude do ponto de grade do cenario}
+#'     \item{longitude - longitude do ponto de grade do cenario}
 #'     }
 #' @export
 le_entrada_pontos_grade <- function(pasta_entrada, nome_subbacia, modelos_precipitacao) {
@@ -621,26 +625,26 @@ le_entrada_bat_conf <- function(pasta_entrada) {
 #' @param pasta_entrada caminho da pasta  "arq_entrada"
 #' @param pontos_grade data.table com as colunas
 #'     \itemize{
-#'     \item{nome}{nome da sub_bacia}
-#'     \item{nome_cenario_1}{primeira parte do nome dos cenarios de precipitacao considerados o caso}
-#'     \item{nome_cenario_2}{segunda parte do nome dos cenarios de precipitacao considerados o caso}
-#'     \item{latitude}{latitude do ponto de grade do cenario}
-#'     \item{longitude}{longitude do ponto de grade do cenario}
+#'     \item{nome - nome da sub_bacia}
+#'     \item{nome_cenario_1 - primeira parte do nome dos cenarios de precipitacao considerados o caso}
+#'     \item{nome_cenario_2 - segunda parte do nome dos cenarios de precipitacao considerados o caso}
+#'     \item{latitude - latitude do ponto de grade do cenario}
+#'     \item{longitude - longitude do ponto de grade do cenario}
 #'     }
 #' @param datas_rodadas data table com as colunas
 #'     \itemize{
-#'     \item{data}{data da rodada}
-#'     \item{numero_dias_previsao}{numero de dias de previsao}
+#'     \item{data - data da rodada}
+#'     \item{numero_dias_previsao - numero de dias de previsao}
 #'     }
 #' @importFrom  data.table fread setcolorder setorder
 #' @importFrom stats na.omit
 #' @return previsao_precipitacao data.table com as colunas
 #'     \itemize{
-#'     \item{data_rodada}{data da rodada}
-#'     \item{data_previsao}{data da previsao}
-#'     \item{cenario}{nome do cenario}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{valor}{valor da previsao}
+#'     \item{data_rodada - data da rodada}
+#'     \item{data_previsao - data da previsao}
+#'     \item{cenario - nome do cenario}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{valor - valor da previsao}
 #'     }
 #' @export
 le_entrada_previsao_precipitacao_2 <- function(pasta_entrada, datas_rodadas, pontos_grade) {
@@ -695,27 +699,27 @@ le_entrada_previsao_precipitacao_2 <- function(pasta_entrada, datas_rodadas, pon
 #' @param pasta_entrada caminho da pasta  "arq_entrada"
 #' @param pontos_grade data.table com as colunas
 #'     \itemize{
-#'     \item{nome}{nome da sub_bacia}
-#'     \item{nome_cenario_1}{primeira parte do nome dos cenarios de precipitacao considerados o caso}
-#'     \item{nome_cenario_2}{segunda parte do nome dos cenarios de precipitacao considerados o caso}
-#'     \item{latitude}{latitude do ponto de grade do cenario}
-#'     \item{longitude}{longitude do ponto de grade do cenario}
+#'     \item{nome - nome da sub_bacia}
+#'     \item{nome_cenario_1 - primeira parte do nome dos cenarios de precipitacao considerados o caso}
+#'     \item{nome_cenario_2 - segunda parte do nome dos cenarios de precipitacao considerados o caso}
+#'     \item{latitude - latitude do ponto de grade do cenario}
+#'     \item{longitude - longitude do ponto de grade do cenario}
 #'     }
 #' @param datas_rodadas data table com as colunas
 #'     \itemize{
-#'     \item{data}{data da rodada}
-#'     \item{numero_dias_previsao}{numero de dias de previsao}
+#'     \item{data - data da rodada}
+#'     \item{numero_dias_previsao - numero de dias de previsao}
 #'     }
 #' @param nome_cenario nome do cenario a ser simulado
 #' @importFrom  data.table fread setcolorder setorder
 #' @importFrom stats na.omit
 #' @return previsao_precipitacao data.table com as colunas
 #'     \itemize{
-#'     \item{data_rodada}{data da rodada}
-#'     \item{data_previsao}{data da previsao}
-#'     \item{cenario}{nome do cenario}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{valor}{valor da previsao}
+#'     \item{data_rodada - data da rodada}
+#'     \item{data_previsao - data da previsao}
+#'     \item{cenario - nome do cenario}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{valor - valor da previsao}
 #'     }
 #' @export
 le_entrada_previsao_precipitacao_1 <- function(pasta_entrada, datas_rodadas, pontos_grade, nome_cenario) {
@@ -773,28 +777,28 @@ le_entrada_previsao_precipitacao_1 <- function(pasta_entrada, datas_rodadas, pon
 #' @param pasta_entrada caminho da pasta  "arq_entrada"
 #' @param pontos_grade data.table com as colunas
 #'     \itemize{
-#'     \item{nome}{nome da sub_bacia}
-#'     \item{nome_cenario_1}{primeira parte do nome dos cenarios de precipitacao considerados o caso}
-#'     \item{nome_cenario_2}{segunda parte do nome dos cenarios de precipitacao considerados o caso}
-#'     \item{latitude}{latitude do ponto de grade do cenario}
-#'     \item{longitude}{longitude do ponto de grade do cenario}
+#'     \item{nome - nome da sub_bacia}
+#'     \item{nome_cenario_1 - primeira parte do nome dos cenarios de precipitacao considerados o caso}
+#'     \item{nome_cenario_2 - segunda parte do nome dos cenarios de precipitacao considerados o caso}
+#'     \item{latitude - latitude do ponto de grade do cenario}
+#'     \item{longitude - longitude do ponto de grade do cenario}
 #'     }
 #' @param data_previsao data da previsao
 #' @param datas_rodadas data table com as colunas
 #'     \itemize{
-#'     \item{data}{data da rodada}
-#'     \item{numero_dias_previsao}{numero de dias de previsao}
+#'     \item{data - data da rodada}
+#'     \item{numero_dias_previsao - numero de dias de previsao}
 #'     }
 #' @param nome_cenario nome do cenario a ser simulado
 #' @importFrom  data.table fread setcolorder setorder
 #' @importFrom stats na.omit
 #' @return previsao_precipitacao data.table com as colunas
 #'     \itemize{
-#'     \item{data_rodada}{data da rodada}
-#'     \item{data_previsao}{data da previsao}
-#'     \item{cenario}{nome do cenario}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{valor}{valor da previsao}
+#'     \item{data_rodada - data da rodada}
+#'     \item{data_previsao - data da previsao}
+#'     \item{cenario - nome do cenario}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{valor - valor da previsao}
 #'     }
 #' @export
 le_entrada_previsao_precipitacao_0 <- function(pasta_entrada, datas_rodadas, data_previsao, pontos_grade, nome_cenario) {
@@ -873,57 +877,57 @@ le_entrada_previsao_precipitacao_0 <- function(pasta_entrada, datas_rodadas, dat
 #' @importFrom  data.table rbindlist
 #' @return saida lista com as variaveis: parametros data table com os parametros dos modelos
 #'     \itemize{
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{parametro}{nome do parametro}
-#'     \item{valor}{valor do parametro}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{parametro - nome do parametro}
+#'     \item{valor - valor do parametro}
 #'     }
 #' inicializacao data.table com a inicializacao com as colunas:
 #'     \itemize{
-#'     \item{nome}{nome da sub_bacia}
-#'     \item{variavel}{vazao de base inicial}
-#'     \item{valor}{valor da variavel}
+#'     \item{nome - nome da sub_bacia}
+#'     \item{variavel - vazao de base inicial}
+#'     \item{valor - valor da variavel}
 #'     }
 #' precipitacao data table com o historico de precipitacao com as colunas:
 #'     \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{valor}{valor da variavel}
+#'     \item{data - data da observacao}
+#'     \item{posto - nome do posto}
+#'     \item{valor - valor da variavel}
 #'     }
 #' previsao_precipitacao data.table com a previsao de precipitacao com as colunas:
 #'     \itemize{
-#'     \item{data_rodada}{data da rodada}
-#'     \item{data_previsao}{data da previsao}
-#'     \item{cenario}{nome do cenario}
-#'     \item{posto}{nome do posto}
-#'     \item{valor}{valor da previsao}
+#'     \item{data_rodada - data da rodada}
+#'     \item{data_previsao - data da previsao}
+#'     \item{cenario - nome do cenario}
+#'     \item{posto - nome do posto}
+#'     \item{valor - valor da previsao}
 #'     }
 #' evapotranspiracao data.table com o historico de NC deevapotranspiracao com as colunas:
 #'     \itemize{
-#'     \item{mes}{mes da NC}
-#'     \item{posto}{nome do posto}
-#'     \item{valor}{valor da NC de evapotranspiracao observada}
+#'     \item{mes - mes da NC}
+#'     \item{posto - nome do posto}
+#'     \item{valor - valor da NC de evapotranspiracao observada}
 #'     }
 #' vazao data table com o historico de vazao com as colunas:
 #'     \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{valor}{valor da variavel}
+#'     \item{data - data da observacao}
+#'     \item{posto - nome do posto}
+#'     \item{valor - valor da variavel}
 #'     }
 #' postos_plu data table contendo a relacao sub-bacia x postos_plu com as colunas:
 #'     \itemize{
-#'     \item{nome}{nome da sub_bacia}
-#'     \item{posto}{nome do posto plu}
-#'     \item{valor}{peso do posto plu}
+#'     \item{nome - nome da sub_bacia}
+#'     \item{posto - nome do posto plu}
+#'     \item{valor - peso do posto plu}
 #'     }
 #' datas_rodadas data table contendo as datas dos casos a serem executados e seus respectivos horizontes:
 #'     \itemize{
-#'     \item{data}{data do caso}
-#'     \item{numero_dias_previsao}{horizonte do caso}
+#'     \item{data - data do caso}
+#'     \item{numero_dias_previsao - horizonte do caso}
 #'     }
 #' caso lista contendo os seguintes parametros
 #'     \itemize{
-#'     \item{numero_subbacias}{numero de sub-bacias do caso}
-#'     \item{nome_subbacia}{vetor com o nome das sub-bacias}
+#'     \item{numero_subbacias - numero de sub-bacias do caso}
+#'     \item{nome_subbacia - vetor com o nome das sub-bacias}
 #'     }
 #' @export
 le_arq_entrada <- function(pasta_entrada) {

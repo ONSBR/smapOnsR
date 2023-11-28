@@ -99,16 +99,16 @@ rodada_varios_dias <- function(modelo, inicializacao, precipitacao, evapotranspi
 #' @param parametros data table com 8910 linhas and 3 colunas:
 #' \describe{
 #'   \itemize{
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{parametros}{nome do parametros}
-#'     \item{valor}{valor do parametro}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{parametros - nome do parametros}
+#'     \item{valor - valor do parametro}
 #'     }
 #' }
 #' @param postos_plu data.table  com as colunas
 #'     \itemize{
-#'     \item{nome}{nome da sub_bacia}
-#'     \item{posto}{nome do posto plu}
-#'     \item{valor}{peso do posto plu}
+#'     \item{nome - nome da sub_bacia}
+#'     \item{posto - nome do posto plu}
+#'     \item{valor - peso do posto plu}
 #'     }
 #' @return objeto de classe \code{smap_ons}
 #' @export

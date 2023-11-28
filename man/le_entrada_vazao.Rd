@@ -14,9 +14,9 @@ le_entrada_vazao(pasta_entrada, nome_subbacia)
 \value{
 data.table vazao com as colunas
 \itemize{
-\item{data}{data da observacao}
-\item{posto}{nome do posto}
-\item{valor}{valor da precipitacao observada}
+\item{data - data da observacao}
+\item{posto - nome da sub-bacia}
+\item{valor - valor da vazao observada}
 }
 }
 \description{

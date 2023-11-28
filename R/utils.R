@@ -6,17 +6,23 @@
 #' @param serie_temporal serie temporal a ser utilizada como espelho
 #' @param normal_climatologica data.table com NC de evapotranspiracao com as colunas
 #'     \itemize{
-#'     \item{mes}{mes da NC}
-#'     \item{posto}{nome do posto}
-#'     \item{valor}{valor da NC de evapotranspiracao observada}
+#'     \item{mes - mes da NC}
+#'     \item{posto - nome do posto}
+#'     \item{valor - valor da NC de evapotranspiracao observada}
 #'     }
 #' @importFrom data.table data.table setnames setorder
 #' @importFrom lubridate month
+#' @examples
+#' nome2 <- "baixoig"
+#' normal_climatologica <- historico_etp_NC[nome == nome2]
+#' serie_temporal <- historico_precipitacao[posto == postos_plu[nome == nome2, posto]]
+#' serie_temporal <- ponderacao_espacial(serie_temporal, postos_plu[nome == nome2])
+#' serie_temporal_NC <- transforma_NC_serie(serie_temporal, normal_climatologica)
 #' @return data.table com as colunas
 #'     \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{valor}{valor da serie temporal}
+#'     \item{data - data da observacao}
+#'     \item{posto - nome do posto}
+#'     \item{valor - valor da serie temporal}
 #'     }
 #' @export 
 transforma_NC_serie <- function(serie_temporal, normal_climatologica) {
@@ -39,25 +45,35 @@ transforma_NC_serie <- function(serie_temporal, normal_climatologica) {
 #'
 #' @param serie_temporal data.table com as colunas
 #'     \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{id}{id do posto}
-#'     \item{valor}{valor da serie_temporal observada}
+#'     \item{data - data da observacao}
+#'     \item{posto - nome do posto}
+#'     \item{id - id do posto}
+#'     \item{valor - valor da serie_temporal observada}
 #'     }
 #' @param datas_rodadas data.table com as colunas
 #'     \itemize{
-#'     \item{data}{data da rodada}
-#'     \item{numero_dias_previsao}{numero de dias de previsao}
+#'     \item{data - data da rodada}
+#'     \item{numero_dias_previsao - numero de dias de previsao}
 #'      }
 #' @importFrom data.table data.table setcolorder setorder
 #' @return data.table com as colunas
 #'     \itemize{
-#'     \item{data_rodada}{data da rodada}
-#'     \item{data_previsao}{data da previsao}
-#'     \item{cenario}{nome do cenario}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{valor}{valor da previsao}
+#'     \item{data_rodada - data da rodada}
+#'     \item{data_previsao - data da previsao}
+#'     \item{cenario - nome do cenario}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{valor - valor da previsao}
 #'     }
+#' @examples 
+#' sub_bacia <- "avermelha"
+#' precipitacao <- historico_precipitacao[posto %in% postos_plu[nome == sub_bacia, posto]]
+#' precipitacao <- ponderacao_espacial(precipitacao, postos_plu[nome == sub_bacia])
+#' datas_rodadas <- data.table::data.table(
+#'   data = as.Date(c("2020-05-01", "2020-05-08")),
+#'   numero_dias_previsao = c(15, 20)
+#' )
+#' 
+#' previsao <- transforma_historico_previsao(precipitacao, datas_rodadas)
 #' @export
 transforma_historico_previsao <- function(serie_temporal, datas_rodadas) {
 
@@ -93,29 +109,29 @@ transforma_historico_previsao <- function(serie_temporal, datas_rodadas) {
 #'
 #' @param observado data.table com as colunas
 #'     \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{id}{id do posto}
-#'     \item{valor}{valor da serie_temporal observada}
+#'     \item{data - data da observacao}
+#'     \item{posto - nome do posto}
+#'     \item{id - id do posto}
+#'     \item{valor - valor da serie_temporal observada}
 #'     }
 #' @param previsto data.table com as colunas
 #'     \itemize{
-#'     \item{data_rodada}{data da rodada}
-#'     \item{data_previsao}{data da previsao}
-#'     \item{cenario}{nome do cenario}
-#'     \item{posto}{nome do posto}
-#'     \item{id}{id do posto}
-#'     \item{valor}{valor da previsao}
+#'     \item{data_rodada - data da rodada}
+#'     \item{data_previsao - data da previsao}
+#'     \item{cenario - nome do cenario}
+#'     \item{posto - nome do posto}
+#'     \item{id - id do posto}
+#'     \item{valor - valor da previsao}
 #'     }
 #' @importFrom data.table data.table setcolorder setorder
 #' @return serie_temporal data.table com as colunas
 #'     \itemize{
-#'     \item{data_rodada}{data da rodada}
-#'     \item{data_previsao}{data da previsao}
-#'     \item{cenario}{nome do cenario}
-#'     \item{posto}{nome do posto}
-#'     \item{id}{id do posto}
-#'     \item{valor}{valor da previsao}
+#'     \item{data_rodada - data da rodada}
+#'     \item{data_previsao - data da previsao}
+#'     \item{cenario - nome do cenario}
+#'     \item{posto - nome do posto}
+#'     \item{id - id do posto}
+#'     \item{valor - valor da previsao}
 #'     }
 #' @export
 combina_observacao_previsao <- function(observado, previsto){
@@ -141,26 +157,26 @@ combina_observacao_previsao <- function(observado, previsto){
 #'
 #' @param datas_rodadas data table com as colunas
 #'     \itemize{
-#'     \item{data}{data da rodada}
-#'     \item{numero_dias_previsao}{numero de dias de previsão}
+#'     \item{data - data da rodada}
+#'     \item{numero_dias_previsao - numero de dias de previsão}
 #'     }
 #' @param previsao_precipitacao data.table com as colunas
 #'     \itemize{
-#'     \item{data_rodada}{data da rodada}
-#'     \item{data_previsao}{data da previsao}
-#'     \item{cenario}{nome do cenario}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{valor}{valor da previsao}
+#'     \item{data_rodada - data da rodada}
+#'     \item{data_previsao - data da previsao}
+#'     \item{cenario - nome do cenario}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{valor - valor da previsao}
 #'     }
 #' @param numero_dias numero de dias alem da data final da previsao a ser verificado
 #' @importFrom data.table data.table setcolorder setorder setnames CJ
 #' @return previsao_precipitacao data.table com as colunas
 #'     \itemize{
-#'     \item{data_rodada}{data da rodada}
-#'     \item{data_previsao}{data da previsao}
-#'     \item{cenario}{nome do cenario}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{valor}{valor da previsao}
+#'     \item{data_rodada - data da rodada}
+#'     \item{data_previsao - data da previsao}
+#'     \item{cenario - nome do cenario}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{valor - valor da previsao}
 #'     }
 #' @export
 completa_previsao <- function(previsao_precipitacao, datas_rodadas, numero_dias = 2){

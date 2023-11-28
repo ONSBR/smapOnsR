@@ -3,38 +3,44 @@
 #' executa rodada oficial do modleo SMAP/ONS
 #'
 #' @param pasta_entrada caminho da pasta  "arq_entrada"
+#' @examples 
+#'\dontrun{
+#' zip::unzip(system.file("extdata", "dados_entrada.zip", package = "smapOnsR"), exdir = system.file("extdata", package = "smapOnsR"))
+#' pasta_entrada <- system.file("extdata", "Arq_Entrada1", package = "smapOnsR")
+#' saida <- executa_caso_oficial(pasta_entrada)
+#' }
 #' @return saida lista com o data.table previsao contendo as seguintes colunas:
 #'     \itemize{
-#'     \item{data_caso}{data da rodada}
-#'     \item{data_previsao}{data da previsao}
-#'     \item{cenario}{nome do cenario}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{variavel}{nome da variavel}
-#'     \item{valor}{valor da variavel}
+#'     \item{data_caso - data da rodada}
+#'     \item{data_previsao - data da previsao}
+#'     \item{cenario - nome do cenario}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{variavel - nome da variavel}
+#'     \item{valor - valor da variavel}
 #'     }
 #'  otimizacao data table com as colunas:
 #' \itemize{
-#'     \item{otimizacao}{valor das variaveis da otimizacao}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{data_caso}{data do caso}
+#'     \item{otimizacao - valor das variaveis da otimizacao}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{data_caso - data do caso}
 #'     }
 #'  assimilacao data table com as colunas:
 #' \itemize{
-#'     \item{data_caso}{data da rodada}
-#'     \item{data_assimilacao}{data da assimilacao}
-#'     \item{cenario}{nome do cenario}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{variavel}{nome da variavel}
-#'     \item{valor}{valor da variavel}
+#'     \item{data_caso - data da rodada}
+#'     \item{data_assimilacao - data da assimilacao}
+#'     \item{cenario - nome do cenario}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{variavel - nome da variavel}
+#'     \item{valor - valor da variavel}
 #'     }
 #' precipitacao data table contendo precipitacao observada e previsata com as colunas:
 #' \itemize{
-#'     \item{data_previsao}{data da precipitacao}
-#'     \item{data_rodada}{data da rodada}
-#'     \item{cenario}{nome do cenario}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{variavel}{nome da variavel}
-#'     \item{valor}{valor da variavel}
+#'     \item{data_previsao - data da precipitacao}
+#'     \item{data_rodada - data da rodada}
+#'     \item{cenario - nome do cenario}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{variavel - nome da variavel}
+#'     \item{valor - valor da variavel}
 #'     }
 #' @export
 
@@ -55,36 +61,36 @@ executa_caso_oficial <- function(pasta_entrada){
 #' @param pasta_entrada caminho da pasta  "arq_entrada"
 #' @return saida lista com o data.table previsao contendo as seguintes colunas:
 #'     \itemize{
-#'     \item{data_caso}{data da rodada}
-#'     \item{data_previsao}{data da previsao}
-#'     \item{cenario}{nome do cenario}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{variavel}{nome da variavel}
-#'     \item{valor}{valor da variavel}
+#'     \item{data_caso - data da rodada}
+#'     \item{data_previsao - data da previsao}
+#'     \item{cenario - nome do cenario}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{variavel - nome da variavel}
+#'     \item{valor - valor da variavel}
 #'     }
 #'  otimizacao data table com as colunas:
 #' \itemize{
-#'     \item{otimizacao}{valor das variaveis da otimizacao}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{data_caso}{data do caso}
+#'     \item{otimizacao - valor das variaveis da otimizacao}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{data_caso - data do caso}
 #'     }
 #'  assimilacao data table com as colunas:
 #' \itemize{
-#'     \item{data_caso}{data da rodada}
-#'     \item{data_assimilacao}{data da assimilacao}
-#'     \item{cenario}{nome do cenario}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{variavel}{nome da variavel}
-#'     \item{valor}{valor da variavel}
+#'     \item{data_caso - data da rodada}
+#'     \item{data_assimilacao - data da assimilacao}
+#'     \item{cenario - nome do cenario}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{variavel - nome da variavel}
+#'     \item{valor - valor da variavel}
 #'     }
 #' precipitacao data table contendo precipitacao observada e previsata com as colunas:
 #' \itemize{
-#'     \item{data_previsao}{data da precipitacao}
-#'     \item{data_rodada}{data da rodada}
-#'     \item{cenario}{nome do cenario}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{variavel}{nome da variavel}
-#'     \item{valor}{valor da variavel}
+#'     \item{data_previsao - data da precipitacao}
+#'     \item{data_rodada - data da rodada}
+#'     \item{cenario - nome do cenario}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{variavel - nome da variavel}
+#'     \item{valor - valor da variavel}
 #'     }
 #' @export
 
@@ -103,38 +109,43 @@ executa_caso_oficial_novo <- function(pasta_entrada){
 #' executa rodada com evapotranspiracao diaria do modelo SMAP/ONS com dados de entrada novos
 #'
 #' @param pasta_entrada caminho da pasta  "arq_entrada"
+#' @examples 
+#'\dontrun{
+#' pasta_entrada <- system.file("extdata", "arq_entrada_novo", package = "smapOnsR")
+#' saida <- executa_caso_etp(pasta_entrada)
+#' }
 #' @return saida lista com o data.table previsao contendo as seguintes colunas:
 #'     \itemize{
-#'     \item{data_caso}{data da rodada}
-#'     \item{data_previsao}{data da previsao}
-#'     \item{cenario}{nome do cenario}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{variavel}{nome da variavel}
-#'     \item{valor}{valor da variavel}
+#'     \item{data_caso - data da rodada}
+#'     \item{data_previsao - data da previsao}
+#'     \item{cenario - nome do cenario}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{variavel - nome da variavel}
+#'     \item{valor - valor da variavel}
 #'     }
 #'  otimizacao data table com as colunas:
 #' \itemize{
-#'     \item{otimizacao}{valor das variaveis da otimizacao}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{data_caso}{data do caso}
+#'     \item{otimizacao - valor das variaveis da otimizacao}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{data_caso - data do caso}
 #'     }
 #'  assimilacao data table com as colunas:
 #' \itemize{
-#'     \item{data_caso}{data da rodada}
-#'     \item{data_assimilacao}{data da assimilacao}
-#'     \item{cenario}{nome do cenario}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{variavel}{nome da variavel}
-#'     \item{valor}{valor da variavel}
+#'     \item{data_caso - data da rodada}
+#'     \item{data_assimilacao - data da assimilacao}
+#'     \item{cenario - nome do cenario}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{variavel - nome da variavel}
+#'     \item{valor - valor da variavel}
 #'     }
 #' precipitacao data table contendo precipitacao observada e previsata com as colunas:
 #' \itemize{
-#'     \item{data_previsao}{data da precipitacao}
-#'     \item{data_rodada}{data da rodada}
-#'     \item{cenario}{nome do cenario}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{variavel}{nome da variavel}
-#'     \item{valor}{valor da variavel}
+#'     \item{data_previsao - data da precipitacao}
+#'     \item{data_rodada - data da rodada}
+#'     \item{cenario - nome do cenario}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{variavel - nome da variavel}
+#'     \item{valor - valor da variavel}
 #'     }
 #' @export
 

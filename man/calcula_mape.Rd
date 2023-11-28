@@ -23,3 +23,8 @@ mape
 \description{
 Realiza o calculo do MAPE
 }
+\examples{
+observacao <- 1:30
+simulacao <- observacao - 0.5
+nse <- calcula_mape(simulacao, observacao)
+}

@@ -40,26 +40,26 @@ calibracao(
 
 \item{precipitacao}{data table com a precipitacao a ser ponderada com as colunas
 \itemize{
-\item{data}{data da observacao}
-\item{posto}{nome do posto}
-\item{id}{id do posto}
-\item{valor}{valor da variavel}
+\item{data - data da observacao}
+\item{posto - nome do posto}
+\item{id - id do posto}
+\item{valor - valor da variavel}
 }}
 
 \item{evapotranspiracao}{data table com a evapotranspiracao a ser ponderada com as colunas
 \itemize{
-\item{data}{data da observacao}
-\item{posto}{nome do posto}
-\item{id}{id do posto}
-\item{valor}{valor da variavel}
+\item{data - data da observacao}
+\item{posto - nome do posto}
+\item{id - id do posto}
+\item{valor - valor da variavel}
 }}
 
 \item{vazao}{data table com a vazao a avaliada
 \itemize{
-\item{data}{data da observacao}
-\item{posto}{nome do posto}
-\item{id}{id do posto}
-\item{valor}{valor da variavel}
+\item{data - data da observacao}
+\item{posto - nome do posto}
+\item{id - id do posto}
+\item{valor - valor da variavel}
 }}
 
 \item{data_inicio_objetivo}{data inicial da avaliacao da funcao objetivo}
@@ -72,16 +72,62 @@ calibracao(
 
 \item{postos_plu}{data.table com as colunas
 \itemize{
-\item{nome}{nome da sub_bacia}
-\item{posto}{nome do posto plu}
-\item{valor}{peso do posto plu}
+\item{nome - nome da sub_bacia}
+\item{posto - nome do posto plu}
+\item{valor - peso do posto plu}
 }}
 
 \item{pesos}{vetor de pesos a serem utilizados para cada data durante a calibracao}
 }
 \value{
-objetivo valor da funcao objetivo
+ajuste valor da funcao objetivo
 }
 \description{
 Raliza a calibracao de calibracao do SMAP/ONS dado um vetor inicial de pearametros e seus limites superiores e inferiores
+}
+\examples{
+nome2 <- "baixoig"
+ modelo <- new_modelo_smap_ons(parametros[nome == nome2], postos_plu[nome == nome2])
+ kt_max <- sum(modelo$kt[1:2] > 0)
+ kt_min <- sum(modelo$kt[4:63] > 0)
+
+ EbInic <- 300
+ TuInic <- 0.50
+ Supin <- 700
+
+ normal_climatologica <- historico_etp_NC[nome == nome2]
+ precipitacao <- historico_precipitacao[posto \%in\% postos_plu[nome == nome2, posto]]
+ precipitacao_ponderada <- ponderacao_espacial(precipitacao, postos_plu[nome == nome2])
+ data_inicio_objetivo <- as.Date("2011-01-01")
+ data_fim_objetivo <- as.Date("2021-12-31") - kt_max
+ evapotranspiracao <- transforma_NC_serie(precipitacao_ponderada[data >= min(data) + kt_min & data <= data_fim_objetivo], normal_climatologica)
+ vazao <- historico_vazao[data >= data_inicio_objetivo & data <= data_fim_objetivo & posto == nome2]
+
+ area <- attributes(modelo)$area
+ vetor_modelo <- unlist(modelo)
+ vetor_modelo <- c(vetor_modelo[1:11], vetor_modelo[75:77], 5, 5)
+ numero_postos_plu <- nrow(postos_plu[nome == nome2])
+
+ limite_inferior <- vetor_modelo * 0.01
+ limite_superior <- vetor_modelo * 10
+ limite_inferior[8] <- 0.9999999
+ limite_superior[8] <- 1.0000001
+ limite_inferior[12] <- 0.8
+ limite_superior[12] <- 1.2
+ limite_inferior[13] <- 0.8
+ limite_superior[13] <- 1.2
+ limite_inferior[14] <- 0.8
+ limite_superior[14] <- 1.2
+ limite_inferior[15:16] <- 0.00001
+ limite_superior[15:16] <- 50
+
+ numero_dias <- nrow(evapotranspiracao)
+ inicio_objetivo <- evapotranspiracao[data <= data_inicio_objetivo, .N]
+ fim_objetivo <- evapotranspiracao[data <= data_fim_objetivo, .N]
+
+\dontrun{
+ par <- calibracao(vetor_modelo,  kt_min, kt_max, area, EbInic, TuInic, Supin, precipitacao,
+     evapotranspiracao, vazao, data_inicio_objetivo, data_fim_objetivo,
+     limite_inferior, limite_superior, postos_plu[nome == nome2])
+}
 }

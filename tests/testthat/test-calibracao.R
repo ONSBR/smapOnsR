@@ -1,8 +1,8 @@
 test_that("Testa a funcao de calibracao", {
   nome2 <- "baixoig"
   modelo <- new_modelo_smap_ons(parametros[nome == nome2], postos_plu[nome == nome2])
-  kt_max <- max(which(modelo$kt[3:1] > 0)) - 1
-  kt_min <- max(which(modelo$kt[3:63] > 0)) - 1
+  kt_max <- sum(modelo$kt[1:2] > 0)
+  kt_min <- sum(modelo$kt[4:63] > 0)
 
   EbInic <- 300
   TuInic <- 0.50
@@ -41,8 +41,13 @@ test_that("Testa a funcao de calibracao", {
       limite_inferior[17:(16 + numero_postos_plu)] <- 0
   }
 
+  numero_dias <- nrow(evapotranspiracao)
+  inicio_objetivo <- evapotranspiracao[data <= data_inicio_objetivo, .N]
+  fim_objetivo <- evapotranspiracao[data <= data_fim_objetivo, .N]
+
   fo <- funcao_objetivo_calibracao(vetor_modelo, kt_min, kt_max, area, EbInic, TuInic, Supin, precipitacao,
-      evapotranspiracao, vazao, data_inicio_objetivo, data_fim_objetivo, postos_plu[nome == nome2])
+      evapotranspiracao, vazao, inicio_objetivo, fim_objetivo, postos_plu[nome == nome2],
+      pesos = rep(1 / length(vazao[, valor]), length(vazao[, valor])), numero_dias, numero_postos_plu)
 
   par <- calibracao(vetor_modelo,  kt_min, kt_max, area, EbInic, TuInic, Supin, precipitacao,
       evapotranspiracao, vazao, data_inicio_objetivo, data_fim_objetivo,
@@ -51,13 +56,15 @@ test_that("Testa a funcao de calibracao", {
   expect_equal((par$value < fo), TRUE)
 
   data_inicio_objetivo <- evapotranspiracao[, min(data)]
+  inicio_objetivo <- evapotranspiracao[data <= data_inicio_objetivo, .N]
   vazao <- historico_vazao[data >= data_inicio_objetivo & data <= data_fim_objetivo & posto == nome2]
   vazao[, peso := 1 / .N]
   vazao[data < "2011-01-01", peso := 0]
   vazao[peso != 0, peso := 1 / .N]
 
   fo2 <- funcao_objetivo_calibracao(vetor_modelo, kt_min, kt_max, area, EbInic, TuInic, Supin, precipitacao,
-      evapotranspiracao, vazao, data_inicio_objetivo, data_fim_objetivo, postos_plu[nome == nome2], vazao[, peso])
+      evapotranspiracao, vazao, inicio_objetivo, fim_objetivo, postos_plu[nome == nome2], vazao[, peso], 
+      numero_dias, numero_postos_plu)
 
   expect_equal(fo, fo2)
 })

@@ -14,14 +14,14 @@ le_entrada_inicializacao(pasta_entrada, nome_subbacia)
 \value{
 lista com o data.table inicializacao com as colunas
 \itemize{
-\item{nome}{nome da sub-bacia}
-\item{variavel}{nome da variavel}
-\item{valor}{valor da variavel}
+\item{nome - nome da sub-bacia}
+\item{variavel - nome da variavel}
+\item{valor - valor da variavel}
 }
 e data table datas_rodadas com as colunas
 \itemize{
-\item{data}{data da rodada}
-\item{numero_dias_previsao}{numero de dias de previsao}
+\item{data - data do caso}
+\item{numero_dias_previsao - numero de dias de previsao de cada caso}
 }
 }
 \description{

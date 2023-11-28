@@ -12,9 +12,9 @@ le_historico_verificado(arq)
 \value{
 data.table com as colunas
 \itemize{
-\item{data}{data da observacao}
-\item{posto}{nome do posto}
-\item{valor}{valor da precipitacao observada}
+\item{data - data da observacao}
+\item{posto - nome do posto}
+\item{valor - valor da precipitacao observada}
 }
 }
 \description{

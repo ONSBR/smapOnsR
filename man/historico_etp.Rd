@@ -10,9 +10,9 @@
 A data table com 163,632 linhas and 4 colunas:
 \describe{
 \itemize{
-\item{data}{data da observacao}
-\item{nome}{nome do posto}
-\item{valor}{valor de evapotranspiracao potencial observada}
+\item{data - data da observacao}
+\item{nome - nome do posto}
+\item{valor - valor de evapotranspiracao potencial observada}
 }
 }
 }

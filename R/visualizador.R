@@ -153,8 +153,8 @@ executa_visualizador_calibracao <- function(){
                 parametros_posto <- parametros_posto()
                 postos_plu <- postos_plu()
                 modelo <- new_modelo_smap_ons(parametros_posto, postos_plu[postos_plu$nome == input$sub_bacia])
-                kt_max <- max(which(modelo$kt[3:1] > 0)) - 1
-                kt_min <- max(which(modelo$kt[3:63] > 0)) - 1
+                kt_max <- sum(vetor_modelo[1:2] > 0)
+                kt_min <- sum(modelo$kt[4:63] > 0)
                 shiny::updateNumericInput(session, "str", value = vetor_modelo[1])
                 shiny::updateNumericInput(session, "k2t", value = vetor_modelo[2])
                 shiny::updateNumericInput(session, "crec", value = vetor_modelo[3])
@@ -927,30 +927,30 @@ executa_visualizador_calibracao <- function(){
 #'
 #' @param previsoes contendo as seguintes colunas:
 #'     \itemize{
-#'     \item{data_caso}{data da rodada}
-#'     \item{data_previsao}{data da previsao}
-#'     \item{cenario}{nome do cenario}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{variavel}{nome da variavel}
-#'     \item{valor}{valor da variavel}
+#'     \item{data_caso - data da rodada}
+#'     \item{data_previsao - data da previsao}
+#'     \item{cenario - nome do cenario}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{variavel - nome da variavel}
+#'     \item{valor - valor da variavel}
 #'     }
 #' @param assimilacao data table com as colunas:
 #' \itemize{
-#'     \item{data_caso}{data da rodada}
-#'     \item{data_assimilacao}{data da assimilacao}
-#'     \item{cenario}{nome do cenario}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{variavel}{nome da variavel}
-#'     \item{valor}{valor da variavel}
+#'     \item{data_caso - data da rodada}
+#'     \item{data_assimilacao - data da assimilacao}
+#'     \item{cenario - nome do cenario}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{variavel - nome da variavel}
+#'     \item{valor - valor da variavel}
 #'     }
 #' @param precipitacao data table contendo precipitacao observada e previsata com as colunas:
 #' \itemize{
-#'     \item{data_previsao}{data da precipitacao}
-#'     \item{data_rodada}{data da rodada}
-#'     \item{cenario}{nome do cenario}
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{variavel}{nome da variavel}
-#'     \item{valor}{valor da variavel}
+#'     \item{data_previsao - data da precipitacao}
+#'     \item{data_rodada - data da rodada}
+#'     \item{cenario - nome do cenario}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{variavel - nome da variavel}
+#'     \item{valor - valor da variavel}
 #'     }
 #' @param funcao_objetivo data table com as colunas:
 #' \itemize{

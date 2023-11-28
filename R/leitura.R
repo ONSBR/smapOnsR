@@ -11,9 +11,9 @@
 #' @importFrom utils read.csv
 #' @return data.table com as colunas
 #'     \itemize{
-#'     \item{nome}{nome da sub-bacia}
-#'     \item{parametro}{nome do parametro}
-#'     \item{valor}{valor do parametro}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{parametro - nome do parametro}
+#'     \item{valor - valor do parametro}
 #'     }
 #' @export 
 le_parametros <- function(arq) {
@@ -96,9 +96,9 @@ le_parametros <- function(arq) {
 #' @importFrom stats complete.cases
 #' @return data.table com as colunas
 #'     \itemize{
-#'     \item{data}{data da observacao}
-#'     \item{posto}{nome do posto}
-#'     \item{valor}{valor da precipitacao observada}
+#'     \item{data - data da observacao}
+#'     \item{posto - nome do posto}
+#'     \item{valor - valor da precipitacao observada}
 #'     }
 #' @export 
 
@@ -149,11 +149,11 @@ le_historico_verificado <- function(arq) {
 #' @importFrom  data.table data.table as.IDate
 #' @return data.table com a precipitacao prevista com as colunas
 #'     \itemize{
-#'     \item{data_rodada}{data da rodada do modelo que gerou a previsao}
-#'     \item{data_previsao}{data da previsao}
-#'     \item{cenario}{codigo do cenario}
-#'     \item{nome}{nome da sub bacia}
-#'     \item{valor}{valor da previsao de precipitacao}
+#'     \item{data_rodada - data da rodada do modelo que gerou a previsao}
+#'     \item{data_previsao - data da previsao}
+#'     \item{cenario - codigo do cenario}
+#'     \item{nome - nome da sub bacia}
+#'     \item{valor - valor da previsao de precipitacao}
 #'     }
 #' @export 
 le_precipitacao_prevista <- function(arq) {
@@ -211,9 +211,9 @@ le_precipitacao_prevista <- function(arq) {
 #' @importFrom  data.table data.table
 #' @return data.table com a inicializacao com as colunas
 #'     \itemize{
-#'     \item{nome}{nome da sub_bacia}
-#'     \item{variavel}{nome da variavel}
-#'     \item{valor}{valor da variavel}
+#'     \item{nome - nome da sub_bacia}
+#'     \item{variavel - nome da variavel}
+#'     \item{valor - valor da variavel}
 #'     }
 #' @export 
 le_inicializacao <- function(arq) {
@@ -267,8 +267,8 @@ le_inicializacao <- function(arq) {
 #' @importFrom  data.table fread
 #' @return data table contendo as datas dos casos a serem executados e seus respectivos horizontes:
 #'     \itemize{
-#'     \item{data}{data do caso}
-#'     \item{numero_dias_previsao}{horizonte do caso}
+#'     \item{data - data do caso}
+#'     \item{numero_dias_previsao - horizonte do caso}
 #'     }
 #' @export 
 le_datas_rodada <- function(arq) {
@@ -320,8 +320,8 @@ le_datas_rodada <- function(arq) {
 #' @importFrom  data.table fread
 #' @return data table contendo as datas dos casos a serem executados e seus respectivos horizontes:
 #'     \itemize{
-#'     \item{data}{data do caso}
-#'     \item{numero_dias_previsao}{horizonte do caso}
+#'     \item{data - data do caso}
+#'     \item{numero_dias_previsao - horizonte do caso}
 #'     }
 #' @export 
 le_arquivos <- function(pasta_entrada) {
@@ -376,8 +376,8 @@ le_arquivos <- function(pasta_entrada) {
 #' @importFrom  data.table fread
 #' @return data table contendo as datas dos casos a serem executados e seus respectivos horizontes:
 #'     \itemize{
-#'     \item{data}{data do caso}
-#'     \item{numero_dias_previsao}{horizonte do caso}
+#'     \item{data - data do caso}
+#'     \item{numero_dias_previsao - horizonte do caso}
 #'     }
 #' @export 
 le_postos_plu <- function(arq) {
@@ -439,9 +439,9 @@ le_postos_plu <- function(arq) {
 #' @importFrom  data.table fread setcolorder
 #' @return data.table evapotranspiracao com as colunas
 #'     \itemize{
-#'     \item{mes}{mes da NC}
-#'     \item{posto}{nome do posto}
-#'     \item{valor}{valor da NC de evapotranspiracao observada}
+#'     \item{mes - mes da NC}
+#'     \item{posto - nome do posto}
+#'     \item{valor - valor da NC de evapotranspiracao observada}
 #'     }
 #' @export
 le_evapotranspiracao_nc <- function(arq) {
