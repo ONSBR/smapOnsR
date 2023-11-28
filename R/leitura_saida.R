@@ -127,7 +127,6 @@ le_execucao <- function(pasta_saida, data) {
 #'         \item{valor} valor da variavel prevista
 #'     }
 #' @export
-#' 
 le_previsao <- function(pasta_saida, data) {
 
     arq <- list.files(path = pasta_saida, pattern = "previsao.txt", ignore.case = TRUE, full.names = TRUE)

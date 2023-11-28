@@ -69,7 +69,6 @@
 #'     \item{valor - valor da variavel}
 #'     }
 #' @export
-#' 
 
 assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao_assimilacao,
       evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias_assimilacao,
@@ -289,7 +288,6 @@ funcao_objetivo_assimilacao_oficial <- function(vetor_variaveis, vetor_modelo, T
 #'     \item{valor - valor da variavel}
 #'     }
 #' @export
-#' 
 
 assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao_assimilacao,
       evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias_assimilacao,

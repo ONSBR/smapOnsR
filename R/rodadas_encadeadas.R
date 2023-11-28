@@ -98,7 +98,6 @@
 #' entrada$postos_plu, entrada$datas_rodadas, length(unique(entrada$previsao_precipitacao[, cenario])), entrada$caso$nome_subbacia)
 #' }
 #' @export
-#' 
 rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_observada, 
     precipitacao_prevista, evapotranspiracao_nc, vazao_observada, postos_plu, datas_rodadas, 
     numero_cenarios, sub_bacias) {
@@ -347,7 +346,6 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
 #'     \item{valor - valor da variavel}
 #'     }
 #' @export
-#' 
 rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observada, 
     precipitacao_prevista, evapotranspiracao_observada, evapotranspiracao_prevista, vazao_observada, postos_plu, datas_rodadas, 
     numero_cenarios, sub_bacias) {
@@ -602,7 +600,6 @@ rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observa
 #'     \item{valor - valor da variavel}
 #'     }
 #' @export
-#' 
 rodada_sem_assimilacao <- function(parametros, inicializacao, precipitacao_observada, 
     precipitacao_prevista, evapotranspiracao_nc, vazao_observada, postos_plu, datas_rodadas, 
     numero_cenarios, sub_bacias, execucao) {

@@ -22,7 +22,6 @@
 #'         \item{valor} valor da variavel prevista
 #'     }
 #' @export
-#' 
 escreve_previsao <- function(pasta_saida = "arq_saida", previsao) {
     unique_nomes <- unique(previsao$nome)
     unique_cenarios <- unique(previsao$cenario)
@@ -31,7 +30,7 @@ escreve_previsao <- function(pasta_saida = "arq_saida", previsao) {
             tabela <- previsao[cenario == nome_cenario & nome == nome_subbacia & 
             variavel == "Qcalc", .(data_previsao, valor)]
             tabela[, data_previsao := format(data_previsao, "%d/%m/%Y")]
-            tabela[, valor := sprintf("%010.2f", valor)]
+            tabela[, valor := sprintf("%09.2f", valor)]
             nome_arquivo <- paste0(nome_subbacia, "_", nome_cenario, "_previsao.txt")
             write.table("Data       Qcal", file = file.path(pasta_saida, nome_arquivo), quote = FALSE, sep = " ", row.names = FALSE, col.names = FALSE)
             write.table(tabela, file = file.path(pasta_saida, nome_arquivo), quote = FALSE, sep = " ", row.names = FALSE, col.names = FALSE, append = TRUE)
@@ -63,7 +62,6 @@ escreve_previsao <- function(pasta_saida = "arq_saida", previsao) {
 #'         \item{valor} valor da variavel prevista
 #'     }
 #' @export
-#' 
 escreve_ajuste <- function(pasta_saida = "arq_saida", assimilacao) {
     unique_nomes <- unique(assimilacao$nome)
     for (nome_subbacia in unique_nomes) {
@@ -83,3 +81,21 @@ escreve_ajuste <- function(pasta_saida = "arq_saida", assimilacao) {
         write.table(tabela, file = file.path(pasta_saida, nome_arquivo), quote = FALSE, sep = " ", row.names = FALSE, col.names = FALSE, append = TRUE)
     }
 }
+
+#cores <- parallel::detectCores()
+#cl <- parallel::makeCluster(cores[1] - 1) #not to overload your computer
+#doParallel::registerDoParallel(cl)
+#parallel::clusterEvalQ(cl, {library("smapOnsR")})
+#
+#bacias <- list.dirs("inst/extdata/caso_oficial", recursive = FALSE)
+#bacias <- c(bacias[1:4], bacias[6:7])
+#foreach::foreach(bacia = bacias) %dopar% {
+##for (bacia in bacias){
+#    dir_bacia <- file.path(bacia, "ARQ_ENTRADA")
+#    saida <- executa_caso_oficial(dir_bacia)
+#    pasta_saida <- file.path(bacia, "ARQ_SAIDA_R")
+#    dir.create(pasta_saida)
+#    escreve_ajuste(pasta_saida, saida$assimilacao)
+#    escreve_previsao(pasta_saida, saida$previsao)
+#}
+#parallel::stopCluster(cl)
