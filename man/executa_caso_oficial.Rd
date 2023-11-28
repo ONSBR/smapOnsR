@@ -47,3 +47,10 @@ precipitacao data table contendo precipitacao observada e previsata com as colun
 \description{
 executa rodada oficial do modleo SMAP/ONS
 }
+\examples{
+\dontrun{
+zip::unzip(system.file("extdata", "dados_entrada.zip", package = "smapOnsR"), exdir = system.file("extdata", package = "smapOnsR"))
+pasta_entrada <- system.file("extdata", "Arq_Entrada1", package = "smapOnsR")
+saida <- executa_caso_oficial(pasta_entrada)
+}
+}

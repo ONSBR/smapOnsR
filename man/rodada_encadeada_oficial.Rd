@@ -117,3 +117,14 @@ precipitacao data table contendo precipitacao observada e previsata com as colun
 \description{
 Realiza execucoes encadeadas do modelo SMAP/ONS
 }
+\examples{
+\dontrun{
+pasta_entrada <- system.file("extdata", "Arq_Entrada0", package = "smapOnsR")
+
+entrada <- le_arq_entrada(pasta_entrada)
+
+saida <- rodada_encadeada_oficial(entrada$parametros,
+entrada$inicializacao, entrada$precipitacao, entrada$previsao_precipitacao, entrada$evapotranspiracao, entrada$vazao,
+entrada$postos_plu, entrada$datas_rodadas, length(unique(entrada$previsao_precipitacao[, cenario])), entrada$caso$nome_subbacia)
+}
+}

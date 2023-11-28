@@ -6,6 +6,18 @@
 #' @param kt vetor de kts
 #' @param kt_max valor do maximo lag positivo
 #' @param kt_min valor do maximo lag maximo negativo
+#' @examples 
+#' sub_bacia <- "avermelha"
+#' modelo <- new_modelo_smap_ons(parametros[nome == sub_bacia], postos_plu[nome == sub_bacia])
+#' kt <- unlist(modelo)[12:74]
+#' kt_min <- sum(kt[4:63] > 0)
+#' kt_max <- sum(kt[1:2] > 0)
+#' data_inicio <- as.Date("2021-12-01")
+#' data_fim <- as.Date("2021-12-29")
+#'
+#' serie_temporal <- historico_precipitacao[posto == "psatagv" &  data >= data_inicio - kt_min & data <= data_fim + kt_max, valor]
+#'
+#' saida <- ponderacao_temporal(serie_temporal, kt, kt_max, kt_min)
 #' @importFrom zoo rollapply
 #' @importFrom stats weighted.mean
 #' @return serie_temporal_ponderada: vetor com a serie temporal ponderada pelos kts
@@ -34,6 +46,18 @@ ponderacao_temporal <- function(serie_temporal, kt, kt_max, kt_min) {
 #'     \item{psat - nome do posto plu}
 #'     \item{valor - peso do posto plu}
 #'     }
+#' @examples 
+#' sub_bacia <- "pimentalt"
+#' modelo <- new_modelo_smap_ons(parametros[nome == sub_bacia], postos_plu[nome == sub_bacia])
+#' kt <- unlist(modelo)[12:74]
+#' kt_min <- sum(kt[4:63] > 0)
+#' kt_max <- sum(kt[1:2] > 0)
+#' data_inicio <- as.Date("2021-12-01")
+#' data_fim <- as.Date("2021-12-29")
+#' precipitacao <- historico_precipitacao[data <= (data_fim + kt_max) &
+#'           data >= (data_inicio - kt_min) & posto %in% postos_plu[nome == sub_bacia, posto]]
+#'
+#' precipitacao_ponderada <- ponderacao_espacial(precipitacao, postos_plu[nome == sub_bacia])
 #' @importFrom data.table setcolorder
 #' @return precipitacao data table com a precipitacao a ser ponderada com as colunas
 #'     \itemize{

@@ -12,6 +12,12 @@
 #'     }
 #' @importFrom data.table data.table setnames setorder
 #' @importFrom lubridate month
+#' @examples
+#' nome2 <- "baixoig"
+#' normal_climatologica <- historico_etp_NC[nome == nome2]
+#' serie_temporal <- historico_precipitacao[posto == postos_plu[nome == nome2, posto]]
+#' serie_temporal <- ponderacao_espacial(serie_temporal, postos_plu[nome == nome2])
+#' serie_temporal_NC <- transforma_NC_serie(serie_temporal, normal_climatologica)
 #' @return data.table com as colunas
 #'     \itemize{
 #'     \item{data - data da observacao}
@@ -58,6 +64,16 @@ transforma_NC_serie <- function(serie_temporal, normal_climatologica) {
 #'     \item{nome - nome da sub-bacia}
 #'     \item{valor - valor da previsao}
 #'     }
+#' @examples 
+#' sub_bacia <- "avermelha"
+#' precipitacao <- historico_precipitacao[posto %in% postos_plu[nome == sub_bacia, posto]]
+#' precipitacao <- ponderacao_espacial(precipitacao, postos_plu[nome == sub_bacia])
+#' datas_rodadas <- data.table::data.table(
+#'   data = as.Date(c("2020-05-01", "2020-05-08")),
+#'   numero_dias_previsao = c(15, 20)
+#' )
+#' 
+#' previsao <- transforma_historico_previsao(precipitacao, datas_rodadas)
 #' @export
 transforma_historico_previsao <- function(serie_temporal, datas_rodadas) {
 

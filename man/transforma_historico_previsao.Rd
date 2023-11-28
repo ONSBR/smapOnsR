@@ -34,3 +34,14 @@ data.table com as colunas
 \description{
 Transforma historico de serie temporal em data table de previsao
 }
+\examples{
+sub_bacia <- "avermelha"
+precipitacao <- historico_precipitacao[posto \%in\% postos_plu[nome == sub_bacia, posto]]
+precipitacao <- ponderacao_espacial(precipitacao, postos_plu[nome == sub_bacia])
+datas_rodadas <- data.table::data.table(
+  data = as.Date(c("2020-05-01", "2020-05-08")),
+  numero_dias_previsao = c(15, 20)
+)
+
+previsao <- transforma_historico_previsao(precipitacao, datas_rodadas)
+}

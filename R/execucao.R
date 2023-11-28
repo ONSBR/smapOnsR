@@ -3,6 +3,12 @@
 #' executa rodada oficial do modleo SMAP/ONS
 #'
 #' @param pasta_entrada caminho da pasta  "arq_entrada"
+#' @examples 
+#'\dontrun{
+#' zip::unzip(system.file("extdata", "dados_entrada.zip", package = "smapOnsR"), exdir = system.file("extdata", package = "smapOnsR"))
+#' pasta_entrada <- system.file("extdata", "Arq_Entrada1", package = "smapOnsR")
+#' saida <- executa_caso_oficial(pasta_entrada)
+#' }
 #' @return saida lista com o data.table previsao contendo as seguintes colunas:
 #'     \itemize{
 #'     \item{data_caso - data da rodada}
@@ -103,6 +109,11 @@ executa_caso_oficial_novo <- function(pasta_entrada){
 #' executa rodada com evapotranspiracao diaria do modelo SMAP/ONS com dados de entrada novos
 #'
 #' @param pasta_entrada caminho da pasta  "arq_entrada"
+#' @examples 
+#'\dontrun{
+#' pasta_entrada <- system.file("extdata", "arq_entrada_novo", package = "smapOnsR")
+#' saida <- executa_caso_etp(pasta_entrada)
+#' }
 #' @return saida lista com o data.table previsao contendo as seguintes colunas:
 #'     \itemize{
 #'     \item{data_caso - data da rodada}

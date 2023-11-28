@@ -47,3 +47,9 @@ precipitacao data table contendo precipitacao observada e previsata com as colun
 \description{
 executa rodada com evapotranspiracao diaria do modelo SMAP/ONS com dados de entrada novos
 }
+\examples{
+\dontrun{
+pasta_entrada <- system.file("extdata", "arq_entrada_novo", package = "smapOnsR")
+saida <- executa_caso_etp(pasta_entrada)
+}
+}

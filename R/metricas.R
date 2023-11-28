@@ -7,6 +7,10 @@
 #' @param simulacao vetor com os valores da serie simulada
 #' @param observacao vetor com os valores da serie simulada
 #' @param pesos pesos a serem utilizados para cada data
+#' @examples 
+#' observacao <- 1:30
+#' simulacao <- observacao - 0.5
+#' nse <- calcula_nse(simulacao, observacao)
 #' @importFrom stats weighted.mean
 #' @return nse
 #' @export
@@ -25,6 +29,10 @@ calcula_nse <- function(simulacao, observacao, pesos = rep(1 / length(observacao
 #' @param simulacao vetor com os valores da serie simulada
 #' @param observacao vetor com os valores da serie simulada
 #' @param pesos pesos a serem utilizados para cada data
+#' @examples 
+#' observacao <- 1:30
+#' simulacao <- observacao - 0.5
+#' nse <- calcula_mape(simulacao, observacao)
 #' @return mape
 #' @export
 
@@ -40,6 +48,10 @@ calcula_mape <- function(simulacao, observacao, pesos = rep(1 /length(observacao
 #' @param simulacao vetor com os valores da serie simulada
 #' @param observacao vetor com os valores da serie simulada
 #' @param pesos pesos a serem utilizados para cada data
+#' @examples 
+#' observacao <- 1:30
+#' simulacao <- observacao - 0.5
+#' nse <- calcula_dm(simulacao, observacao)
 #' @return dm distancia multicriterio
 #' @export 
 
