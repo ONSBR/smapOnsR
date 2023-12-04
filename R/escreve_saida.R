@@ -43,7 +43,7 @@ escreve_previsao <- function(pasta_saida = "arq_saida", previsao) {
 #' Funcao de escrita dos arquivos oficiais de ajuste
 #' 
 #' @param pasta_saida pasta com os arquivos de saida
-#' @param previsao data.table contendo as seguintes colunas:
+#' @param assimilacao data.table contendo as seguintes colunas:
 #'     \itemize{
 #'     \item{data_caso - data da rodada}
 #'     \item{data_previsao - data da previsao}

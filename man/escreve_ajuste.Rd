@@ -9,7 +9,7 @@ escreve_ajuste(pasta_saida = "arq_saida", assimilacao)
 \arguments{
 \item{pasta_saida}{pasta com os arquivos de saida}
 
-\item{previsao}{data.table contendo as seguintes colunas:
+\item{assimilacao}{data.table contendo as seguintes colunas:
 \itemize{
 \item{data_caso - data da rodada}
 \item{data_previsao - data da previsao}
