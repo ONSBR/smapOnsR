@@ -155,7 +155,7 @@ test_that("testa caso pegando a assimilacao original do aplicativo",{
       entrada$inicializacao, entrada$precipitacao, entrada$previsao_precipitacao, entrada$evapotranspiracao, entrada$vazao,
       entrada$postos_plu, entrada$datas_rodadas, length(unique(entrada$previsao_precipitacao[, cenario])), entrada$caso$nome_subbacia, execucao)
     previsao <- saida$previsao[variavel == "Qcalc"]
-    previsao_original <- le_previsao(pasta_saida, entrada$datas_rodadas$data)
+    previsao_original <- le_previsao_2(pasta_saida, entrada$datas_rodadas$data)
     previsao[, dif := valor - previsao_original[, valor]]
 
     expect_true(previsao[, max(abs(dif))] < 0.01)

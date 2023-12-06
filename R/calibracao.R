@@ -244,7 +244,6 @@ cria_kt <- function(kt_max, kt_min, alfa, beta){
 #' @importFrom data.table data.table
 #' @return ajuste valor da funcao objetivo
 #' @export
-#'
 calibracao <- function(vetor_modelo, kt_min, kt_max, area, EbInic, TuInic, Supin, precipitacao,
       evapotranspiracao, vazao, data_inicio_objetivo, data_fim_objetivo,
       limite_inferior, limite_superior, postos_plu, pesos = rep(1 / length(vazao[, valor]), length(vazao[, valor]))){

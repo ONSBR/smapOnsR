@@ -4,45 +4,13 @@
 \alias{executa_caso_oficial}
 \title{Executa caso oficial}
 \usage{
-executa_caso_oficial(pasta_entrada)
+executa_caso_oficial(pasta_caso)
 }
 \arguments{
-\item{pasta_entrada}{caminho da pasta  "arq_entrada"}
+\item{pasta_caso}{pasta do caso contendo as pastas "Arq_Entrada" e "Arq_Saida"}
 }
 \value{
-saida lista com o data.table previsao contendo as seguintes colunas:
-\itemize{
-\item{data_caso - data da rodada}
-\item{data_previsao - data da previsao}
-\item{cenario - nome do cenario}
-\item{nome - nome da sub-bacia}
-\item{variavel - nome da variavel}
-\item{valor - valor da variavel}
-}
-otimizacao data table com as colunas:
-\itemize{
-\item{otimizacao - valor das variaveis da otimizacao}
-\item{nome - nome da sub-bacia}
-\item{data_caso - data do caso}
-}
-assimilacao data table com as colunas:
-\itemize{
-\item{data_caso - data da rodada}
-\item{data_assimilacao - data da assimilacao}
-\item{cenario - nome do cenario}
-\item{nome - nome da sub-bacia}
-\item{variavel - nome da variavel}
-\item{valor - valor da variavel}
-}
-precipitacao data table contendo precipitacao observada e previsata com as colunas:
-\itemize{
-\item{data_previsao - data da precipitacao}
-\item{data_rodada - data da rodada}
-\item{cenario - nome do cenario}
-\item{nome - nome da sub-bacia}
-\item{variavel - nome da variavel}
-\item{valor - valor da variavel}
-}
+Escreve os arquivos "sub-bacia_ajuste.txt" e "sub-bacia_cenario_previsao.txt" no formato oficial
 }
 \description{
 executa rodada oficial do modleo SMAP/ONS

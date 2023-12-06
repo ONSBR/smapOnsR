@@ -127,8 +127,7 @@ le_execucao <- function(pasta_saida, data) {
 #'         \item{valor} valor da variavel prevista
 #'     }
 #' @export
-#' 
-le_previsao <- function(pasta_saida, data) {
+le_previsao_2 <- function(pasta_saida, data) {
 
     arq <- list.files(path = pasta_saida, pattern = "previsao.txt", ignore.case = TRUE, full.names = TRUE)
 
@@ -146,4 +145,36 @@ le_previsao <- function(pasta_saida, data) {
     setorder(dat, nome, data_caso, cenario, data_previsao)
 
     return(dat)
+}
+
+#' Le Arquivos PREVISAO
+#' 
+#' Leitor dos arquivos de previsao de cada rodada diaria
+#' 
+#' @param pasta_saida pasta com os arquivos de saida
+#' @param cenario cenario de precipitacao utilizado
+#' @param sub_bacia  nome da subbacia da qual estes dados dizem respeito
+#' @param data data de referencia da rodada
+#'
+#' @return data.table contendo a dado de previsao arrumado
+#'     \itemize{
+#'         \item{data_caso} data do caso executado
+#'         \item{data_previsao} dia alvo da previsao
+#'         \item{cenario} cenario de precipitacao utilizado
+#'         \item{nome} nome da subbacia da qual estes dados dizem respeito
+#'         \item{variavel} nome da variavel prevista
+#'         \item{valor} valor da variavel prevista
+#'     }
+#' @export
+le_previsao <- function(pasta_saida, cenario, sub_bacia, data) {
+    arq <- file.path(pasta_saida, paste0(sub_bacia, "_", cenario, "_previsao.txt"))
+
+    previsao <- data.table::fread(arq)
+    previsao[, data_caso := data]
+    previsao[, cenario := cenario]
+    previsao[, variavel := "Qcalc"]
+    previsao[, nome := sub_bacia]
+    data.table::setnames(previsao, c("Data", "Qcal"), c("data_previsao", "valor"))    
+
+    return(previsao)
 }
