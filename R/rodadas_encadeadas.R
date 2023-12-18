@@ -118,6 +118,10 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
         EbInic <- inicializacao[nome == sub_bacia & variavel == "Ebin", valor]
         Supin <- inicializacao[nome == sub_bacia & variavel == "Supin", valor]
         TuInic <- inicializacao[nome == sub_bacia & variavel == "Tuin", valor]
+        limite_inferior_ebin <- inicializacao[nome == sub_bacia & variavel == "limite_inferior_ebin", valor]
+        limite_superior_ebin <- inicializacao[nome == sub_bacia & variavel == "limite_superior_ebin", valor]
+        limite_inferior_prec <- inicializacao[nome == sub_bacia & variavel == "limite_inferior_prec", valor]
+        limite_superior_prec <- inicializacao[nome == sub_bacia & variavel == "limite_superior_prec", valor]
         numero_dias_assimilacao <- inicializacao[nome == sub_bacia & variavel == "numero_dias_assimilacao", valor]
         vetor_inicializacao <- array(rep(0, numero_cenarios * 7), c(numero_cenarios, 7))
 
@@ -161,7 +165,9 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
             evapotranspiracao <- evapotranspiracao[, valor] * vetor_modelo[76]
 
             ajuste <- assimilacao_oficial(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao_assimilacao,
-                        evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias_assimilacao)
+                        evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias_assimilacao, 
+                        limite_prec = c(limite_inferior_prec, limite_superior_prec),
+                        limite_ebin = c(limite_inferior_ebin, limite_superior_ebin))
             
             ajuste$simulacao[, data_assimilacao := seq.Date((dataRodada - numero_dias_assimilacao), dataRodada - 1, 1)]
             ajuste$simulacao[, nome := sub_bacia]

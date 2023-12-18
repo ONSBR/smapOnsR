@@ -946,6 +946,7 @@ le_arq_entrada <- function(pasta_entrada) {
 
     inicializacao <- data.table::rbindlist(lapply(caso$nome_subbacia, function(sub_bacia) {
   result <- le_entrada_inicializacao(pasta_entrada, sub_bacia)
+  result$inicializacao <- rbind(result$inicializacao, parametros[nome == sub_bacia][82:85], use.names = FALSE)
   result[[1]]
         }))
     inicializacao[variavel == "Tuin", valor := valor / 100] 

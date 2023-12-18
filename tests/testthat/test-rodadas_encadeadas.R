@@ -19,8 +19,10 @@ test_that("testa rodadas encadeadas", {
     vazao <- historico_vazao[posto %in% sub_bacias]
     evapotranspiracao <- historico_etp_NC[nome %in% sub_bacias]
 
-    inicializacao <- data.table::data.table(nome = c(rep("avermelha", 4), rep("ssimao2", 4)), variavel = rep(c("Ebin", "Supin", "Tuin", "numero_dias_assimilacao"),2), 
-    valor = c(218.71, 46.69, 0.2891, 31, 441.67, 256.98, 0.3141, 31))
+    inicializacao <- data.table::data.table(nome = c(rep("avermelha", 8), rep("ssimao2", 8)),
+    variavel = rep(c("Ebin", "Supin", "Tuin", "numero_dias_assimilacao", 
+    "limite_inferior_ebin", "limite_superior_ebin", "limite_superior_prec", "limite_inferior_prec"), 2),
+    valor = c(218.71, 46.69, 0.2891, 31, 0.8, 1.2, 2, 0, 441.67, 256.98, 0.3141, 31, 0.8, 1.2, 2, 0))
     
     saida <- rodada_encadeada_oficial(parametros[nome %in% sub_bacias],
     inicializacao, precipitacao, previsao_precipitacao, evapotranspiracao, vazao,
