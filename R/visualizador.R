@@ -113,24 +113,25 @@ executa_visualizador_calibracao <- function(){
                             shiny::numericInput(inputId = "numero_periodo_desconsiderado", label = "Periodos desconsiderados", value = 0, min = 0),
                             shiny::uiOutput("periodos_desconsiderados")
                         ),
+                        shiny::hr(),
+                        shiny::fluidRow(
+                            shiny::downloadButton("download_parametros", "Download parametros_sub_bacia.csv"),
+                            shiny::downloadButton("download_postos_plu", "Download postos_plu_sub_bacia.csv")
+                        )
                     ),
 
                     shiny::mainPanel(
                         shiny::fluidRow(
                             shiny::dateRangeInput("zoom_calibracao", "Zoom calibracao", start = NULL, end = NULL, min = NULL, max = NULL),
                             dygraphs::dygraphOutput("dygraph_zoom", heigh = "600px"),
-                            shiny::column(2, shiny::textOutput("funcao_objetivo")),
+                            shiny::column(1, shiny::actionButton(inputId = "botao_calibracao", label = "Calibrar", class = "btn-lg btn-success")),
+                            shiny::column(1, shiny::checkboxGroupInput("variaveis", "variaveis", choices = c("Qsup1", "Qsup2", "Qplan"))),
+                            shiny::column(1, shiny::textOutput("funcao_objetivo")),
                             shiny::column(5, shiny::tableOutput("tabela_metrica1")),
-                            shiny::column(4, shiny::tableOutput("tabela_metrica2")),
-                            shiny::selectInput(inputId = "estatistica", label = "estatistica", choices = c("media", "dp", "assimetria", "kurtosis")),
+                            shiny::column(3, shiny::tableOutput("tabela_metrica2")),
+                            shiny::selectInput(inputId = "estatistica", label = "estatistica", choices = c("media", "dp", "assimetria", "curtose")),
                             plotly::plotlyOutput("metrica_mensal"),
-                            shiny::column(3,
-                                shiny::actionButton(inputId = "botao_calibracao", label = "Calibrar", class = "btn-lg btn-success"),
-                                shiny::checkboxGroupInput("variaveis", "variaveis", choices = c("Qsup1", "Qsup2", "Qplan")),
-                                plotly::plotlyOutput("grafico_kts")
-                            ),
-                            shiny::downloadButton("download_parametros", "Download parametros_sub_bacia.csv"),
-                            shiny::downloadButton("download_postos_plu", "Download postos_plu_sub_bacia.csv")
+                            plotly::plotlyOutput("grafico_kts")
                         )
                     )
                 )
@@ -738,13 +739,13 @@ executa_visualizador_calibracao <- function(){
                 metricas[tipo == "simulado", media := saida_objetivo[, mean(Qcalc)]]
                 metricas[tipo == "simulado", dp := saida_objetivo[, sd(Qcalc)]]
                 metricas[tipo == "simulado", assimetria := saida_objetivo[, moments::skewness(Qcalc)]]
-                metricas[tipo == "simulado", kurtosis := saida_objetivo[, moments::kurtosis(Qcalc)]]
+                metricas[tipo == "simulado", curtose := saida_objetivo[, moments::kurtosis(Qcalc)]]
                 metricas[tipo == "simulado", p95 := saida_objetivo[, quantile(Qcalc, 0.95)]]
                 metricas[tipo == "simulado", max := saida_objetivo[, max(Qcalc)]]
                 metricas[tipo == "historico", media := vazao_fo[, mean(valor)]]
                 metricas[tipo == "historico", dp := vazao_fo[, sd(valor)]]
                 metricas[tipo == "historico", assimetria := vazao_fo[, moments::skewness(valor)]]
-                metricas[tipo == "historico", kurtosis := vazao_fo[, moments::kurtosis(valor)]]
+                metricas[tipo == "historico", curtose := vazao_fo[, moments::kurtosis(valor)]]
                 metricas[tipo == "historico", p95 := vazao_fo[, quantile(valor, 0.95)]]
                 metricas[tipo == "historico", max := vazao_fo[, max(valor)]]
                 metricas        
@@ -816,7 +817,7 @@ executa_visualizador_calibracao <- function(){
                 metricas <- rbindlist(list(metricas, simulacao), use.names=TRUE)
 
                 simulacao <- saida_objetivo[, moments::kurtosis(Qcalc), by = lubridate::month(data)]
-                simulacao[, estatistica := "kurtosis"]
+                simulacao[, estatistica := "curtose"]
                 metricas <- rbindlist(list(metricas, simulacao), use.names=TRUE)
                 metricas[, tipo := "simulado"]
 
