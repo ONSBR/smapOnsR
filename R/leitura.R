@@ -259,6 +259,14 @@ le_inicializacao <- function(arq) {
         stop("o arquivo ", arq, " possui valores duplicados na coluna 'variavel' para uma mesma sub-bacia")
     }
 
+    variaveis <- c("Ebin", "Tuin", "Supin", "numero_dias_assimilacao")
+
+    teste <- dat[, setdiff(variaveis, variavel), by = c("nome")]
+
+    if (nrow(teste) != 0) {
+        stop(paste0("falta o parametro ", teste$V1, " para a sub-bacia ", teste$nome, " no arquivo ", arq, "\n"))
+    }
+
     dat
 }
 
