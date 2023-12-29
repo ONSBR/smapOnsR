@@ -18,7 +18,9 @@ assimilacao_evapotranspiracao(
   limite_prec = c(0.5, 2),
   limite_etp = c(0.5, 2),
   limite_ebin = c(0.8, 1.2),
-  limite_supin = c(0, 2)
+  limite_supin = c(0, 2),
+  funcao_objetivo = calcula_dm,
+  fnscale = 1
 )
 }
 \arguments{
@@ -55,6 +57,10 @@ assimilacao_evapotranspiracao(
 \item{limite_ebin}{limites mínimo e máximo da vazao de base inicial}
 
 \item{limite_supin}{limites mínimo e máximo da vazao superficial inicial}
+
+\item{funcao_objetivo}{funcao objetivo a ser utilizada na assimilacao}
+
+\item{fnscale}{valor indicando se a funcao deve ser maximizada ou minimizada}
 }
 \value{
 ajuste lista contendo

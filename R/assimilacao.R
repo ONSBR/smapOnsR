@@ -22,6 +22,8 @@
 #' @param limite_prec limites mínimo e máximo dos pesos utilizados para ponderar a precipitacao durante a etapa de assimilacao
 #' @param limite_ebin limites mínimo e máximo da vazao de base inicial
 #' @param limite_supin limites mínimo e máximo da vazao superficial inicial
+#' @param funcao_objetivo funcao objetivo a ser utilizada na assimilacao
+#' @param fnscale valor indicando se a funcao deve ser maximizada ou minimizada
 #'
 #' @examples
 #' 
@@ -73,7 +75,7 @@
 assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao_assimilacao,
       evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias_assimilacao,
       limite_prec = c(0.5, 2), limite_ebin = c(0.8, 1.2),
-      limite_supin = c(0, 2)) {
+      limite_supin = c(0, 2), funcao_objetivo = calcula_dm, fnscale = 1) {
     
     kt <- vetor_modelo[12:74]
     kt_max <- sum(vetor_modelo[12:13] > 0)
@@ -108,7 +110,8 @@ assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, preci
               vazao = vazao,
               numero_dias_assimilacao = numero_dias_assimilacao,
               pesos_funcao_objetivo = pesos_funcao_objetivo,
-              control = list(fnscale = 1, ndeps = rep(0.000001, length(vetor_variaveis)),
+              funcao_objetivo = funcao_objetivo,
+              control = list(fnscale = fnscale, ndeps = rep(0.000001, length(vetor_variaveis)),
               maxit = 1000))
 
   EbInic <- ajuste$par[numero_dias_assimilacao + 1]
@@ -149,6 +152,7 @@ assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, preci
 #' @param vazao vetor de vazao observada
 #' @param numero_dias_assimilacao numero de dias da assimilacao
 #' @param area area da sub-bacia
+#' @param funcao_objetivo funcao objetivo a ser utilizada na assimilacao
 #' 
 #' @examples
 #' 
@@ -197,11 +201,13 @@ assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, preci
 
 funcao_objetivo_assimilacao_oficial <- function(vetor_variaveis, vetor_modelo, TuInic,
       precipitacao_ponderada, evapotranspiracao, evapotranspiracao_planicie, vazao, area,
-      numero_dias_assimilacao, pesos_funcao_objetivo = rep((1 / numero_dias_assimilacao), numero_dias_assimilacao)){
+      numero_dias_assimilacao,
+      pesos_funcao_objetivo = rep((1 / numero_dias_assimilacao), numero_dias_assimilacao),
+      funcao_objetivo = calcula_dm){
 
   EbInic <- vetor_variaveis[numero_dias_assimilacao + 1]
   Supin <- vetor_variaveis[numero_dias_assimilacao + 2]
-  if (Supin < 0) { #L-BFGS-B as vezes fornece valor negativo próximo a 0 ('-1e-17')
+  if (Supin < 0) { #L-BFGS-B as vezes fornece valor negativo proximo a 0 ('-1e-17')
     Supin <- 0
   }
   inicializacao <- inicializacao_smap(vetor_modelo, area, EbInic, TuInic, Supin)
@@ -213,7 +219,7 @@ funcao_objetivo_assimilacao_oficial <- function(vetor_variaveis, vetor_modelo, T
             vetor_inicializacao, area, precipitacao_ponderada,
             evapotranspiracao, evapotranspiracao_planicie, numero_dias_assimilacao)
 
-  objetivo <- calcula_dm(simulacao[, 1], vazao, pesos_funcao_objetivo)
+  objetivo <- funcao_objetivo(simulacao[, 1], vazao, pesos_funcao_objetivo)
   objetivo
 }
 
@@ -243,6 +249,8 @@ funcao_objetivo_assimilacao_oficial <- function(vetor_variaveis, vetor_modelo, T
 #' @param limite_etp limites mínimo e máximo dos pesos utilizados para ponderar a precipitacao durante a etapa de assimilacao
 #' @param limite_ebin limites mínimo e máximo da vazao de base inicial
 #' @param limite_supin limites mínimo e máximo da vazao superficial inicial
+#' @param funcao_objetivo funcao objetivo a ser utilizada na assimilacao
+#' @param fnscale valor indicando se a funcao deve ser maximizada ou minimizada
 #'
 #' @examples
 #' # usando dado dummy contido no pacote
@@ -292,7 +300,7 @@ funcao_objetivo_assimilacao_oficial <- function(vetor_variaveis, vetor_modelo, T
 assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao_assimilacao,
       evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias_assimilacao,
       limite_prec = c(0.5, 2), limite_etp = c(0.5, 2), limite_ebin = c(0.8, 1.2),
-      limite_supin = c(0, 2)) {
+      limite_supin = c(0, 2), funcao_objetivo = calcula_dm, fnscale = 1) {
     
     kt <- vetor_modelo[12:74]
     kt_max <- sum(vetor_modelo[12:13] > 0)
@@ -329,7 +337,8 @@ assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Su
               vazao = vazao,
               numero_dias_assimilacao = numero_dias_assimilacao,
               pesos_funcao_objetivo = pesos_funcao_objetivo,
-              control = list(fnscale = 1, ndeps = rep(0.000001, length(vetor_variaveis)),
+              funcao_objetivo = funcao_objetivo,
+              control = list(fnscale = fnscale, ndeps = rep(0.000001, length(vetor_variaveis)),
               maxit = 1000))
     
     EbInic <- ajuste$par[numero_dias_assimilacao * 2 + 1]
@@ -372,6 +381,8 @@ assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Su
 #' @param vazao vetor de vazao observada
 #' @param numero_dias_assimilacao numero de dias da assimilacao
 #' @param area area da sub-bacia
+#' @param funcao_objetivo funcao objetivo a ser utilizada na assimilacao
+#' 
 #' @examples
 #' # usando dado dummy contido no pacote
 #' sub_bacia <- "baixoig"
@@ -419,11 +430,13 @@ assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Su
 
 funcao_objetivo_assimilacao_evapotranspiracao <- function(vetor_variaveis, vetor_modelo, TuInic,
       precipitacao_ponderada, evapotranspiracao, evapotranspiracao_planicie, vazao, area,
-      numero_dias_assimilacao, pesos_funcao_objetivo = rep((1 / numero_dias_assimilacao), numero_dias_assimilacao)){
+      numero_dias_assimilacao,
+      pesos_funcao_objetivo = rep((1 / numero_dias_assimilacao), numero_dias_assimilacao),
+      funcao_objetivo = calcula_dm) {
 
   EbInic <- vetor_variaveis[numero_dias_assimilacao * 2 + 1]
   Supin <- vetor_variaveis[numero_dias_assimilacao * 2 + 2]
-  if (Supin < 0) { #L-BFGS-B as vezes fornece valor negativo próximo a 0 ('-1e-17')
+  if (Supin < 0) { #L-BFGS-B as vezes fornece valor negativo proximo a 0 ('-1e-17')
     Supin <- 0
   }
   inicializacao <- inicializacao_smap(vetor_modelo, area, EbInic, TuInic, Supin)
@@ -438,6 +451,6 @@ funcao_objetivo_assimilacao_evapotranspiracao <- function(vetor_variaveis, vetor
             vetor_inicializacao, area, precipitacao_ponderada,
             evapotranspiracao, evapotranspiracao_planicie, numero_dias_assimilacao)
 
-  objetivo <- calcula_dm(simulacao[, 1], vazao, pesos_funcao_objetivo)
+  objetivo <- funcao_objetivo(simulacao[, 1], vazao, pesos_funcao_objetivo)
   objetivo
 }

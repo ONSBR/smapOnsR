@@ -610,12 +610,14 @@ le_entrada_bat_conf <- function(pasta_entrada) {
     colnames(dat) <- c("parametro", "valor")
     
     if (length(dat[parametro == "arqPrev", parametro]) == 0) {
-        formato_previsao <- 0
-    } else {
-        formato_previsao <- as.numeric(dat[parametro == "arqPrev", strsplit(valor, "'")[[1]][1]])
+        dat <- rbind(dat , data.table::data.table(parametro = "arqPrev", valor = 0))
     }
 
-    formato_previsao
+    dat[parametro == "objetivo" & valor == "dm", valor := 0]
+    dat[parametro == "objetivo" & valor == "nse", valor := 1]
+    dat[parametro == "objetivo" & valor == "mape", valor := 2]
+
+    dat
 }
 
 #' Leitor de arquivo de previsao de precipitacao do smap/ons
@@ -933,7 +935,8 @@ le_entrada_previsao_precipitacao_0 <- function(pasta_entrada, datas_rodadas, dat
 le_arq_entrada <- function(pasta_entrada) {
 
     caso <- le_entrada_caso(pasta_entrada)
-    tipo_previsao <- le_entrada_bat_conf(pasta_entrada)
+    configuracao <- le_entrada_bat_conf(pasta_entrada)
+    tipo_previsao <- configuracao[parametro == "arqPrev", valor]
     modelos_precipitacao <- le_entrada_modelos_precipitacao(pasta_entrada)
 
     parametros <- data.table::rbindlist(lapply(caso$nome_subbacia, function(sub_bacia) {
@@ -947,6 +950,7 @@ le_arq_entrada <- function(pasta_entrada) {
     inicializacao <- data.table::rbindlist(lapply(caso$nome_subbacia, function(sub_bacia) {
   result <- le_entrada_inicializacao(pasta_entrada, sub_bacia)
   result$inicializacao <- rbind(result$inicializacao, parametros[nome == sub_bacia][82:85], use.names = FALSE)
+  result$inicializacao <- rbind(result$inicializacao, data.table::data.table(nome = sub_bacia, parametro = "funcao_objetivo", configuracao[parametro == "objetivo", as.numeric(valor)]), use.names = FALSE)
   result[[1]]
         }))
     inicializacao[variavel == "Tuin", valor := valor / 100] 

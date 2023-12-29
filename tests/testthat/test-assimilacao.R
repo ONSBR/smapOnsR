@@ -44,6 +44,24 @@ test_that("testa a assimilacao de dados oficial", {
       evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias = dias_assimilacao)
   
   expect_equal((saida$ajuste$value < fo), TRUE)
+
+  saida2 <- assimilacao_oficial(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao,
+      evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias = dias_assimilacao,
+      funcao_objetivo = calcula_dm)
+
+  expect_equal(saida, saida2)
+
+  saida3 <- assimilacao_oficial(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao,
+      evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias = dias_assimilacao,
+      funcao_objetivo = calcula_mape)
+  idia <- dias_assimilacao:1
+  pesos <- (log(idia + 1) - log(idia)) / log(dias_assimilacao + 1)
+  expect_equal(calcula_mape(saida3$simulacao[, 1], vazao, pesos), saida3$ajuste$value)
+
+  saida4 <- assimilacao_oficial(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao,
+      evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias = dias_assimilacao,
+      funcao_objetivo = calcula_nse, fnscale = -1)
+  expect_equal(calcula_nse(saida4$simulacao[, 1], vazao, pesos), saida4$ajuste$value)
 })
 
 test_that("testa a assimilacao de dados com evapotranspiracao", {
@@ -92,4 +110,22 @@ test_that("testa a assimilacao de dados com evapotranspiracao", {
       evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias = dias_assimilacao)
 
   expect_equal((saida$ajuste$value < fo), TRUE)
+
+  saida2 <- assimilacao_evapotranspiracao(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao,
+      evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias = dias_assimilacao,
+      funcao_objetivo = calcula_dm)
+
+  expect_equal(saida, saida2)
+
+  saida3 <- assimilacao_evapotranspiracao(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao,
+      evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias = dias_assimilacao,
+      funcao_objetivo = calcula_mape)
+  idia <- dias_assimilacao:1
+  pesos <- (log(idia + 1) - log(idia)) / log(dias_assimilacao + 1)
+  expect_equal(calcula_mape(saida3$simulacao[, 1], vazao, pesos), saida3$ajuste$value)
+
+  saida4 <- assimilacao_evapotranspiracao(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao,
+      evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias = dias_assimilacao,
+      funcao_objetivo = calcula_nse, fnscale = -1)
+  expect_equal(calcula_nse(saida4$simulacao[, 1], vazao, pesos), saida4$ajuste$value)
 })

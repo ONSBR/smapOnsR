@@ -125,6 +125,23 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
         limite_inferior_prec <- inicializacao[nome == sub_bacia & variavel == "limite_inferior_prec", valor]
         limite_superior_prec <- inicializacao[nome == sub_bacia & variavel == "limite_superior_prec", valor]
         numero_dias_assimilacao <- inicializacao[nome == sub_bacia & variavel == "numero_dias_assimilacao", valor]
+        
+        if(nrow(inicializacao[variavel == "funcao_objetivo"]) > 0) {
+            if (inicializacao[nome == sub_bacia & variavel == "funcao_objetivo", valor] == 0) {
+                funcao_objetivo <- calcula_dm
+                fnscale <- 1
+            } else if (inicializacao[nome == sub_bacia & variavel == "funcao_objetivo", valor] == 1){
+                funcao_objetivo <- calcula_nse
+                fnscale <- -1
+            } else if (inicializacao[nome == sub_bacia & variavel == "funcao_objetivo", valor] == 2){
+                funcao_objetivo <- calcula_mape
+                fnscale <- 1
+            }
+        } else{
+            funcao_objetivo <- calcula_dm
+            fnscale <- 1
+        }
+
         vetor_inicializacao <- array(rep(0, numero_cenarios * 7), c(numero_cenarios, 7))
 
         modelo <- new_modelo_smap_ons(parametros[nome == sub_bacia], postos_plu[nome %in% sub_bacia])
@@ -169,7 +186,7 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
             ajuste <- assimilacao_oficial(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao_assimilacao,
                         evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias_assimilacao, 
                         limite_prec = c(limite_inferior_prec, limite_superior_prec),
-                        limite_ebin = c(limite_inferior_ebin, limite_superior_ebin))
+                        limite_ebin = c(limite_inferior_ebin, limite_superior_ebin), funcao_objetivo = funcao_objetivo, fnscale = fnscale)
             
             ajuste$simulacao[, data_assimilacao := seq.Date((dataRodada - numero_dias_assimilacao), dataRodada - 1, 1)]
             ajuste$simulacao[, nome := sub_bacia]
@@ -367,6 +384,7 @@ rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observa
     saida_ajuste_assimilacao <- data.table::data.table()
     saida_precipitacao <- data.table::data.table()
     saida_ajuste_fo <- data.table::data.table()
+
     data.table::setorder(precipitacao_prevista, "data_rodada", "nome", "cenario", "data_previsao")
     data.table::setorder(evapotranspiracao_prevista, "data_rodada", "nome", "cenario", "data_previsao")
     for (ibacia in 1:numero_sub_bacias){
@@ -376,6 +394,25 @@ rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observa
         Supin <- inicializacao[nome == sub_bacia & variavel == "Supin", valor]
         TuInic <- inicializacao[nome == sub_bacia & variavel == "Tuin", valor]
         numero_dias_assimilacao <- inicializacao[nome == sub_bacia & variavel == "numero_dias_assimilacao", valor]
+        limite_inferior_ebin <- inicializacao[nome == sub_bacia & variavel == "limite_inferior_ebin", valor]
+        limite_superior_ebin <- inicializacao[nome == sub_bacia & variavel == "limite_superior_ebin", valor]
+        limite_inferior_prec <- inicializacao[nome == sub_bacia & variavel == "limite_inferior_prec", valor]
+        limite_superior_prec <- inicializacao[nome == sub_bacia & variavel == "limite_superior_prec", valor]
+        if(nrow(inicializacao[variavel == "funcao_objetivo"]) > 0) {
+            if (inicializacao[nome == sub_bacia & variavel == "funcao_objetivo", valor] == 0) {
+                funcao_objetivo <- calcula_dm
+                fnscale <- 1
+            } else if (inicializacao[nome == sub_bacia & variavel == "funcao_objetivo", valor] == 1){
+                funcao_objetivo <- calcula_nse
+                fnscale <- -1
+            } else if (inicializacao[nome == sub_bacia & variavel == "funcao_objetivo", valor] == 2){
+                funcao_objetivo <- calcula_mape
+                fnscale <- 1
+            }
+        } else{
+            funcao_objetivo <- calcula_dm
+            fnscale <- 1
+        }
         vetor_inicializacao <- array(rep(0, numero_cenarios * 7), c(numero_cenarios, 7))
 
         modelo <- new_modelo_smap_ons(parametros[nome == sub_bacia], postos_plu[nome %in% sub_bacia])
@@ -415,7 +452,9 @@ rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observa
             evapotranspiracao <- evapotranspiracao_observada[posto == sub_bacia & data < dataRodada & data >= (dataRodada - numero_dias_assimilacao), valor] * vetor_modelo[76]
 
             ajuste <- assimilacao_evapotranspiracao(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao_assimilacao,
-                        evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias_assimilacao)
+                        evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias_assimilacao, 
+                        limite_prec = c(limite_inferior_prec, limite_superior_prec),
+                        limite_ebin = c(limite_inferior_ebin, limite_superior_ebin), funcao_objetivo = funcao_objetivo, fnscale = fnscale)
 
             ajuste$simulacao[, data_assimilacao := seq.Date((dataRodada - numero_dias_assimilacao), dataRodada - 1, 1)]
             ajuste$simulacao[, nome := sub_bacia]
