@@ -20,6 +20,8 @@ calibracao(
   limite_inferior,
   limite_superior,
   postos_plu,
+  funcao_objetivo = calcula_dm,
+  fnscale = 1,
   pesos = rep(1/length(vazao[, valor]), length(vazao[, valor]))
 )
 }
@@ -76,6 +78,10 @@ calibracao(
 \item{posto - nome do posto plu}
 \item{valor - peso do posto plu}
 }}
+
+\item{funcao_objetivo}{funcao objetivo a ser utilizada na calibracao}
+
+\item{fnscale}{1 indica minimizacao da funcao objetivo / -1 maximizacao}
 
 \item{pesos}{vetor de pesos a serem utilizados para cada data durante a calibracao}
 }

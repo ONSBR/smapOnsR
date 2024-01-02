@@ -11,7 +11,7 @@ test_that("Testa a funcao de calibracao", {
   normal_climatologica <- historico_etp_NC[nome == nome2]
   precipitacao <- historico_precipitacao[posto %in% postos_plu[nome == nome2, posto]]
   precipitacao_ponderada <- ponderacao_espacial(precipitacao, postos_plu[nome == nome2])
-  data_inicio_objetivo <- as.Date("2011-01-01")
+  data_inicio_objetivo <- as.Date("2021-01-01")
   data_fim_objetivo <- as.Date("2021-12-31") - kt_max
   evapotranspiracao <- transforma_NC_serie(precipitacao_ponderada[data >= min(data) + kt_min & data <= data_fim_objetivo], normal_climatologica)
   vazao <- historico_vazao[data >= data_inicio_objetivo & data <= data_fim_objetivo & posto == nome2]
@@ -51,7 +51,7 @@ test_that("Testa a funcao de calibracao", {
 
   par <- calibracao(vetor_modelo,  kt_min, kt_max, area, EbInic, TuInic, Supin, precipitacao,
       evapotranspiracao, vazao, data_inicio_objetivo, data_fim_objetivo,
-      limite_inferior, limite_superior, postos_plu[nome == nome2])
+      limite_inferior, limite_superior, postos_plu[nome == nome2], calcula_kge())
 
   expect_equal((par$value < fo), TRUE)
 

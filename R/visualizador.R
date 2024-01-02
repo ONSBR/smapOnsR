@@ -124,6 +124,7 @@ executa_visualizador_calibracao <- function(){
                         shiny::fluidRow(
                             shiny::dateRangeInput("zoom_calibracao", "Zoom calibracao", start = NULL, end = NULL, min = NULL, max = NULL),
                             dygraphs::dygraphOutput("dygraph_zoom", heigh = "600px"),
+                            shiny::selectInput(inputId ="funcao_objetivo", label = shiny::h3("Selecione a funcao objetivo"), choices = c("dm", "nse", "mape", "kge"), selected = "dm"),
                             shiny::column(1, shiny::actionButton(inputId = "botao_calibracao", label = "Calibrar", class = "btn-lg btn-success")),
                             shiny::column(1, shiny::checkboxGroupInput("variaveis", "variaveis", choices = c("Qsup1", "Qsup2", "Qplan"))),
                             shiny::column(1, shiny::textOutput("funcao_objetivo")),
@@ -711,8 +712,18 @@ executa_visualizador_calibracao <- function(){
                     vazao_fo[peso != 0, peso := 1 / .N]
                 }
 
-                funcao_objetivo <- calcula_dm(saida()[data >= data_inicio_objetivo & data <= data_fim_objetivo, Qcalc], vazao_fo[, valor], vazao_fo[, peso])
-                paste0("funcao objetivo = ", funcao_objetivo)
+                if (input$funcao_objetivo == "dm") {
+                    calcula_funcao_objetivo <- calcula_dm
+                } else if (input$funcao_objetivo == "nse") {
+                    calcula_funcao_objetivo <- calcula_nse
+                } else if (input$funcao_objetivo == "mape") {
+                    calcula_funcao_objetivo <- calcula_mape
+                } else if (input$funcao_objetivo == "kge") {
+                    calcula_funcao_objetivo <- calcula_kge
+                }
+
+                funcao_objetivo <- calcula_funcao_objetivo(saida()[data >= data_inicio_objetivo & data <= data_fim_objetivo, Qcalc], vazao_fo[, valor], vazao_fo[, peso])
+                paste0("funcao objetivo = ", round(funcao_objetivo, 2))
             }
         })
 
@@ -776,11 +787,9 @@ executa_visualizador_calibracao <- function(){
                 metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "dm", valor = calcula_dm(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
                 metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "mape", valor = calcula_mape(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
                 metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "nse", valor = calcula_nse(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
-                metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "pbias", valor = saida_objetivo[, sum(Qcalc * vazao_fo[, peso])] / vazao_fo[, sum(valor * vazao_fo[, peso])])))
-                metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "correl", valor = cor(saida_objetivo[, Qcalc], vazao_fo[, valor]))))
-                alfa <- sd(saida_objetivo[, Qcalc]) / sd(vazao_fo[, valor])
-                metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "kge", 
-                valor = 1 - sqrt((metricas[metrica == "correl", valor] - 1) ^ 2 + (metricas[metrica == "pbias", valor] - 1) ^ 2 + (alfa - 1) ^ 2))))
+                metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "pbias", valor = calcula_pbias(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
+                metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "correl", valor = calcula_correlacao(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
+                metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "kge", valor = calcula_kge(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
                 metricas        
             }
         })
@@ -906,6 +915,20 @@ executa_visualizador_calibracao <- function(){
             vetor_modelo[15] <- input$alfa
             vetor_modelo[16] <- input$beta
 
+            if (input$funcao_objetivo == "dm") {
+                funcao_objetivo <- calcula_dm
+                fnscale = 1
+            } else if (input$funcao_objetivo == "nse") {
+                funcao_objetivo <- calcula_nse
+                fnscale = -1
+            } else if (input$funcao_objetivo == "mape") {
+                funcao_objetivo <- calcula_mape
+                fnscale = 1
+            } else if (input$funcao_objetivo == "kge") {
+                funcao_objetivo <- calcula_kge
+                fnscale = -1
+            }
+
             area <- area()
             Ebin <- input$Ebin
             Tuin <- input$Tuin
@@ -959,7 +982,7 @@ executa_visualizador_calibracao <- function(){
                 calibracao(vetor_modelo, kt_min, kt_max, area, Ebin, Tuin, Supin, precipitacao,
                                     evapotranspiracao_fo, vazao_fo, data_inicio_objetivo, data_fim_objetivo,
                                     limite_inferior, limite_superior, postos_plu[postos_plu$nome == input$sub_bacia],
-                                    vazao_fo[, peso])
+                                    funcao_objetivo, fnscale, vazao_fo[, peso])
             })
             
             shiny::observe({

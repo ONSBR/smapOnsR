@@ -20,7 +20,8 @@ funcao_objetivo_calibracao(
   postos_plu,
   pesos = rep(1/length(vazao[, valor]), length(vazao[, valor])),
   numero_dias,
-  numero_postos_plu
+  numero_postos_plu,
+  funcao_objetivo = calcula_dm
 )
 }
 \arguments{
@@ -78,6 +79,8 @@ funcao_objetivo_calibracao(
 \item{numero_dias}{numero de dias da simulacao para a calibracao}
 
 \item{numero_postos_plu}{numero de posto_plu considerados}
+
+\item{funcao_objetivo}{funcao objetivo a ser utilizada na calibracao}
 }
 \value{
 objetivo valor da funcao objetivo
