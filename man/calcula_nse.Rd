@@ -2,8 +2,7 @@
 % Please edit documentation in R/metricas.R
 \name{calcula_nse}
 \alias{calcula_nse}
-\title{FUNCOES PARA CALCULO DE METRICA DE AVALIACAO DO MODELO
-Calcula NSE}
+\title{Calcula NSE}
 \usage{
 calcula_nse(
   simulacao,

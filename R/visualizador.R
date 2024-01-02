@@ -1070,9 +1070,9 @@ executa_visualizador_calibracao <- function(){
 ##### VISUALIZADOR DE CASOS EXECUTADOS ############
 
 
-#' Visualizador GHCen
+#' Visualizador SMAP/ONS
 #' 
-#' Visualiza os cenarios gerados pelo modelo GHCen
+#' Visualiza dos cenarios gerados pelo modelo SMAP/ONS
 #'
 #' @param previsoes contendo as seguintes colunas:
 #'     \itemize{

@@ -1,5 +1,3 @@
-#' FUNCOES PARA CALCULO DE METRICA DE AVALIACAO DO MODELO
-
 #' Calcula NSE
 #' 
 #' Realiza o calculo do NSE
