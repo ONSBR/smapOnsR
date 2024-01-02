@@ -27,4 +27,5 @@ Realiza o calculo do vies percentual de duas amostras
 observacao <- 1:30
 simulacao <- observacao - 0.5
 pbias <- calcula_pbias(simulacao, observacao)
+
 }

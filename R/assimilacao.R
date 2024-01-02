@@ -209,7 +209,7 @@ funcao_objetivo_assimilacao_oficial <- function(vetor_variaveis, vetor_modelo, T
       precipitacao_ponderada, evapotranspiracao, evapotranspiracao_planicie, vazao, area,
       numero_dias_assimilacao,
       pesos_funcao_objetivo = rep((1 / numero_dias_assimilacao), numero_dias_assimilacao),
-      funcao_objetivo = calcula_dm){
+      funcao_objetivo = calcula_dm) {
 
   EbInic <- vetor_variaveis[numero_dias_assimilacao + 1]
   Supin <- vetor_variaveis[numero_dias_assimilacao + 2]
@@ -322,7 +322,7 @@ assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Su
     precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada[, valor], kt,
                                                     kt_max, kt_min)
 
-    vazao_observada_maxima <- max(vazao)  
+    vazao_observada_maxima <- max(vazao)
     pesos_prec <- rep(1, numero_dias_assimilacao)
     pesos_etp <- rep(1, numero_dias_assimilacao)
     limite_inferior <- c(rep(limite_prec[1], numero_dias_assimilacao), rep(limite_etp[1], numero_dias_assimilacao), limite_ebin[1] * EbInic, limite_supin[1] * vazao_observada_maxima)

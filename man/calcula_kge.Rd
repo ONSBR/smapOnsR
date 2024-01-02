@@ -18,7 +18,7 @@ calcula_kge(
 \item{pesos}{pesos a serem utilizados para cada data}
 }
 \value{
-correlacao ponderada entre as amostras
+Valor do KGE ponderado
 }
 \description{
 Realiza o calculo do indice de eficiencia kge

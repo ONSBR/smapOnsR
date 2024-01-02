@@ -67,12 +67,15 @@ calcula_dm <- function(simulacao, observacao, pesos = rep(1 /length(observacao),
 #' @param simulacao vetor com os valores da serie simulada
 #' @param observacao vetor com os valores da serie simulada
 #' @param pesos pesos a serem utilizados para cada data
-#' @examples 
+#' 
+#' @examples
 #' observacao <- 1:30
 #' simulacao <- observacao - 0.5
 #' pbias <- calcula_pbias(simulacao, observacao)
+#' 
 #' @return vies percentual
-#' @export 
+#' 
+#' @export
 
 calcula_pbias <- function(simulacao, observacao, pesos = rep(1 /length(observacao), length(observacao))){
     pbias <- sum((simulacao * pesos)) /  sum((observacao * pesos))
@@ -86,11 +89,13 @@ calcula_pbias <- function(simulacao, observacao, pesos = rep(1 /length(observaca
 #' @param simulacao vetor com os valores da serie simulada
 #' @param observacao vetor com os valores da serie simulada
 #' @param pesos pesos a serem utilizados para cada data
+#' 
 #' @examples 
 #' observacao <- 1:30
 #' simulacao <- observacao - 0.5
 #' pbias <- calcula_correlacao(simulacao, observacao)
 #' @return correlacao ponderada entre as amostras
+#' 
 #' @export 
 
 calcula_correlacao <- function(simulacao, observacao, pesos = rep(1 /length(observacao), length(observacao))){
@@ -98,12 +103,10 @@ calcula_correlacao <- function(simulacao, observacao, pesos = rep(1 /length(obse
     media_observacao <- sum(observacao * pesos)
     media_simulacao <- sum(simulacao * pesos)
 
-    # Calculate the components of the weighted correlation formula
     numerador <- sum(pesos * (observacao - media_observacao) * (simulacao - media_simulacao))
     denominador_observacao <- sqrt(sum(pesos * (observacao - media_observacao) ^ 2))
     denominador_simulacao <- sqrt(sum(pesos * (simulacao - media_simulacao) ^ 2))
 
-    # Calculate weighted correlation
     correlacao <- numerador / (denominador_observacao * denominador_simulacao)
 
     correlacao
@@ -116,11 +119,13 @@ calcula_correlacao <- function(simulacao, observacao, pesos = rep(1 /length(obse
 #' @param simulacao vetor com os valores da serie simulada
 #' @param observacao vetor com os valores da serie simulada
 #' @param pesos pesos a serem utilizados para cada data
-#' @examples 
+#' 
+#' @examples
 #' observacao <- 1:30
 #' simulacao <- observacao - 0.5
 #' pbias <- calcula_alfa(simulacao, observacao)
 #' @return correlacao ponderada entre as amostras
+#' 
 #' @export 
 
 calcula_alfa <- function(simulacao, observacao, pesos = rep(1 /length(observacao), length(observacao))){
@@ -144,10 +149,11 @@ calcula_alfa <- function(simulacao, observacao, pesos = rep(1 /length(observacao
 #' observacao <- 1:30
 #' simulacao <- observacao - 0.5
 #' kge <- calcula_kge(simulacao, observacao)
-#' @return correlacao ponderada entre as amostras
+#' @return Valor do KGE ponderado
+#' 
 #' @export 
 
-calcula_kge <- function(simulacao, observacao, pesos = rep(1 /length(observacao), length(observacao))){
+calcula_kge <- function(simulacao, observacao, pesos = rep(1 /length(observacao), length(observacao))) {
     
     correlacao <- calcula_correlacao(simulacao, observacao, pesos)
     pbias <- calcula_pbias(simulacao, observacao, pesos)
