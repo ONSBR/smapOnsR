@@ -589,9 +589,16 @@ le_arq_entrada_novo <- function(pasta_entrada) {
 
     if (any(arquivos[, arquivo] == "PRECIPITACAO_PREVISTA")) {
         precipitacao_prevista <- le_precipitacao_prevista(file.path(pasta_entrada,arquivos[arquivo == "PRECIPITACAO_PREVISTA", nome_arquivo]))
+        data.table::setnames(precipitacao_prevista , "nome", "posto")
+        precipitacao_prevista <- data.table::rbindlist(lapply(sub_bacias$nome, function(sub_bacia) {
+            ponderacao_espacial(precipitacao_prevista, postos_plu[nome %in% sub_bacia])
+        }))
         if (!all(sub_bacias$nome %in% precipitacao_prevista$nome)) {
             stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% precipitacao_prevista$nome, nome], " no arquivo ", arquivos[arquivo == "PRECIPITACAO_PREVISTA", nome_arquivo]))
         }
+        previsao_precipitacao <- completa_previsao(previsao_precipitacao, datas_rodadas)
+        previsao_precipitacao <- previsao_precipitacao[, mean(valor), by = .(data_rodada, data_previsao, cenario, nome)]
+        colnames(previsao_precipitacao)[5] <- "valor"
     } else {
         print("nao existe arquivo de previsao de precipitacao, serao utilizados dados historicos")
         precipitacao_prevista <- data.table::copy(precipitacao_observada)
