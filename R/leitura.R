@@ -251,8 +251,11 @@ le_inicializacao <- function(arq) {
         stop("o arquivo ", arq, " possui valores menores do que 2 para a variavel 'numero_dias_assimilacao'")
     }
 
-    if (any(!(dat$variavel %in% c("Ebin", "Supin", "Tuin", "numero_dias_assimilacao", "limite_inferior_ebin", "limite_superior_ebin", "limite_superior_prec", "limite_inferior_prec")))) {
-        stop("o arquivo ", arq, " possui valores diferentes de 'Ebin', 'Supin', 'Tuin', 'numero_dias_assimilacao', 'limite_inferior_ebin', 'limite_superior_ebin', 'limite_superior_prec', 'limite_inferior_prec' na coluna 'variavel'")
+    if (any(!(dat$variavel %in% c("Ebin", "Supin", "Tuin", "numero_dias_assimilacao", "limite_inferior_ebin",
+     "limite_superior_ebin", "limite_superior_prec", "limite_inferior_prec", "funcao_objetivo")))) {
+        stop("o arquivo ", arq, " possui valores diferentes de 'Ebin', 'Supin', 'Tuin', 
+        'numero_dias_assimilacao', 'limite_inferior_ebin', 'limite_superior_ebin', 'limite_superior_prec',
+        'limite_inferior_prec', 'funcao_objetivo' na coluna 'variavel'")
     }
 
     if (any(duplicated(dat[, .(variavel, nome)]))) {
@@ -264,7 +267,7 @@ le_inicializacao <- function(arq) {
     teste <- dat[, setdiff(variaveis, variavel), by = c("nome")]
 
     if (nrow(teste) != 0) {
-        stop(paste0("falta o parametro ", teste$V1, " para a sub-bacia ", teste$nome, " no arquivo ", arq, "\n"))
+        stop(paste0("falta a variavel ", teste$V1, " para a sub-bacia ", teste$nome, " no arquivo ", arq, "\n"))
     }
 
     dat
