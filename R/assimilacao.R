@@ -330,9 +330,6 @@ assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Su
     limite_inferior[numero_dias_assimilacao] <- 0.9999999999
     limite_superior[numero_dias_assimilacao] <- 1.0000000001
     limites_iguais <- limite_superior == limite_inferior
-    print(paste0("limite superior: ", limite_superior))
-    print(paste0("limite inferior: ", limite_inferior))
-    print(paste0("limites iguais: ", limites_iguais))
     limite_superior[limites_iguais] <- limite_inferior[limites_iguais] + 0.000001
     vetor_variaveis <- c(pesos_prec, pesos_etp, EbInic, Supin)
 

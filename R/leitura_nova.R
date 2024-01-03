@@ -248,7 +248,7 @@ le_inicializacao <- function(arq) {
     }
 
     if (any(dat$variavel == 'numero_dias_assimilacao' & dat$valor < 2)) {
-        stop("o arquivo ", arq, " possui valores menores do que 2 para a variavel 'numero_dias_assimilacao'")
+        stop("o arquivo ", arq, " possui valor menor que 2 para a variavel 'numero_dias_assimilacao'")
     }
 
     if (any(!(dat$variavel %in% c("Ebin", "Supin", "Tuin", "numero_dias_assimilacao", "limite_inferior_ebin",
@@ -262,7 +262,8 @@ le_inicializacao <- function(arq) {
         stop("o arquivo ", arq, " possui valores duplicados na coluna 'variavel' para uma mesma sub-bacia")
     }
 
-    variaveis <- c("Ebin", "Tuin", "Supin", "numero_dias_assimilacao")
+    variaveis <- c("Ebin", "Tuin", "Supin", "numero_dias_assimilacao", "limite_inferior_ebin",
+     "limite_superior_ebin", "limite_superior_prec", "limite_inferior_prec")
 
     teste <- dat[, setdiff(variaveis, variavel), by = c("nome")]
 
