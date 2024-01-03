@@ -37,14 +37,13 @@ assimilacao_evapotranspiracao(
 \item{precipitacao_assimilacao}{data table com a precipitacao a ser ponderada com as colunas
 \itemize{
 \item{data - data da observacao}
-\item{posto - nome do posto}
-\item{id - id do posto}
+\item{nome - nome da sub-bacia}
 \item{valor - valor da variavel}
 }}
 
-\item{evapotranspiracao}{vetor de evapotranspiracao}
+\item{evapotranspiracao}{vetor de evapotranspiracao potencial}
 
-\item{evapotranspiracao_planicie}{vetor de evapotranspiracao do reservatorio de planicie}
+\item{evapotranspiracao_planicie}{vetor de evapotranspiracao potencial do reservatorio de planicie}
 
 \item{vazao}{vetor de vazao observada}
 

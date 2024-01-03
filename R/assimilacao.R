@@ -12,11 +12,11 @@
 #' @param precipitacao_assimilacao data table com a precipitacao a ser ponderada com as colunas
 #'     \itemize{
 #'     \item{data - data da observacao}
-#'     \item{posto - nome do posto}
+#'     \item{nome - nome da sub-bacia}
 #'     \item{valor - valor da variavel}
 #'     }
-#' @param evapotranspiracao vetor de evapotranspiracao
-#' @param evapotranspiracao_planicie vetor de evapotranspiracao do reservatorio de planicie
+#' @param evapotranspiracao vetor de evapotranspiracao potencial
+#' @param evapotranspiracao_planicie vetor de evapotranspiracao potencial do reservatorio de planicie
 #' @param vazao vetor de vazao observada
 #' @param numero_dias_assimilacao numero de dias da assimilacao
 #' @param limite_prec limites mínimo e máximo dos pesos utilizados para ponderar a precipitacao durante a etapa de assimilacao
@@ -243,12 +243,11 @@ funcao_objetivo_assimilacao_oficial <- function(vetor_variaveis, vetor_modelo, T
 #' @param precipitacao_assimilacao data table com a precipitacao a ser ponderada com as colunas
 #'     \itemize{
 #'     \item{data - data da observacao}
-#'     \item{posto - nome do posto}
-#'     \item{id - id do posto}
+#'     \item{nome - nome da sub-bacia}
 #'     \item{valor - valor da variavel}
 #'     }
-#' @param evapotranspiracao vetor de evapotranspiracao
-#' @param evapotranspiracao_planicie vetor de evapotranspiracao do reservatorio de planicie
+#' @param evapotranspiracao vetor de evapotranspiracao potencial
+#' @param evapotranspiracao_planicie vetor de evapotranspiracao potencial do reservatorio de planicie
 #' @param vazao vetor de vazao observada
 #' @param numero_dias_assimilacao numero de dias da assimilacao
 #' @param limite_prec limites mínimo e máximo dos pesos utilizados para ponderar a precipitacao durante a etapa de assimilacao
@@ -309,8 +308,9 @@ funcao_objetivo_assimilacao_oficial <- function(vetor_variaveis, vetor_modelo, T
 #'     }
 #' @export
 
-assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao_assimilacao,
-      evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias_assimilacao,
+assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Supin, 
+      precipitacao_assimilacao, evapotranspiracao, evapotranspiracao_planicie,
+      vazao, numero_dias_assimilacao,
       limite_prec = c(0.5, 2), limite_etp = c(0.5, 2), limite_ebin = c(0.8, 1.2),
       limite_supin = c(0, 2), funcao_objetivo = calcula_dm, fnscale = 1) {
     

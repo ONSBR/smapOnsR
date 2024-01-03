@@ -452,9 +452,10 @@ rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observa
             evapotranspiracao <- evapotranspiracao_observada[posto == sub_bacia & data < dataRodada & data >= (dataRodada - numero_dias_assimilacao), valor] * vetor_modelo[76]
 
             ajuste <- assimilacao_evapotranspiracao(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao_assimilacao,
-                        evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias_assimilacao, 
-                        limite_prec = c(limite_inferior_prec, limite_superior_prec),
-                        limite_ebin = c(limite_inferior_ebin, limite_superior_ebin), funcao_objetivo = funcao_objetivo, fnscale = fnscale)
+                        evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias_assimilacao,
+                        limite_prec = c(limite_inferior_prec, limite_superior_prec), limite_etp = c(0.5, 2),
+                        limite_ebin = c(limite_inferior_ebin, limite_superior_ebin), limite_supin = c(0, 2),
+                        funcao_objetivo = funcao_objetivo, fnscale = fnscale)
 
             ajuste$simulacao[, data_assimilacao := seq.Date((dataRodada - numero_dias_assimilacao), dataRodada - 1, 1)]
             ajuste$simulacao[, nome := sub_bacia]
