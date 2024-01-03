@@ -600,7 +600,7 @@ le_arq_entrada_novo <- function(pasta_entrada) {
         previsao_precipitacao <- previsao_precipitacao[, mean(valor), by = .(data_rodada, data_previsao, cenario, nome)]
         colnames(previsao_precipitacao)[5] <- "valor"
     } else {
-        print("nao existe arquivo de previsao de precipitacao, serao utilizados dados historicos")
+        warning("nao existe arquivo de previsao de precipitacao, serao utilizados dados historicos")
         precipitacao_prevista <- data.table::copy(precipitacao_observada)
         colnames(precipitacao_prevista)[2] <- "nome"
         precipitacao_prevista <- transforma_historico_previsao(precipitacao_prevista, datas_rodadas)
@@ -615,7 +615,7 @@ le_arq_entrada_novo <- function(pasta_entrada) {
                 stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% evapotranspiracao_prevista$nome, nome], " no arquivo ", arquivos[arquivo == "EVAPOTRANSPIRACAO_PREVISTA", nome_arquivo]))
             }
         } else {
-            print("nao existe arquivo de previsao de evapotranspiracao, serao utilizados dados historicos")
+            warning("nao existe arquivo de previsao de evapotranspiracao, serao utilizados dados historicos")
             
             datas_rodadas[, numero_dias_previsao := (numero_dias_previsao - 2)]
             evapotranspiracao_prevista <- data.table::copy(evapotranspiracao_observada)
