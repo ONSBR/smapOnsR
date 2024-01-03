@@ -130,7 +130,7 @@ executa_visualizador_calibracao <- function(){
                             shiny::column(1, shiny::textOutput("funcao_objetivo")),
                             shiny::column(5, shiny::tableOutput("tabela_metrica1")),
                             shiny::column(3, shiny::tableOutput("tabela_metrica2")),
-                            shiny::selectInput(inputId = "estatistica", label = shiny::h3("Estatíticas mensais"), choices = c("media", "dp", "assimetria", "curtose")),
+                            shiny::selectInput(inputId = "estatistica", label = shiny::h3("Estatisticas mensais"), choices = c("media", "dp", "assimetria", "curtose")),
                             plotly::plotlyOutput("metrica_mensal"),
                             plotly::plotlyOutput("grafico_kts")
                         )
