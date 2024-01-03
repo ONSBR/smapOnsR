@@ -17,7 +17,9 @@ assimilacao_oficial(
   numero_dias_assimilacao,
   limite_prec = c(0.5, 2),
   limite_ebin = c(0.8, 1.2),
-  limite_supin = c(0, 2)
+  limite_supin = c(0, 2),
+  funcao_objetivo = calcula_dm,
+  fnscale = 1
 )
 }
 \arguments{
@@ -34,13 +36,13 @@ assimilacao_oficial(
 \item{precipitacao_assimilacao}{data table com a precipitacao a ser ponderada com as colunas
 \itemize{
 \item{data - data da observacao}
-\item{posto - nome do posto}
+\item{nome - nome da sub-bacia}
 \item{valor - valor da variavel}
 }}
 
-\item{evapotranspiracao}{vetor de evapotranspiracao}
+\item{evapotranspiracao}{vetor de evapotranspiracao potencial}
 
-\item{evapotranspiracao_planicie}{vetor de evapotranspiracao do reservatorio de planicie}
+\item{evapotranspiracao_planicie}{vetor de evapotranspiracao potencial do reservatorio de planicie}
 
 \item{vazao}{vetor de vazao observada}
 
@@ -51,6 +53,10 @@ assimilacao_oficial(
 \item{limite_ebin}{limites mínimo e máximo da vazao de base inicial}
 
 \item{limite_supin}{limites mínimo e máximo da vazao superficial inicial}
+
+\item{funcao_objetivo}{funcao objetivo a ser utilizada na assimilacao}
+
+\item{fnscale}{valor indicando se a funcao deve ser maximizada ou minimizada}
 }
 \value{
 lista contendo
@@ -67,38 +73,44 @@ Realiza a assimilacao de dados com a metodologia oficial
 \examples{
 
 # usando dado dummy contido no pacote
-sub_bacia <- "baixoig"
-data_rodada <- as.Date('2020/01/01')
-dias_assimilacao <- 31
-numero_dias <- dias_assimilacao
-EbInic <- historico_vazao[data == (data_rodada - dias_assimilacao + 1) & posto == sub_bacia, valor] / 2
-Supin <- historico_vazao[data == (data_rodada - dias_assimilacao + 1) & posto == sub_bacia, valor] / 2
-TuInic <- 0.5
+  sub_bacia <- "baixoig"
+ data_rodada <- as.Date('2020/01/01')
+ dias_assimilacao <- 31
+ numero_dias <- dias_assimilacao
+ EbInic <- historico_vazao[data == (data_rodada - dias_assimilacao + 1) & posto == sub_bacia, valor] / 2
+ Supin <- historico_vazao[data == (data_rodada - dias_assimilacao + 1) & posto == sub_bacia, valor] / 2
+ TuInic <- 0.5
 
-modelo <- new_modelo_smap_ons(parametros[nome == sub_bacia], postos_plu[nome == sub_bacia])
-vetor_modelo <- unlist(modelo)
-area <- attributes(modelo)$area
+ modelo <- new_modelo_smap_ons(parametros[nome == sub_bacia], postos_plu[nome == sub_bacia])
+ vetor_modelo <- unlist(modelo)
+ area <- attributes(modelo)$area
 
-vazao <- historico_vazao[data < data_rodada & data >= (data_rodada - dias_assimilacao) 
-                        & posto == sub_bacia, valor]
-normal_climatologica <- historico_etp_NC[nome == sub_bacia]
+ vazao <- historico_vazao[data < data_rodada & data >= (data_rodada - dias_assimilacao) 
+                         & posto == sub_bacia, valor]
+ normal_climatologica <- historico_etp_NC[nome == sub_bacia]
 
-kt_max <- sum(modelo$kt[1:2] > 0)
-kt_min <- sum(modelo$kt[4:63] > 0)
-precipitacao <- historico_precipitacao[data < (data_rodada + kt_max) & data >= (data_rodada - dias_assimilacao - kt_min) & posto == 'psatbigu']
-precipitacao <- ponderacao_espacial(precipitacao, postos_plu[nome == sub_bacia])
+ kt_max <- sum(modelo$kt[1:2] > 0)
+ kt_min <- sum(modelo$kt[4:63] > 0)
+ precipitacao <- historico_precipitacao[data < (data_rodada + kt_max) & data >= (data_rodada - dias_assimilacao - kt_min) & posto == 'psatbigu']
+ precipitacao <- ponderacao_espacial(precipitacao, postos_plu[nome == sub_bacia])
 
-evapotranspiracao <- transforma_NC_serie(precipitacao[data < data_rodada & data >= (data_rodada - dias_assimilacao)], normal_climatologica) 
-evapotranspiracao_planicie <- evapotranspiracao[, valor] * vetor_modelo[77]
-evapotranspiracao <- evapotranspiracao[, valor] * vetor_modelo[76]
+ evapotranspiracao <- transforma_NC_serie(precipitacao[data < data_rodada & data >= (data_rodada - dias_assimilacao)], normal_climatologica) 
+ evapotranspiracao_planicie <- evapotranspiracao[, valor] * vetor_modelo[77]
+ evapotranspiracao <- evapotranspiracao[, valor] * vetor_modelo[76]
 
-kt <- vetor_modelo[12:74]
-precipitacao_ponderada <- data.table::data.table(precipitacao)
-precipitacao_ponderada[, valor := valor * vetor_modelo[75]]
-precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada[, valor], kt, kt_max, kt_min)
+ kt <- vetor_modelo[12:74]
+ precipitacao_ponderada <- data.table::data.table(precipitacao)
+ precipitacao_ponderada[, valor := valor * vetor_modelo[75]]
+ precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada[, valor], kt, kt_max, kt_min)
+
+ pesos <- rep(1, numero_dias)
+ limite_prec <- c(0.5, 2)
+ limite_ebin <- c(0.8, 1.2)
+ limite_supin <- c(0, 2)
+
+ vetor_parametros <- c(pesos, EbInic, Supin)
 \dontrun{
-saida <- assimilacao_oficial(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao,
-       evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias = dias_assimilacao
-saida
+ saida <- assimilacao_oficial(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao,
+     evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias = dias_assimilacao)
 }
 }

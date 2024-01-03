@@ -9,7 +9,7 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
-Depends: 
+Depends:
     R (>= 3.5)
 Imports:
     data.table,
@@ -25,6 +25,8 @@ Imports:
     plotly,
     ggplot2,
     zip,
+    moments,
+    arrow,
     zoo
 Remotes: felipe-treistman/funcaoSmapCpp
 LazyData: true

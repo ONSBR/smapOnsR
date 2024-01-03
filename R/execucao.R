@@ -15,11 +15,11 @@
 executa_caso_oficial <- function(pasta_caso){
     pasta_entrada <- file.path(pasta_caso, "Arq_Entrada")
     pasta_saida <- file.path(pasta_caso, "Arq_Saida")
-    if (!dir.exists(pasta_entrada)){
-        stop("nao existe a pasta de entrada", pasta_entrada)
+    if (!dir.exists(pasta_entrada)) {
+        stop("nao existe a pasta de entrada ", pasta_entrada)
     }
-    if (!dir.exists(pasta_saida)){
-        stop("nao existe a pasta de saida", pasta_saida)
+    if (!dir.exists(pasta_saida)) {
+        stop("nao existe a pasta de saida ", pasta_saida)
     }
     entrada <- le_arq_entrada(pasta_entrada)
 
@@ -246,6 +246,7 @@ executa_caso_etp <- function(pasta_entrada){
 ## Create a cluster object with the desired number of cores/workers
 #
 #cores <- parallel::detectCores()
+
 #cl <- parallel::makeCluster(cores[1] - 1) #not to overload your computer
 #
 ## Set up the parallel backend

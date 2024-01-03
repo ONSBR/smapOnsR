@@ -15,10 +15,12 @@ test_that("testa execucao oficial", {
   } else {
     expect_true(abs(round(saida[, valor][10], 0) - 3493) < 3493 * 0.01)
   }
-
+  
+  #CN12.2
   pasta_caso <- system.file("extdata", package = "smapOnsR")
   expect_error(executa_caso_oficial(pasta_caso))
 
+  #CN12.1
   pasta_caso <- system.file("extdata", "Arq_Entrada", package = "smapOnsR")
   expect_error(executa_caso_oficial(pasta_caso))
 })
@@ -31,9 +33,9 @@ test_that("testa execucao novo formato", {
   secao <- sessionInfo()
   
   if (secao$R.version$os == "mingw32") {
-    expect_equal(round(saida$previsao[nome == "avermelha" & variavel == "Qcalc" & cenario == "historico", valor][27], 0), 729)
+    expect_equal(round(saida$previsao[nome == "avermelha" & variavel == "Qcalc" & cenario == "historico", valor][27], 0), 732)
   } else {
-    expect_true(abs(round(saida$previsao[nome == "avermelha" & variavel == "Qcalc" & cenario == "historico", valor][27], 0) - 729) < 729 * 0.01)
+    expect_true(abs(round(saida$previsao[nome == "avermelha" & variavel == "Qcalc" & cenario == "historico", valor][27], 0) - 732) < 732 * 0.01)
     
   }
 

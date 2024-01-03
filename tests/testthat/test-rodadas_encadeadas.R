@@ -19,8 +19,10 @@ test_that("testa rodadas encadeadas", {
     vazao <- historico_vazao[posto %in% sub_bacias]
     evapotranspiracao <- historico_etp_NC[nome %in% sub_bacias]
 
-    inicializacao <- data.table::data.table(nome = c(rep("avermelha", 4), rep("ssimao2", 4)), variavel = rep(c("Ebin", "Supin", "Tuin", "numero_dias_assimilacao"),2), 
-    valor = c(218.71, 46.69, 0.2891, 31, 441.67, 256.98, 0.3141, 31))
+    inicializacao <- data.table::data.table(nome = c(rep("avermelha", 8), rep("ssimao2", 8)),
+    variavel = rep(c("Ebin", "Supin", "Tuin", "numero_dias_assimilacao", 
+    "limite_inferior_ebin", "limite_superior_ebin", "limite_superior_prec", "limite_inferior_prec"), 2),
+    valor = c(218.71, 46.69, 0.2891, 31, 0.8, 1.2, 2, 0, 441.67, 256.98, 0.3141, 31, 0.8, 1.2, 2, 0))
     
     saida <- rodada_encadeada_oficial(parametros[nome %in% sub_bacias],
     inicializacao, precipitacao, previsao_precipitacao, evapotranspiracao, vazao,
@@ -38,16 +40,16 @@ test_that("testa rodada ecmwf", {
 
   entrada <- le_arq_entrada(pasta_entrada)
 
-  #parametros <- entrada$parametros
-  #inicializacao <- entrada$inicializacao
-  #precipitacao_observada <- entrada$precipitacao
-  #    precipitacao_prevista <- entrada$previsao_precipitacao
-  #    evapotranspiracao_nc <-entrada$evapotranspiracao
-  #      vazao_observada <- entrada$vazao
-  #      postos_plu <- entrada$postos_plu
-  #      datas_rodadas <- entrada$datas_rodadas
-  #    numero_cenarios <- length(unique(entrada$previsao_precipitacao[, cenario]))
-  #    sub_bacias <- entrada$caso$nome_subbacia
+  parametros <- entrada$parametros
+  inicializacao <- entrada$inicializacao
+  precipitacao_observada <- entrada$precipitacao
+      precipitacao_prevista <- entrada$previsao_precipitacao
+      evapotranspiracao_nc <-entrada$evapotranspiracao
+        vazao_observada <- entrada$vazao
+        postos_plu <- entrada$postos_plu
+        datas_rodadas <- entrada$datas_rodadas
+      numero_cenarios <- length(unique(entrada$previsao_precipitacao[, cenario]))
+      sub_bacias <- entrada$caso$nome_subbacia
 
   set.seed(129852)
   saida <- rodada_encadeada_oficial(entrada$parametros,
@@ -132,8 +134,10 @@ test_that("testa rodada com serie temporal etp", {
 
     datas_rodadas$numero_dias_previsao <- datas_rodadas$numero_dias_previsao + 2
 
-    inicializacao <- data.table::data.table(nome = c(rep("avermelha", 4), rep("ssimao2", 4)), variavel = rep(c("Ebin", "Supin", "Tuin", "numero_dias_assimilacao"),2), 
-    valor = c(218.71, 46.69, 0.2891, 31, 441.67, 256.98, 0.3141, 31))
+    inicializacao <- data.table::data.table(nome = c(rep("avermelha", 8), rep("ssimao2", 8)),
+    variavel = rep(c("Ebin", "Supin", "Tuin", "numero_dias_assimilacao", 
+    "limite_inferior_ebin", "limite_superior_ebin", "limite_superior_prec", "limite_inferior_prec"), 2),
+    valor = c(218.71, 46.69, 0.2891, 31, 0.8, 1.2, 2, 0, 441.67, 256.98, 0.3141, 31, 0.8, 1.2, 2, 0))
     
     saida <- rodada_encadeada_etp(parametros[nome %in% sub_bacias],
     inicializacao, precipitacao_observada, precipitacao_prevista, evapotranspiracao_observada, evapotranspiracao_prevista, vazao_observada,
@@ -149,7 +153,6 @@ test_that("testa caso pegando a assimilacao original do aplicativo",{
 
     entrada <- le_arq_entrada(pasta_entrada)
     execucao <- le_execucao(pasta_saida, entrada$datas_rodadas$data)
-
 
     saida <- rodada_sem_assimilacao(entrada$parametros,
       entrada$inicializacao, entrada$precipitacao, entrada$previsao_precipitacao, entrada$evapotranspiracao, entrada$vazao,
@@ -169,10 +172,9 @@ test_that("testa caso pegando a assimilacao original do aplicativo",{
 })
 
 #test_that("testa rodada com serie temporal etp", {
-#    pasta_entrada <- system.file("extdata", "Arq_entrada_novo", package = "smapOnsR")
+#    pasta_entrada <- system.file("extdata", "arq_entrada_novo", package = "smapOnsR")
 #
 #    entrada <- le_arq_entrada_novo(pasta_entrada)
-#    entrada$datas_rodadas <- entrada$datas_rodadas[1:3]
 #    
 #    sub_bacias <- c("smesa", "avermelha")
 #
@@ -184,4 +186,12 @@ test_that("testa caso pegando a assimilacao original do aplicativo",{
 #
 #    expect_equal(round(saida$previsao[data_caso == "2011-01-15" & data_previsao == "2011-02-16"
 #     & cenario == "historico" & variavel == "Qcalc" & nome == "smesa", valor], 0), 1054)
+#  
+#  secao <- sessionInfo()
+#  
+#  if (secao$R.version$os == "mingw32") {
+#    expect_equal(round(saida$previsao[nome == "ssimao2" & variavel == "Qcalc", valor][17], 0), 1210)
+#  } else {
+#    expect_true(abs(round(saida$previsao[nome == "ssimao2" & variavel == "Qcalc", valor][17], 0) - 1210) < 1210 * 0.01)
+#  }
 #})

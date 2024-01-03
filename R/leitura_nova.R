@@ -146,7 +146,8 @@ le_historico_verificado <- function(arq) {
 #' Realiza a leitura do csv 'precipitacao_prevista.csv' com os dados iniciais
 #' 
 #' @param arq nome do arquivo "precipitacao_prevista.csv"
-#' @importFrom  data.table data.table as.IDate
+#' @importFrom  data.table data.table as.data.table
+#' @importFrom arrow read_parquet
 #' @return data.table com a precipitacao prevista com as colunas
 #'     \itemize{
 #'     \item{data_rodada - data da rodada do modelo que gerou a previsao}
@@ -161,7 +162,13 @@ le_precipitacao_prevista <- function(arq) {
     if (!file.exists(arq)) {
         stop("o arquivo de precipitacao prevista nao existe.")
     }
-    dat <- data.table::fread(arq)
+
+    extensao <- strsplit(arq, split = "\\.")[[1]][2]
+    if (extensao == ".parquet") {
+        dat <- data.table::as.data.table(arrow::read_parquet(arq))
+    } else {
+        dat <- data.table::fread(arq)
+    }
 
     if (any(colnames(dat) != c("data_rodada", "data_previsao", "cenario", "nome", "valor"))) {
         stop("o arquivo deve possuir as seguintes colunas 'data_rodada', 'data_previsao', 'cenario', 'nome', 'valor'")
@@ -241,19 +248,27 @@ le_inicializacao <- function(arq) {
     }
 
     if (any(dat$variavel == 'numero_dias_assimilacao' & dat$valor < 2)) {
-        stop("o arquivo ", arq, " possui valores menores do que 2 para a variavel 'numero_dias_assimilacao'")
+        stop("o arquivo ", arq, " possui valor menor que 2 para a variavel 'numero_dias_assimilacao'")
     }
 
-    if (any(!(dat$variavel %in% c("Ebin", "Supin", "Tuin", "numero_dias_assimilacao")))) {
-        stop("o arquivo ", arq, " possui valores diferentes de 'Ebin', 'Supin', 'Tuin' ou 'numero_dias_assimilacao' na coluna 'variavel'")
+    if (any(!(dat$variavel %in% c("Ebin", "Supin", "Tuin", "numero_dias_assimilacao", "limite_inferior_ebin",
+     "limite_superior_ebin", "limite_superior_prec", "limite_inferior_prec", "funcao_objetivo")))) {
+        stop("o arquivo ", arq, " possui valores diferentes de 'Ebin', 'Supin', 'Tuin', 
+        'numero_dias_assimilacao', 'limite_inferior_ebin', 'limite_superior_ebin', 'limite_superior_prec',
+        'limite_inferior_prec', 'funcao_objetivo' na coluna 'variavel'")
     }
 
     if (any(duplicated(dat[, .(variavel, nome)]))) {
         stop("o arquivo ", arq, " possui valores duplicados na coluna 'variavel' para uma mesma sub-bacia")
     }
 
-    if (any(!(dat[, .(count = .N), by = nome]$count == 4))) {
-        stop("o arquivo ", arq, " deve possuir 4 valores diferentes ('Ebin', 'Supin', 'Tuin' ou 'numero_dias_assimilacao') na coluna 'variavel' para uma mesma sub-bacia")
+    variaveis <- c("Ebin", "Tuin", "Supin", "numero_dias_assimilacao", "limite_inferior_ebin",
+     "limite_superior_ebin", "limite_superior_prec", "limite_inferior_prec")
+
+    teste <- dat[, setdiff(variaveis, variavel), by = c("nome")]
+
+    if (nrow(teste) != 0) {
+        stop(paste0("falta a variavel ", teste$V1, " para a sub-bacia ", teste$nome, " no arquivo ", arq, "\n"))
     }
 
     dat
@@ -575,11 +590,18 @@ le_arq_entrada_novo <- function(pasta_entrada) {
 
     if (any(arquivos[, arquivo] == "PRECIPITACAO_PREVISTA")) {
         precipitacao_prevista <- le_precipitacao_prevista(file.path(pasta_entrada,arquivos[arquivo == "PRECIPITACAO_PREVISTA", nome_arquivo]))
+        data.table::setnames(precipitacao_prevista , "nome", "posto")
+        precipitacao_prevista <- data.table::rbindlist(lapply(sub_bacias$nome, function(sub_bacia) {
+            ponderacao_espacial(precipitacao_prevista, postos_plu[nome %in% sub_bacia])
+        }))
         if (!all(sub_bacias$nome %in% precipitacao_prevista$nome)) {
             stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% precipitacao_prevista$nome, nome], " no arquivo ", arquivos[arquivo == "PRECIPITACAO_PREVISTA", nome_arquivo]))
         }
+        previsao_precipitacao <- completa_previsao(previsao_precipitacao, datas_rodadas)
+        previsao_precipitacao <- previsao_precipitacao[, mean(valor), by = .(data_rodada, data_previsao, cenario, nome)]
+        colnames(previsao_precipitacao)[5] <- "valor"
     } else {
-        print("nao existe arquivo de previsao de precipitacao, serao utilizados dados historicos")
+        warning("nao existe arquivo de previsao de precipitacao, serao utilizados dados historicos")
         precipitacao_prevista <- data.table::copy(precipitacao_observada)
         colnames(precipitacao_prevista)[2] <- "nome"
         precipitacao_prevista <- transforma_historico_previsao(precipitacao_prevista, datas_rodadas)
@@ -589,9 +611,12 @@ le_arq_entrada_novo <- function(pasta_entrada) {
 
     } else {
         if (any(arquivos[, arquivo] == "EVAPOTRANSPIRACAO_PREVISTA")) {
-
+            evapotranspiracao_prevista <- le_precipitacao_prevista(file.path(pasta_entrada,arquivos[arquivo == "EVAPOTRANSPIRACAO_PREVISTA", nome_arquivo]))
+            if (!all(sub_bacias$nome %in% evapotranspiracao_prevista$nome)) {
+                stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% evapotranspiracao_prevista$nome, nome], " no arquivo ", arquivos[arquivo == "EVAPOTRANSPIRACAO_PREVISTA", nome_arquivo]))
+            }
         } else {
-            print("nao existe arquivo de previsao de evapotranspiracao, serao utilizados dados historicos")
+            warning("nao existe arquivo de previsao de evapotranspiracao, serao utilizados dados historicos")
             
             datas_rodadas[, numero_dias_previsao := (numero_dias_previsao - 2)]
             evapotranspiracao_prevista <- data.table::copy(evapotranspiracao_observada)

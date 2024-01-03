@@ -10,6 +10,7 @@
 #' @importFrom future future value resolved
 #' @importFrom DT renderDataTable dataTableOutput
 #' @importFrom plotly renderPlotly plotlyOutput plot_ly
+#' @importFrom moments skewness kurtosis
 #' @export
 
 executa_visualizador_calibracao <- function(){
@@ -112,21 +113,26 @@ executa_visualizador_calibracao <- function(){
                             shiny::numericInput(inputId = "numero_periodo_desconsiderado", label = "Periodos desconsiderados", value = 0, min = 0),
                             shiny::uiOutput("periodos_desconsiderados")
                         ),
+                        shiny::hr(),
+                        shiny::fluidRow(
+                            shiny::downloadButton("download_parametros", "Download parametros_sub_bacia.csv"),
+                            shiny::downloadButton("download_postos_plu", "Download postos_plu_sub_bacia.csv")
+                        )
                     ),
 
                     shiny::mainPanel(
                         shiny::fluidRow(
-                            dygraphs::dygraphOutput("dygraph", heigh = "600px"),
-                            shiny::textOutput("funcao_objetivo"),
-                            dygraphs::dygraphOutput("dygraph_zoom", heigh = "600px"),
                             shiny::dateRangeInput("zoom_calibracao", "Zoom calibracao", start = NULL, end = NULL, min = NULL, max = NULL),
-                            shiny::column(3,
-                                shiny::actionButton(inputId = "botao_calibracao", label = "Calibrar", class = "btn-lg btn-success"),
-                                shiny::checkboxGroupInput("variaveis", "variaveis", choices = c("Qsup1", "Qsup2", "Qplan")),
-                                plotly::plotlyOutput("grafico_kts")
-                            ),
-                            shiny::downloadButton("download_parametros", "Download parametros_sub_bacia.csv"),
-                            shiny::downloadButton("download_postos_plu", "Download postos_plu_sub_bacia.csv")
+                            dygraphs::dygraphOutput("dygraph_zoom", heigh = "600px"),
+                            shiny::selectInput(inputId ="funcao_objetivo", label = shiny::h3("Selecione a funcao objetivo"), choices = c("dm", "nse", "mape", "kge"), selected = "dm"),
+                            shiny::column(1, shiny::actionButton(inputId = "botao_calibracao", label = "Calibrar", class = "btn-lg btn-success")),
+                            shiny::column(1, shiny::checkboxGroupInput("variaveis", "variaveis", choices = c("Qsup1", "Qsup2", "Qplan"))),
+                            shiny::column(1, shiny::textOutput("funcao_objetivo")),
+                            shiny::column(5, shiny::tableOutput("tabela_metrica1")),
+                            shiny::column(3, shiny::tableOutput("tabela_metrica2")),
+                            shiny::selectInput(inputId = "estatistica", label = shiny::h3("Estatisticas mensais"), choices = c("media", "dp", "assimetria", "curtose")),
+                            plotly::plotlyOutput("metrica_mensal"),
+                            plotly::plotlyOutput("grafico_kts")
                         )
                     )
                 )
@@ -706,10 +712,153 @@ executa_visualizador_calibracao <- function(){
                     vazao_fo[peso != 0, peso := 1 / .N]
                 }
 
-                funcao_objetivo <- calcula_dm(saida()[data >= data_inicio_objetivo & data <= data_fim_objetivo, Qcalc], vazao_fo[, valor], vazao_fo[, peso])
-                paste0("funcao objetivo = ", funcao_objetivo)
+                if (input$funcao_objetivo == "dm") {
+                    calcula_funcao_objetivo <- calcula_dm
+                } else if (input$funcao_objetivo == "nse") {
+                    calcula_funcao_objetivo <- calcula_nse
+                } else if (input$funcao_objetivo == "mape") {
+                    calcula_funcao_objetivo <- calcula_mape
+                } else if (input$funcao_objetivo == "kge") {
+                    calcula_funcao_objetivo <- calcula_kge
+                }
+
+                funcao_objetivo <- calcula_funcao_objetivo(saida()[data >= data_inicio_objetivo & data <= data_fim_objetivo, Qcalc], vazao_fo[, valor], vazao_fo[, peso])
+                paste0("funcao objetivo = ", round(funcao_objetivo, 2))
             }
         })
+
+        output$tabela_metrica1 <- shiny::renderTable({
+            if (!is.null(input[[paste0("posto_plu_1")]])) {
+                data_inicio_objetivo <- input$periodo_calibracao[1]
+                data_fim_objetivo <- input$periodo_calibracao[2]
+                vazao <- vazao_posto()
+
+                vazao_fo <- vazao[which((vazao$data >= data_inicio_objetivo) & (vazao$data <= data_fim_objetivo))]
+
+                vazao_fo[, peso := 1 / .N]
+
+                if (input$numero_periodo_desconsiderado >= 1) {
+                    for (iperiodo in 1:input$numero_periodo_desconsiderado){
+                        vazao_fo[data >= input[[paste0("periodo_desconsiderado_", iperiodo)]][1] & data <= input[[paste0("periodo_desconsiderado_", iperiodo)]][2], peso := 0]
+                    }
+                    vazao_fo[peso != 0, peso := 1 / .N]
+                }
+
+                saida_objetivo <- saida()[data >= data_inicio_objetivo & data <= data_fim_objetivo]
+
+                metricas <- data.table::data.table(tipo = c("historico", "simulado"))
+                metricas[tipo == "simulado", media := saida_objetivo[, mean(Qcalc)]]
+                metricas[tipo == "simulado", dp := saida_objetivo[, sd(Qcalc)]]
+                metricas[tipo == "simulado", assimetria := saida_objetivo[, moments::skewness(Qcalc)]]
+                metricas[tipo == "simulado", curtose := saida_objetivo[, moments::kurtosis(Qcalc)]]
+                metricas[tipo == "simulado", p95 := saida_objetivo[, quantile(Qcalc, 0.95)]]
+                metricas[tipo == "simulado", max := saida_objetivo[, max(Qcalc)]]
+                metricas[tipo == "historico", media := vazao_fo[, mean(valor)]]
+                metricas[tipo == "historico", dp := vazao_fo[, sd(valor)]]
+                metricas[tipo == "historico", assimetria := vazao_fo[, moments::skewness(valor)]]
+                metricas[tipo == "historico", curtose := vazao_fo[, moments::kurtosis(valor)]]
+                metricas[tipo == "historico", p95 := vazao_fo[, quantile(valor, 0.95)]]
+                metricas[tipo == "historico", max := vazao_fo[, max(valor)]]
+                metricas        
+            }
+        })
+
+        output$tabela_metrica2 <- shiny::renderTable({
+            if (!is.null(input[[paste0("posto_plu_1")]])) {
+                data_inicio_objetivo <- input$periodo_calibracao[1]
+                data_fim_objetivo <- input$periodo_calibracao[2]
+                vazao <- vazao_posto()
+
+                vazao_fo <- vazao[which((vazao$data >= data_inicio_objetivo) & (vazao$data <= data_fim_objetivo))]
+
+                vazao_fo[, peso := 1 / .N]
+
+                if (input$numero_periodo_desconsiderado >= 1) {
+                    for (iperiodo in 1:input$numero_periodo_desconsiderado){
+                        vazao_fo[data >= input[[paste0("periodo_desconsiderado_", iperiodo)]][1] & data <= input[[paste0("periodo_desconsiderado_", iperiodo)]][2], peso := 0]
+                    }
+                    vazao_fo[peso != 0, peso := 1 / .N]
+                }
+
+                saida_objetivo <- saida()[data >= data_inicio_objetivo & data <= data_fim_objetivo]
+
+                metricas <- data.table::data.table(metrica = as.character(), valor = as.numeric())
+
+                metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "dm", valor = calcula_dm(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
+                metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "mape", valor = calcula_mape(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
+                metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "nse", valor = calcula_nse(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
+                metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "pbias", valor = calcula_pbias(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
+                metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "correl", valor = calcula_correlacao(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
+                metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "kge", valor = calcula_kge(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
+                metricas        
+            }
+        })
+
+        output$metrica_mensal <- plotly::renderPlotly({
+            if (!is.null(input[[paste0("posto_plu_1")]])) {
+                data_inicio_objetivo <- input$periodo_calibracao[1]
+                data_fim_objetivo <- input$periodo_calibracao[2]
+                vazao <- vazao_posto()
+
+                vazao_fo <- vazao[which((vazao$data >= data_inicio_objetivo) & (vazao$data <= data_fim_objetivo))]
+
+                vazao_fo[, peso := 1 / .N]
+
+                if (input$numero_periodo_desconsiderado >= 1) {
+                    for (iperiodo in 1:input$numero_periodo_desconsiderado){
+                        vazao_fo[data >= input[[paste0("periodo_desconsiderado_", iperiodo)]][1] & data <= input[[paste0("periodo_desconsiderado_", iperiodo)]][2], peso := 0]
+                    }
+                    vazao_fo[peso != 0, peso := 1 / .N]
+                }
+                saida_objetivo <- saida()[data >= data_inicio_objetivo & data <= data_fim_objetivo]
+
+                metricas <- data.table::data.table(estatistica = as.character(), lubridate = as.integer(), V1 = as.numeric())
+                simulacao <- saida_objetivo[, mean(Qcalc), by = lubridate::month(data)]
+                simulacao[, estatistica := "media"]
+                metricas <- rbindlist(list(metricas, simulacao), use.names=TRUE)
+
+                simulacao <- saida_objetivo[, sd(Qcalc), by = lubridate::month(data)]
+                simulacao[, estatistica := "dp"]
+                metricas <- rbindlist(list(metricas, simulacao), use.names=TRUE)
+
+                simulacao <- saida_objetivo[, moments::skewness(Qcalc), by = lubridate::month(data)]
+                simulacao[, estatistica := "assimetria"]
+                metricas <- rbindlist(list(metricas, simulacao), use.names=TRUE)
+
+                simulacao <- saida_objetivo[, moments::kurtosis(Qcalc), by = lubridate::month(data)]
+                simulacao[, estatistica := "curtose"]
+                metricas <- rbindlist(list(metricas, simulacao), use.names=TRUE)
+                metricas[, tipo := "simulado"]
+
+                metricas2 <- data.table::data.table(estatistica = as.character(), lubridate = as.integer(), V1 = as.numeric())
+                observado <- vazao_fo[, mean(valor), by = lubridate::month(data)]
+                observado[, estatistica := "media"]
+                metricas2 <- rbindlist(list(metricas2, observado), use.names=TRUE)
+
+                observado <- vazao_fo[, sd(valor), by = lubridate::month(data)]
+                observado[, estatistica := "dp"]
+                metricas2 <- rbindlist(list(metricas2, observado), use.names=TRUE)
+
+                observado <- vazao_fo[, moments::skewness(valor), by = lubridate::month(data)]
+                observado[, estatistica := "assimetria"]
+                metricas2 <- rbindlist(list(metricas2, observado), use.names=TRUE)
+
+                observado <- vazao_fo[, moments::kurtosis(valor), by = lubridate::month(data)]
+                observado[, estatistica := "curtose"]
+                metricas2 <- rbindlist(list(metricas2, observado), use.names=TRUE)
+
+                metricas2[, tipo := "observado"]
+
+                metricas <- rbindlist(list(metricas, metricas2), use.names=TRUE)
+                data.table::setnames(metricas, c("lubridate", "V1"), c("mes", "valor"))
+                
+                grafico_mensal <- ggplot2::ggplot(data = metricas[estatistica == input$estatistica], 
+                                    ggplot2::aes(x = mes, y = valor, color = tipo)) + ggplot2::geom_line() + ggplot2::theme_light()
+                grafico_mensal <- plotly::ggplotly(grafico_mensal)
+                grafico_mensal
+            }
+        })
+
 
         shiny::observeEvent(input$botao_calibracao,{
             limite_superior <- as.numeric(rep(0, 16), c(16))
@@ -766,6 +915,20 @@ executa_visualizador_calibracao <- function(){
             vetor_modelo[15] <- input$alfa
             vetor_modelo[16] <- input$beta
 
+            if (input$funcao_objetivo == "dm") {
+                funcao_objetivo <- calcula_dm
+                fnscale = 1
+            } else if (input$funcao_objetivo == "nse") {
+                funcao_objetivo <- calcula_nse
+                fnscale = -1
+            } else if (input$funcao_objetivo == "mape") {
+                funcao_objetivo <- calcula_mape
+                fnscale = 1
+            } else if (input$funcao_objetivo == "kge") {
+                funcao_objetivo <- calcula_kge
+                fnscale = -1
+            }
+
             area <- area()
             Ebin <- input$Ebin
             Tuin <- input$Tuin
@@ -819,7 +982,7 @@ executa_visualizador_calibracao <- function(){
                 calibracao(vetor_modelo, kt_min, kt_max, area, Ebin, Tuin, Supin, precipitacao,
                                     evapotranspiracao_fo, vazao_fo, data_inicio_objetivo, data_fim_objetivo,
                                     limite_inferior, limite_superior, postos_plu[postos_plu$nome == input$sub_bacia],
-                                    vazao_fo[, peso])
+                                    funcao_objetivo, fnscale, vazao_fo[, peso])
             })
             
             shiny::observe({
@@ -874,8 +1037,17 @@ executa_visualizador_calibracao <- function(){
             parametros$valor[parametros$parametro == "Area"] <- area()
             parametros$valor[parametros$parametro == "ktMin"] <- input$kt_min
             parametros$valor[parametros$parametro == "ktMax"] <- input$kt_max
-            parametros <- data.table::rbindlist(list(parametros, data.table::data.table(nome = parametros[, unique(nome)], parametro = "Alfa", valor = input$alfa)))
-            parametros <- data.table::rbindlist(list(parametros, data.table::data.table(nome = parametros[, unique(nome)], parametro = "Beta", valor = input$beta)))
+            if (nrow(parametros[parametros$parametro == "Alfa"]) == 0){
+                parametros <- data.table::rbindlist(list(parametros, data.table::data.table(nome = parametros[, unique(nome)], parametro = "Alfa", valor = input$alfa)))
+            } else {
+                parametros$valor[parametros$parametro == "Alfa"] <- input$alfa
+            }
+            if (nrow(parametros[parametros$parametro == "Beta"]) == 0){
+                parametros <- data.table::rbindlist(list(parametros, data.table::data.table(nome = parametros[, unique(nome)], parametro = "Beta", valor = input$beta)))
+            } else {
+                parametros$valor[parametros$parametro == "Beta"] <- input$beta
+            }
+            
 
             kt <- cria_kt(input$kt_max, input$kt_min, input$alfa, input$beta)
             parametros$valor[parametros$parametro %in% paste0("Kt", 2:-60)] <- kt
@@ -921,9 +1093,9 @@ executa_visualizador_calibracao <- function(){
 ##### VISUALIZADOR DE CASOS EXECUTADOS ############
 
 
-#' Visualizador GHCen
+#' Visualizador SMAP/ONS
 #' 
-#' Visualiza os cenarios gerados pelo modelo GHCen
+#' Visualiza dos cenarios gerados pelo modelo SMAP/ONS
 #'
 #' @param previsoes contendo as seguintes colunas:
 #'     \itemize{

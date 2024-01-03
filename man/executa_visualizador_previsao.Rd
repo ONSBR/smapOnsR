@@ -2,7 +2,7 @@
 % Please edit documentation in R/visualizador.R
 \name{executa_visualizador_previsao}
 \alias{executa_visualizador_previsao}
-\title{Visualizador GHCen}
+\title{Visualizador SMAP/ONS}
 \usage{
 executa_visualizador_previsao(
   previsoes,
@@ -50,5 +50,5 @@ executa_visualizador_previsao(
 }}
 }
 \description{
-Visualiza os cenarios gerados pelo modelo GHCen
+Visualiza dos cenarios gerados pelo modelo SMAP/ONS
 }

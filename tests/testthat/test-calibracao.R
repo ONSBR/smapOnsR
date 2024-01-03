@@ -51,7 +51,7 @@ test_that("Testa a funcao de calibracao", {
 
   par <- calibracao(vetor_modelo,  kt_min, kt_max, area, EbInic, TuInic, Supin, precipitacao,
       evapotranspiracao, vazao, data_inicio_objetivo, data_fim_objetivo,
-      limite_inferior, limite_superior, postos_plu[nome == nome2])
+      limite_inferior, limite_superior, postos_plu[nome == nome2], calcula_dm)
 
   expect_equal((par$value < fo), TRUE)
 

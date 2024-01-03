@@ -41,6 +41,7 @@
 #' @param fim_objetivo fim do calculo da funcao objetivo
 #' @param numero_dias numero de dias da simulacao para a calibracao
 #' @param numero_postos_plu numero de posto_plu considerados
+#' @param funcao_objetivo funcao objetivo a ser utilizada na calibracao
 #' 
 #' @examples 
 #' nome2 <- "baixoig"
@@ -95,7 +96,7 @@
 funcao_objetivo_calibracao <- function(vetor_modelo, kt_min, kt_max, area, EbInic, TuInic, Supin, 
       precipitacao, evapotranspiracao, vazao, inicio_objetivo, fim_objetivo,
       postos_plu, pesos = rep(1 / length(vazao[, valor]), length(vazao[, valor])), numero_dias,
-      numero_postos_plu) {
+      numero_postos_plu, funcao_objetivo = calcula_dm) {
 
   kt <- cria_kt(kt_max, kt_min, vetor_modelo[15], vetor_modelo[16])
 
@@ -123,7 +124,7 @@ funcao_objetivo_calibracao <- function(vetor_modelo, kt_min, kt_max, area, EbIni
   
   dat <- data.table::data.table(saida)
 
-  objetivo <- calcula_dm(dat[inicio_objetivo:fim_objetivo, Qcalc],
+  objetivo <- funcao_objetivo(dat[inicio_objetivo:fim_objetivo, Qcalc],
                          vazao[, valor], pesos)
   objetivo
 }
@@ -194,6 +195,8 @@ cria_kt <- function(kt_max, kt_min, alfa, beta){
 #'     \item{posto - nome do posto plu}
 #'     \item{valor - peso do posto plu}
 #'     }
+#' @param funcao_objetivo funcao objetivo a ser utilizada na calibracao
+#' @param fnscale 1 indica minimizacao da funcao objetivo / -1 maximizacao
 #' @param pesos vetor de pesos a serem utilizados para cada data durante a calibracao
 #' @examples 
 #' nome2 <- "baixoig"
@@ -246,7 +249,8 @@ cria_kt <- function(kt_max, kt_min, alfa, beta){
 #' @export
 calibracao <- function(vetor_modelo, kt_min, kt_max, area, EbInic, TuInic, Supin, precipitacao,
       evapotranspiracao, vazao, data_inicio_objetivo, data_fim_objetivo,
-      limite_inferior, limite_superior, postos_plu, pesos = rep(1 / length(vazao[, valor]), length(vazao[, valor]))){
+      limite_inferior, limite_superior, postos_plu, funcao_objetivo = calcula_dm, fnscale = 1,
+      pesos = rep(1 / length(vazao[, valor]), length(vazao[, valor]))) {
 
   if (length(unique(limite_inferior == limite_superior)) == 2) {
     limite_superior[limite_inferior == limite_superior] <- limite_superior[limite_inferior == limite_superior] + 0.000001
@@ -273,7 +277,8 @@ calibracao <- function(vetor_modelo, kt_min, kt_max, area, EbInic, TuInic, Supin
               pesos = pesos,
               numero_dias = numero_dias,
               numero_postos_plu = numero_postos_plu,
-              control = list(fnscale = 1))
+              funcao_objetivo = funcao_objetivo,
+              control = list(fnscale = fnscale))
   
   if (numero_postos_plu > 1) {
     ajuste$par[17:(16 + numero_postos_plu)] <- ajuste$par[17:(16 + numero_postos_plu)] / sum(ajuste$par[17:(16 + numero_postos_plu)])

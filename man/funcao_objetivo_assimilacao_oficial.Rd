@@ -14,7 +14,8 @@ funcao_objetivo_assimilacao_oficial(
   vazao,
   area,
   numero_dias_assimilacao,
-  pesos_funcao_objetivo = rep((1/numero_dias_assimilacao), numero_dias_assimilacao)
+  pesos_funcao_objetivo = rep((1/numero_dias_assimilacao), numero_dias_assimilacao),
+  funcao_objetivo = calcula_dm
 )
 }
 \arguments{
@@ -42,6 +43,8 @@ funcao_objetivo_assimilacao_oficial(
 \item{numero_dias_assimilacao}{numero de dias da assimilacao}
 
 \item{pesos_funcao_objetivo}{vetor de pesos da funcao objetivo}
+
+\item{funcao_objetivo}{funcao objetivo a ser utilizada na assimilacao}
 }
 \value{
 objetivo valor da funcao objetivo
