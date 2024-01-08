@@ -31,27 +31,26 @@ le_parametros <- function(arq) {
     dat[, valor := as.numeric(valor)]
 
     if (any(is.na(dat$valor))) {
-        stop("a coluna 'valor' do arquivo ", arq, " possui valores nao numericos")
+        stop("o parametro ", dat[is.na(dat$valor), parametro], " da sub-bacia ", 
+        dat[is.na(dat$valor), nome], " no arquivo ", arq, " possui valor nao numerico")
     }
-
-    if (any(is.na(dat$parametro) | dat$parametro == "")) {
-        stop("a coluna 'parametro' do arquivo ", arq, " possui valores vazios")
-    }
-
+    
     if (any(is.na(dat$nome) | dat$nome == "")) {
         stop("a coluna 'nome' do arquivo ", arq, " possui valores vazios")
     }
 
     if (any(dat$valor < 0)) {
-        stop("a coluna 'valor' do arquivo ", arq, " possui valores negativos")
+        stop("o parametro ", dat[dat$valor < 0, parametro], " da sub-bacia ", 
+        dat[dat$valor < 0, nome], " no arquivo ", arq, " possui valor negativo")
     }
 
     if (any(dat$parametro == "Area" & dat$valor == 0)) {
-        stop("a coluna 'valor' do arquivo ", arq, " possui valores iguais a zero associados ao parametro 'Area'")
+        stop("a coluna 'valor' do arquivo ", arq, " possui valor igual a zero associados ao parametro 'Area'")
     }
     
     if (any(duplicated(dat[, .(nome, parametro)]))) {
-        stop("o arquivo ", arq, " possui valores duplicados na coluna 'parametro' para uma mesma sub-bacia")
+        stop("o parametro ", dat[duplicated(dat[, .(nome, parametro)]), parametro], " da sub-bacia ", 
+        dat[duplicated(dat[, .(nome, parametro)]), nome], " no arquivo ", arq, " esta duplicado")
     }
 
     parametros <- c("Area", "Str", "K2t", "Crec", "Ai", "Capc", 
@@ -72,7 +71,13 @@ le_parametros <- function(arq) {
     if (min(teste$V1) < 0.995) {
         stop(paste0("o somatorio dos Kts da sub-bacia ", teste[V1 < 0.995, nome], ", e menor que 0.995 no arquivo ", arq, "\n"))
     }
-    # FAZER O TESTE PARA A SOMA DOS KT'S (KT2 ATE KT-60) A QUAL NAO PODE SER MAIOR DO QUE 1
+
+    teste <- dat[substr(parametro, 1, 2) == "Kt", length(valor), by = "nome"]
+    if (any(teste$V1 != 63)) {
+        stop(paste0("o somatorio dos Kts da sub-bacia ", teste[V1 != 63, nome], 
+        "nao possui o valor para os 63 Kts no arquivo ", arq, ".\n"))
+    }
+
     dat
 }
 
@@ -115,7 +120,7 @@ le_historico_verificado <- function(arq) {
     dat[, data := as.Date(data, format = "%d/%m/%Y")]
     
     if (any(duplicated(dat[, data]))) {
-         stop(paste0("a data ", dat[duplicated(data), data], ", esta duplicada no arquivo ", arq, "\n"))
+         stop(paste0("a data ", dat[duplicated(data), data], ", esta duplicada no arquivo ", arq, ".\n"))
     }
 
     dat <- data.table::melt(dat, id.vars = "data", variable.name = "posto",
@@ -127,15 +132,17 @@ le_historico_verificado <- function(arq) {
     dat[, valor := as.numeric(valor)]
 
     if (any(is.na(dat$data))) {
-        stop("a coluna 'data' do arquivo ", arq, " possui valores nao numericos")
+        stop("a coluna 'data' do arquivo ", arq, " possui valores nao numericos", ".\n")
     }
 
     if (any(is.na(dat$valor))) {
-        stop("a coluna 'valor' do arquivo ", arq, " possui valores nao numericos para a sub-bacia ", dat[is.na(valor), posto], " para a data ", dat[is.na(valor), data])
+        stop("a sub-bacia ", dat[is.na(valor), posto], " possui valor nao numerico para a data ",
+        dat[is.na(valor), data], " no arquivo ", arq, ".\n")
     }
 
     if (any(dat$valor < 0)) {
-        stop("a coluna 'valor' do arquivo ", arq, " possui valores negativos para a sub-bacia ", dat[valor < 0, posto], " para a data ", dat[is.na(valor), data])
+        stop("a sub-bacia ", dat[valor < 0, posto], " possui valor negativo para a data ",
+        dat[valor < 0, data], " no arquivo ", arq, ".\n")
     }
 
     return(dat)
@@ -179,21 +186,25 @@ le_precipitacao_prevista <- function(arq) {
     dat[, data_rodada := as.Date(data_rodada, format = "%d/%m/%Y")]
 
     if (any(is.na(dat$valor))) {
-        stop("a coluna 'valor' do arquivo ", arq, " possui valores nao numericos")
+        stop(paste0("a sub-bacia ", dat[is.na(valor), nome], " possui valor nao numerico para a data de previsao ",
+        dat[is.na(valor), data_previsao], " do caso de ", dat[is.na(valor), data_previsao],
+        " no arquivo ", arq, ".\n"))
     }
 
     if (any(is.na(dat$data_previsao))) {
-        stop("a coluna 'data_previsao' do arquivo ", arq, " possui valores nao numericos")
+        stop(paste0("a coluna 'data_previsao' do arquivo ", arq, " possui valores nao numericos para a sub-bacia ", dat[is.na(data_previsao), unique(nome)], ".\n"))
     }
 
     if (any(is.na(dat$data_rodada))) {
-        stop("a coluna 'data_rodada' do arquivo ", arq, " possui valores nao numericos")
+        stop(paste0("a coluna 'data_rodada' do arquivo ", arq, " possui valores nao numericos para a sub-bacia ", dat[is.na(data_rodada), unique(nome)], ".\n"))
     }
 
     if (any(dat$valor < 0)) {
-        stop("a coluna 'valor' do arquivo ", arq, " possui valores negativos")
+        stop(paste0("a sub-bacia ", dat[valor < 0, nome], " possui valor negativo para a data de previsao ",
+        dat[valor < 0, data_previsao], " do caso de ", dat[valor < 0, data_previsao],
+        " no arquivo ", arq, ".\n"))
     }
-    
+       
     teste_completo <- data.table::data.table()
     for (idata in 1:dat[, length(unique(data_rodada))]) {
         data <- dat[, unique(data_rodada)[idata]]
@@ -204,7 +215,9 @@ le_precipitacao_prevista <- function(arq) {
 
     if (nrow(teste_completo) != 0) {
         teste_completo[, V1 := data.table::as.IDate(V1)]
-        stop(paste0("falta a data de previsao ", teste_completo$V1, " para o cenario ", teste_completo$cenario, " da sub-bacia ", teste_completo$nome, " do caso de ", teste_completo$data_rodada, "\n"))
+        stop(paste0("falta a data de previsao ", teste_completo$V1, " para o cenario ", 
+        teste_completo$cenario, " da sub-bacia ", teste_completo$nome, 
+        " do caso de ", teste_completo$data_rodada, "\n"))
     }
 
     dat
@@ -235,12 +248,14 @@ le_inicializacao <- function(arq) {
     }
     dat[, valor := as.numeric(valor)]
 
-    if (any(is.na(dat$valor))) {
-        stop("a coluna 'valor' do arquivo ", arq, " possui valores nao numericos")
+    if (any(dat$valor < 0)) {
+        stop(paste0("a sub-bacia ", dat[valor < 0, nome], " possui valor negativo para a variavel ",
+        dat[valor < 0, variavel], " no arquivo ", arq, ".\n"))
     }
 
-    if (any(dat$valor < 0)) {
-        stop("a coluna 'valor' do arquivo ", arq, " possui valores negativos")
+    if (any(is.na(dat$valor))) {
+        stop(paste0("a sub-bacia ", dat[is.na(valor), nome], " possui valor negativo para a variavel ",
+        dat[is.na(valor), variavel], " no arquivo ", arq, ".\n"))
     }
 
     if (any(dat$variavel == 'Tuin' & dat$valor > 100)) {
@@ -259,7 +274,9 @@ le_inicializacao <- function(arq) {
     }
 
     if (any(duplicated(dat[, .(variavel, nome)]))) {
-        stop("o arquivo ", arq, " possui valores duplicados na coluna 'variavel' para uma mesma sub-bacia")
+        stop("o arquivo ", arq, " possui valores duplicados para a sub-bacia ",
+        dat[duplicated(dat[, .(variavel, nome)]), nome], 
+        " para a variavel ", dat[duplicated(dat[, .(variavel, nome)]), variavel])
     }
 
     variaveis <- c("Ebin", "Tuin", "Supin", "numero_dias_assimilacao", "limite_inferior_ebin",
@@ -365,19 +382,19 @@ le_arquivos <- function(pasta_entrada) {
         stop("o arquivo ", arq," deve possuir colunas 'arquivo' e 'nome_arquivo'")
     }
 
-    for (col_nome in names(dat)) {
-        nlinhas <- dat[[col_nome]]
-        if (length(nlinhas) > 11) {
-            stop("no arquivo ", arq, " foram informados ", length(nlinhas), " linhas de dados. E necessario informar no maximo 11.")
-        }
-    }
-
     if (any(is.na(dat$nome_arquivo) | dat$nome_arquivo == "")) {
-        stop("o nome de algum '.csv' nao foi declarado no arquivo ", arq)
+        stop("o nome do arquivo ", dat[dat$nome_arquivo == "", arquivo], " nao foi declarado no arquivo ", arq)
     }
 
-    if (!all(grepl("\\.csv$", dat$nome_arquivo))) {
-        stop("todos os arquivos informados no arq ", arq, " devem possuir a extensao '.csv'")
+    if ((any(dat[, arquivo] == "EVAPOTRANSPIRACAO_NC")) & 
+        (any(dat[, arquivo] == "EVAPOTRANSPIRACAO_OBSERVADA"))) {
+        stop(paste0("Na lista de arquivos a evapotranspiracao potencial foi informada de duas formas distintas"))
+    }
+
+    if ((any(dat[, arquivo] == "EVAPOTRANSPIRACAO_NC")) & 
+        (any(dat[, arquivo] == "EVAPOTRANSPIRACAO_PREVISTA"))) {
+        stop(paste0("Na lista de arquivos a evapotranspiracao potencial foi informada como normal climatologica
+        , porem, foi incluido arquivo de previsao de avapotranspiracao potencial"))
     }
 
     dat
@@ -406,41 +423,45 @@ le_postos_plu <- function(arq) {
     if (any(colnames(dat) != c("nome", "posto", "valor"))) {
         stop("o arquivo ", arq," deve deve possuir colunas 'nome', 'posto' e 'valor'")
     }
+    dat[, valor := as.numeric(valor)]
 
-    valor_n_numerico <- any(!is.numeric(dat$valor))
-    if (valor_n_numerico) {
-        stop("a coluna 'valor' do arquivo ", arq, " possui valores nao numericos")
+    if (any(is.na(dat$valor))) {
+        stop(paste0("o posto pluviometrico ", dat[is.na(dat$valor), posto], " possui valor nao numerico.\n"))
     }
 
-    valor_vazio <- any(is.na((dat$valor) | dat$valor == ""))
-    if (valor_vazio) {
-        stop("a coluna 'valor' do arquivo ", arq, " possui valores vazios")
+    if (any(dat$valor < 0)) {
+        stop(paste0("o posto pluviometrico ", dat[dat$valor < 0, posto], " possui valor negativo.\n"))
     }
 
-    valor_negativo <- any((dat$valor) < 0)
-    if (valor_negativo) stop("a coluna 'valor' do arquivo ", arq, " possui valores negativos")
-
-    valor_maior <- any((dat$valor) > 1)
-    if (valor_maior) {
-        stop("a coluna 'valor' do arquivo ", arq, " possui valores maiores do que 1")
-    }
-
-    if (any(is.na(dat$posto) | dat$posto == "")) {
-        stop("no arquivo ", arq, " a coluna 'posto' possui valores vazios")
+    if (any(dat$valor > 1)) {
+        stop(paste0("o posto pluviometrico ", dat[dat$valor > 1, posto], " possui valor maior que 1.\n"))
     }
 
     if (any(is.na(dat$nome) | dat$nome == "")) {
-        stop("no arquivo ", arq, " a coluna 'nome' possui valores vazios")
+        stop("no arquivo ", arq, " a coluna 'nome' possui valor vazio para o posto ", 
+        dat[(is.na(dat$nome) | dat$nome == ""), posto], ".\n")
+    }
+
+    if (any(is.na(dat$posto) | dat$posto == "")) {
+        stop("no arquivo ", arq, " a coluna 'posto' possui valor vazio para a sub-bacia ", 
+        dat[(is.na(dat$posto) | dat$posto == ""), nome], ".\n")
+    }
+
+    if (any(duplicated(dat[, .(nome, posto)]))) {
+        stop("o posto ", dat[duplicated(dat[, .(nome, posto)]), posto], " da sub-bacia ", 
+        dat[duplicated(dat[, .(nome, posto)]), nome], " no arquivo ", arq, " esta duplicado.\n")
     }
 
     if (any(dat[, sum(valor), by = "nome"]$V1 > 1.005)){
         soma <- dat[, .(valor = sum(valor)), by = nome]
-        stop("Somatorio dos Kes no arquivo ", arq, " maior do que 1.005 para a subbacia ", soma[valor > 1.005, nome])
+        stop(paste0("Somatorio dos Kes no arquivo ", arq, 
+        " maior que 1.005 para a subbacia ", soma[valor > 1.005, nome]), ".\n")
     }
 
     if (any(dat[, sum(valor), by = "nome"]$V1 < 0.995)){
         soma <- dat[, .(valor = sum(valor)), by = nome]
-        stop("Somatorio dos Kes no arquivo ", arq, " maior do que 1.005 para a subbacia ", soma[valor < 0.995, nome])
+        stop(paste0("Somatorio dos Kes no arquivo ", arq, 
+        " menor que 0.995 para a subbacia ", soma[valor < 0.995, nome]), ".\n")
     }
 
     dat
@@ -473,15 +494,18 @@ le_evapotranspiracao_nc <- function(arq) {
     }
 
     if (any(is.na(dat$valor))) {
-        stop("a coluna 'valor' do arquivo ", arq, " possui valores nao numericos")
+        stop(paste0("a sub-bacia ", dat[is.na(valor), nome], " possui valor  de evapotranspiracao potencial nao numerico para o mes ",
+        dat[is.na(valor), mes], " no arquivo ", arq, ".\n"))
     }
 
     if (any(dat$valor < 0)) {
-        stop("a coluna 'valor' do arquivo ", arq, " possui valores negativos")
+        stop(paste0("a sub-bacia ", dat[valor < 0, nome], " possui valor de evapotranspiracao potencial negativo para o mes ",
+        dat[valor < 0, mes], " no arquivo ", arq, ".\n"))
     }
 
     if (any(is.na(dat$mes))) {
-        stop("a coluna 'mes' do arquivo ", arq, " possui valores nao numericos")
+        stop(paste0("a sub-bacia ", dat[is.na(mes), nome], " possui valor nao numerico na coluna mes",
+        " no arquivo ", arq, ".\n"))
     }
 
     if (any(dat$mes > 12)) {
@@ -516,17 +540,41 @@ le_arq_entrada_novo <- function(pasta_entrada) {
     if (any(arquivos[, arquivo] == "PARAMETROS")) {
         parametros <- le_parametros(file.path(pasta_entrada,arquivos[arquivo == "PARAMETROS", nome_arquivo])) #[nome %in% sub_bacias$nome]
         if (!all(sub_bacias$nome %in% parametros[, nome])) {
-            stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% parametros$nome, nome], " no arquivo ", arquivos[arquivo == "PARAMETROS", nome_arquivo]))
+            stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% parametros$nome, nome], " no arquivo ", arquivos[arquivo == "PARAMETROS", nome_arquivo], ".\n"))
         }
     } else {
         stop("nao existe o arquivo de parametros")
     }
 
+    if (any(arquivos[, arquivo] == "INICIALIZACAO")) {
+        inicializacao <-  le_inicializacao(file.path(pasta_entrada,arquivos[arquivo == "INICIALIZACAO", nome_arquivo]))
+        inicializacao[variavel == "Tuin", valor := valor / 100]
+        if (!all(sub_bacias$nome %in% inicializacao$nome)) {
+            stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% inicializacao$nome, nome], " no arquivo ", arquivos[arquivo == "INICIALIZACAO", nome_arquivo], ".\n"))
+        }
+    } else {
+        stop("nao existe o arquivo de estados iniciais do smap")
+    }
+
+    if (any(arquivos[, arquivo] == "DATAS_RODADAS")) {
+        datas_rodadas <- le_datas_rodada(file.path(pasta_entrada,arquivos[arquivo == "DATAS_RODADAS", nome_arquivo]))
+    } else{
+        stop("nao existe o arquivo de datas a serem executadas")
+    }
+
     if (any(arquivos[, arquivo] == "VAZAO_OBSERVADA")) {
         vazao_observada <- le_historico_verificado(file.path(pasta_entrada, arquivos[arquivo == "VAZAO_OBSERVADA", nome_arquivo]))[posto %in% sub_bacias$nome]
         if (!all(sub_bacias$nome %in% vazao_observada$posto)) {
-            stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% vazao_observada$posto, nome], " no arquivo ", arquivos[arquivo == "VAZAO_OBSERVADA", nome_arquivo]))
+            stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% vazao_observada$posto, nome], " no arquivo ", arquivos[arquivo == "VAZAO_OBSERVADA", nome_arquivo], ".\n"))
         }
+        lapply(sub_bacias$nome, function(nome_subbacia) {
+            data_inicio <- datas_rodadas[, min(data)] - inicializacao[nome == nome_subbacia & variavel == "numero_dias_assimilacao", valor] + 1
+            data_fim <- datas_rodadas[, max(data)] - 1
+            if (vazao_observada[, min(data)] > data_inicio)
+            stop(stop(paste0("O historico de vazao da sub-bacia ", nome_subbacia, " deve comecar na data ", data_inicio)))
+            if (vazao_observada[, max(data)] < data_fim)
+            stop(stop(paste0("O historico de vazao da sub-bacia ", nome_subbacia, " deve terminar na data ", data_fim)))
+        })
     } else {
         stop("nao existe o arquivo de vazoes observadas")
     }
@@ -539,21 +587,29 @@ le_arq_entrada_novo <- function(pasta_entrada) {
         evapotranspiracao_observada <- data.table::data.table()
         evapotranspiracao_nc <- le_evapotranspiracao_nc(file.path(pasta_entrada, arquivos[arquivo == "EVAPOTRANSPIRACAO_NC", nome_arquivo]))
         if (!all(sub_bacias$nome %in% evapotranspiracao_nc$nome)) {
-            stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% evapotranspiracao_nc$nome, nome], " no arquivo ", arquivos[arquivo == "EVAPOTRANSPIRACAO_NC", nome_arquivo]))
+            stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% evapotranspiracao_nc$nome, nome], " no arquivo ", arquivos[arquivo == "EVAPOTRANSPIRACAO_NC", nome_arquivo], ".\n"))
         }
     }
 
     if (any(arquivos[, arquivo] == "EVAPOTRANSPIRACAO_OBSERVADA")) {
         evapotranspiracao_observada <- le_historico_verificado(file.path(pasta_entrada,arquivos[arquivo == "EVAPOTRANSPIRACAO_OBSERVADA", nome_arquivo]))[posto %in% sub_bacias$nome]
         if (!all(sub_bacias$nome %in% evapotranspiracao_observada$posto)) {
-            stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% evapotranspiracao_observada$posto, nome], " no arquivo ", arquivos[arquivo == "EVAPOTRANSPIRACAO_OBSERVADA", nome_arquivo]))
+            stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% evapotranspiracao_observada$posto, nome], " no arquivo ", arquivos[arquivo == "EVAPOTRANSPIRACAO_OBSERVADA", nome_arquivo], ".\n"))
         }
+        lapply(sub_bacias$nome, function(nome_subbacia) {
+            data_inicio <- datas_rodadas[, min(data)] - inicializacao[nome == nome_subbacia & variavel == "numero_dias_assimilacao", valor] + 1
+            data_fim <- datas_rodadas[, max(data)] - 1
+            if (evapotranspiracao_observada[, min(data)] > data_inicio)
+            stop(stop(paste0("O historico de vazao da sub-bacia ", nome_subbacia, " deve comecar na data ", data_inicio)))
+            if (evapotranspiracao_observada[, max(data)] < data_fim)
+            stop(stop(paste0("O historico de vazao da sub-bacia ", nome_subbacia, " deve terminar na data ", data_fim)))
+        })
     }
 
     if (any(arquivos[, arquivo] == "POSTOS_PLUVIOMETRICOS")) {
-        postos_plu <- le_postos_plu(file.path(pasta_entrada, arquivos[arquivo == "POSTOS_PLUVIOMETRICOS", nome_arquivo]))
+        postos_plu <- le_postos_plu(file.path(pasta_entrada, arquivos[arquivo == "POSTOS_PLUVIOMETRICOS", nome_arquivo]))[nome %in% sub_bacias$nome]
         if (!all(sub_bacias$nome %in% postos_plu$nome)) {
-            stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% postos_plu$nome, nome], " no arquivo ", arquivos[arquivo == "POSTOS_PLUVIOMETRICOS", nome_arquivo]))
+            stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% postos_plu$nome, nome], " no arquivo ", arquivos[arquivo == "POSTOS_PLUVIOMETRICOS", nome_arquivo], ".\n"))
         }
     } else{
         stop("nao existe o arquivo de postos pluviometricos")
@@ -562,9 +618,19 @@ le_arq_entrada_novo <- function(pasta_entrada) {
     if (any(arquivos[, arquivo] == "PRECIPITACAO_OBSERVADA")) {
         precipitacao_observada <- le_historico_verificado(file.path(pasta_entrada,arquivos[arquivo == "PRECIPITACAO_OBSERVADA", nome_arquivo]))[posto %in% postos_plu$posto]
         if (!all(sub_bacias$nome %in% postos_plu[precipitacao_observada[, unique(posto)] %in% posto, nome])) {
-            stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% postos_plu[precipitacao_observada[, unique(posto)] %in% posto, nome], nome], " no arquivo ", arquivos[arquivo == "PRECIPITACAO_OBSERVADA", nome_arquivo]))
+            stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% postos_plu[precipitacao_observada[, unique(posto)] %in% posto, nome], nome], " no arquivo ", arquivos[arquivo == "PRECIPITACAO_OBSERVADA", nome_arquivo], ".\n"))
         }
-    } else {
+        lapply(sub_bacias$nome, function(nome_subbacia) {
+            kt <- parametros[nome == nome_subbacia & substr(parametro, 1, 2) == "Kt", valor]
+            ktMin <- sum(kt[4:63] > 0)
+            data_inicio <- datas_rodadas[, min(data)] - inicializacao[nome == nome_subbacia & variavel == "numero_dias_assimilacao", valor] + 1
+            data_fim <- datas_rodadas[, max(data)]
+            if (precipitacao_observada[, min(data)] > (data_inicio - ktMin))
+                stop(paste0("O historico de precipitacao verificada da sub-bacia ", nome_subbacia, " deve comecar na data ", data_inicio - ktMin))
+            if (precipitacao_observada[, max(data)] < (data_fim))
+                stop(paste0("O historico de precipitacao verificada da sub-bacia ", nome_subbacia, " deve terminar na data ", data_fim + ktMax))
+        })
+        } else {
         stop("nao existe o arquivo de precipitacao observada")
     }
     
@@ -572,34 +638,20 @@ le_arq_entrada_novo <- function(pasta_entrada) {
   ponderacao_espacial(precipitacao_observada, postos_plu[nome %in% sub_bacia])
         }))
 
-    if (any(arquivos[, arquivo] == "INICIALIZACAO")) {
-        inicializacao <-  le_inicializacao(file.path(pasta_entrada,arquivos[arquivo == "INICIALIZACAO", nome_arquivo]))
-        inicializacao[variavel == "Tuin", valor := valor / 100]
-        if (!all(sub_bacias$nome %in% inicializacao$nome)) {
-            stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% inicializacao$nome, nome], " no arquivo ", arquivos[arquivo == "INICIALIZACAO", nome_arquivo]))
-        }
-    } else {
-        stop("nao existe o arquivo de estados iniciais do smap")
-    }
-
-    if (any(arquivos[, arquivo] == "DATAS_RODADAS")) {
-        datas_rodadas <- le_datas_rodada(file.path(pasta_entrada,arquivos[arquivo == "DATAS_RODADAS", nome_arquivo]))
-    } else{
-        stop("nao existe o arquivo de datas a serem executadas")
-    }
-
     if (any(arquivos[, arquivo] == "PRECIPITACAO_PREVISTA")) {
         precipitacao_prevista <- le_precipitacao_prevista(file.path(pasta_entrada,arquivos[arquivo == "PRECIPITACAO_PREVISTA", nome_arquivo]))
         data.table::setnames(precipitacao_prevista , "nome", "posto")
-        precipitacao_prevista <- data.table::rbindlist(lapply(sub_bacias$nome, function(sub_bacia) {
-            ponderacao_espacial(precipitacao_prevista, postos_plu[nome %in% sub_bacia])
-        }))
-        if (!all(sub_bacias$nome %in% precipitacao_prevista$nome)) {
-            stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% precipitacao_prevista$nome, nome], " no arquivo ", arquivos[arquivo == "PRECIPITACAO_PREVISTA", nome_arquivo]))
+        if (!all(postos_plu$posto %in% unique(precipitacao_prevista$posto))) {
+            stop(paste0("Falta a previsao do posto pluviometrico ", 
+            postos_plu[!posto %in% unique(precipitacao_prevista$posto), posto], 
+            " no arquivo ", arquivos[arquivo == "PRECIPITACAO_PREVISTA", nome_arquivo], ".\n"))
         }
-        previsao_precipitacao <- completa_previsao(previsao_precipitacao, datas_rodadas)
-        previsao_precipitacao <- previsao_precipitacao[, mean(valor), by = .(data_rodada, data_previsao, cenario, nome)]
-        colnames(previsao_precipitacao)[5] <- "valor"
+        precipitacao_prevista <- data.table::rbindlist(lapply(sub_bacias$nome[1], function(sub_bacia) {
+            ponderacao_espacial_previsao(precipitacao_prevista, postos_plu[nome %in% sub_bacia])
+        }))
+        precipitacao_prevista <- completa_previsao(precipitacao_prevista, datas_rodadas)
+        precipitacao_prevista <- precipitacao_prevista[, mean(valor), by = .(data_rodada, data_previsao, cenario, nome)]
+        colnames(precipitacao_prevista)[5] <- "valor"
     } else {
         warning("nao existe arquivo de previsao de precipitacao, serao utilizados dados historicos")
         precipitacao_prevista <- data.table::copy(precipitacao_observada)
@@ -613,7 +665,7 @@ le_arq_entrada_novo <- function(pasta_entrada) {
         if (any(arquivos[, arquivo] == "EVAPOTRANSPIRACAO_PREVISTA")) {
             evapotranspiracao_prevista <- le_precipitacao_prevista(file.path(pasta_entrada,arquivos[arquivo == "EVAPOTRANSPIRACAO_PREVISTA", nome_arquivo]))
             if (!all(sub_bacias$nome %in% evapotranspiracao_prevista$nome)) {
-                stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% evapotranspiracao_prevista$nome, nome], " no arquivo ", arquivos[arquivo == "EVAPOTRANSPIRACAO_PREVISTA", nome_arquivo]))
+                stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% evapotranspiracao_prevista$nome, nome], " no arquivo ", arquivos[arquivo == "EVAPOTRANSPIRACAO_PREVISTA", nome_arquivo], ".\n"))
             }
         } else {
             warning("nao existe arquivo de previsao de evapotranspiracao, serao utilizados dados historicos")

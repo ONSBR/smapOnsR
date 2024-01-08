@@ -2,251 +2,266 @@ test_that("testa arquivo arquivos.csv", {
     dir.create(file.path(system.file("extdata", package = "smapOnsR"), "validacao_arq_entrada_novo"))
     zip::unzip(system.file("extdata", "validacao_arq_entrada_novo.zip", package = "smapOnsR"), exdir = system.file("extdata", "validacao_arq_entrada_novo", package = "smapOnsR"))
 
-    pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN01", "CT1.1", "Arq_Entrada", package = "smapOnsR")
+    pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN13", "CT13.1", "Arq_Entrada", package = "smapOnsR")
     expect_error(le_arquivos(pasta_entrada))
     
-    pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN01", "CT1.2", "Arq_Entrada", package = "smapOnsR")
+    pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN13", "CT13.2", "Arq_Entrada", package = "smapOnsR")
     expect_error(le_arquivos(pasta_entrada))
 
-    pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN01", "CT1.3", "Arq_Entrada", package = "smapOnsR")
+    pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN13", "CT13.3", "Arq_Entrada", package = "smapOnsR")
     expect_error(le_arquivos(pasta_entrada))
 
-    pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN01", "CT1.4", "Arq_Entrada", package = "smapOnsR")
+    pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN13", "CT13.4", "Arq_Entrada", package = "smapOnsR")
     expect_error(le_arquivos(pasta_entrada))
 
-    pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN01", "CT1.5", "Arq_Entrada", package = "smapOnsR")
-    expect_error(le_arquivos(pasta_entrada))
-
-    pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN01", "CT1.6", "Arq_Entrada", package = "smapOnsR")
+    pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN13", "CT13.5", "Arq_Entrada", package = "smapOnsR")
     expect_error(le_arquivos(pasta_entrada))
 })
 
 test_that("testa arquivo posto_plu.csv", {
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN02", "CT2.1", "Arq_Entrada", "postos_plu.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN14", "CT14.1", "Arq_Entrada", "postos_plu.csv", package = "smapOnsR")
+    expect_error(suppressWarnings(le_postos_plu(arq)))
+
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN14", "CT14.2", "Arq_Entrada", "postos_plu.csv", package = "smapOnsR")
     expect_error(le_postos_plu(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN02", "CT2.2", "Arq_Entrada", "postos_plu.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN14", "CT14.3", "Arq_Entrada", "postos_plu.csv", package = "smapOnsR")
     expect_error(le_postos_plu(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN02", "CT2.3", "Arq_Entrada", "postos_plu.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN14", "CT14.4", "Arq_Entrada", "postos_plu.csv", package = "smapOnsR")
     expect_error(le_postos_plu(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN02", "CT2.4", "Arq_Entrada", "postos_plu.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN14", "CT14.5", "Arq_Entrada", "postos_plu.csv", package = "smapOnsR")
     expect_error(le_postos_plu(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN02", "CT2.5", "Arq_Entrada", "postos_plu.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN14", "CT14.6", "Arq_Entrada", "postos_plu.csv", package = "smapOnsR")
     expect_error(le_postos_plu(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN02", "CT2.6", "Arq_Entrada", "postos_plu.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN14", "CT14.7", "Arq_Entrada", "postos_plu.csv", package = "smapOnsR")
     expect_error(le_postos_plu(arq))
 
-    # arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN02", "CT2.7", "Arq_Entrada", "postos_plu.csv", package = "smapOnsR")
-    # expect_error(le_postos_plu(arq))
-
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN02", "CT2.8", "Arq_Entrada", "postos_plu.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN14", "CT14.8", "Arq_Entrada", "postos_plu.csv", package = "smapOnsR")
     expect_error(le_postos_plu(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN02", "CT2.9", "Arq_Entrada", "postos_plu.csv", package = "smapOnsR")
-    expect_error(le_postos_plu(arq))
-
-    pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN02", "CT2.10", "Arq_Entrada", package = "smapOnsR")
+    pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN14", "CT14.9", "Arq_Entrada", package = "smapOnsR")
     expect_error(suppressWarnings(le_arq_entrada_novo(pasta_entrada)))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN02", "CT2.11", "Arq_Entrada", "postos_plu.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN14", "CT14.10", "Arq_Entrada", "postos_plu.csv", package = "smapOnsR")
+    expect_error(le_postos_plu(arq))
+
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN14", "CT14.11", "Arq_Entrada", "postos_plu.csv", package = "smapOnsR")
+    expect_error(le_postos_plu(arq))
+
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN14", "CT14.12", "Arq_Entrada", "postos_plu.csv", package = "smapOnsR")
     expect_error(le_postos_plu(arq))
 })
 
 test_that("testa datasRodadas.csv", {
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN03", "CT3.1", "Arq_Entrada", "datasRodadas.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN15", "CT15.1", "Arq_Entrada", "datasRodadas.csv", package = "smapOnsR")
     expect_error(le_datas_rodada(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN03", "CT3.2", "Arq_Entrada", "datasRodadas.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN15", "CT15.2", "Arq_Entrada", "datasRodadas.csv", package = "smapOnsR")
     expect_error(le_datas_rodada(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN03", "CT3.3", "Arq_Entrada", "datasRodadas.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN15", "CT15.3", "Arq_Entrada", "datasRodadas.csv", package = "smapOnsR")
     expect_error(le_datas_rodada(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN03", "CT3.4", "Arq_Entrada", "datasRodadas.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN15", "CT15.4", "Arq_Entrada", "datasRodadas.csv", package = "smapOnsR")
     expect_error(suppressWarnings(le_datas_rodada(arq)))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN03", "CT3.5", "Arq_Entrada", "datasRodadas.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN15", "CT15.5", "Arq_Entrada", "datasRodadas.csv", package = "smapOnsR")
     expect_error(le_datas_rodada(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN03", "CT3.6", "Arq_Entrada", "datasRodadas.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN15", "CT15.6", "Arq_Entrada", "datasRodadas.csv", package = "smapOnsR")
     expect_error(le_datas_rodada(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN03", "CT3.7", "Arq_Entrada", "datasRodadas.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN15", "CT15.7", "Arq_Entrada", "datasRodadas.csv", package = "smapOnsR")
     expect_error(le_datas_rodada(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN03", "CT3.8", "Arq_Entrada", "datasRodadas.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN15", "CT15.8", "Arq_Entrada", "datasRodadas.csv", package = "smapOnsR")
     expect_error(le_datas_rodada(arq))
 
 })
 
 test_that("testa inicializacao.csv", {
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN04", "CT4.1", "Arq_Entrada", "inicializacao.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN16", "CT16.1", "Arq_Entrada", "inicializacao.csv", package = "smapOnsR")
     expect_error(le_inicializacao(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN04", "CT4.2", "Arq_Entrada", "inicializacao.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN16", "CT16.2", "Arq_Entrada", "inicializacao.csv", package = "smapOnsR")
     expect_error(le_inicializacao(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN04", "CT4.3", "Arq_Entrada", "inicializacao.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN16", "CT16.3", "Arq_Entrada", "inicializacao.csv", package = "smapOnsR")
     expect_error(le_inicializacao(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN04", "CT4.4", "Arq_Entrada", "inicializacao.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN16", "CT16.4", "Arq_Entrada", "inicializacao.csv", package = "smapOnsR")
     expect_error(suppressWarnings(le_inicializacao(arq)))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN04", "CT4.5", "Arq_Entrada", "inicializacao.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN16", "CT16.5", "Arq_Entrada", "inicializacao.csv", package = "smapOnsR")
     expect_error(le_inicializacao(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN04", "CT4.6", "Arq_Entrada", "inicializacao.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN16", "CT16.6", "Arq_Entrada", "inicializacao.csv", package = "smapOnsR")
     expect_error(le_inicializacao(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN04", "CT4.7", "Arq_Entrada", "inicializacao.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN16", "CT16.7", "Arq_Entrada", "inicializacao.csv", package = "smapOnsR")
     expect_error(le_inicializacao(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN04", "CT4.8", "Arq_Entrada", "inicializacao.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN16", "CT16.8", "Arq_Entrada", "inicializacao.csv", package = "smapOnsR")
     expect_error(le_inicializacao(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN04", "CT4.9", "Arq_Entrada", "inicializacao.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN16", "CT16.9", "Arq_Entrada", "inicializacao.csv", package = "smapOnsR")
     expect_error(le_inicializacao(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN04", "CT4.10", "Arq_Entrada", "inicializacao.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN16", "CT16.10", "Arq_Entrada", "inicializacao.csv", package = "smapOnsR")
     expect_error(le_inicializacao(arq))
 
-    pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN04", "CT4.11", "Arq_Entrada", package = "smapOnsR")
+    pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN16", "CT16.11", "Arq_Entrada", package = "smapOnsR")
     expect_error(suppressWarnings(le_arq_entrada_novo(pasta_entrada)))
 })
 
 test_that("testa parametros.csv", {
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN05", "CT5.1", "Arq_Entrada", "parametros.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN17", "CT17.1", "Arq_Entrada", "parametros.csv", package = "smapOnsR")
     expect_error(le_parametros(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN05", "CT5.2", "Arq_Entrada", "parametros.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN17", "CT17.2", "Arq_Entrada", "parametros.csv", package = "smapOnsR")
     expect_error(suppressWarnings(le_parametros(arq)))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN05", "CT5.3", "Arq_Entrada", "parametros.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN17", "CT17.3", "Arq_Entrada", "parametros.csv", package = "smapOnsR")
     expect_error(le_parametros(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN05", "CT5.4", "Arq_Entrada", "parametros.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN17", "CT17.4", "Arq_Entrada", "parametros.csv", package = "smapOnsR")
     expect_error(le_parametros(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN05", "CT5.5", "Arq_Entrada", "parametros.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN17", "CT17.5", "Arq_Entrada", "parametros.csv", package = "smapOnsR")
     expect_error(le_parametros(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN05", "CT5.6", "Arq_Entrada", "parametros.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN17", "CT17.6", "Arq_Entrada", "parametros.csv", package = "smapOnsR")
     expect_error(le_parametros(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN05", "CT5.7", "Arq_Entrada", "parametros.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN17", "CT17.7", "Arq_Entrada", "parametros.csv", package = "smapOnsR")
     expect_error(le_parametros(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN05", "CT5.8", "Arq_Entrada", "parametros.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN17", "CT17.8", "Arq_Entrada", "parametros.csv", package = "smapOnsR")
     expect_error(le_parametros(arq))
 
-    pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN05", "CT5.9", "Arq_Entrada", package = "smapOnsR")
+    pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN17", "CT17.9", "Arq_Entrada", package = "smapOnsR")
     expect_error(le_arq_entrada_novo(pasta_entrada))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN05", "CT5.10", "Arq_Entrada", "parametros.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN17", "CT17.10", "Arq_Entrada", "parametros.csv", package = "smapOnsR")
     expect_error(le_parametros(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN05", "CT5.11", "Arq_Entrada", "parametros.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN17", "CT17.11", "Arq_Entrada", "parametros.csv", package = "smapOnsR")
+    expect_error(le_parametros(arq))
+
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN17", "CT17.12", "Arq_Entrada", "parametros.csv", package = "smapOnsR")
     expect_error(le_parametros(arq))
 })
 
 test_that("testa precipitacao_prevista.csv", {
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN06", "CT6.1", "Arq_Entrada", "precipitacao_prevista.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN18", "CT18.1", "Arq_Entrada", "precipitacao_prevista.csv", package = "smapOnsR")
     expect_error(le_precipitacao_prevista(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN06", "CT6.2", "Arq_Entrada", "precipitacao_prevista.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN18", "CT18.2", "Arq_Entrada", "precipitacao_prevista.csv", package = "smapOnsR")
     expect_error(suppressWarnings(le_precipitacao_prevista(arq)))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN06", "CT6.3", "Arq_Entrada", "precipitacao_prevista.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN18", "CT18.3", "Arq_Entrada", "precipitacao_prevista.csv", package = "smapOnsR")
     expect_error(le_precipitacao_prevista(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN06", "CT6.4", "Arq_Entrada", "precipitacao_prevista.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN18", "CT18.4", "Arq_Entrada", "precipitacao_prevista.csv", package = "smapOnsR")
     expect_error(suppressWarnings(le_precipitacao_prevista(arq)))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN06", "CT6.5", "Arq_Entrada", "precipitacao_prevista.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN18", "CT18.5", "Arq_Entrada", "precipitacao_prevista.csv", package = "smapOnsR")
+    expect_error(suppressWarnings(le_precipitacao_prevista(arq)))
+
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN18", "CT18.6", "Arq_Entrada", "precipitacao_prevista.csv", package = "smapOnsR")
     expect_error(le_precipitacao_prevista(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN06", "CT6.6", "Arq_Entrada", "precipitacao_prevista.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN18", "CT18.7", "Arq_Entrada", "precipitacao_prevista.csv", package = "smapOnsR")
     expect_error(le_precipitacao_prevista(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN06", "CT6.7", "Arq_Entrada", "precipitacao_prevista.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN18", "CT18.8", "Arq_Entrada", "precipitacao_prevista.csv", package = "smapOnsR")
     expect_error(le_precipitacao_prevista(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN06", "CT6.8", "Arq_Entrada", "precipitacao_prevista.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN18", "CT18.9", "Arq_Entrada", "precipitacao_prevista.csv", package = "smapOnsR")
     expect_error(le_precipitacao_prevista(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN06", "CT6.9", "Arq_Entrada", "precipitacao_prevista.csv", package = "smapOnsR")
-    expect_error(le_precipitacao_prevista(arq))
-
-    pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN06", "CT6.10", "Arq_Entrada", package = "smapOnsR")
+    pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN18", "CT18.10", "Arq_Entrada", package = "smapOnsR")
     expect_error(suppressWarnings(le_arq_entrada_novo(pasta_entrada)))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN06", "CT6.11", "Arq_Entrada", "precipitacao_prevista.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN18", "CT18.11", "Arq_Entrada", "precipitacao_prevista.csv", package = "smapOnsR")
+    expect_error(suppressWarnings(le_precipitacao_prevista(arq)))
+
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN18", "CT18.12", "Arq_Entrada", "precipitacao_prevista.csv", package = "smapOnsR")
     expect_error(suppressWarnings(le_precipitacao_prevista(arq)))
 })
 
 test_that("testa vazoes.csv", {
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN07", "CT7.1", "Arq_Entrada", "vazoes.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN19", "CT19.1", "Arq_Entrada", "vazoes.csv", package = "smapOnsR")
     expect_error(le_historico_verificado(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN07", "CT7.2", "Arq_Entrada", "vazoes.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN19", "CT19.2", "Arq_Entrada", "vazoes.csv", package = "smapOnsR")
     expect_error(le_historico_verificado(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN07", "CT7.3", "Arq_Entrada", "vazoes.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN19", "CT19.3", "Arq_Entrada", "vazoes.csv", package = "smapOnsR")
     expect_error(suppressWarnings(le_historico_verificado(arq)))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN07", "CT7.4", "Arq_Entrada", "vazoes.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN19", "CT19.4", "Arq_Entrada", "vazoes.csv", package = "smapOnsR")
     expect_error(le_historico_verificado(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN07", "CT7.5", "Arq_Entrada", "vazoes.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN19", "CT19.5", "Arq_Entrada", "vazoes.csv", package = "smapOnsR")
     expect_error(le_historico_verificado(arq))
 
-    pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN07", "CT7.6", "Arq_Entrada", package = "smapOnsR")
+    pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN19", "CT19.6", "Arq_Entrada", package = "smapOnsR")
     expect_error(suppressWarnings(le_arq_entrada_novo(pasta_entrada)))
 
-    pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN07", "CT7.7", "Arq_Entrada", package = "smapOnsR")
+    pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN19", "CT19.7", "Arq_Entrada", package = "smapOnsR")
     expect_error(suppressWarnings(le_arq_entrada_novo(pasta_entrada)))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN07", "CT7.8", "Arq_Entrada", "vazoes.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN19", "CT19.8", "Arq_Entrada", "vazoes.csv", package = "smapOnsR")
     expect_error(le_historico_verificado(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN07", "CT7.9", "Arq_Entrada", "vazoes.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN19", "CT19.9", "Arq_Entrada", "vazoes.csv", package = "smapOnsR")
     expect_error(le_historico_verificado(arq))
+
+    pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN19", "CT19.10", "Arq_Entrada", package = "smapOnsR")
+    expect_error(suppressWarnings(le_arq_entrada_novo(pasta_entrada)))
+
+    pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN19", "CT19.11", "Arq_Entrada", package = "smapOnsR")
+    expect_error(suppressWarnings(le_arq_entrada_novo(pasta_entrada)))
+
+    pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN19", "CT19.12", "Arq_Entrada", package = "smapOnsR")
+    expect_error(suppressWarnings(le_arq_entrada_novo(pasta_entrada)))
 })
 
 
 test_that("testa evapotranspiracao_nc.csv", {
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN08", "CT8.1", "evapotranspiracao_nc.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN20", "CT20.1", "evapotranspiracao_nc.csv", package = "smapOnsR")
     expect_error(le_evapotranspiracao_nc(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN08", "CT8.2", "evapotranspiracao_nc.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN20", "CT20.2", "evapotranspiracao_nc.csv", package = "smapOnsR")
     expect_error(le_evapotranspiracao_nc(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN08", "CT8.3", "evapotranspiracao_nc.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN20", "CT20.3", "evapotranspiracao_nc.csv", package = "smapOnsR")
     expect_error(le_evapotranspiracao_nc(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN08", "CT8.4", "evapotranspiracao_nc.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN20", "CT20.4", "evapotranspiracao_nc.csv", package = "smapOnsR")
     expect_error(suppressWarnings(le_evapotranspiracao_nc(arq)))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN08", "CT8.5", "evapotranspiracao_nc.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN20", "CT20.5", "evapotranspiracao_nc.csv", package = "smapOnsR")
     expect_error(suppressWarnings(le_evapotranspiracao_nc(arq)))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN08", "CT8.6", "evapotranspiracao_nc.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN20", "CT20.6", "evapotranspiracao_nc.csv", package = "smapOnsR")
     expect_error(le_evapotranspiracao_nc(arq))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN08", "CT8.7", "evapotranspiracao_nc.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN20", "CT20.7", "evapotranspiracao_nc.csv", package = "smapOnsR")
     expect_error(suppressWarnings(le_evapotranspiracao_nc(arq)))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN08", "CT8.8", "evapotranspiracao_nc.csv", package = "smapOnsR")
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN20", "CT20.8", "evapotranspiracao_nc.csv", package = "smapOnsR")
     expect_error(le_evapotranspiracao_nc(arq))
 
-    pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN08", "CT8.9", package = "smapOnsR")
+    pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN20", "CT20.9", package = "smapOnsR")
     expect_error(suppressWarnings(le_arq_entrada_novo(pasta_entrada)))
 
-    pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN08", "CT8.10", package = "smapOnsR")
+    pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN20", "CT20.10", package = "smapOnsR")
     expect_error(suppressWarnings(le_arq_entrada_novo(pasta_entrada)))
 
     unlink(system.file("extdata", "validacao_arq_entrada_novo", package = "smapOnsR"), recursive = TRUE)
