@@ -70,73 +70,22 @@ executa_caso_oficial <- function(pasta_caso){
 #'     \item{valor - valor da variavel}
 #'     }
 #' @export
-
-executa_caso_oficial_novo <- function(pasta_entrada){
+executa_caso_novo <- function(pasta_entrada){
     entrada <- le_arq_entrada_novo(pasta_entrada)
 
-    saida <- rodada_encadeada_oficial(entrada$parametros,
-          entrada$inicializacao, entrada$precipitacao_observada, entrada$precipitacao_prevista, entrada$evapotranspiracao_nc, entrada$vazao,
-          entrada$postos_plu, entrada$datas_rodadas, length(unique(entrada$precipitacao_prevista[, cenario])), entrada$sub_bacias$nome)
+    if (nrow(entrada$precipitacao_prevista) == 0) {
+        saida <- rodada_encadeada_oficial(entrada$parametros,
+            entrada$inicializacao, entrada$precipitacao_observada, entrada$precipitacao_prevista, entrada$evapotranspiracao_nc, entrada$vazao,
+            entrada$postos_plu, entrada$datas_rodadas, length(unique(entrada$precipitacao_prevista[, cenario])), entrada$sub_bacias$nome)
+    } else {
+        saida <- rodada_encadeada_etp(entrada$parametros,
+            entrada$inicializacao, entrada$precipitacao_observada, entrada$precipitacao_prevista, entrada$evapotranspiracao_observada, 
+            entrada$evapotranspiracao_prevista, entrada$vazao_observada,
+            entrada$postos_plu, entrada$datas_rodadas, length(unique(entrada$precipitacao_prevista[, cenario])), entrada$sub_bacias$nome)
+    }
 
     saida
 }
-
-#' Executa caso com evapotranspiraca diaria
-#' 
-#' executa rodada com evapotranspiracao diaria do modelo SMAP/ONS com dados de entrada novos
-#'
-#' @param pasta_entrada caminho da pasta  "arq_entrada"
-#' @examples 
-#'\dontrun{
-#' pasta_entrada <- system.file("extdata", "arq_entrada_novo", package = "smapOnsR")
-#' saida <- executa_caso_etp(pasta_entrada)
-#' }
-#' @return saida lista com o data.table previsao contendo as seguintes colunas:
-#'     \itemize{
-#'     \item{data_caso - data da rodada}
-#'     \item{data_previsao - data da previsao}
-#'     \item{cenario - nome do cenario}
-#'     \item{nome - nome da sub-bacia}
-#'     \item{variavel - nome da variavel}
-#'     \item{valor - valor da variavel}
-#'     }
-#'  otimizacao data table com as colunas:
-#' \itemize{
-#'     \item{otimizacao - valor das variaveis da otimizacao}
-#'     \item{nome - nome da sub-bacia}
-#'     \item{data_caso - data do caso}
-#'     }
-#'  assimilacao data table com as colunas:
-#' \itemize{
-#'     \item{data_caso - data da rodada}
-#'     \item{data_assimilacao - data da assimilacao}
-#'     \item{cenario - nome do cenario}
-#'     \item{nome - nome da sub-bacia}
-#'     \item{variavel - nome da variavel}
-#'     \item{valor - valor da variavel}
-#'     }
-#' precipitacao data table contendo precipitacao observada e previsata com as colunas:
-#' \itemize{
-#'     \item{data_previsao - data da precipitacao}
-#'     \item{data_rodada - data da rodada}
-#'     \item{cenario - nome do cenario}
-#'     \item{nome - nome da sub-bacia}
-#'     \item{variavel - nome da variavel}
-#'     \item{valor - valor da variavel}
-#'     }
-#' @export
-
-executa_caso_etp <- function(pasta_entrada){
-    entrada <- le_arq_entrada_novo(pasta_entrada)
-
-    saida <- rodada_encadeada_etp(entrada$parametros,
-        entrada$inicializacao, entrada$precipitacao_observada, entrada$precipitacao_prevista, entrada$evapotranspiracao_observada, 
-        entrada$evapotranspiracao_prevista, entrada$vazao_observada,
-        entrada$postos_plu, entrada$datas_rodadas, length(unique(entrada$precipitacao_prevista[, cenario])), entrada$sub_bacias$nome)
-
-    saida
-}
-
 #####RODADA ENCADEADA NOVO FORMATO
 #entrada <- le_arq_entrada_novo(pasta_entrada)
 #

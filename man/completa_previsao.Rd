@@ -4,10 +4,10 @@
 \alias{completa_previsao}
 \title{Completa as previsoes com mais n dias}
 \usage{
-completa_previsao(previsao_precipitacao, datas_rodadas, numero_dias = 2)
+completa_previsao(precipitacao_prevista, datas_rodadas, numero_dias = 2)
 }
 \arguments{
-\item{previsao_precipitacao}{data.table com as colunas
+\item{precipitacao_prevista}{data.table com as colunas
 \itemize{
 \item{data_rodada - data da rodada}
 \item{data_previsao - data da previsao}
@@ -25,7 +25,7 @@ completa_previsao(previsao_precipitacao, datas_rodadas, numero_dias = 2)
 \item{numero_dias}{numero de dias alem da data final da previsao a ser verificado}
 }
 \value{
-previsao_precipitacao data.table com as colunas
+precipitacao_prevista data.table com as colunas
 \itemize{
 \item{data_rodada - data da rodada}
 \item{data_previsao - data da previsao}
