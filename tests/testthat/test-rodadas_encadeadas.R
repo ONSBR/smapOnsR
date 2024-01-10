@@ -1,35 +1,45 @@
 test_that("testa rodadas encadeadas", {
+    #CT25.1
     numero_dias_assimilacao <- 31
     
     datas_rodadas<- data.table::data.table(data = as.Date(c("2020-05-01", "2020-05-08")), numero_dias_previsao = c(15, 20))
 
     sub_bacias <- c("avermelha", "ssimao2")
     
-    precipitacao <- historico_precipitacao[posto %in% postos_plu[nome %in% sub_bacias, posto]]
+    precipitacao_observada <- historico_precipitacao[posto %in% postos_plu[nome %in% sub_bacias, posto]]
 
-    precipitacao <- data.table::rbindlist(lapply(sub_bacias, function(sub_bacia) {
-  ponderacao_espacial(precipitacao, postos_plu[nome %in% sub_bacia])
+    precipitacao_observada <- data.table::rbindlist(lapply(sub_bacias, function(sub_bacia) {
+  ponderacao_espacial(precipitacao_observada, postos_plu[nome %in% sub_bacia])
         }))
-    previsao_precipitacao <- transforma_historico_previsao(precipitacao, datas_rodadas)
-    aux <- data.table::data.table(previsao_precipitacao)
+    precipitacao_prevista <- transforma_historico_previsao(precipitacao_observada, datas_rodadas)
+    aux <- data.table::data.table(precipitacao_prevista)
     aux[, cenario := "cenario2"]
-    previsao_precipitacao <- rbind(aux, previsao_precipitacao)
+    precipitacao_prevista <- rbind(aux, precipitacao_prevista)
 
-    numero_cenarios <- length(unique(previsao_precipitacao[, cenario]))
-    vazao <- historico_vazao[posto %in% sub_bacias]
-    evapotranspiracao <- historico_etp_NC[nome %in% sub_bacias]
+    numero_cenarios <- length(unique(precipitacao_prevista[, cenario]))
+    vazao_observada <- historico_vazao[posto %in% sub_bacias]
+    evapotranspiracao_nc <- historico_etp_NC[nome %in% sub_bacias]
 
     inicializacao <- data.table::data.table(nome = c(rep("avermelha", 8), rep("ssimao2", 8)),
     variavel = rep(c("Ebin", "Supin", "Tuin", "numero_dias_assimilacao", 
     "limite_inferior_ebin", "limite_superior_ebin", "limite_superior_prec", "limite_inferior_prec"), 2),
-    valor = c(218.71, 46.69, 0.2891, 31, 0.8, 1.2, 2, 0, 441.67, 256.98, 0.3141, 31, 0.8, 1.2, 2, 0))
+    valor = c(218.71, 46.69, 0.2891, 31, 0.8, 1.2, 2, 0, 441.67, 256.98, 0.3141, 31, 0.8, 1.2, 2, 0.5))
     
     saida <- rodada_encadeada_oficial(parametros[nome %in% sub_bacias],
-    inicializacao, precipitacao, previsao_precipitacao, evapotranspiracao, vazao,
+    inicializacao, precipitacao_observada, precipitacao_prevista, evapotranspiracao_nc, vazao_observada,
     postos_plu, datas_rodadas, numero_cenarios, sub_bacias)
 
     expect_equal(saida$previsao[data_previsao == "2020-05-05" & cenario == "cenario2", valor],
                 saida$previsao[data_previsao == "2020-05-05" & cenario == "historico", valor])
+
+    #CT25.2
+    Ebin_segundo_caso <- saida$otimizacao[nome == "ssimao2" & data_caso == "2020-05-08" &
+              variavel == "Ebin", limite_inferior / 0.8]
+    
+    data_assimilacao_seguinte <- as.Date("2020-05-08") - 32
+    Ebin_assimilacao_primeiro_caso <- saida$assimilacao[nome == "ssimao2" & data_caso == "2020-05-01" & variavel == "Qbase" & 
+                      data_assimilacao == data_assimilacao_seguinte, valor]
+    expect_equal(Ebin_segundo_caso, Ebin_assimilacao_primeiro_caso)
 })
 
 test_that("testa rodada ecmwf", {
@@ -40,16 +50,16 @@ test_that("testa rodada ecmwf", {
 
   entrada <- le_arq_entrada(pasta_entrada)
 
-  parametros <- entrada$parametros
-  inicializacao <- entrada$inicializacao
-  precipitacao_observada <- entrada$precipitacao
-      precipitacao_prevista <- entrada$previsao_precipitacao
-      evapotranspiracao_nc <-entrada$evapotranspiracao
-        vazao_observada <- entrada$vazao
-        postos_plu <- entrada$postos_plu
-        datas_rodadas <- entrada$datas_rodadas
-      numero_cenarios <- length(unique(entrada$previsao_precipitacao[, cenario]))
-      sub_bacias <- entrada$caso$nome_subbacia
+  #parametros <- entrada$parametros
+  #inicializacao <- entrada$inicializacao
+  #precipitacao_observada <- entrada$precipitacao
+  #    precipitacao_prevista <- entrada$previsao_precipitacao
+  #    evapotranspiracao_nc <- entrada$evapotranspiracao
+  #      vazao_observada <- entrada$vazao
+  #      postos_plu <- entrada$postos_plu
+  #      datas_rodadas <- entrada$datas_rodadas
+  #    numero_cenarios <- length(unique(entrada$previsao_precipitacao[, cenario]))
+  #    sub_bacias <- entrada$caso$nome_subbacia
 
   set.seed(129852)
   saida <- rodada_encadeada_oficial(entrada$parametros,
