@@ -120,24 +120,30 @@ assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, preci
               control = list(fnscale = fnscale, ndeps = rep(0.000001, length(vetor_variaveis)),
               maxit = 1000))
 
-  EbInic <- ajuste$par[numero_dias_assimilacao + 1]
-  Supin <- ajuste$par[numero_dias_assimilacao + 2]
-  if (Supin < 0) { #L-BFGS-B as vezes fornece valor negativo próximo a 0 ('-1e-17')
-    Supin <- 0
-  }
-  inicializacao <- inicializacao_smap(vetor_modelo, area, EbInic, TuInic, Supin)
-  vetor_inicializacao <- unlist(inicializacao)
+    EbInic <- ajuste$par[numero_dias_assimilacao + 1]
+    Supin <- ajuste$par[numero_dias_assimilacao + 2]
+    if (Supin < 0) { #L-BFGS-B as vezes fornece valor negativo próximo a 0 ('-1e-17')
+      Supin <- 0
+    }
+    inicializacao <- inicializacao_smap(vetor_modelo, area, EbInic, TuInic, Supin)
+    vetor_inicializacao <- unlist(inicializacao)
 
-  precipitacao_ponderada <- precipitacao_ponderada * ajuste$par[1:numero_dias_assimilacao]
+    precipitacao_ponderada <- precipitacao_ponderada * ajuste$par[1:numero_dias_assimilacao]
 
-  simulacao <- funcaoSmapCpp::rodada_varios_dias_cpp2(vetor_modelo,
-            vetor_inicializacao, area, precipitacao_ponderada,
-            evapotranspiracao, evapotranspiracao_planicie, numero_dias_assimilacao)
+    simulacao <- funcaoSmapCpp::rodada_varios_dias_cpp2(vetor_modelo,
+              vetor_inicializacao, area, precipitacao_ponderada,
+              evapotranspiracao, evapotranspiracao_planicie, numero_dias_assimilacao)
 
-  simulacao <- data.table::data.table(simulacao)
+    simulacao <- data.table::data.table(simulacao)
 
-  saida <- list(ajuste = ajuste, simulacao = simulacao)
-  saida
+    otimizacao <- data.table::data.table(ajuste$par)
+    colnames(otimizacao) <- "otimizacao"
+    otimizacao[, limite_inferior := limite_inferior]
+    otimizacao[, limite_superior := limite_superior]
+    otimizacao[, variavel := c(paste0("prec (t-", 31:1,")"), "Ebin", "Supin")]
+
+    saida <- list(ajuste = ajuste, simulacao = simulacao, otimizacao = otimizacao)
+    saida
 }
 
 #' Funcao objetivo da assimilacao oficial
@@ -371,7 +377,14 @@ assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Su
 
     simulacao <- data.table::data.table(simulacao)
 
-    saida <- list(ajuste = ajuste, simulacao = simulacao)
+    otimizacao <- data.table::data.table(ajuste$par)
+    colnames(otimizacao) <- "otimizacao"
+    otimizacao[, limite_inferior := limite_inferior]
+    otimizacao[, limite_superior := limite_superior]
+    otimizacao[, variavel := c(paste0("prec (t-", 31:1,")"), paste0("etp (t-", 31:1,")"), "Ebin", "Supin")]
+
+    saida <- list(ajuste = ajuste, simulacao = simulacao, otimizacao = otimizacao)
+
     saida
 }
 

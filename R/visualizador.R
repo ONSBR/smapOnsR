@@ -723,7 +723,7 @@ executa_visualizador_calibracao <- function(){
                 }
 
                 funcao_objetivo <- calcula_funcao_objetivo(saida()[data >= data_inicio_objetivo & data <= data_fim_objetivo, Qcalc], vazao_fo[, valor], vazao_fo[, peso])
-                paste0("funcao objetivo = ", round(funcao_objetivo, 2))
+                paste0("funcao objetivo = ", round(funcao_objetivo, 4))
             }
         })
 
