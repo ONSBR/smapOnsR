@@ -28,7 +28,7 @@ test_that("testa execucao oficial", {
 test_that("testa execucao novo formato", {
   pasta_entrada <- system.file("extdata", "arq_entrada_novo", package = "smapOnsR")
 
-  saida <- suppressWarnings(executa_caso_etp(pasta_entrada))
+  saida <- suppressWarnings(executa_caso_novo(pasta_entrada))
 
   secao <- sessionInfo()
   

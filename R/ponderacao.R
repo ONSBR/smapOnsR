@@ -81,3 +81,47 @@ ponderacao_espacial <- function(historico_precipitacao, postos_plu) {
 
   precipitacao
 }
+
+#' Funcao de ponderacao espacial 
+#' 
+#' Realiza a ponderacao espacial de previsao de precipitacao atraves dos pesos de cada sub_bacia
+#'
+#' @param precipitacao_prevista data.table com a precipitacao prevista por posto pluviometrico com as colunas
+#'     \itemize{
+#'     \item{data_rodada - data da rodada do modelo que gerou a previsao}
+#'     \item{data_previsao - data da previsao}
+#'     \item{cenario - codigo do cenario}
+#'     \item{posto - nome do posto pluviometrico}
+#'     \item{valor - valor da previsao de precipitacao}
+#'     }
+#' @param postos_plu data.table postos_plu com as colunas
+#'     \itemize{
+#'     \item{posto}{nome da sub_bacia}
+#'     \item{psat}{nome do posto plu}
+#'     \item{valor}{peso do posto plu}
+#'     }
+#' @importFrom data.table setcolorder
+#' @return data.table com a precipitacao prevista por sub-bacia com as colunas
+#'     \itemize{
+#'     \item{data_rodada - data da rodada do modelo que gerou a previsao}
+#'     \item{data_previsao - data da previsao}
+#'     \item{cenario - codigo do cenario}
+#'     \item{nome - nome da sub-bacia}
+#'     \item{valor - valor da previsao de precipitacao}
+#'     }
+#' @export
+ponderacao_espacial_previsao <- function(precipitacao_prevista, postos_plu) {
+
+  precipitacao <- precipitacao_prevista[posto %in% postos_plu[, posto]]
+  precipitacao <- merge(precipitacao, postos_plu, "posto")
+  precipitacao <- precipitacao[, valor := sum(valor.x * valor.y), 
+                  by = c("data_rodada", "data_previsao", "cenario", "posto")]
+  precipitacao <- unique(precipitacao, by = c("data_rodada", "data_previsao", "cenario", "posto"))
+  precipitacao[, valor.x := NULL]
+  precipitacao[, valor.y := NULL]
+  precipitacao[, posto := NULL]
+  
+  precipitacao <- data.table::setcolorder(precipitacao, c("data_rodada", "data_previsao", "nome", "cenario", "valor"))
+
+  precipitacao
+}

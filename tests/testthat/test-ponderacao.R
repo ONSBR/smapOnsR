@@ -1,4 +1,5 @@
 test_that("Testa ponderacao temporal", {
+  #CT24.1
   sub_bacia <- "avermelha"
   modelo <- new_modelo_smap_ons(parametros[nome == sub_bacia], postos_plu[nome == sub_bacia])
   kt <- unlist(modelo)[12:74]
@@ -14,6 +15,7 @@ test_that("Testa ponderacao temporal", {
 })
 
 test_that("Testa ponderacao espacial", {
+  #CT24.2
   sub_bacia <- "pimentalt"
   modelo <- new_modelo_smap_ons(parametros[nome == sub_bacia], postos_plu[nome == sub_bacia])
   kt <- unlist(modelo)[12:74]
