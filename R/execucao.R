@@ -73,7 +73,7 @@ executa_caso_oficial <- function(pasta_caso){
 executa_caso_novo <- function(pasta_entrada){
     entrada <- le_arq_entrada_novo(pasta_entrada)
 
-    if (nrow(entrada$precipitacao_prevista) == 0) {
+    if (nrow(entrada$evapotranspiracao_prevista) == 0) {
         saida <- rodada_encadeada_oficial(entrada$parametros,
             entrada$inicializacao, entrada$precipitacao_observada, entrada$precipitacao_prevista, entrada$evapotranspiracao_nc, entrada$vazao,
             entrada$postos_plu, entrada$datas_rodadas, length(unique(entrada$precipitacao_prevista[, cenario])), entrada$sub_bacias$nome)
