@@ -103,6 +103,10 @@ assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, preci
     idia <- numero_dias_assimilacao:1
     pesos_funcao_objetivo <- (log(idia + 1) - log(idia)) / log(numero_dias_assimilacao + 1)
     
+    if (length(unique(vazao)) == 1) {
+      vazao[1] <- vazao[1] + 0.0001
+    }
+
     set.seed(12364810)
     ajuste <- stats::optim(par = vetor_variaveis, method = "L-BFGS-B",
               lower = limite_inferior, upper = limite_superior,
@@ -341,6 +345,10 @@ assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Su
 
     idia <- numero_dias_assimilacao:1
     pesos_funcao_objetivo <- (log(idia + 1) - log(idia)) / log(numero_dias_assimilacao + 1)
+
+    if (length(unique(vazao)) == 1) {
+      vazao[1] <- vazao[1] + 0.0001
+    }
 
     set.seed(12364810)
     ajuste <- stats::optim(par = vetor_variaveis, method = "L-BFGS-B",
