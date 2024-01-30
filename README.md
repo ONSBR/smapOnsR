@@ -29,7 +29,17 @@ Exemplo de como executar um caso com os dados de entrada oficiais.
 ``` r
 library(smapOnsR)
 ## Executar linha abaixo
-#pasta_entrada <- system.file("extdata", "Arq_entrada", package = "smapOnsR")
+pasta_entrada <- system.file("extdata", "caso_completo2", package = "smapOnsR")
 
-#saida <- executa_caso_oficial(pasta_entrada)
+saida <- executa_caso_oficial(pasta_entrada)
+```
+
+Exemplo de como executar um caso com os dados de entrada novos.
+
+``` r
+library(smapOnsR)
+## Executar linha abaixo
+pasta_entrada <- system.file("extdata", "arq_entrada_novo", package = "smapOnsR")
+
+saida <- executa_caso_novo(pasta_entrada)
 ```
