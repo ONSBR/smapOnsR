@@ -2,7 +2,7 @@
 % Please edit documentation in R/leitura_antiga.R
 \name{le_entrada_posto_plu}
 \alias{le_entrada_posto_plu}
-\title{Leitor de arquivo de com os postos plu da sub_bacia}
+\title{Leitor de arquivo com os postos plu da sub_bacia}
 \usage{
 le_entrada_posto_plu(pasta_entrada, nome_subbacia)
 }

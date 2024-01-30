@@ -300,7 +300,7 @@ le_entrada_vazao <- function(pasta_entrada, nome_subbacia) {
     vazao
 }
 
-#' Leitor de arquivo de com os postos plu da sub_bacia
+#' Leitor de arquivo com os postos plu da sub_bacia
 #' 
 #' Le arquivo "sub-bacia_postos_plu.txt" utilizado no aplicativo SMAP/ONS
 #' 
