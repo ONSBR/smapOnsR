@@ -34,8 +34,8 @@ le_entrada_parametros <- function(pasta_entrada, nome_subbacia) {
     if (!is.character(parametros[2, 1])) stop(paste0("Nao existe valores de kt declarados no arquivo ", arq))
     aux <- unlist(strsplit(parametros[2, 1], "\\s+"))
     parametros_smap$nKt <- as.numeric(aux[1])
-    if(as.numeric(aux[1]) != length(aux) - 1) stop(paste0("Numero de kt diferente do total de kt declarado no arquivo ", arq))    
     if (is.na(parametros_smap$nKt)) stop(paste0("Parametro de numero de kt com valor nao numerico no arquivo ", arq))    
+    if(as.numeric(aux[1]) != length(aux) - 1) stop(paste0("Numero de kt diferente do total de kt declarado no arquivo ", arq))    
     if (parametros_smap$nKt < 3) stop(paste0("Parametro de numero de kt com valor inferior a 3 no arquivo ", arq))    
     if (parametros_smap$nKt != trunc(parametros_smap$nKt)) stop(paste0("Parametro de numero de kt com valor decimal no arquivo ", arq))    
 
@@ -49,6 +49,7 @@ le_entrada_parametros <- function(pasta_entrada, nome_subbacia) {
 
     parametros_smap[1, 81] <- sum(parametros_smap[, 7:66] > 0)
     parametros_smap[1, 82] <- sum(parametros_smap[, 4:5] > 0)
+    if (any(is.na(parametros_smap[, 4:66]))) stop(paste0("Valor de kt nao numerico no arquivo ", arq))
     if (sum(parametros_smap[, 4:66]) < 0.995) stop(paste0("Somatorio dos kts inferior a 0.995 no arquivo ", arq))
     if (sum(parametros_smap[, 4:66]) > 1.005) stop(paste0("Somatorio dos kts superior a 1.005 no arquivo ", arq))
     parametros_smap[, limite_superior_ebin := as.numeric(parametros[17, 1])]
@@ -299,7 +300,7 @@ le_entrada_vazao <- function(pasta_entrada, nome_subbacia) {
     vazao
 }
 
-#' Leitor de arquivo de com os postos plu da sub_bacia
+#' Leitor de arquivo com os postos plu da sub_bacia
 #' 
 #' Le arquivo "sub-bacia_postos_plu.txt" utilizado no aplicativo SMAP/ONS
 #' 

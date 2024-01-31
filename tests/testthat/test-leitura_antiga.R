@@ -408,6 +408,9 @@ test_that("testa arquivo 'sub_bacia'_'parametros'.txt", {
     pasta_entrada <- system.file("extdata", "Validacao", "CN07", "CT7.2", "Arq_Entrada", package = "smapOnsR")
     expect_error(suppressWarnings(le_entrada_parametros(pasta_entrada, nome_subbacia)))
 
+    pasta_entrada <- system.file("extdata", "Validacao", "CN07", "CT7.3", "Arq_Entrada", package = "smapOnsR")
+    expect_error(suppressWarnings(le_entrada_parametros(pasta_entrada, nome_subbacia)))
+
     pasta_entrada <- system.file("extdata", "Validacao", "CN07", "CT7.4", "Arq_Entrada", package = "smapOnsR")
     expect_error(suppressWarnings(le_entrada_parametros(pasta_entrada, nome_subbacia)))
     
@@ -418,13 +421,13 @@ test_that("testa arquivo 'sub_bacia'_'parametros'.txt", {
     expect_error(suppressWarnings(le_entrada_parametros(pasta_entrada, nome_subbacia)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN07", "CT7.7", "Arq_Entrada", package = "smapOnsR")
-    expect_error(suppressWarnings(le_entrada_parametros(pasta_entrada, nome_subbacia)))
+    expect_equal(le_entrada_parametros(pasta_entrada, nome_subbacia)$valor[2], 5)
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN07", "CT7.8", "Arq_Entrada", package = "smapOnsR")
     expect_error(suppressWarnings(le_entrada_parametros(pasta_entrada, nome_subbacia)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN07", "CT7.9", "Arq_Entrada", package = "smapOnsR")
-    expect_equal(le_entrada_parametros(pasta_entrada, nome_subbacia)$valor[2], 5)
+    expect_error(suppressWarnings(le_entrada_parametros(pasta_entrada, nome_subbacia)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN07", "CT7.10", "Arq_Entrada", package = "smapOnsR")
     expect_error(suppressWarnings(le_entrada_parametros(pasta_entrada, nome_subbacia)))
@@ -442,7 +445,7 @@ test_that("testa arquivo 'sub_bacia'_'parametros'.txt", {
     expect_error(suppressWarnings(le_entrada_parametros(pasta_entrada, nome_subbacia)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN07", "CT7.15", "Arq_Entrada", package = "smapOnsR")
-    expect_error(suppressWarnings(le_entrada_parametros(pasta_entrada, nome_subbacia)))
+    expect_equal(le_entrada_parametros(pasta_entrada, nome_subbacia)$valor[2], 5)
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN07", "CT7.16", "Arq_Entrada", package = "smapOnsR")
     expect_error(suppressWarnings(le_entrada_parametros(pasta_entrada, nome_subbacia)))
@@ -454,7 +457,7 @@ test_that("testa arquivo 'sub_bacia'_'parametros'.txt", {
     expect_error(suppressWarnings(le_entrada_parametros(pasta_entrada, nome_subbacia)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN07", "CT7.19", "Arq_Entrada", package = "smapOnsR")
-    expect_equal(le_entrada_parametros(pasta_entrada, nome_subbacia)$valor[2], 5)
+    expect_error(suppressWarnings(le_entrada_parametros(pasta_entrada, nome_subbacia)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN07", "CT7.20", "Arq_Entrada", package = "smapOnsR")
     expect_error(suppressWarnings(le_entrada_parametros(pasta_entrada, nome_subbacia)))
@@ -509,7 +512,7 @@ test_that("testa arquivo 'sub_bacia'_'parametros'.txt", {
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN07", "CT7.37", "Arq_Entrada", package = "smapOnsR")
     expect_error(suppressWarnings(le_entrada_parametros(pasta_entrada, nome_subbacia)))
-
+    
     pasta_entrada <- system.file("extdata", "Validacao", "CN07", "CT7.38", "Arq_Entrada", package = "smapOnsR")
     expect_error(suppressWarnings(le_entrada_parametros(pasta_entrada, nome_subbacia)))
 
@@ -673,7 +676,7 @@ test_that("testa arquivo 'sub_bacia'_'parametros'.txt", {
     expect_error(suppressWarnings(le_entrada_parametros(pasta_entrada, nome_subbacia)))
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN07", "CT7.92", "Arq_Entrada", package = "smapOnsR")
-    expect_error(suppressWarnings(le_entrada_parametros(pasta_entrada, nome_subbacia)))
+    expect_equal(le_entrada_parametros(pasta_entrada, nome_subbacia)$valor[81], 2)
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN07", "CT7.93", "Arq_Entrada", package = "smapOnsR")
     expect_error(suppressWarnings(le_entrada_parametros(pasta_entrada, nome_subbacia)))
@@ -682,13 +685,10 @@ test_that("testa arquivo 'sub_bacia'_'parametros'.txt", {
     expect_equal(le_entrada_parametros(pasta_entrada, nome_subbacia)$valor[81], 2)
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN07", "CT7.95", "Arq_Entrada", package = "smapOnsR")
-    expect_error(suppressWarnings(le_entrada_parametros(pasta_entrada, nome_subbacia)))
+    expect_equal(le_entrada_parametros(pasta_entrada, nome_subbacia)$valor[1], 100322)
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN07", "CT7.96", "Arq_Entrada", package = "smapOnsR")
-    expect_equal(le_entrada_parametros(pasta_entrada, nome_subbacia)$valor[1], 123456.6)
-
-    pasta_entrada <- system.file("extdata", "Validacao", "CN07", "CT7.97", "Arq_Entrada", package = "smapOnsR")
-    expect_equal(le_entrada_parametros(pasta_entrada, nome_subbacia)$valor[1], 100322)  
+    expect_error(suppressWarnings(le_entrada_parametros(pasta_entrada, nome_subbacia)))
 })
 
 test_that("testa arquivo de previsoes de precipitacao", {
