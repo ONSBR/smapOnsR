@@ -20,7 +20,7 @@ le_entrada_parametros <- function(pasta_entrada, nome_subbacia) {
         stop(paste0("nao existe o arquivo ", pattern))
     }
 
-    parametros <- read.csv(arq, sep = "'", header = FALSE)
+    parametros <- read.csv(arq, comment.char = "'", header = FALSE, sep = ";")
 
     parametros_smap <- array(rep(0, 82), c(1, 82))
     parametros_smap <- data.table::data.table(parametros_smap)
