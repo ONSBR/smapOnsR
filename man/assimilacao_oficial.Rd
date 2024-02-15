@@ -15,6 +15,7 @@ assimilacao_oficial(
   evapotranspiracao_planicie,
   vazao,
   numero_dias_assimilacao,
+  ajusta_precipitacao,
   limite_prec = c(0.5, 2),
   limite_ebin = c(0.8, 1.2),
   limite_supin = c(0, 2),
@@ -47,6 +48,8 @@ assimilacao_oficial(
 \item{vazao}{vetor de vazao observada}
 
 \item{numero_dias_assimilacao}{numero de dias da assimilacao}
+
+\item{ajusta_precipitacao}{flag para a realizacao de ajuste da precipitacao observada pelo peso do penultimo dia de precipitacao}
 
 \item{limite_prec}{limites mínimo e máximo dos pesos utilizados para ponderar a precipitacao durante a etapa de assimilacao}
 

@@ -19,6 +19,7 @@
 #' @param evapotranspiracao_planicie vetor de evapotranspiracao potencial do reservatorio de planicie
 #' @param vazao vetor de vazao observada
 #' @param numero_dias_assimilacao numero de dias da assimilacao
+#' @param ajusta_precipitacao flag para a realizacao de ajuste da precipitacao observada pelo peso do penultimo dia de precipitacao
 #' @param limite_prec limites mínimo e máximo dos pesos utilizados para ponderar a precipitacao durante a etapa de assimilacao
 #' @param limite_ebin limites mínimo e máximo da vazao de base inicial
 #' @param limite_supin limites mínimo e máximo da vazao superficial inicial
@@ -80,7 +81,7 @@
 
 assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao_assimilacao,
       evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias_assimilacao,
-      limite_prec = c(0.5, 2), limite_ebin = c(0.8, 1.2),
+      ajusta_precipitacao, limite_prec = c(0.5, 2), limite_ebin = c(0.8, 1.2),
       limite_supin = c(0, 2), funcao_objetivo = calcula_dm, fnscale = 1) {
     
     kt <- vetor_modelo[12:74]
@@ -131,6 +132,10 @@ assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, preci
     }
     inicializacao <- inicializacao_smap(vetor_modelo, area, EbInic, TuInic, Supin)
     vetor_inicializacao <- unlist(inicializacao)
+
+    if (ajusta_precipitacao == 1) {
+      ajuste$par[numero_dias_assimilacao] <- ajuste$par[(numero_dias_assimilacao - 1)]
+    }
 
     precipitacao_ponderada <- precipitacao_ponderada * ajuste$par[1:numero_dias_assimilacao]
 
@@ -260,6 +265,7 @@ funcao_objetivo_assimilacao_oficial <- function(vetor_variaveis, vetor_modelo, T
 #' @param evapotranspiracao_planicie vetor de evapotranspiracao potencial do reservatorio de planicie
 #' @param vazao vetor de vazao observada
 #' @param numero_dias_assimilacao numero de dias da assimilacao
+#' @param ajusta_precipitacao flag para a realizacao de ajuste da precipitacao observada pelo peso do penultimo dia de precipitacao
 #' @param limite_prec limites mínimo e máximo dos pesos utilizados para ponderar a precipitacao durante a etapa de assimilacao
 #' @param limite_etp limites mínimo e máximo dos pesos utilizados para ponderar a precipitacao durante a etapa de assimilacao
 #' @param limite_ebin limites mínimo e máximo da vazao de base inicial
@@ -320,7 +326,7 @@ funcao_objetivo_assimilacao_oficial <- function(vetor_variaveis, vetor_modelo, T
 
 assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Supin, 
       precipitacao_assimilacao, evapotranspiracao, evapotranspiracao_planicie,
-      vazao, numero_dias_assimilacao,
+      vazao, numero_dias_assimilacao, ajusta_precipitacao,
       limite_prec = c(0.5, 2), limite_etp = c(0.5, 2), limite_ebin = c(0.8, 1.2),
       limite_supin = c(0, 2), funcao_objetivo = calcula_dm, fnscale = 1) {
     
@@ -374,6 +380,10 @@ assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Su
     }
     inicializacao <- inicializacao_smap(vetor_modelo, area, EbInic, TuInic, Supin)
     vetor_inicializacao <- unlist(inicializacao)
+
+    if (ajusta_precipitacao == 1) {
+      ajuste$par[numero_dias_assimilacao] <- ajuste$par[(numero_dias_assimilacao - 1)]
+    }
 
     precipitacao_ponderada <- precipitacao_ponderada * ajuste$par[1:numero_dias_assimilacao]
     evapotranspiracao_ponderada <- evapotranspiracao * ajuste$par[(1:numero_dias_assimilacao) * 2]

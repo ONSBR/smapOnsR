@@ -116,6 +116,9 @@ test_that("testa inicializacao.csv", {
 
     pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN16", "CT16.11", "Arq_Entrada", package = "smapOnsR")
     expect_error(suppressWarnings(le_arq_entrada_novo(pasta_entrada)))
+
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN16", "CT16.12", "Arq_Entrada", "inicializacao.csv", package = "smapOnsR")
+    expect_error(le_inicializacao(arq))
 })
 
 test_that("testa parametros.csv", {

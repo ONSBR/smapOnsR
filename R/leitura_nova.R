@@ -171,7 +171,7 @@ le_precipitacao_prevista <- function(arq) {
     }
 
     extensao <- strsplit(arq, split = "\\.")[[1]][2]
-    if (extensao == ".parquet") {
+    if (extensao == "parquet") {
         dat <- data.table::as.data.table(arrow::read_parquet(arq))
     } else {
         dat <- data.table::fread(arq)
@@ -247,10 +247,19 @@ le_inicializacao <- function(arq) {
         stop("o arquivo deve possuir as seguintes colunas 'nome', 'variavel', 'valor'")
     }
     dat[, valor := as.numeric(valor)]
-
+    
+    missing_ajusta_precipitacao <- dat[!nome %in% dat[variavel == "ajusta_precipitacao", unique(nome)], 
+                                    .(nome = unique(nome), variavel = "ajusta_precipitacao", valor = 0)]
+    dat <- rbind(dat, missing_ajusta_precipitacao)
+    
     if (any(dat$valor < 0)) {
         stop(paste0("a sub-bacia ", dat[valor < 0, nome], " possui valor negativo para a variavel ",
         dat[valor < 0, variavel], " no arquivo ", arq, ".\n"))
+    }
+
+    if (any(dat$variavel == 'ajusta_precipitacao' & dat$valor > 1)) {
+        stop(paste0("a sub-bacia ", dat[variavel == "ajusta_precipitacao" & valor < 0, nome], 
+        " possui valor maior que 1 para a variavel 'ajusta_precipitacao' no arquivo ", arq, ".\n"))
     }
 
     if (any(is.na(dat$valor))) {
@@ -267,10 +276,11 @@ le_inicializacao <- function(arq) {
     }
 
     if (any(!(dat$variavel %in% c("Ebin", "Supin", "Tuin", "numero_dias_assimilacao", "limite_inferior_ebin",
-     "limite_superior_ebin", "limite_superior_prec", "limite_inferior_prec", "funcao_objetivo")))) {
+     "limite_superior_ebin", "limite_superior_prec", "limite_inferior_prec",
+     "funcao_objetivo", "ajusta_precipitacao")))) {
         stop("o arquivo ", arq, " possui valores diferentes de 'Ebin', 'Supin', 'Tuin', 
         'numero_dias_assimilacao', 'limite_inferior_ebin', 'limite_superior_ebin', 'limite_superior_prec',
-        'limite_inferior_prec', 'funcao_objetivo' na coluna 'variavel'")
+        'limite_inferior_prec', 'funcao_objetivo', 'ajusta_precipitacao' na coluna 'variavel'")
     }
 
     if (any(duplicated(dat[, .(variavel, nome)]))) {
@@ -288,6 +298,7 @@ le_inicializacao <- function(arq) {
         stop(paste0("falta a variavel ", teste$V1, " para a sub-bacia ", teste$nome, " no arquivo ", arq, "\n"))
     }
 
+    data.table::setorder(dat, "nome")
     dat
 }
 
@@ -646,7 +657,7 @@ le_arq_entrada_novo <- function(pasta_entrada) {
             postos_plu[!posto %in% unique(precipitacao_prevista$posto), posto], 
             " no arquivo ", arquivos[arquivo == "PRECIPITACAO_PREVISTA", nome_arquivo], ".\n"))
         }
-        precipitacao_prevista <- data.table::rbindlist(lapply(sub_bacias$nome[1], function(sub_bacia) {
+        precipitacao_prevista <- data.table::rbindlist(lapply(sub_bacias$nome, function(sub_bacia) {
             ponderacao_espacial_previsao(precipitacao_prevista, postos_plu[nome %in% sub_bacia])
         }))
         precipitacao_prevista <- completa_previsao(precipitacao_prevista, datas_rodadas)
