@@ -271,7 +271,7 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
             if (idata < numero_datas) {
                 inicio_proxima_assimilacao <- datas_rodadas[idata + 1, data] - numero_dias_assimilacao - 1
                 EbInic <- ajuste$simulacao[data_assimilacao == inicio_proxima_assimilacao, Qbase]
-                Supin <- ajuste$simulacao[data_assimilacao == inicio_proxima_assimilacao, Qsup1 + Qsup2]
+                Supin <- ajuste$simulacao[data_assimilacao == inicio_proxima_assimilacao, Qsup1 + Qsup2 + Qplan]
                 TuInic <- ajuste$simulacao[data_assimilacao == inicio_proxima_assimilacao, Tu]
             }
         }
@@ -561,7 +561,7 @@ rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observa
             if (idata < numero_datas) {
                 inicio_proxima_assimilacao <- datas_rodadas[idata + 1, data] - numero_dias_assimilacao - 1
                 EbInic <- ajuste$simulacao[data_assimilacao == inicio_proxima_assimilacao, Qbase]
-                Supin <- ajuste$simulacao[data_assimilacao == inicio_proxima_assimilacao, Qsup1 + Qsup2]
+                Supin <- ajuste$simulacao[data_assimilacao == inicio_proxima_assimilacao, Qsup1 + Qsup2 + Qplan]
                 TuInic <- ajuste$simulacao[data_assimilacao == inicio_proxima_assimilacao, Tu]
             }
         }
