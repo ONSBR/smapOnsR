@@ -209,7 +209,7 @@ le_precipitacao_prevista <- function(arq) {
     for (idata in 1:dat[, length(unique(data_rodada))]) {
         data <- dat[, unique(data_rodada)[idata]]
         datas_previstas <- dat[data_rodada == data, unique(data_previsao)]
-        teste <- dat[data_rodada == data, setdiff(datas_previstas, data_previsao), by = c("data_rodada", "nome", "cenario")]
+        teste <- dat[data_rodada == data, setdiff(datas_previstas, data_previsao), by = c( "nome", "cenario")]
         teste_completo <- data.table::rbindlist(list(teste_completo, teste))
     }
 
