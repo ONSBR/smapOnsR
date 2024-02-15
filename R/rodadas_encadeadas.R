@@ -51,7 +51,6 @@
 #'     \item{data - data do caso}
 #'     \item{numero_dias_previsao - horizonte do caso}
 #'     }
-#' @param numero_cenarios numero de cenarios a serem gerados
 #' @param sub_bacias vetor com o nome das sub-bacias a serem consideradas
 #' @importFrom data.table data.table
 #' @return saida lista com o data.table previsao contendo as seguintes colunas:
@@ -100,12 +99,12 @@
 #' @export
 rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_observada, 
     precipitacao_prevista, evapotranspiracao_nc, vazao_observada, postos_plu, datas_rodadas, 
-    numero_cenarios, sub_bacias) {
+    sub_bacias) {
 
     numero_sub_bacias <- length(sub_bacias)
     numero_datas <- nrow(datas_rodadas)
     numero_dias_previsao <- datas_rodadas$numero_dias_previsao
-    nome_cenario <- unique(precipitacao_prevista[, cenario])
+    
 
     saida <- data.table::data.table()
     saida_ajuste_otimizacao <- data.table::data.table()
@@ -143,7 +142,8 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
         }
 
         ajusta_precipitacao <- inicializacao[nome == sub_bacia & variavel == "ajusta_precipitacao", valor]
-
+        
+        numero_cenarios <- precipitacao_prevista[data_rodada == datas_rodadas[1, data] & nome == sub_bacia, length(unique(cenario))]
         vetor_inicializacao <- array(rep(0, numero_cenarios * 7), c(numero_cenarios, 7))
 
         modelo <- new_modelo_smap_ons(parametros[nome == sub_bacia], postos_plu[nome %in% sub_bacia])
@@ -155,9 +155,13 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
         area <- attributes(modelo)$area
 
         for (idata in 1:numero_datas){
+            dataRodada <- datas_rodadas[idata, data]  
+          
+            nome_cenario <- precipitacao_prevista[data_rodada == dataRodada & nome == sub_bacia, unique(cenario)]
+            numero_cenarios <- length(nome_cenario)
+          
             saida_bacia_aux <- data.table::data.table()
             
-            dataRodada <- datas_rodadas[idata, data]
             numero_dias_previsao <- datas_rodadas[data == dataRodada, numero_dias_previsao]
             matriz_precipitacao <- array(rep(0, numero_cenarios * (numero_dias_previsao + numero_dias_assimilacao)), c(numero_cenarios, (numero_dias_previsao + numero_dias_assimilacao)))
             matriz_evapotranspiracao <- array(rep(0, numero_cenarios * (numero_dias_previsao + numero_dias_assimilacao)), c(numero_cenarios, (numero_dias_previsao + numero_dias_assimilacao)))
@@ -342,7 +346,6 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
 #'     \item{data - data do caso}
 #'     \item{numero_dias_previsao - horizonte do caso}
 #'     }
-#' @param numero_cenarios numero de cenarios a serem gerados
 #' @param sub_bacias vetor com o nome das sub-bacias a serem consideradas
 #' @importFrom data.table data.table
 #' @return saida lista com o data.table previsao contendo as seguintes colunas:
@@ -381,7 +384,7 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
 #' @export
 rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observada, 
     precipitacao_prevista, evapotranspiracao_observada, evapotranspiracao_prevista, vazao_observada, postos_plu, datas_rodadas, 
-    numero_cenarios, sub_bacias) {
+    sub_bacias) {
     
     numero_sub_bacias <- length(sub_bacias)
     numero_datas <- nrow(datas_rodadas)
@@ -424,6 +427,7 @@ rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observa
 
         ajusta_precipitacao <- inicializacao[nome == sub_bacia & variavel == "ajusta_precipitacao", valor]
 
+        numero_cenarios <- precipitacao_prevista[data_rodada == datas_rodadas[1, data] & nome == sub_bacia, length(unique(cenario))]
         vetor_inicializacao <- array(rep(0, numero_cenarios * 7), c(numero_cenarios, 7))
 
         modelo <- new_modelo_smap_ons(parametros[nome == sub_bacia], postos_plu[nome %in% sub_bacia])
@@ -434,9 +438,13 @@ rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observa
         area <- attributes(modelo)$area
 
         for (idata in 1:numero_datas){
+            dataRodada <- datas_rodadas[idata, data]  
+          
+            nome_cenario <- precipitacao_prevista[data_rodada == dataRodada & nome == sub_bacia, unique(cenario)]
+            numero_cenarios <- length(nome_cenario)
+          
             saida_bacia_aux <- data.table::data.table()
             
-            dataRodada <- datas_rodadas[idata, data]
             numero_dias_previsao <- datas_rodadas[data == dataRodada, numero_dias_previsao]
             matriz_precipitacao <- array(rep(0, numero_cenarios * (numero_dias_previsao + numero_dias_assimilacao)), c(numero_cenarios, (numero_dias_previsao + numero_dias_assimilacao)))
             matriz_evapotranspiracao <- array(rep(0, numero_cenarios * (numero_dias_previsao + numero_dias_assimilacao)), c(numero_cenarios, (numero_dias_previsao + numero_dias_assimilacao)))

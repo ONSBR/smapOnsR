@@ -28,7 +28,7 @@ test_that("testa rodadas encadeadas", {
     
     saida <- rodada_encadeada_oficial(parametros[nome %in% sub_bacias],
     inicializacao, precipitacao_observada, precipitacao_prevista, evapotranspiracao_nc, vazao_observada,
-    postos_plu, datas_rodadas, numero_cenarios, sub_bacias)
+    postos_plu, datas_rodadas, sub_bacias)
 
     expect_equal(saida$previsao[data_previsao == "2020-05-05" & cenario == "cenario2", valor],
                 saida$previsao[data_previsao == "2020-05-05" & cenario == "historico", valor])
@@ -65,7 +65,7 @@ test_that("testa rodada ecmwf", {
   set.seed(129852)
   saida <- rodada_encadeada_oficial(entrada$parametros,
       entrada$inicializacao, entrada$precipitacao, entrada$previsao_precipitacao, entrada$evapotranspiracao, entrada$vazao,
-      entrada$postos_plu, entrada$datas_rodadas, length(unique(entrada$previsao_precipitacao[, cenario])), entrada$caso$nome_subbacia)
+      entrada$postos_plu, entrada$datas_rodadas, entrada$caso$nome_subbacia)
   
   secao <- sessionInfo()
 
@@ -84,7 +84,7 @@ test_that("testa rodada ecmwf formato oficial", {
   set.seed(129852)
     saida <- rodada_encadeada_oficial(entrada$parametros,
       entrada$inicializacao, entrada$precipitacao, entrada$previsao_precipitacao, entrada$evapotranspiracao, entrada$vazao,
-      entrada$postos_plu, entrada$datas_rodadas, length(unique(entrada$previsao_precipitacao[, cenario])), entrada$caso$nome_subbacia)
+      entrada$postos_plu, entrada$datas_rodadas, entrada$caso$nome_subbacia)
     
   secao <- sessionInfo()
   
@@ -103,7 +103,7 @@ test_that("testa rodada oficial", {
   set.seed(129852)
   saida <- rodada_encadeada_oficial(entrada$parametros,
       entrada$inicializacao, entrada$precipitacao, entrada$previsao_precipitacao, entrada$evapotranspiracao, entrada$vazao,
-      entrada$postos_plu, entrada$datas_rodadas, length(unique(entrada$previsao_precipitacao[, cenario])), entrada$caso$nome_subbacia)
+      entrada$postos_plu, entrada$datas_rodadas, entrada$caso$nome_subbacia)
     
   secao <- sessionInfo()
   
@@ -153,7 +153,7 @@ test_that("testa rodada com serie temporal etp", {
     
     saida <- rodada_encadeada_etp(parametros[nome %in% sub_bacias],
     inicializacao, precipitacao_observada, precipitacao_prevista, evapotranspiracao_observada, evapotranspiracao_prevista, vazao_observada,
-    postos_plu, datas_rodadas, numero_cenarios, sub_bacias)
+    postos_plu, datas_rodadas, sub_bacias)
 
     expect_equal(saida$previsao[data_previsao == "2020-05-05" & cenario == "cenario2", valor],
                 saida$previsao[data_previsao == "2020-05-05" & cenario == "historico", valor])
