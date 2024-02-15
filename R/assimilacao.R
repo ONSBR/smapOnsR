@@ -93,6 +93,7 @@ assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, preci
                                                     kt_max, kt_min)
     vazao_observada_maxima <- max(vazao)
     pesos <- rep(1, numero_dias_assimilacao)
+    vazao[which(vazao == 0)] <- 0.1
     limite_inferior <- c(rep(limite_prec[1],numero_dias_assimilacao), limite_ebin[1] * EbInic, limite_supin[1] * vazao_observada_maxima)
     limite_superior <- c(rep(limite_prec[2],numero_dias_assimilacao), limite_ebin[2] * EbInic, limite_supin[2] * vazao_observada_maxima)
     limite_inferior[numero_dias_assimilacao] <- 0.9999999999
@@ -341,6 +342,7 @@ assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Su
     vazao_observada_maxima <- max(vazao)
     pesos_prec <- rep(1, numero_dias_assimilacao)
     pesos_etp <- rep(1, numero_dias_assimilacao)
+	vazao[which(vazao == 0)] <- 0.1
     limite_inferior <- c(rep(limite_prec[1], numero_dias_assimilacao), rep(limite_etp[1], numero_dias_assimilacao), limite_ebin[1] * EbInic, limite_supin[1] * vazao_observada_maxima)
     limite_superior <- c(rep(limite_prec[2], numero_dias_assimilacao), rep(limite_etp[2], numero_dias_assimilacao), limite_ebin[2] * EbInic, limite_supin[2] * vazao_observada_maxima)
     limite_inferior[numero_dias_assimilacao] <- 0.9999999999
