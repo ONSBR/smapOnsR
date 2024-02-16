@@ -1,3 +1,25 @@
+# smapOnsR 0.2.0
+
+## Major changes
+
+* Possibilidade de ajuste da precipitacao observada apos o processo de assimilacao. O processo de assimilacao permanece igual. Apos o termino da assimilacao a precipitação observada diaria é corrigida pelo fator do penultimo dia de assimilacao.
+
+## Minor changes
+
+* Inclusao de testes de validacao do arquivo bat.conf
+
+* Ajuste na validacao de arquivo de previsoes em novo formato
+
+* Numero de cenarios pode ser variavel por data a ser executada
+
+## Bug fixes
+
+* Inclusao da vazao de planicie no calculo da vazao superficial para rodadas encadeadas
+
+* Ajuste na assimilacao para casos com vazao nula
+
+* Ajuste na funcao "completa_previsao" para execucoes com mais de 1 caso 
+
 # smapOnsR 0.1.0
 
 * Versão inicial utilizada na validação do pacote smapOnsR
