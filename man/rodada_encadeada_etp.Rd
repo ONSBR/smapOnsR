@@ -14,7 +14,6 @@ rodada_encadeada_etp(
   vazao_observada,
   postos_plu,
   datas_rodadas,
-  numero_cenarios,
   sub_bacias
 )
 }
@@ -84,8 +83,6 @@ rodada_encadeada_etp(
 \item{data - data do caso}
 \item{numero_dias_previsao - horizonte do caso}
 }}
-
-\item{numero_cenarios}{numero de cenarios a serem gerados}
 
 \item{sub_bacias}{vetor com o nome das sub-bacias a serem consideradas}
 }

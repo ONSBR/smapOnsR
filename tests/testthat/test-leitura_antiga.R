@@ -916,6 +916,39 @@ test_that("testa arquivo 'nome_do_posto_c.txt'", {
 
     pasta_entrada <- system.file("extdata", "Validacao", "CN10", "CT10.15", "Arq_Entrada", package = "smapOnsR")
     expect_error(suppressWarnings(le_entrada_precipitacao(pasta_entrada, postos_plu)))
+})
+
+test_that("testa arquivo 'bat.conf'", {
+    
+    pasta_entrada <- system.file("extdata", "Validacao", "CN11", "CT11.1", package = "smapOnsR")
+    expect_error(le_entrada_bat_conf(pasta_entrada))
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN11", "CT11.2", package = "smapOnsR")
+    expect_error(le_entrada_bat_conf(pasta_entrada))
+    
+    pasta_entrada <- system.file("extdata", "Validacao", "CN11", "CT11.3", package = "smapOnsR")
+    expect_equal(le_arq_entrada(pasta_entrada)$inicializacao[variavel == "funcao_objetivo", valor], 2)
+    
+    pasta_entrada <- system.file("extdata", "Validacao", "CN11", "CT11.4", package = "smapOnsR")
+    expect_equal(le_arq_entrada(pasta_entrada)$inicializacao[variavel == "funcao_objetivo", valor], 1)
+    
+    pasta_entrada <- system.file("extdata", "Validacao", "CN11", "CT11.5", package = "smapOnsR")
+    expect_equal(le_arq_entrada(pasta_entrada)$inicializacao[variavel == "funcao_objetivo", valor], 0)
+    
+    pasta_entrada <- system.file("extdata", "Validacao", "CN11", "CT11.6", package = "smapOnsR")
+    expect_equal(le_arq_entrada(pasta_entrada)$inicializacao[variavel == "ajusta_precipitacao", valor], 1)
+    
+    pasta_entrada <- system.file("extdata", "Validacao", "CN11", "CT11.7", package = "smapOnsR")
+    expect_equal(le_arq_entrada(pasta_entrada)$inicializacao[variavel == "ajusta_precipitacao", valor], 0)
+    
+    pasta_entrada <- system.file("extdata", "Validacao", "CN11", "CT11.8", package = "smapOnsR")
+    expect_equal(le_arq_entrada(pasta_entrada)$inicializacao[variavel == "ajusta_precipitacao", valor], 0)
+    
+    pasta_entrada <- system.file("extdata", "Validacao", "CN11", "CT11.9", package = "smapOnsR")
+    expect_error(le_entrada_bat_conf(pasta_entrada))
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN11", "CT11.10", package = "smapOnsR")
+    expect_error(le_entrada_bat_conf(pasta_entrada))
 
     unlink(system.file("extdata", "Validacao", package = "smapOnsR"), recursive = TRUE)
 })

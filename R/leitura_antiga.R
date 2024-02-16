@@ -614,6 +614,22 @@ le_entrada_bat_conf <- function(pasta_entrada) {
         dat <- rbind(dat , data.table::data.table(parametro = "arqPrev", valor = 0))
     }
 
+    if (length(dat[parametro == "ajusta_precipitacao", parametro]) == 0) {
+        dat <- rbind(dat , data.table::data.table(parametro = "ajusta_precipitacao", valor = 0))
+    }
+
+    if (nrow(dat[parametro == "objetivo" & valor %in% c("dm", "nse", "mape")]) == 0) {
+        stop(paste0("Funcao objetivo diferente de 'dm', 'nse', ou 'mape' no arquivo ", arq))
+    }
+
+    if (dat[parametro == "arqPrev", valor] > 2) {
+        stop(paste0("Valor de formato de arquivo de previsao maior que 2 no arquivo", arq))
+    }
+
+    if (dat[parametro == "ajusta_precipitacao", valor] > 1) {
+        stop(paste0("Valor do flag 'ajusta_precipitacao' maior que 1 no arquivo", arq))
+    }
+
     dat[parametro == "objetivo" & valor == "dm", valor := 0]
     dat[parametro == "objetivo" & valor == "nse", valor := 1]
     dat[parametro == "objetivo" & valor == "mape", valor := 2]
@@ -949,9 +965,14 @@ le_arq_entrada <- function(pasta_entrada) {
         }))
 
     inicializacao <- data.table::rbindlist(lapply(caso$nome_subbacia, function(sub_bacia) {
-  result <- le_entrada_inicializacao(pasta_entrada, sub_bacia)
-  result$inicializacao <- rbind(result$inicializacao, parametros[nome == sub_bacia][82:85], use.names = FALSE)
-  result$inicializacao <- rbind(result$inicializacao, data.table::data.table(nome = sub_bacia, parametro = "funcao_objetivo", configuracao[parametro == "objetivo", as.numeric(valor)]), use.names = FALSE)
+        result <- le_entrada_inicializacao(pasta_entrada, sub_bacia)
+        result$inicializacao <- rbind(result$inicializacao, parametros[nome == sub_bacia][82:85], use.names = FALSE)
+        result$inicializacao <- rbind(result$inicializacao, data.table::data.table(nome = sub_bacia, 
+                                        parametro = "funcao_objetivo", configuracao[parametro == "objetivo", 
+                                        as.numeric(valor)]), use.names = FALSE)
+        result$inicializacao <- rbind(result$inicializacao, data.table::data.table(nome = sub_bacia, 
+                                        parametro = "ajusta_precipitacao", configuracao[parametro == "ajusta_precipitacao", 
+                                        as.numeric(valor)]), use.names = FALSE)
   result[[1]]
         }))
     inicializacao[variavel == "Tuin", valor := valor / 100] 

@@ -180,30 +180,43 @@ combina_observacao_previsao <- function(observado, previsto){
 #'     }
 #' @export
 completa_previsao <- function(precipitacao_prevista, datas_rodadas, numero_dias = 2){
-
-    mean_values <- precipitacao_prevista[, .(mean_valor = mean(valor)), by = .(nome, data_rodada, cenario)]
-
-    unique_combinations <- unique(precipitacao_prevista[, .(nome, data_rodada, cenario)])
-
-    datas <- seq.Date(datas_rodadas$data + 1,
-                    datas_rodadas$data + datas_rodadas$numero_dias_previsao + numero_dias, by = 1)
-
-    all_combinations <- data.table::CJ(nome = unique_combinations$nome, cenario = unique_combinations$cenario, data_previsao = datas)
-
-    missing_forecasts <- all_combinations[!precipitacao_prevista, on = c("nome", "cenario", "data_previsao")]
-
-    missing_forecasts <- mean_values[missing_forecasts, on = .(nome, cenario)]
-
-    missing_forecasts[, data_rodada := datas_rodadas$data]
-
-    data.table::setnames(missing_forecasts, "mean_valor", "valor")
-
-    missing_forecasts <- unique(missing_forecasts)
-
-    data.table::setcolorder(missing_forecasts, c("data_rodada", "data_previsao", "cenario", "nome", "valor"))
-
-    precipitacao_prevista <- data.table::rbindlist(list(precipitacao_prevista, missing_forecasts), use.names = TRUE)
-
+    result_list <- list()
+    
+    for (i in seq_len(nrow(datas_rodadas))) {
+      
+      current_data_rodada <- datas_rodadas[i, ]
+      
+      if (any(precipitacao_prevista[data_rodada == current_data_rodada$data, as.numeric(max(data_previsao) - 
+                          (current_data_rodada$data + current_data_rodada$numero_dias_previsao - 1 + numero_dias)), by = .(nome, cenario)]$V1 <= 0)) {
+        
+        mean_values <- precipitacao_prevista[, .(mean_valor = mean(valor)), by = .(nome, data_rodada, cenario)]
+        
+        unique_combinations <- unique(precipitacao_prevista[data_rodada == current_data_rodada$data, .(nome, data_rodada, cenario)])
+        
+        datas <- seq.Date(current_data_rodada$data + 1,
+                          current_data_rodada$data + current_data_rodada$numero_dias_previsao + numero_dias, by = 1)
+        
+        all_combinations <- data.table::CJ(nome = unique_combinations$nome, cenario = unique_combinations$cenario, data_previsao = datas)
+        
+        missing_forecasts <- all_combinations[!precipitacao_prevista, on = c("nome", "cenario", "data_previsao")]
+        
+        missing_forecasts <- mean_values[missing_forecasts, on = .(nome, cenario)]
+        
+        missing_forecasts[, data_rodada := current_data_rodada$data]
+        
+        data.table::setnames(missing_forecasts, "mean_valor", "valor")
+        
+        missing_forecasts <- unique(missing_forecasts)
+        
+        data.table::setcolorder(missing_forecasts, c("data_rodada", "data_previsao", "cenario", "nome", "valor"))
+        
+        result_list[[i]] <- missing_forecasts
+        
+        precipitacao_prevista <- data.table::rbindlist(list(precipitacao_prevista, result_list[[i]]), use.names = TRUE)
+      }
+      
+    }
+    
     data.table::setorder(precipitacao_prevista, nome, data_rodada, data_previsao, cenario)
     
     precipitacao_prevista

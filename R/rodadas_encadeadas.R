@@ -51,7 +51,6 @@
 #'     \item{data - data do caso}
 #'     \item{numero_dias_previsao - horizonte do caso}
 #'     }
-#' @param numero_cenarios numero de cenarios a serem gerados
 #' @param sub_bacias vetor com o nome das sub-bacias a serem consideradas
 #' @importFrom data.table data.table
 #' @return saida lista com o data.table previsao contendo as seguintes colunas:
@@ -100,12 +99,12 @@
 #' @export
 rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_observada, 
     precipitacao_prevista, evapotranspiracao_nc, vazao_observada, postos_plu, datas_rodadas, 
-    numero_cenarios, sub_bacias) {
+    sub_bacias) {
 
     numero_sub_bacias <- length(sub_bacias)
     numero_datas <- nrow(datas_rodadas)
     numero_dias_previsao <- datas_rodadas$numero_dias_previsao
-    nome_cenario <- unique(precipitacao_prevista[, cenario])
+    
 
     saida <- data.table::data.table()
     saida_ajuste_otimizacao <- data.table::data.table()
@@ -126,7 +125,7 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
         limite_superior_prec <- inicializacao[nome == sub_bacia & variavel == "limite_superior_prec", valor]
         numero_dias_assimilacao <- inicializacao[nome == sub_bacia & variavel == "numero_dias_assimilacao", valor]
         
-        if(nrow(inicializacao[variavel == "funcao_objetivo"]) > 0) {
+        if (nrow(inicializacao[nome == sub_bacia & variavel == "funcao_objetivo"]) > 0) {
             if (inicializacao[nome == sub_bacia & variavel == "funcao_objetivo", valor] == 0) {
                 funcao_objetivo <- calcula_dm
                 fnscale <- 1
@@ -137,11 +136,14 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
                 funcao_objetivo <- calcula_mape
                 fnscale <- 1
             }
-        } else{
+        } else {
             funcao_objetivo <- calcula_dm
             fnscale <- 1
         }
 
+        ajusta_precipitacao <- inicializacao[nome == sub_bacia & variavel == "ajusta_precipitacao", valor]
+        
+        numero_cenarios <- precipitacao_prevista[data_rodada == datas_rodadas[1, data] & nome == sub_bacia, length(unique(cenario))]
         vetor_inicializacao <- array(rep(0, numero_cenarios * 7), c(numero_cenarios, 7))
 
         modelo <- new_modelo_smap_ons(parametros[nome == sub_bacia], postos_plu[nome %in% sub_bacia])
@@ -153,9 +155,13 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
         area <- attributes(modelo)$area
 
         for (idata in 1:numero_datas){
+            dataRodada <- datas_rodadas[idata, data]  
+          
+            nome_cenario <- precipitacao_prevista[data_rodada == dataRodada & nome == sub_bacia, unique(cenario)]
+            numero_cenarios <- length(nome_cenario)
+          
             saida_bacia_aux <- data.table::data.table()
             
-            dataRodada <- datas_rodadas[idata, data]
             numero_dias_previsao <- datas_rodadas[data == dataRodada, numero_dias_previsao]
             matriz_precipitacao <- array(rep(0, numero_cenarios * (numero_dias_previsao + numero_dias_assimilacao)), c(numero_cenarios, (numero_dias_previsao + numero_dias_assimilacao)))
             matriz_evapotranspiracao <- array(rep(0, numero_cenarios * (numero_dias_previsao + numero_dias_assimilacao)), c(numero_cenarios, (numero_dias_previsao + numero_dias_assimilacao)))
@@ -184,8 +190,8 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
             evapotranspiracao <- evapotranspiracao[, valor] * vetor_modelo[76]
 
             ajuste <- assimilacao_oficial(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao_assimilacao,
-                        evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias_assimilacao, 
-                        limite_prec = c(limite_inferior_prec, limite_superior_prec),
+                        evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias_assimilacao,
+                        ajusta_precipitacao, limite_prec = c(limite_inferior_prec, limite_superior_prec),
                         limite_ebin = c(limite_inferior_ebin, limite_superior_ebin), funcao_objetivo = funcao_objetivo, fnscale = fnscale)
             
             ajuste$simulacao[, data_assimilacao := seq.Date((dataRodada - numero_dias_assimilacao), dataRodada - 1, 1)]
@@ -202,17 +208,26 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
             saida_ajuste_fo_aux[, data_caso := dataRodada]
 
             saida_precipitacao <- data.table::rbindlist(list(saida_precipitacao, precipitacao))
-
+            
             precipitacao[, valor := valor * vetor_modelo[75]]
-            matriz_precipitacao <- array(precipitacao[data_previsao < (dataRodada + numero_dias_previsao + kt_max) & data_rodada == dataRodada & 
-                data_previsao >= (dataRodada - numero_dias_assimilacao - kt_min), valor], c(numero_dias_previsao + numero_dias_assimilacao + kt_max + kt_min, numero_cenarios))
+            matriz_precipitacao <- array(precipitacao[data_previsao < (dataRodada + kt_max - 1) & data_rodada == dataRodada & 
+                data_previsao >= (dataRodada - numero_dias_assimilacao - kt_min), valor], c(numero_dias_assimilacao + kt_max + kt_min - 1, numero_cenarios))
             matriz_precipitacao <- t(ponderacao_temporal(matriz_precipitacao, kt, kt_max, kt_min))
             if (numero_cenarios == 1) {
-                matriz_precipitacao[, 1:numero_dias_assimilacao] <- matriz_precipitacao[, 1:numero_dias_assimilacao] * ajuste$ajuste$par[1:numero_dias_assimilacao]
+                matriz_precipitacao[, 1:(numero_dias_assimilacao - 1)] <- matriz_precipitacao[, 1:(numero_dias_assimilacao - 1)] * ajuste$ajuste$par[1:(numero_dias_assimilacao - 1)]
             } else {
-                matriz_precipitacao[, 1:numero_dias_assimilacao] <- sweep(matriz_precipitacao[, 1:numero_dias_assimilacao], 2, ajuste$ajuste$par[1:numero_dias_assimilacao], `*`)
+                matriz_precipitacao[, 1:(numero_dias_assimilacao - 1)] <- sweep(matriz_precipitacao[, 1:(numero_dias_assimilacao - 1)], 2, ajuste$ajuste$par[1:(numero_dias_assimilacao - 1)], `*`)
             }
-            
+
+            if (ajusta_precipitacao == 1) {
+                precipitacao[data_previsao <= dataRodada, valor := valor * ajuste$ajuste$par[numero_dias_assimilacao - 1]]
+            }
+            matriz_precipitacao_previsao <- array(precipitacao[data_previsao < (dataRodada + numero_dias_previsao + kt_max) & data_rodada == dataRodada & 
+                data_previsao >= (dataRodada - kt_min - 1), valor], c(numero_dias_previsao + kt_max + kt_min + 1, numero_cenarios))
+            matriz_precipitacao_previsao <- t(ponderacao_temporal(matriz_precipitacao_previsao, kt, kt_max, kt_min))
+
+            matriz_precipitacao <- cbind(matriz_precipitacao, matriz_precipitacao_previsao)
+                      
             colnames(precipitacao)[1] <- "data"
             precipitacao <- precipitacao[cenario == unique(cenario)[1]]
             precipitacao[, data_rodada := NULL]
@@ -256,7 +271,7 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
             if (idata < numero_datas) {
                 inicio_proxima_assimilacao <- datas_rodadas[idata + 1, data] - numero_dias_assimilacao - 1
                 EbInic <- ajuste$simulacao[data_assimilacao == inicio_proxima_assimilacao, Qbase]
-                Supin <- ajuste$simulacao[data_assimilacao == inicio_proxima_assimilacao, Qsup1 + Qsup2]
+                Supin <- ajuste$simulacao[data_assimilacao == inicio_proxima_assimilacao, Qsup1 + Qsup2 + Qplan]
                 TuInic <- ajuste$simulacao[data_assimilacao == inicio_proxima_assimilacao, Tu]
             }
         }
@@ -331,7 +346,6 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
 #'     \item{data - data do caso}
 #'     \item{numero_dias_previsao - horizonte do caso}
 #'     }
-#' @param numero_cenarios numero de cenarios a serem gerados
 #' @param sub_bacias vetor com o nome das sub-bacias a serem consideradas
 #' @importFrom data.table data.table
 #' @return saida lista com o data.table previsao contendo as seguintes colunas:
@@ -369,8 +383,8 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
 #'     }
 #' @export
 rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observada, 
-    precipitacao_prevista, evapotranspiracao_observada, evapotranspiracao_prevista, vazao_observada, postos_plu, datas_rodadas, 
-    numero_cenarios, sub_bacias) {
+    precipitacao_prevista, evapotranspiracao_observada, evapotranspiracao_prevista, vazao_observada, 
+    postos_plu, datas_rodadas, sub_bacias) {
     
     numero_sub_bacias <- length(sub_bacias)
     numero_datas <- nrow(datas_rodadas)
@@ -410,6 +424,10 @@ rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observa
             funcao_objetivo <- calcula_dm
             fnscale <- 1
         }
+
+        ajusta_precipitacao <- inicializacao[nome == sub_bacia & variavel == "ajusta_precipitacao", valor]
+
+        numero_cenarios <- precipitacao_prevista[data_rodada == datas_rodadas[1, data] & nome == sub_bacia, length(unique(cenario))]
         vetor_inicializacao <- array(rep(0, numero_cenarios * 7), c(numero_cenarios, 7))
 
         modelo <- new_modelo_smap_ons(parametros[nome == sub_bacia], postos_plu[nome %in% sub_bacia])
@@ -420,9 +438,13 @@ rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observa
         area <- attributes(modelo)$area
 
         for (idata in 1:numero_datas){
+            dataRodada <- datas_rodadas[idata, data]  
+          
+            nome_cenario <- precipitacao_prevista[data_rodada == dataRodada & nome == sub_bacia, unique(cenario)]
+            numero_cenarios <- length(nome_cenario)
+          
             saida_bacia_aux <- data.table::data.table()
             
-            dataRodada <- datas_rodadas[idata, data]
             numero_dias_previsao <- datas_rodadas[data == dataRodada, numero_dias_previsao]
             matriz_precipitacao <- array(rep(0, numero_cenarios * (numero_dias_previsao + numero_dias_assimilacao)), c(numero_cenarios, (numero_dias_previsao + numero_dias_assimilacao)))
             matriz_evapotranspiracao <- array(rep(0, numero_cenarios * (numero_dias_previsao + numero_dias_assimilacao)), c(numero_cenarios, (numero_dias_previsao + numero_dias_assimilacao)))
@@ -449,7 +471,7 @@ rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observa
             evapotranspiracao <- evapotranspiracao_observada[posto == sub_bacia & data < dataRodada & data >= (dataRodada - numero_dias_assimilacao), valor] * vetor_modelo[76]
 
             ajuste <- assimilacao_evapotranspiracao(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao_assimilacao,
-                        evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias_assimilacao,
+                        evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias_assimilacao, ajusta_precipitacao,
                         limite_prec = c(limite_inferior_prec, limite_superior_prec), limite_etp = c(0.5, 2),
                         limite_ebin = c(limite_inferior_ebin, limite_superior_ebin), limite_supin = c(0, 2),
                         funcao_objetivo = funcao_objetivo, fnscale = fnscale)
@@ -470,15 +492,23 @@ rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observa
             saida_precipitacao <- data.table::rbindlist(list(saida_precipitacao, precipitacao))
 
             precipitacao[, valor := valor * vetor_modelo[75]]
-            matriz_precipitacao <- array(precipitacao[data_previsao < (dataRodada + numero_dias_previsao + kt_max) & data_rodada == dataRodada & 
-                data_previsao >= (dataRodada - numero_dias_assimilacao - kt_min), valor], c(numero_dias_previsao + numero_dias_assimilacao + kt_max + kt_min, numero_cenarios))
+            matriz_precipitacao <- array(precipitacao[data_previsao < (dataRodada + kt_max - 1) & data_rodada == dataRodada & 
+                data_previsao >= (dataRodada - numero_dias_assimilacao - kt_min), valor], c(numero_dias_assimilacao + kt_max + kt_min - 1, numero_cenarios))
             matriz_precipitacao <- t(ponderacao_temporal(matriz_precipitacao, kt, kt_max, kt_min))
             if (numero_cenarios == 1) {
-                matriz_precipitacao[, 1:numero_dias_assimilacao] <- matriz_precipitacao[, 1:numero_dias_assimilacao] * ajuste$ajuste$par[1:numero_dias_assimilacao]
+                matriz_precipitacao[, 1:(numero_dias_assimilacao - 1)] <- matriz_precipitacao[, 1:(numero_dias_assimilacao - 1)] * ajuste$ajuste$par[1:(numero_dias_assimilacao - 1)]
             } else {
-                matriz_precipitacao[, 1:numero_dias_assimilacao] <- sweep(matriz_precipitacao[, 1:numero_dias_assimilacao], 2, ajuste$ajuste$par[1:numero_dias_assimilacao], `*`)
+                matriz_precipitacao[, 1:(numero_dias_assimilacao - 1)] <- sweep(matriz_precipitacao[, 1:(numero_dias_assimilacao - 1)], 2, ajuste$ajuste$par[1:(numero_dias_assimilacao - 1)], `*`)
             }
-            
+
+            if (ajusta_precipitacao == 1) {
+                precipitacao[data_previsao <= dataRodada, valor := valor * ajuste$ajuste$par[numero_dias_assimilacao - 1]]
+            }
+            matriz_precipitacao_previsao <- array(precipitacao[data_previsao < (dataRodada + numero_dias_previsao + kt_max) & data_rodada == dataRodada & 
+                data_previsao >= (dataRodada - kt_min - 1), valor], c(numero_dias_previsao + kt_max + kt_min + 1, numero_cenarios))
+            matriz_precipitacao_previsao <- t(ponderacao_temporal(matriz_precipitacao_previsao, kt, kt_max, kt_min))
+
+            matriz_precipitacao <- cbind(matriz_precipitacao, matriz_precipitacao_previsao)
             previsao_evapotranspiracao_rodada <- evapotranspiracao_prevista[nome == sub_bacia & data_rodada == dataRodada & data_previsao < (dataRodada + numero_dias_previsao)]
             evapotranspiracao <- data.table::data.table(evapotranspiracao_observada[posto == sub_bacia &
             data <= dataRodada & data >= (dataRodada - numero_dias_assimilacao)])
@@ -531,7 +561,7 @@ rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observa
             if (idata < numero_datas) {
                 inicio_proxima_assimilacao <- datas_rodadas[idata + 1, data] - numero_dias_assimilacao - 1
                 EbInic <- ajuste$simulacao[data_assimilacao == inicio_proxima_assimilacao, Qbase]
-                Supin <- ajuste$simulacao[data_assimilacao == inicio_proxima_assimilacao, Qsup1 + Qsup2]
+                Supin <- ajuste$simulacao[data_assimilacao == inicio_proxima_assimilacao, Qsup1 + Qsup2 + Qplan]
                 TuInic <- ajuste$simulacao[data_assimilacao == inicio_proxima_assimilacao, Tu]
             }
         }
