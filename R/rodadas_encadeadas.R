@@ -383,8 +383,8 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
 #'     }
 #' @export
 rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observada, 
-    precipitacao_prevista, evapotranspiracao_observada, evapotranspiracao_prevista, vazao_observada, postos_plu, datas_rodadas, 
-    sub_bacias) {
+    precipitacao_prevista, evapotranspiracao_observada, evapotranspiracao_prevista, vazao_observada, 
+    postos_plu, datas_rodadas, sub_bacias) {
     
     numero_sub_bacias <- length(sub_bacias)
     numero_datas <- nrow(datas_rodadas)

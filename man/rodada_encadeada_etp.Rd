@@ -14,7 +14,6 @@ rodada_encadeada_etp(
   vazao_observada,
   postos_plu,
   datas_rodadas,
-  numero_cenarios,
   sub_bacias
 )
 }
