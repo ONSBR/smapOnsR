@@ -220,7 +220,8 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
             }
 
             if (ajusta_precipitacao == 1) {
-                precipitacao[data_previsao <= dataRodada, valor := valor * ajuste$ajuste$par[numero_dias_assimilacao - 1]]
+                precipitacao[data_previsao <= dataRodada, valor := 
+                valor * min(ajuste$ajuste$par[numero_dias_assimilacao - 1], 1)]
             }
             matriz_precipitacao_previsao <- array(precipitacao[data_previsao < (dataRodada + numero_dias_previsao + kt_max) & data_rodada == dataRodada & 
                 data_previsao >= (dataRodada - kt_min - 1), valor], c(numero_dias_previsao + kt_max + kt_min + 1, numero_cenarios))
@@ -502,7 +503,8 @@ rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observa
             }
 
             if (ajusta_precipitacao == 1) {
-                precipitacao[data_previsao <= dataRodada, valor := valor * ajuste$ajuste$par[numero_dias_assimilacao - 1]]
+                precipitacao[data_previsao <= dataRodada, valor := 
+                valor * min(ajuste$ajuste$par[numero_dias_assimilacao - 1], 1)]
             }
             matriz_precipitacao_previsao <- array(precipitacao[data_previsao < (dataRodada + numero_dias_previsao + kt_max) & data_rodada == dataRodada & 
                 data_previsao >= (dataRodada - kt_min - 1), valor], c(numero_dias_previsao + kt_max + kt_min + 1, numero_cenarios))
