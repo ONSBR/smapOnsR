@@ -74,6 +74,21 @@ test_that("testa rodada ecmwf", {
   } else {
     expect_true(abs(round(saida$previsao[nome == "pimentalt" & variavel == "Qcalc" & cenario == "ecmwf_1", valor][31], 0) - 10166) < 10166 * 0.01)
   }
+
+  entrada$inicializacao[variavel == "ajusta_precipitacao", valor := 1]
+
+  set.seed(129852)
+  saida <- rodada_encadeada_oficial(entrada$parametros,
+      entrada$inicializacao, entrada$precipitacao, entrada$previsao_precipitacao, entrada$evapotranspiracao, entrada$vazao,
+      entrada$postos_plu, entrada$datas_rodadas, entrada$caso$nome_subbacia)
+  
+  secao <- sessionInfo()
+
+  if (secao$R.version$os == "mingw32") {
+    expect_equal(round(saida$previsao[nome == "tucurui" & variavel == "Qcalc" & cenario == "ecmwf_1", valor][1], 0), 2211)
+  } else {
+    expect_true(abs(round(saida$previsao[nome == "tucurui" & variavel == "Qcalc" & cenario == "ecmwf_1", valor][1], 0) - 2211) < 2211 * 0.01)
+  }
 })
 
 test_that("testa rodada ecmwf formato oficial", {
@@ -146,7 +161,7 @@ test_that("testa rodada com serie temporal etp", {
     datas_rodadas$numero_dias_previsao <- datas_rodadas$numero_dias_previsao + 2
 
     inicializacao <- data.table::data.table(nome = c(rep("avermelha", 9), rep("ssimao2", 9)),
-    variavel = rep(c("Ebin", "Supin", "Tuin", "numero_dias_assimilacao", 
+    variavel = rep(c("Ebin", "Supin", "Tuin", "numero_dias_assimilacao",
     "limite_inferior_ebin", "limite_superior_ebin", "limite_superior_prec", "limite_inferior_prec",
     "ajusta_precipitacao"), 2),
     valor = c(218.71, 46.69, 0.2891, 31, 0.8, 1.2, 2, 0.5, 0, 441.67, 256.98, 0.3141, 31, 0.8, 1.2, 2, 0.5, 0))

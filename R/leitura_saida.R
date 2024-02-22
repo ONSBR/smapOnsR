@@ -134,7 +134,7 @@ le_previsao_2 <- function(pasta_saida, data) {
     dat <- fread(arq)
     dat <- melt(dat, id.vars = 1:2, variable.name = "data_previsao", value.name = "vazao")
     dat[, data_previsao := as.Date(data_previsao, format = "%d/%m/%Y")]
-    dat[, data_caso := data]
+    dat[, data_caso := as.Date(data, format = "%d/%m/%Y")]
     dat[, variavel := "Qcalc"]
     colnames(dat) <- tolower(colnames(dat))
     setcolorder(dat, c("data_caso", "data_previsao", "modelo", "subbacia" , "variavel", "vazao"))
@@ -142,7 +142,8 @@ le_previsao_2 <- function(pasta_saida, data) {
     colnames(dat)[6] <- c("valor")
     dat[, nome := tolower(nome)]
     dat[, cenario := tolower(cenario)]
-    setorder(dat, nome, data_caso, cenario, data_previsao)
+    data.table::setorder(dat, nome, data_caso, cenario, data_previsao)
+
 
     return(dat)
 }
@@ -174,7 +175,8 @@ le_previsao <- function(pasta_saida, cenario, sub_bacia, data) {
     previsao[, cenario := cenario]
     previsao[, variavel := "Qcalc"]
     previsao[, nome := sub_bacia]
+    previsao[, Data := as.Date(Data, format = "%d/%m/%Y")]
     data.table::setnames(previsao, c("Data", "Qcal"), c("data_previsao", "valor"))    
-
+    data.table::setcolorder(previsao, c("data_caso", "data_previsao", "nome", "cenario", "variavel", "valor"))
     return(previsao)
 }

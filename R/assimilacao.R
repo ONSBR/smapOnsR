@@ -135,7 +135,7 @@ assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, preci
     vetor_inicializacao <- unlist(inicializacao)
 
     if (ajusta_precipitacao == 1) {
-      ajuste$par[numero_dias_assimilacao] <- ajuste$par[(numero_dias_assimilacao - 1)]
+      ajuste$par[numero_dias_assimilacao] <- min(ajuste$par[(numero_dias_assimilacao - 1)], 1)
     }
 
     precipitacao_ponderada <- precipitacao_ponderada * ajuste$par[1:numero_dias_assimilacao]
@@ -150,7 +150,7 @@ assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, preci
     colnames(otimizacao) <- "otimizacao"
     otimizacao[, limite_inferior := limite_inferior]
     otimizacao[, limite_superior := limite_superior]
-    otimizacao[, variavel := c(paste0("prec (t-", 31:1,")"), "Ebin", "Supin")]
+    otimizacao[, variavel := c(paste0("prec (t-", 31:1, ")"), "Ebin", "Supin")]
 
     saida <- list(ajuste = ajuste, simulacao = simulacao, otimizacao = otimizacao)
     saida
@@ -384,7 +384,7 @@ assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Su
     vetor_inicializacao <- unlist(inicializacao)
 
     if (ajusta_precipitacao == 1) {
-      ajuste$par[numero_dias_assimilacao] <- ajuste$par[(numero_dias_assimilacao - 1)]
+      ajuste$par[numero_dias_assimilacao] <- min(ajuste$par[(numero_dias_assimilacao - 1)], 1)
     }
 
     precipitacao_ponderada <- precipitacao_ponderada * ajuste$par[1:numero_dias_assimilacao]

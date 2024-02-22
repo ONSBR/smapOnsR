@@ -24,11 +24,16 @@ executa_caso_oficial <- function(pasta_caso){
     entrada <- le_arq_entrada(pasta_entrada)
 
     saida <- rodada_encadeada_oficial(entrada$parametros,
-        entrada$inicializacao, entrada$precipitacao, entrada$previsao_precipitacao, entrada$evapotranspiracao, entrada$vazao,
+        entrada$inicializacao, entrada$precipitacao, entrada$previsao_precipitacao, 
+        entrada$evapotranspiracao, entrada$vazao,
         entrada$postos_plu, entrada$datas_rodadas, entrada$caso$nome_subbacia)
 
     escreve_previsao(pasta_saida, saida$previsao)
     escreve_ajuste(pasta_saida, saida$assimilacao)
+    write.table(saida$otimizacao, file = file.path(pasta_saida, "otimizacao.csv"),
+                row.names = FALSE, quote = FALSE, sep = ";")
+    write.table(saida$funcao_objetivo, file = file.path(pasta_saida, "funcao_objetivo.csv"),
+                row.names = FALSE, quote = FALSE, sep = ";")
 }
 
 #' Executa caso oficial com entrada nova
