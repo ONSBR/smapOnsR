@@ -1,8 +1,20 @@
+# smapOnsR 0.2.1
+
+## Major changes
+
+* Ajuste da precipitacao observada apos o processo de assimilacao limitado ao valor maximo de 1
+
+## Minor changes
+
+* escrita de arquivos de otimizacao e funcao_objetivo na funcao de execucao
+
+* ajuste nas funcoes de leitura de arquivo de saida
+
 # smapOnsR 0.2.0
 
 ## Major changes
 
-* Possibilidade de ajuste da precipitacao observada apos o processo de assimilacao. O processo de assimilacao permanece igual. Apos o termino da assimilacao a precipitação observada diaria é corrigida pelo fator do penultimo dia de assimilacao.
+* Possibilidade de ajuste da precipitacao observada apos o processo de assimilacao. O processo de assimilacao permanece igual. Apos o termino da assimilacao a precipitação observada diaria e corrigida pelo fator do penultimo dia de assimilacao.
 
 ## Minor changes
 
