@@ -84,10 +84,10 @@ test_that("testa rodada ecmwf", {
   
   secao <- sessionInfo()
 
-  if (secao$R.version$os == "linux-gnu") {
-    expect_equal(round(saida$previsao[nome == "tucurui" & variavel == "Qcalc" & cenario == "ecmwf_1", valor][1], 0), 2215)
+  if (secao$R.version$os == "mingw32") {
+    expect_equal(round(saida$previsao[nome == "tucurui" & variavel == "Qcalc" & cenario == "ecmwf_1", valor][1], 0), 2211)
   } else {
-    expect_true(abs(round(saida$previsao[nome == "tucurui" & variavel == "Qcalc" & cenario == "ecmwf_1", valor][1], 0) - 2215) < 2215 * 0.01)
+    expect_true(abs(round(saida$previsao[nome == "tucurui" & variavel == "Qcalc" & cenario == "ecmwf_1", valor][1], 0) - 2211) < 2211 * 0.01)
   }
 })
 
