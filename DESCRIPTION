@@ -1,6 +1,6 @@
 Package: smapOnsR
 Title: SMAP/ONS
-Version: 0.2.1
+Version: 0.2.2
 Authors@R: 
     person("Felipe", "Treistman", , "felipe.treistman@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-9948-8680"))

@@ -1,3 +1,13 @@
+# smapOnsR 0.2.2
+
+## Bug fixes
+* Correcao da ponderacao temporal para somatorio de kts diferente de 1
+
+## Minor changes
+* Ajuste leitura caso.txt e arquivo de vazoes e parametros oficiais 
+
+* Ajuste testes operacionais e entrada de dados de validacao
+
 # smapOnsR 0.2.1
 
 ## Major changes
