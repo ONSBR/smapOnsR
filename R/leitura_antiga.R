@@ -36,7 +36,6 @@ le_entrada_parametros <- function(pasta_entrada, nome_subbacia) {
     parametros_smap$nKt <- as.numeric(aux[1])
     if (is.na(parametros_smap$nKt)) stop(paste0("Parametro de numero de kt com valor nao numerico no arquivo ", arq))    
     if(as.numeric(aux[1]) != length(aux) - 1) stop(paste0("Numero de kt diferente do total de kt declarado no arquivo ", arq))    
-    if (parametros_smap$nKt < 3) stop(paste0("Parametro de numero de kt com valor inferior a 3 no arquivo ", arq))    
     if (parametros_smap$nKt != trunc(parametros_smap$nKt)) stop(paste0("Parametro de numero de kt com valor decimal no arquivo ", arq))    
 
     for (ikt in 1:parametros_smap[, nKt]) {
@@ -138,7 +137,7 @@ le_entrada_caso <- function(pasta_entrada) {
 
     if (!file.exists(arquivo)) stop("nao existe o arquivo do tipo caso.txt")
     
-    dat <- data.table::fread(arquivo, sep = "'", header = FALSE)
+    dat <- data.table::fread(arquivo, sep = "'", header = FALSE, blank.lines.skip = TRUE)
     numero_subbacias <- as.numeric(dat[1, V1])
 
     if (is.na(numero_subbacias)) stop("Valor nao numerico de sub-bacias no arquivo caso.txt")
@@ -279,23 +278,27 @@ le_entrada_vazao <- function(pasta_entrada, nome_subbacia) {
     vazao[, V2 := NULL]
     vazao[, V3 := NULL]
     vazao[, V4 := NULL]
-    vazao <- vazao[!is.na(V5) & !is.na(V6)]
+    vazao <- vazao[!is.na(V5)]
 
     colnames(vazao) <- c("data", "valor")
     vazao[, data := as.Date(data, format = "%Y-%m-%d")]
     if (any(is.na(vazao[, data]))) stop(paste0("Data com formato incorreto no arquivo ", arq))
     if (any(vazao[, lubridate::year(data)] < 0 )) stop(paste0("Data com formato incorreto no arquivo ", arq))
     if (nrow(vazao[grepl("-", valor)]) > 1) {
-        stop(paste0("Vazao observada da data ", vazao[valor < 0, data]," negativa para a sub-bacia ", nome_subbacia))
+        stop(paste0("Vazao observada da data ", vazao[valor < 0, data], 
+        " negativa para a sub-bacia ", nome_subbacia, ".\n"))
     }    
     vazao <- vazao[!grepl("-", valor)]
     vazao[, valor := as.numeric(valor)]
-    if (any(is.na(vazao[, valor]))) stop(paste0("Vazao observada da data ", vazao[is.na(valor), data]," nao existente para a sub-bacia ", nome_subbacia))
+    if (any(is.na(vazao[, valor]))) stop(paste0("Vazao observada da data ", vazao[is.na(valor), data], 
+    " nao existente para a sub-bacia ", nome_subbacia, ".\n"))
 
     vazao[, posto := nome_subbacia]
     vazao <- data.table::setcolorder(vazao, c("data", "posto", "valor"))
     vazao <- data.table::setorder(vazao, data)
-    if (length(vazao[, data]) != length(seq.Date(vazao[, min(data)], vazao[, max(data)], by = 1))) stop(paste0("Data faltante no arquivo ", arq))
+    datas_faltantes <- as.Date(setdiff(seq.Date(vazao[, min(data)], vazao[, max(data)], by = 1), vazao[, data]))
+    if (length(datas_faltantes) > 0) stop(paste0("Falta a vazao daa data ", 
+    datas_faltantes, " no arquivo ", arq, ".\n"))
 
     vazao
 }

@@ -16,6 +16,9 @@ test_that("testa arquivo arquivos.csv", {
 
     pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN13", "CT13.5", "Arq_Entrada", package = "smapOnsR")
     expect_error(le_arquivos(pasta_entrada))
+
+    pasta_entrada <- system.file("extdata", "validacao_arq_entrada_novo", "CN13", "CT13.6", "Arq_Entrada", package = "smapOnsR")
+    expect_error(le_arquivos(pasta_entrada))
 })
 
 test_that("testa arquivo posto_plu.csv", {
@@ -81,6 +84,8 @@ test_that("testa datasRodadas.csv", {
     arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN15", "CT15.8", "Arq_Entrada", "datasRodadas.csv", package = "smapOnsR")
     expect_error(le_datas_rodada(arq))
 
+    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN15", "CT15.9", "Arq_Entrada", "datasRodadas.csv", package = "smapOnsR")
+    expect_error(le_datas_rodada(arq))
 })
 
 test_that("testa inicializacao.csv", {
