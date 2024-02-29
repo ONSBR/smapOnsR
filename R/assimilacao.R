@@ -513,7 +513,6 @@ funcao_objetivo_assimilacao_evapotranspiracao <- function(vetor_variaveis, vetor
   print(paste0("area: ", area))
   print(paste0("numero_dias_assimilacao: ", numero_dias_assimilacao))
   print(paste0("pesos_funcao_objetivo: ", pesos_funcao_objetivo))
-  print(paste0("funcao_objetivo: ", funcao_objetivo))
 
   EbInic <- vetor_variaveis[(numero_dias_assimilacao * 2 + 1)]
   Supin <- vetor_variaveis[(numero_dias_assimilacao * 2 + 2)]
