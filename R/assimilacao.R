@@ -502,18 +502,7 @@ funcao_objetivo_assimilacao_evapotranspiracao <- function(vetor_variaveis, vetor
       numero_dias_assimilacao,
       pesos_funcao_objetivo = rep((1 / numero_dias_assimilacao), numero_dias_assimilacao),
       funcao_objetivo = calcula_dm) {
-
-  print(paste0("vetor_variaveis: ", vetor_variaveis))
-  print(paste0("vetor_modelo: ", vetor_modelo))
-  print(paste0("TuInic: ", TuInic))
-  print(paste0("precipitacao_ponderada: ", precipitacao_ponderada))
-  print(paste0("evapotranspiracao: ", evapotranspiracao))
-  print(paste0("evapotranspiracao_planicie: ", evapotranspiracao_planicie))
-  print(paste0("vazao: ", vazao))
-  print(paste0("area: ", area))
-  print(paste0("numero_dias_assimilacao: ", numero_dias_assimilacao))
-  print(paste0("pesos_funcao_objetivo: ", pesos_funcao_objetivo))
-
+        
   EbInic <- vetor_variaveis[(numero_dias_assimilacao * 2 + 1)]
   Supin <- vetor_variaveis[(numero_dias_assimilacao * 2 + 2)]
   if (Supin < 0) { #L-BFGS-B as vezes fornece valor negativo proximo a 0 ('-1e-17')
