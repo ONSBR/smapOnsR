@@ -362,6 +362,19 @@ assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Su
       vazao[1] <- vazao[1] + 0.0001
     }
 
+    print(paste0("limite_inferior: ", limite_inferior))
+    print(paste0("limite_superior: ", limite_superior))
+    print(paste0("vetor_variaveis: ", vetor_variaveis))
+    print(paste0("vetor_modelo: ", vetor_modelo))
+    print(paste0("TuInic: ", TuInic))
+    print(paste0("area: ", area))
+    print(paste0("precipitacao_ponderada: ", precipitacao_ponderada))
+    print(paste0("evapotranspiracao: ", evapotranspiracao))
+    print(paste0("evapotranspiracao_planicie: ", evapotranspiracao_planicie))
+    print(paste0("vazao: ", vazao))
+    print(paste0("numero_dias_assimilacao: ", numero_dias_assimilacao))
+    print(paste0("pesos_funcao_objetivo: ", pesos_funcao_objetivo))
+
     set.seed(12364810)
     ajuste <- stats::optim(par = vetor_variaveis, method = "L-BFGS-B",
               lower = limite_inferior, upper = limite_superior,
@@ -387,10 +400,13 @@ assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Su
     inicializacao <- inicializacao_smap(vetor_modelo, area, EbInic, TuInic, Supin)
     vetor_inicializacao <- unlist(inicializacao)
 
+    print(paste0("ajusta_precipitacao: ", ajusta_precipitacao))
     if (ajusta_precipitacao == 1) {
       ajuste$par[numero_dias_assimilacao] <- min(ajuste$par[(numero_dias_assimilacao - 1)], 1)
     }
 
+    print(paste0("ajuste$par[1:numero_dias_assimilacao]: ", ajuste$par[1:numero_dias_assimilacao]))
+    print(paste0("ajuste$par[(numero_dias_assimilacao + 1):(numero_dias_assimilacao * 2)]: ", ajuste$par[(numero_dias_assimilacao + 1):(numero_dias_assimilacao * 2)]))
     precipitacao_ponderada <- precipitacao_ponderada * ajuste$par[1:numero_dias_assimilacao]
     evapotranspiracao_ponderada <- evapotranspiracao *
                 ajuste$par[(numero_dias_assimilacao + 1):(numero_dias_assimilacao * 2)]
@@ -402,6 +418,7 @@ assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Su
               evapotranspiracao_ponderada, evapotranspiracao_planicie, numero_dias_assimilacao)
 
     simulacao <- data.table::data.table(simulacao)
+    print(paste0("simulacao: ", simulacao))
 
     otimizacao <- data.table::data.table(ajuste$par)
     colnames(otimizacao) <- "otimizacao"
