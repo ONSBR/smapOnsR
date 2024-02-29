@@ -342,9 +342,13 @@ assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Su
     vazao_observada_maxima <- max(vazao)
     pesos_prec <- rep(1, numero_dias_assimilacao)
     pesos_etp <- rep(1, numero_dias_assimilacao)
-	vazao[which(vazao == 0)] <- 0.1
-    limite_inferior <- c(rep(limite_prec[1], numero_dias_assimilacao), rep(limite_etp[1], numero_dias_assimilacao), limite_ebin[1] * EbInic, limite_supin[1] * vazao_observada_maxima)
-    limite_superior <- c(rep(limite_prec[2], numero_dias_assimilacao), rep(limite_etp[2], numero_dias_assimilacao), limite_ebin[2] * EbInic, limite_supin[2] * vazao_observada_maxima)
+	  vazao[which(vazao == 0)] <- 0.1
+    limite_inferior <- c(rep(limite_prec[1], numero_dias_assimilacao),
+                         rep(limite_etp[1], numero_dias_assimilacao),
+                         limite_ebin[1] * EbInic, limite_supin[1] * vazao_observada_maxima)
+    limite_superior <- c(rep(limite_prec[2], numero_dias_assimilacao),
+                         rep(limite_etp[2], numero_dias_assimilacao),
+                         limite_ebin[2] * EbInic, limite_supin[2] * vazao_observada_maxima)
     limite_inferior[numero_dias_assimilacao] <- 0.9999999999
     limite_superior[numero_dias_assimilacao] <- 1.0000000001
     limites_iguais <- limite_superior == limite_inferior
@@ -389,9 +393,9 @@ assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Su
 
     precipitacao_ponderada <- precipitacao_ponderada * ajuste$par[1:numero_dias_assimilacao]
     evapotranspiracao_ponderada <- evapotranspiracao *
-                ajuste$par[((numero_dias_assimilacao + 1):(numero_dias_assimilacao * 2))]
+                ajuste$par[(numero_dias_assimilacao + 1):(numero_dias_assimilacao * 2)]
     evapotranspiracao_planicie <- evapotranspiracao_planicie *
-                ajuste$par[((numero_dias_assimilacao + 1):(numero_dias_assimilacao * 2))]
+                ajuste$par[(numero_dias_assimilacao + 1):(numero_dias_assimilacao * 2)]
 
     simulacao <- funcaoSmapCpp::rodada_varios_dias_cpp2(vetor_modelo,
               vetor_inicializacao, area, precipitacao_ponderada,

@@ -130,6 +130,7 @@ le_historico_verificado <- function(arq) {
     data.table::setorder(dat, posto, data)
     data.table::setcolorder(dat, c("data", "posto", "valor"))
     dat[, valor := as.numeric(valor)]
+    dat[, posto := as.character(posto)]
 
     if (any(is.na(dat$data))) {
         stop("a coluna 'data' do arquivo ", arq, " possui valores nao numericos", ".\n")
