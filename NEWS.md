@@ -3,6 +3,8 @@
 ## Bug fixes
 * Correcao da ponderacao temporal para somatorio de kts diferente de 1
 
+* Correcao da aplicacao dos pesos da assimilacao na etp para casos com etp serie temporal
+
 ## Minor changes
 * Ajuste leitura caso.txt e arquivo de vazoes e parametros oficiais 
 

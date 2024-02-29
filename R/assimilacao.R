@@ -388,8 +388,10 @@ assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Su
     }
 
     precipitacao_ponderada <- precipitacao_ponderada * ajuste$par[1:numero_dias_assimilacao]
-    evapotranspiracao_ponderada <- evapotranspiracao * ajuste$par[(1:numero_dias_assimilacao) * 2]
-    evapotranspiracao_planicie <- evapotranspiracao_planicie * ajuste$par[(1:numero_dias_assimilacao) * 2]
+    evapotranspiracao_ponderada <- evapotranspiracao *
+                ajuste$par[((numero_dias_assimilacao + 1):(numero_dias_assimilacao * 2))]
+    evapotranspiracao_planicie <- evapotranspiracao_planicie *
+                ajuste$par[((numero_dias_assimilacao + 1):(numero_dias_assimilacao * 2))]
 
     simulacao <- funcaoSmapCpp::rodada_varios_dias_cpp2(vetor_modelo,
               vetor_inicializacao, area, precipitacao_ponderada,
@@ -489,8 +491,8 @@ funcao_objetivo_assimilacao_evapotranspiracao <- function(vetor_variaveis, vetor
 
   precipitacao_ponderada <- precipitacao_ponderada * vetor_variaveis[1:numero_dias_assimilacao]
 
-  evapotranspiracao <- evapotranspiracao * vetor_variaveis[2 * (1:numero_dias_assimilacao)]
-  evapotranspiracao_planicie <- evapotranspiracao_planicie * vetor_variaveis[2 * (1:numero_dias_assimilacao)]
+  evapotranspiracao <- evapotranspiracao * vetor_variaveis[((numero_dias_assimilacao + 1):(numero_dias_assimilacao * 2))]
+  evapotranspiracao_planicie <- evapotranspiracao_planicie * vetor_variaveis[((numero_dias_assimilacao + 1):(numero_dias_assimilacao * 2))]
 
   simulacao <- funcaoSmapCpp::rodada_varios_dias_cpp2(vetor_modelo,
             vetor_inicializacao, area, precipitacao_ponderada,
