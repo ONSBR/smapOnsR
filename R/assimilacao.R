@@ -391,8 +391,8 @@ assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Su
               funcao_objetivo = funcao_objetivo,
               control = list(fnscale = fnscale, ndeps = rep(0.000001, length(vetor_variaveis)),
               maxit = 1000))
-    ajuste
-    
+    print(ajuste)
+
     EbInic <- ajuste$par[numero_dias_assimilacao * 2 + 1]
     Supin <- ajuste$par[numero_dias_assimilacao * 2 + 2]
     if (Supin < 0) { #L-BFGS-B as vezes fornece valor negativo próximo a 0 ('-1e-17')
@@ -503,8 +503,20 @@ funcao_objetivo_assimilacao_evapotranspiracao <- function(vetor_variaveis, vetor
       pesos_funcao_objetivo = rep((1 / numero_dias_assimilacao), numero_dias_assimilacao),
       funcao_objetivo = calcula_dm) {
 
-  EbInic <- vetor_variaveis[numero_dias_assimilacao * 2 + 1]
-  Supin <- vetor_variaveis[numero_dias_assimilacao * 2 + 2]
+  print(paste0("vetor_variaveis: ", vetor_variaveis))
+  print(paste0("vetor_modelo: ", vetor_modelo))
+  print(paste0("TuInic: ", TuInic))
+  print(paste0("precipitacao_ponderada: ", precipitacao_ponderada))
+  print(paste0("evapotranspiracao: ", evapotranspiracao))
+  print(paste0("evapotranspiracao_planicie: ", evapotranspiracao_planicie))
+  print(paste0("vazao: ", vazao))
+  print(paste0("area: ", area))
+  print(paste0("numero_dias_assimilacao: ", numero_dias_assimilacao))
+  print(paste0("pesos_funcao_objetivo: ", pesos_funcao_objetivo))
+  print(paste0("funcao_objetivo: ", funcao_objetivo))
+
+  EbInic <- vetor_variaveis[(numero_dias_assimilacao * 2 + 1)]
+  Supin <- vetor_variaveis[(numero_dias_assimilacao * 2 + 2)]
   if (Supin < 0) { #L-BFGS-B as vezes fornece valor negativo proximo a 0 ('-1e-17')
     Supin <- 0
   }
