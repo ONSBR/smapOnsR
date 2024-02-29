@@ -391,6 +391,7 @@ assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Su
               funcao_objetivo = funcao_objetivo,
               control = list(fnscale = fnscale, ndeps = rep(0.000001, length(vetor_variaveis)),
               maxit = 1000))
+    ajuste
     
     EbInic <- ajuste$par[numero_dias_assimilacao * 2 + 1]
     Supin <- ajuste$par[numero_dias_assimilacao * 2 + 2]
@@ -418,7 +419,7 @@ assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Su
               evapotranspiracao_ponderada, evapotranspiracao_planicie, numero_dias_assimilacao)
 
     simulacao <- data.table::data.table(simulacao)
-    print(paste0("simulacao: ", simulacao))
+    simulacao
 
     otimizacao <- data.table::data.table(ajuste$par)
     colnames(otimizacao) <- "otimizacao"
@@ -512,8 +513,10 @@ funcao_objetivo_assimilacao_evapotranspiracao <- function(vetor_variaveis, vetor
 
   precipitacao_ponderada <- precipitacao_ponderada * vetor_variaveis[1:numero_dias_assimilacao]
 
-  evapotranspiracao <- evapotranspiracao * vetor_variaveis[((numero_dias_assimilacao + 1):(numero_dias_assimilacao * 2))]
-  evapotranspiracao_planicie <- evapotranspiracao_planicie * vetor_variaveis[((numero_dias_assimilacao + 1):(numero_dias_assimilacao * 2))]
+  evapotranspiracao <- evapotranspiracao *
+                       vetor_variaveis[(numero_dias_assimilacao + 1):(numero_dias_assimilacao * 2)]
+  evapotranspiracao_planicie <- evapotranspiracao_planicie *
+                       vetor_variaveis[(numero_dias_assimilacao + 1):(numero_dias_assimilacao * 2)]
 
   simulacao <- funcaoSmapCpp::rodada_varios_dias_cpp2(vetor_modelo,
             vetor_inicializacao, area, precipitacao_ponderada,

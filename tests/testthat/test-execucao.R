@@ -31,7 +31,7 @@ test_that("testa execucao novo formato", {
   saida <- suppressWarnings(executa_caso_novo(pasta_entrada))
 
   secao <- sessionInfo()
-  
+  print("test-execucao!!!!!")
   if (secao$R.version$os == "mingw32") {
     expect_equal(round(saida$previsao[nome == "avermelha" & variavel == "Qcalc" & cenario == "historico", valor][27], 0), 730)
   } else {
