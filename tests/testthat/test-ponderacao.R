@@ -12,6 +12,11 @@ test_that("Testa ponderacao temporal", {
 
   saida <- ponderacao_temporal(serie_temporal, kt, kt_max, kt_min)
   expect_equal(saida[29], 4.9405)
+
+  #CT24.3
+  kt[2] <- kt[2] + 0.001
+  saida <- ponderacao_temporal(serie_temporal, kt, kt_max, kt_min)
+  expect_equal(saida[29], 4.95354)
 })
 
 test_that("Testa ponderacao espacial", {

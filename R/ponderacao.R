@@ -25,7 +25,9 @@
 ponderacao_temporal <- function(serie_temporal, kt, kt_max, kt_min) {
 
   N <- length(kt[(3 - kt_max):(3 + kt_min)])
-  serie_temporal_ponderada <- zoo::rollapply(serie_temporal, N, function(v) stats::weighted.mean(v, kt[(3 + kt_min):(3 - kt_max)]), align = "right")
+  soma_kt <- sum(kt)
+  serie_temporal_ponderada <- zoo::rollapply(serie_temporal, N, function(v) 
+                    stats::weighted.mean(v, kt[(3 + kt_min):(3 - kt_max)]), align = "right") * soma_kt
   serie_temporal_ponderada
 
 }
