@@ -5,6 +5,8 @@
 
 * Correcao da aplicacao dos pesos da assimilacao na etp para casos com etp serie temporal
 
+* Ajuste na leitura de "modelos_precipitacao.txt" quando possui comentario com caractere especial
+
 ## Minor changes
 * Ajuste leitura caso.txt e arquivo de vazoes e parametros oficiais 
 
