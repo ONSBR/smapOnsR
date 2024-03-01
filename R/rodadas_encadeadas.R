@@ -451,8 +451,7 @@ rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observa
             matriz_evapotranspiracao <- array(rep(0, numero_cenarios * (numero_dias_previsao + numero_dias_assimilacao)), c(numero_cenarios, (numero_dias_previsao + numero_dias_assimilacao)))
             matriz_evapotranspiracao_planicie <- array(rep(0, numero_cenarios * (numero_dias_previsao + numero_dias_assimilacao)), c(numero_cenarios, (numero_dias_previsao + numero_dias_assimilacao)))
 
-            vazao <- vazao_observada[data < dataRodada & data >= (dataRodada - numero_dias_assimilacao) 
-                          & posto == sub_bacia, valor]
+            vazao <- vazao_observada[data < dataRodada & data >= (dataRodada - numero_dias_assimilacao) & posto == sub_bacia, valor]
             
             previsao_rodada <- precipitacao_prevista[nome == sub_bacia & data_rodada == dataRodada]
             precipitacao <- data.table::data.table(precipitacao_observada[nome == sub_bacia &
@@ -521,11 +520,15 @@ rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observa
             matriz_evapotranspiracao_planicie <- matrix(evapotranspiracao[, valor] * vetor_modelo[77], nrow = numero_cenarios, ncol = nrow(evapotranspiracao), byrow = TRUE)
             matriz_evapotranspiracao <- matrix(evapotranspiracao[, valor] * vetor_modelo[76], nrow = numero_cenarios, ncol = nrow(evapotranspiracao), byrow = TRUE)
             if (numero_cenarios == 1) {
-                matriz_evapotranspiracao_planicie[, 1:numero_dias_assimilacao] <- matriz_evapotranspiracao_planicie[, 1:numero_dias_assimilacao] * ajuste$ajuste$par[(1:numero_dias_assimilacao) * 2]
-                matriz_evapotranspiracao[, 1:numero_dias_assimilacao] <- matriz_evapotranspiracao[, 1:numero_dias_assimilacao] * ajuste$ajuste$par[(1:numero_dias_assimilacao) * 2]
+                matriz_evapotranspiracao_planicie[, 1:numero_dias_assimilacao] <- matriz_evapotranspiracao_planicie[, 1:numero_dias_assimilacao] *
+                                                                            ajuste$ajuste$par[(numero_dias_assimilacao + 1):(numero_dias_assimilacao * 2)]
+                matriz_evapotranspiracao[, 1:numero_dias_assimilacao] <- matriz_evapotranspiracao[, 1:numero_dias_assimilacao] *
+                                                                            ajuste$ajuste$par[(numero_dias_assimilacao + 1):(numero_dias_assimilacao * 2)]
             } else {
-                matriz_evapotranspiracao_planicie[, 1:numero_dias_assimilacao] <- sweep(matriz_evapotranspiracao_planicie[, 1:numero_dias_assimilacao], 2, ajuste$ajuste$par[(1:numero_dias_assimilacao) * 2], `*`)
-                matriz_evapotranspiracao[, 1:numero_dias_assimilacao] <- sweep(matriz_evapotranspiracao[, 1:numero_dias_assimilacao], 2, ajuste$ajuste$par[(1:numero_dias_assimilacao) * 2], `*`)
+                matriz_evapotranspiracao_planicie[, 1:numero_dias_assimilacao] <- sweep(matriz_evapotranspiracao_planicie[, 1:numero_dias_assimilacao], 2, 
+                                                                                ajuste$ajuste$par[(numero_dias_assimilacao + 1):(numero_dias_assimilacao * 2)], `*`)
+                matriz_evapotranspiracao[, 1:numero_dias_assimilacao] <- sweep(matriz_evapotranspiracao[, 1:numero_dias_assimilacao], 2, 
+                                                                                ajuste$ajuste$par[(numero_dias_assimilacao + 1):(numero_dias_assimilacao * 2)], `*`)
             }
 
             EbInic <- ajuste$ajuste$par[numero_dias_assimilacao * 2 + 1]

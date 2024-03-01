@@ -473,10 +473,9 @@ le_entrada_modelos_precipitacao <- function(pasta_entrada) {
         stop("nao existe o arquivo do tipo modelos_precipitacao.txt")
     }
 
-    dat <- data.table::fread(arq, header = FALSE, sep = "'")
+    dat <- data.table::as.data.table(read.csv(arq, header = FALSE, comment.char = "'"))
     dat[, V1 := tolower(V1)]
     numero_cenarios <- as.numeric(dat[1, V1])
-    dat <- data.table::data.table(dat[, V1])
     
     if (is.na(numero_cenarios)) stop("Valor nao numerico de cenarios no arquivo modelos_precipitacao.txt")
     
