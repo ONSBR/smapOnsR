@@ -486,7 +486,6 @@ funcao_objetivo_assimilacao_evapotranspiracao <- function(vetor_variaveis, vetor
       pesos_funcao_objetivo = rep((1 / numero_dias_assimilacao), numero_dias_assimilacao),
       funcao_objetivo = calcula_dm) {
   
-  set.seed(12364810)
   EbInic <- vetor_variaveis[(numero_dias_assimilacao * 2 + 1)]
   Supin <- vetor_variaveis[(numero_dias_assimilacao * 2 + 2)]
   if (Supin < 0) { #L-BFGS-B as vezes fornece valor negativo proximo a 0 ('-1e-17')
