@@ -36,7 +36,7 @@ test_that("testa execucao novo formato", {
   #  expect_equal(round(saida$previsao[nome == "avermelha" & variavel == "Qcalc" & cenario == "historico", valor][27], 0), 730)
   } else if (secao$R.version$os == "linux-gnu") {
      expect_equal(round(saida$previsao[nome == "avermelha" & variavel == "Qcalc" & cenario == "historico", valor][27], 0), 733)
-  } {
+  } else {
     expect_true(abs(round(saida$previsao[nome == "avermelha" & variavel == "Qcalc" & cenario == "historico", valor][27], 0) - 730) < 730 * 0.01)
   }
 
