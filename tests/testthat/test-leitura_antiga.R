@@ -896,6 +896,9 @@ test_that("testa arquivo 'nome_do_posto_c.txt'", {
     pasta_entrada <- system.file("extdata", "Validacao", "CN10", "CT10.8", "Arq_Entrada", package = "smapOnsR")
     expect_error(suppressWarnings(le_entrada_precipitacao(pasta_entrada, postos_plu)))
 
+    pasta_entrada <- system.file("extdata", "Validacao", "CN10", "CT10.9", "Arq_Entrada", package = "smapOnsR")
+    expect_error(suppressWarnings(le_entrada_precipitacao(pasta_entrada, postos_plu)))
+
     pasta_entrada <- system.file("extdata", "Validacao", "CN10", "CT10.10", "Arq_Entrada", package = "smapOnsR")
     expect_equal(le_entrada_precipitacao(pasta_entrada, postos_plu)$valor[1], 15)
 
