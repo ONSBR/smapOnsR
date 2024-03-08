@@ -223,10 +223,10 @@ le_entrada_inicializacao <- function(pasta_entrada, nome_subbacia) {
     }
 
     if (!grepl("^\\d{2}/\\d{2}/\\d{4}$", dat[1, V1])) {
-        stop("Formato invalido de data para o arquivo ", arquivo)
+        stop("Formato invalido de data para o arquivo ", arq)
     } else {
         datas_rodadas <- data.table::data.table(data = as.Date(dat[1, V1], format = "%d/%m/%Y"), numero_dias_previsao = as.numeric(dat[3, V1]))
-        if (is.na(datas_rodadas$data)) stop("Formato invalido de data para o arquivo ", arquivo)
+        if (is.na(datas_rodadas$data)) stop("Formato invalido de data para o arquivo ", arq)
     }    
 
     if (any(is.na(datas_rodadas[, numero_dias_previsao] ))) {
@@ -473,7 +473,7 @@ le_entrada_modelos_precipitacao <- function(pasta_entrada) {
         stop("nao existe o arquivo do tipo modelos_precipitacao.txt")
     }
 
-    dat <- data.table::as.data.table(read.csv(arq, header = FALSE, comment.char = "'"))
+    dat <- data.table::as.data.table(read.csv(arq, header = FALSE, comment.char = "'", fill = TRUE))
     dat[, V1 := tolower(V1)]
     numero_cenarios <- as.numeric(dat[1, V1])
     
@@ -842,7 +842,7 @@ le_entrada_previsao_precipitacao_0 <- function(pasta_entrada, datas_rodadas, dat
             if(length(arq) != 0) stop(paste0("Nao existe o arquivo ", pattern))
         }
     } else {
-        previsao_precipitacao <- data.table::fread(arq, header = FALSE)
+        previsao_precipitacao <- data.table::fread(arq, header = FALSE, fill = TRUE, blank.lines.skip = TRUE)
         previsao_precipitacao[, V1 := as.numeric(V1)]
         if (any(is.na(previsao_precipitacao[, V1]))) stop(paste0("Valor nao numerico de longitude no arquivo ", arq))
         if (any(abs(previsao_precipitacao[, V1]) >= 100)) stop(paste0("Valor de longitude com 3 inteiros no arquivo ", arq))
