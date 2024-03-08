@@ -692,7 +692,7 @@ test_that("testa arquivo 'sub_bacia'_'parametros'.txt", {
 })
 
 test_that("testa arquivo de previsoes de precipitacao", {
-    nome_subbacia <- "Porto"
+    nome_subbacia <- "avermelha"
     
     le_prec <-function(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade){
         previsao_precipitacao <- data.table::rbindlist(lapply(cenarios$V1, function(nome_cenario) {
@@ -703,111 +703,94 @@ test_that("testa arquivo de previsoes de precipitacao", {
         previsao_precipitacao
     }
 
-    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.1", "Arq_Entrada", package = "smapOnsR")
+    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.1", package = "smapOnsR")
     datas_rodadas <- le_entrada_inicializacao(pasta_entrada, nome_subbacia)$datas_rodadas
     modelos_precipitacao <- le_entrada_modelos_precipitacao(pasta_entrada)
     pontos_grade <- suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))
-    datas <- data.table::as.data.table(seq.Date(datas_rodadas$data + 1, datas_rodadas$data + datas_rodadas$numero_dias_previsao, 1))
+    datas <- data.table::as.data.table(seq.Date(datas_rodadas$data + 1, datas_rodadas$data + datas_rodadas$numero_dias_previsao - 1, 1))
     cenarios <- data.table::as.data.table(paste0(unique(pontos_grade$nome_cenario_1),"_",unique(pontos_grade$nome_cenario_2)))
     
-    expect_equal(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)$valor[1], 28.13)
+    expect_equal(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)$valor[1], 5.9)
 
-    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.2", "Arq_Entrada", package = "smapOnsR")
-    expect_equal(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)$valor[1], 28.13)
+    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.2", package = "smapOnsR")
+    pontos_grade <- suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))
+    expect_equal(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)$valor[1], 5.9)
     
-    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.4", "Arq_Entrada", package = "smapOnsR")
+    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.3", package = "smapOnsR")
+    pontos_grade <- suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))
     expect_error(suppressWarnings(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)))
 
-    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.5", "Arq_Entrada", package = "smapOnsR")
+    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.4", package = "smapOnsR")
     expect_error(suppressWarnings(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)))
 
-    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.6", "Arq_Entrada", package = "smapOnsR")
+    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.5", package = "smapOnsR")
+    expect_error(suppressWarnings(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)))
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.6", package = "smapOnsR")
     expect_error(suppressWarnings(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)))
     
-    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.7", "Arq_Entrada", package = "smapOnsR")
+    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.7", package = "smapOnsR")
+    pontos_grade <- suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))
+    expect_equal(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)$valor[1], 5.9)
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.8", package = "smapOnsR")
+    pontos_grade <- suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))
+    expect_equal(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)$valor[1], 5.9)
+
+    pontos_grade <- suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))
+    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.9", package = "smapOnsR")
+    expect_error(suppressWarnings(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)))
+    
+    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.10", package = "smapOnsR")
     expect_error(suppressWarnings(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)))
 
-    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.8", "Arq_Entrada", package = "smapOnsR")
+    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.11", package = "smapOnsR")
+    expect_error(suppressWarnings(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)))
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.12", package = "smapOnsR")
+    expect_error(suppressWarnings(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)))
+
+    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.13", package = "smapOnsR")
+    expect_error(suppressWarnings(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)))
+    
+    datas_rodadas <- le_entrada_inicializacao(pasta_entrada, nome_subbacia)$datas_rodadas
+    datas <- data.table::as.data.table(seq.Date(datas_rodadas$data + 1, datas_rodadas$data + datas_rodadas$numero_dias_previsao - 1, 1))
+    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.14", package = "smapOnsR")
+    expect_error(suppressWarnings(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)))
+    
+    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.15", package = "smapOnsR")
+    expect_error(suppressWarnings(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)))
+    
+    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.16", package = "smapOnsR")
+    expect_error(suppressWarnings(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)))
+    
+    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.17", package = "smapOnsR")
     datas_rodadas <- le_entrada_inicializacao(pasta_entrada, nome_subbacia)$datas_rodadas
     modelos_precipitacao <- le_entrada_modelos_precipitacao(pasta_entrada)
     pontos_grade <- suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))
-    datas <- data.table::as.data.table(seq.Date(datas_rodadas$data + 1, datas_rodadas$data + datas_rodadas$numero_dias_previsao, 1))
+    datas <- data.table::as.data.table(seq.Date(datas_rodadas$data + 1, datas_rodadas$data + datas_rodadas$numero_dias_previsao - 1, 1))
     cenarios <- data.table::as.data.table(paste0(unique(pontos_grade$nome_cenario_1),"_",unique(pontos_grade$nome_cenario_2)))
-    
-    expect_equal(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)$valor[1], 28.13)
+    expect_equal(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)$valor[1], 5)
 
-    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.9", "Arq_Entrada", package = "smapOnsR")
-    datas_rodadas <- le_entrada_inicializacao(pasta_entrada, nome_subbacia)$datas_rodadas
-    modelos_precipitacao <- le_entrada_modelos_precipitacao(pasta_entrada)
-    pontos_grade <- suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))
-    datas <- data.table::as.data.table(seq.Date(datas_rodadas$data + 1, datas_rodadas$data + datas_rodadas$numero_dias_previsao, 1))
-    cenarios <- data.table::as.data.table(paste0(unique(pontos_grade$nome_cenario_1),"_",unique(pontos_grade$nome_cenario_2)))
-    expect_equal(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)$valor[1], 28.13)
+    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.18", package = "smapOnsR")
+    expect_equal(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)$valor[1], 5.9)
 
-    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.11", "Arq_Entrada", package = "smapOnsR")
+    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.19", package = "smapOnsR")
     expect_error(suppressWarnings(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)))
 
-    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.12", "Arq_Entrada", package = "smapOnsR")
+    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.20", package = "smapOnsR")
     expect_error(suppressWarnings(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)))
 
-    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.13", "Arq_Entrada", package = "smapOnsR")
-    expect_error(suppressWarnings(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)))
-    
-    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.14", "Arq_Entrada", package = "smapOnsR")
-    expect_error(suppressWarnings(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)))
-    
-    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.15", "Arq_Entrada", package = "smapOnsR")
-    datas_rodadas <- le_entrada_inicializacao(pasta_entrada, nome_subbacia)$datas_rodadas
-    modelos_precipitacao <- le_entrada_modelos_precipitacao(pasta_entrada)
-    pontos_grade <- suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))
-    datas <- data.table::as.data.table(seq.Date(datas_rodadas$data + 1, datas_rodadas$data + datas_rodadas$numero_dias_previsao, 1))
-    cenarios <- data.table::as.data.table(paste0(unique(pontos_grade$nome_cenario_1),"_",unique(pontos_grade$nome_cenario_2)))
-    expect_error(suppressWarnings(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)))
-    
-    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.16", "Arq_Entrada", package = "smapOnsR")
-    datas_rodadas <- le_entrada_inicializacao(pasta_entrada, nome_subbacia)$datas_rodadas
-    modelos_precipitacao <- le_entrada_modelos_precipitacao(pasta_entrada)
-    pontos_grade <- suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))
-    datas <- data.table::as.data.table(seq.Date(datas_rodadas$data + 1, datas_rodadas$data + datas_rodadas$numero_dias_previsao, 1))
-    cenarios <- data.table::as.data.table(paste0(unique(pontos_grade$nome_cenario_1),"_",unique(pontos_grade$nome_cenario_2)))
-    expect_error(suppressWarnings(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)))
-    
-    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.17", "Arq_Entrada", package = "smapOnsR")
+    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.21", package = "smapOnsR")
     expect_error(suppressWarnings(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)))
 
-    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.18", "Arq_Entrada", package = "smapOnsR")
+    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.22", package = "smapOnsR")
     expect_error(suppressWarnings(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)))
 
-    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.19", "Arq_Entrada", package = "smapOnsR")
-    datas_rodadas <- le_entrada_inicializacao(pasta_entrada, nome_subbacia)$datas_rodadas
-    modelos_precipitacao <- le_entrada_modelos_precipitacao(pasta_entrada)
-    pontos_grade <- suppressWarnings(le_entrada_pontos_grade(pasta_entrada, nome_subbacia, modelos_precipitacao))
-    datas <- data.table::as.data.table(seq.Date(datas_rodadas$data + 1, datas_rodadas$data + datas_rodadas$numero_dias_previsao, 1))
-    cenarios <- data.table::as.data.table(paste0(unique(pontos_grade$nome_cenario_1),"_",unique(pontos_grade$nome_cenario_2)))
-    expect_equal(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)$valor[1], 28)
+    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.23", package = "smapOnsR")
+    expect_equal(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)$valor[1], 5.9)
 
-    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.20", "Arq_Entrada", package = "smapOnsR")
-    expect_equal(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)$valor[1], 28.1)
-
-    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.22", "Arq_Entrada", package = "smapOnsR")
-    expect_equal(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)$valor[1], 281)
-
-    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.23", "Arq_Entrada", package = "smapOnsR")
-    expect_error(suppressWarnings(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)))
-
-    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.24", "Arq_Entrada", package = "smapOnsR")
-    expect_error(suppressWarnings(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)))
-
-    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.25", "Arq_Entrada", package = "smapOnsR")
-    expect_error(suppressWarnings(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)))
-
-    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.26", "Arq_Entrada", package = "smapOnsR")
-    expect_error(suppressWarnings(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)))
-
-    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.28", "Arq_Entrada", package = "smapOnsR")
-    expect_equal(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)$valor[1], 28.13)
-
-    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.29", "Arq_Entrada", package = "smapOnsR")
+    pasta_entrada <- system.file("extdata", "Validacao", "CN08", "CT8.24", package = "smapOnsR")
     expect_error(suppressWarnings(le_prec(cenarios, datas, pasta_entrada, datas_rodadas, pontos_grade)))
 })
 

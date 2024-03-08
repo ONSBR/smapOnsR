@@ -842,7 +842,7 @@ le_entrada_previsao_precipitacao_0 <- function(pasta_entrada, datas_rodadas, dat
             if(length(arq) != 0) stop(paste0("Nao existe o arquivo ", pattern))
         }
     } else {
-        previsao_precipitacao <- data.table::fread(arq, header = FALSE)
+        previsao_precipitacao <- data.table::fread(arq, header = FALSE, fill = TRUE, blank.lines.skip = TRUE)
         previsao_precipitacao[, V1 := as.numeric(V1)]
         if (any(is.na(previsao_precipitacao[, V1]))) stop(paste0("Valor nao numerico de longitude no arquivo ", arq))
         if (any(abs(previsao_precipitacao[, V1]) >= 100)) stop(paste0("Valor de longitude com 3 inteiros no arquivo ", arq))
