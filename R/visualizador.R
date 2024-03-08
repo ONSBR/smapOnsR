@@ -139,6 +139,9 @@ executa_visualizador_calibracao <- function(){
             ),
             shiny::tabPanel("Tabela Dados",
                 DT::dataTableOutput("tabela")
+            ),
+            shiny::tabPanel("Tabela info calibracao",
+                DT::dataTableOutput("info_calibracao")
             )
         )
     )
@@ -695,6 +698,10 @@ executa_visualizador_calibracao <- function(){
 
         output$tabela <- DT::renderDataTable(saida())
 
+        info_calibracao <- reactiveVal(data.table::data.table())
+
+        output$info_calibracao <- DT::renderDataTable(info_calibracao())
+
         output$funcao_objetivo <- shiny::renderText({
             if (!is.null(input[[paste0("posto_plu_1")]])) {
                 data_inicio_objetivo <- input$periodo_calibracao[1]
@@ -979,7 +986,7 @@ executa_visualizador_calibracao <- function(){
             
             # Execute the long-running function asynchronously
             par <- future::future({
-                calibracao(vetor_modelo, kt_min, kt_max, area, Ebin, Tuin, Supin, precipitacao,
+                calibracao_paralela(vetor_modelo, kt_min, kt_max, area, Ebin, Tuin, Supin, precipitacao,
                                     evapotranspiracao_fo, vazao_fo, data_inicio_objetivo, data_fim_objetivo,
                                     limite_inferior, limite_superior, postos_plu[postos_plu$nome == input$sub_bacia],
                                     funcao_objetivo, fnscale, vazao_fo[, peso])
@@ -1013,6 +1020,16 @@ executa_visualizador_calibracao <- function(){
                     disable_button(FALSE)
                     shinyjs::enable("botao_calibracao")
                     shiny::updateActionButton(session, "botao_calibracao", label = "Calibrar")
+
+                    tabela <- data.table::as.data.table(future::value(par)$loginfo)
+                    colnames(tabela) <- c("step", "str", "k2t", "crec", "capc", "k_kt", "h1", "k2t2", 
+                                          "ai", "h", "k1t", "k3t", "pcof", "ecof", "ecof2", 
+                                          "alfa", "beta", "fn", "grad_str", "grad_k2t", "grad_crec", 
+                                          "grad_capc", "grad_k_kt", "grad_h1", "grad_k2t2", 
+                                          "grad_ai", "grad_h", "grad_k1t", "grad_k3t", 
+                                          "grad_pcof", "grad_ecof", "grad_ecof2", "grad_alfa", 
+                                          "grad_beta")
+                    info_calibracao(tabela)
                 }
             })
         })
