@@ -473,7 +473,7 @@ le_entrada_modelos_precipitacao <- function(pasta_entrada) {
         stop("nao existe o arquivo do tipo modelos_precipitacao.txt")
     }
 
-    dat <- fread(arq, header = FALSE, blank.lines.skip = TRUE, sep = ";")
+    dat <- data.table::fread(arq, header = FALSE, blank.lines.skip = TRUE, sep = ";")
     dat[, V1 := tolower(V1)]
     dat[, V1 := strsplit(V1, split = "'")[[1]][1], by = V1]
     numero_cenarios <- as.numeric(dat[1, V1])
