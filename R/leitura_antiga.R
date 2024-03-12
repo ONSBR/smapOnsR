@@ -20,7 +20,9 @@ le_entrada_parametros <- function(pasta_entrada, nome_subbacia) {
         stop(paste0("nao existe o arquivo ", pattern))
     }
 
-    parametros <- read.csv(arq, comment.char = "'", header = FALSE, sep = ";")
+    parametros <- data.table::fread(arq, header = FALSE, blank.lines.skip = TRUE, sep = ";")
+    parametros[, V1 := iconv(V1, to = "UTF-8", sub = "�")]
+    parametros[, V1 := strsplit(V1, split = "'")[[1]][1], by = V1]
 
     parametros_smap <- array(rep(0, 82), c(1, 82))
     parametros_smap <- data.table::data.table(parametros_smap)
@@ -31,8 +33,8 @@ le_entrada_parametros <- function(pasta_entrada, nome_subbacia) {
     aux <- strsplit(arq, split = "/")[[1]]
     parametros_smap$nome <- tolower(sub(".*/", "", sub("_parametros.txt", "", nome_subbacia)))
     parametros_smap$Area <- as.numeric(parametros[1, 1])
-    if (!is.character(parametros[2, 1])) stop(paste0("Nao existe valores de kt declarados no arquivo ", arq))
-    aux <- unlist(strsplit(parametros[2, 1], "\\s+"))
+    if (!is.character(parametros[2, V1])) stop(paste0("Nao existe valores de kt declarados no arquivo ", arq))
+    aux <- unlist(strsplit(parametros[2, V1], "\\s+"))
     parametros_smap$nKt <- as.numeric(aux[1])
     if (is.na(parametros_smap$nKt)) stop(paste0("Parametro de numero de kt com valor nao numerico no arquivo ", arq))    
     if(as.numeric(aux[1]) != length(aux) - 1) stop(paste0("Numero de kt diferente do total de kt declarado no arquivo ", arq))    
@@ -43,7 +45,7 @@ le_entrada_parametros <- function(pasta_entrada, nome_subbacia) {
     }
 
     for (iparametro in 67:80) {
-        parametros_smap[1, iparametro] <- as.numeric(parametros[(iparametro - 64), 1])
+        parametros_smap[1, iparametro] <- as.numeric(parametros[(iparametro - 64), V1])
     }
 
     parametros_smap[1, 81] <- sum(parametros_smap[, 7:66] > 0)
@@ -474,6 +476,7 @@ le_entrada_modelos_precipitacao <- function(pasta_entrada) {
     }
 
     dat <- data.table::fread(arq, header = FALSE, blank.lines.skip = TRUE, sep = ";")
+    dat[, V1 := iconv(V1, to = "UTF-8", sub = "�")]
     dat[, V1 := tolower(V1)]
     dat[, V1 := strsplit(V1, split = "'")[[1]][1], by = V1]
     numero_cenarios <- as.numeric(dat[1, V1])
