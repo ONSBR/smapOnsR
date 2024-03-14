@@ -21,7 +21,7 @@ le_entrada_parametros <- function(pasta_entrada, nome_subbacia) {
     }
 
     parametros <- data.table::fread(arq, header = FALSE, blank.lines.skip = TRUE, sep = ";")
-    parametros[, V1 := iconv(V1, to = "UTF-8", sub = "�")]
+    parametros[, V1 := iconv(V1, "ASCII", "UTF-8", sub = "")]
     parametros[, V1 := strsplit(V1, split = "'")[[1]][1], by = V1]
 
     parametros_smap <- array(rep(0, 82), c(1, 82))
@@ -476,9 +476,10 @@ le_entrada_modelos_precipitacao <- function(pasta_entrada) {
     }
 
     dat <- data.table::fread(arq, header = FALSE, blank.lines.skip = TRUE, sep = ";")
-    dat[, V1 := iconv(V1, to = "UTF-8", sub = "�")]
-    dat[, V1 := tolower(V1)]
+    dat[, V1 := iconv(V1, "ASCII", "UTF-8", sub = "")] 
     dat[, V1 := strsplit(V1, split = "'")[[1]][1], by = V1]
+    dat[, V1 := tolower(V1)]
+    dat[, V1 := trimws(V1)]
     numero_cenarios <- as.numeric(dat[1, V1])
     
     if (is.na(numero_cenarios)) stop("Valor nao numerico de cenarios no arquivo modelos_precipitacao.txt")
