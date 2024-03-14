@@ -218,6 +218,7 @@ assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, preci
 #' fo
 #' 
 #' @importFrom data.table data.table
+#' @importFrom funcaoSmapCpp rodada_varios_dias_cpp2
 #' @return objetivo valor da funcao objetivo
 #' @export
 

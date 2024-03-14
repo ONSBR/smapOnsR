@@ -1,3 +1,24 @@
+# smapOnsR 0.3.0
+
+## Major changes
+
+* Processo de calibração paralelizado
+
+## Minor changes
+
+* Ajuste na validacao de arquivo de inicializacao oficial, e de previsao nova
+
+* Inclusao de teste de validacao de previsao nova
+
+* Ajuste em arquivos exemplo
+
+* Ajuste na leitura de arquivo de precipitacao observada, "modelos_precipitacao" e "_parametros" oficial
+
+* Alteracao do teste das funcoes de rodadas_encadeadas
+
+* Criacao de arquivo com funcoes de validacao de dados de entrada (futuramente todas as validacoes de arquivos de entrada estará contida nesse arquivo)
+
+
 # smapOnsR 0.2.2
 
 ## Bug fixes
