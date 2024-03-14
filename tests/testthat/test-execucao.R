@@ -26,6 +26,7 @@ test_that("testa execucao oficial", {
 })
 
 test_that("testa execucao novo formato", {
+  library(smapOnsR)
   pasta_entrada <- system.file("extdata", "arq_entrada_novo", package = "smapOnsR")
 
   saida <- suppressWarnings(executa_caso_novo(pasta_entrada))
@@ -33,9 +34,9 @@ test_that("testa execucao novo formato", {
   secao <- sessionInfo()
   
   if (secao$R.version$os == "mingw32") {
-  #  expect_equal(round(saida$previsao[nome == "avermelha" & variavel == "Qcalc" & cenario == "historico", valor][27], 0), 730)
+    expect_equal(round(saida$previsao[nome == "avermelha" & variavel == "Qcalc" & cenario == "historico", valor][1], 2), 345.11)
   } else {
-    expect_true(abs(round(saida$previsao[nome == "avermelha" & variavel == "Qcalc" & cenario == "historico", valor][27], 0) - 730) < 730 * 0.01)
+    expect_true(abs(round(saida$previsao[nome == "avermelha" & variavel == "Qcalc" & cenario == "historico", valor][1], 2) - 345.11) < 345.11 * 0.01)
   }
 
   unlink(system.file("extdata", "Arq_Entrada", package = "smapOnsR"), recursive = TRUE)

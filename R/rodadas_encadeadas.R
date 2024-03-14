@@ -53,6 +53,7 @@
 #'     }
 #' @param sub_bacias vetor com o nome das sub-bacias a serem consideradas
 #' @importFrom data.table data.table
+#' @importFrom funcaoSmapCpp rodada_cenarios_dias_cpp2
 #' @return saida lista com o data.table previsao contendo as seguintes colunas:
 #'     \itemize{
 #'     \item{data_caso - data da rodada}
@@ -349,6 +350,7 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
 #'     }
 #' @param sub_bacias vetor com o nome das sub-bacias a serem consideradas
 #' @importFrom data.table data.table
+#' @importFrom funcaoSmapCpp rodada_cenarios_dias_cpp2
 #' @return saida lista com o data.table previsao contendo as seguintes colunas:
 #'     \itemize{
 #'     \item{data_caso - data da rodada}

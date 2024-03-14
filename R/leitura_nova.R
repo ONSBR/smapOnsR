@@ -210,7 +210,7 @@ le_precipitacao_prevista <- function(arq) {
     for (idata in 1:dat[, length(unique(data_rodada))]) {
         data <- dat[, unique(data_rodada)[idata]]
         datas_previstas <- dat[data_rodada == data, unique(data_previsao)]
-        teste <- dat[data_rodada == data, setdiff(datas_previstas, data_previsao), by = c( "nome", "cenario")]
+        teste <- dat[data_rodada == data, setdiff(datas_previstas, data_previsao), by = c("nome", "cenario", "data_rodada")]
         teste_completo <- data.table::rbindlist(list(teste_completo, teste))
     }
 
@@ -679,6 +679,7 @@ le_arq_entrada_novo <- function(pasta_entrada) {
             if (!all(sub_bacias$nome %in% evapotranspiracao_prevista$nome)) {
                 stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% evapotranspiracao_prevista$nome, nome], " no arquivo ", arquivos[arquivo == "EVAPOTRANSPIRACAO_PREVISTA", nome_arquivo], ".\n"))
             }
+            valida_previsao_etp(evapotranspiracao_prevista, precipitacao_prevista)
         } else {
             warning("nao existe arquivo de previsao de evapotranspiracao, serao utilizados dados historicos")
             

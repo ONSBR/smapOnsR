@@ -44,10 +44,11 @@ test_that("testa rodadas encadeadas", {
 })
 
 test_that("testa rodada ecmwf", {
-  zip::unzip(system.file("extdata", "dados_entrada.zip", package = "smapOnsR"), exdir = system.file("extdata", package = "smapOnsR"))
 
+
+  library(smapOnsR)
+  zip::unzip(system.file("extdata", "dados_entrada.zip", package = "smapOnsR"), exdir = system.file("extdata", package = "smapOnsR"))
   pasta_entrada <- system.file("extdata", "Arq_Entrada", package = "smapOnsR")
-  #pasta_entrada <- "inst//extdata//Arq_Entrada"
 
   entrada <- le_arq_entrada(pasta_entrada)
 
@@ -70,9 +71,15 @@ test_that("testa rodada ecmwf", {
   secao <- sessionInfo()
 
   if (secao$R.version$os == "mingw32") {
-    expect_equal(round(saida$previsao[nome == "pimentalt" & variavel == "Qcalc" & cenario == "ecmwf_1", valor][31], 0), 10166)
+    expect_equal(round(saida$previsao[nome == "pimentalt" & variavel == "Qcalc" & cenario == "ecmwf_1", valor][1], 2), 5146.59)
+    expect_equal(round(saida$funcao_objetivo[, funcao_objetivo], 7),
+                       c(0.1107962, 0.0213238, 0.0015776, 0.0131814, 0.0576028,
+                        0.0356864, 0.0591549, 0.2446411, 0.0101129, 0.1188261,
+                        0.0006430, 0.0191476, 0.0005964, 0.0022157, 0.0355439,
+                        0.0281633, 0.0066142, 0.1009915, 0.0030379, 0.1092217,
+                        0.1348698, 0.0575809))
   } else {
-    expect_true(abs(round(saida$previsao[nome == "pimentalt" & variavel == "Qcalc" & cenario == "ecmwf_1", valor][31], 0) - 10166) < 10166 * 0.01)
+    expect_true(abs(round(saida$previsao[nome == "pimentalt" & variavel == "Qcalc" & cenario == "ecmwf_1", valor][1], 0) - 5146.59) < 10166 * 0.01)
   }
 
   entrada$inicializacao[variavel == "ajusta_precipitacao", valor := 1]
@@ -85,15 +92,21 @@ test_that("testa rodada ecmwf", {
   secao <- sessionInfo()
 
   if (secao$R.version$os == "mingw32") {
-    expect_equal(round(saida$previsao[nome == "tucurui" & variavel == "Qcalc" & cenario == "ecmwf_1", valor][1], 0), 2211)
+    expect_equal(round(saida$previsao[nome == "tucurui" & variavel == "Qcalc" & cenario == "ecmwf_1", valor][1], 2), 2210.95)
+    expect_equal(round(saida$funcao_objetivo[, funcao_objetivo], 7),
+                       c(0.1107962, 0.0213238, 0.0015776, 0.0131814, 0.0576028,
+                        0.0356864, 0.0591549, 0.2446411, 0.0101129, 0.1188261,
+                        0.0006430, 0.0191476, 0.0005964, 0.0022157, 0.0355439,
+                        0.0281633, 0.0066142, 0.1009915, 0.0030379, 0.1092217,
+                        0.1348698, 0.0575809))
   } else {
-    expect_true(abs(round(saida$previsao[nome == "tucurui" & variavel == "Qcalc" & cenario == "ecmwf_1", valor][1], 0) - 2211) < 2211 * 0.01)
+    expect_true(abs(round(saida$previsao[nome == "tucurui" & variavel == "Qcalc" & cenario == "ecmwf_1", valor][1], 2) - 2211) < 2210.95 * 0.01)
   }
 })
 
 test_that("testa rodada ecmwf formato oficial", {
+  library(smapOnsR)
   pasta_entrada <- system.file("extdata", "Arq_Entrada1", package = "smapOnsR")
-
   entrada <- le_arq_entrada(pasta_entrada)
 
   set.seed(129852)
@@ -104,7 +117,13 @@ test_that("testa rodada ecmwf formato oficial", {
   secao <- sessionInfo()
   
   if (secao$R.version$os == "mingw32") {
-    expect_equal(round(saida$previsao[nome == "avermelha" & variavel == "Qcalc" & cenario == "ecmwf_ex42", valor][27], 0), 202)
+    expect_equal(round(saida$previsao[nome == "avermelha" & variavel == "Qcalc" & cenario == "ecmwf_ex42", valor][1], 2), 142.49)
+    expect_equal(round(saida$funcao_objetivo[, funcao_objetivo], 7),
+                      c(0.7782175, 0.0500985, 0.1595498, 0.5419530, 0.6626864,
+                        2.4551763, 0.0663579, 0.0329327, 0.3964460, 0.3122717,
+                        0.3056500, 6.3627029, 0.2200111, 0.0826504, 0.3945530,
+                        0.0288400, 0.2675268, 7.2110025, 4.3542436, 0.0271068,
+                        0.0632389, 0.0582628))
   } else {
     expect_true(abs(round(saida$previsao[nome == "avermelha" & variavel == "Qcalc" & cenario == "ecmwf_ex42", valor][27], 0) - 202) < 202 * 0.01)
   }
@@ -112,7 +131,7 @@ test_that("testa rodada ecmwf formato oficial", {
 
 test_that("testa rodada oficial", {
   pasta_entrada <- system.file("extdata", "Arq_Entrada0", package = "smapOnsR")
-
+  library(smapOnsR)
   entrada <- le_arq_entrada(pasta_entrada)
 
   set.seed(129852)
@@ -123,9 +142,15 @@ test_that("testa rodada oficial", {
   secao <- sessionInfo()
   
   if (secao$R.version$os == "mingw32") {
-    expect_equal(round(saida$previsao[nome == "ssimao2" & variavel == "Qcalc", valor][17], 0), 1210)
+    expect_equal(round(saida$previsao[nome == "ssimao2" & variavel == "Qcalc", valor][1], 2), 1073.91)
+    expect_equal(round(saida$funcao_objetivo[, funcao_objetivo], 7),
+                      c(0.0434298, 0.0378167, 0.0181129, 0.0120293, 0.0143889,
+                        0.0090646, 0.0205859, 0.1056197, 0.0083967, 0.0593502,
+                        0.0312499, 0.1302981, 0.0278158, 0.0511445, 0.0148080,
+                        0.0224452, 0.0298919, 0.0103037, 0.1422300, 0.0336895,
+                        0.1225972, 0.0513591))
   } else {
-    expect_true(abs(round(saida$previsao[nome == "ssimao2" & variavel == "Qcalc", valor][17], 0) - 1210) < 1210 * 0.01)
+    expect_true(abs(round(saida$previsao[nome == "ssimao2" & variavel == "Qcalc", valor][1], 2) - 1073.91) < 1073.91 * 0.01)
   }
 })
 
