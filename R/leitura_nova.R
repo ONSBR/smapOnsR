@@ -679,6 +679,7 @@ le_arq_entrada_novo <- function(pasta_entrada) {
             if (!all(sub_bacias$nome %in% evapotranspiracao_prevista$nome)) {
                 stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% evapotranspiracao_prevista$nome, nome], " no arquivo ", arquivos[arquivo == "EVAPOTRANSPIRACAO_PREVISTA", nome_arquivo], ".\n"))
             }
+            valida_previsao_etp(evapotranspiracao_prevista, precipitacao_prevista)
         } else {
             warning("nao existe arquivo de previsao de evapotranspiracao, serao utilizados dados historicos")
             

@@ -198,8 +198,11 @@ test_that("testa precipitacao_prevista.csv", {
     arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN18", "CT18.11", "Arq_Entrada", "precipitacao_prevista.csv", package = "smapOnsR")
     expect_error(suppressWarnings(le_precipitacao_prevista(arq)))
 
-    arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN18", "CT18.12", "Arq_Entrada", "precipitacao_prevista.csv", package = "smapOnsR")
-    expect_error(suppressWarnings(le_precipitacao_prevista(arq)))
+    arq_prec <- system.file("extdata", "validacao_arq_entrada_novo", "CN18", "CT18.12", "precipitacao_prevista.csv", package = "smapOnsR")
+    arq_etp <- system.file("extdata", "validacao_arq_entrada_novo", "CN18", "CT18.12", "evapotranspiracao_prevista.csv", package = "smapOnsR")
+    precipitacao_prevista <- data.table::fread(arq_prec)
+    evapotranspiracao_prevista <- data.table::fread(arq_etp)
+    expect_error(valida_cenarios(evapotranspiracao_prevista, precipitacao_prevista))
 })
 
 test_that("testa vazoes.csv", {
