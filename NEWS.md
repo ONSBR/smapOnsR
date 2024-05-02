@@ -1,3 +1,7 @@
+# smapOnsR 1.0.0
+
+* Versão validada a ser utilizada oficialmente
+
 # smapOnsR 0.3.0
 
 ## Major changes
