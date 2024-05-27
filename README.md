@@ -14,12 +14,15 @@ Pacote com a implementacao em R do modelo SMAP/ONS
 
 ## Instalação
 
-Este pacote ainda nao se encontra disponibilizado no CRAN, de modo que
-deve ser instalado diretamente a partir do repositorio utilizando:
+Para a instalacao do pacote no Windows, e necessaria a instalacao do
+programa Rtools, de mesma versao do R:
+<https://cran.r-project.org/bin/windows/Rtools/> Este pacote ainda nao
+se encontra disponibilizado no CRAN, de modo que deve ser instalado
+diretamente a partir do repositorio utilizando:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("felipe-treistman/smapOnsR")
+devtools::install_github("ONSBR/smapOnsR")
 ```
 
 ## Exemplo
@@ -29,6 +32,7 @@ Exemplo de como executar um caso com os dados de entrada oficiais.
 ``` r
 library(smapOnsR)
 ## Executar linha abaixo
+zip::unzip(system.file("extdata", "dados_entrada.zip", package = "smapOnsR"), exdir = system.file("extdata", package = "smapOnsR"))
 pasta_entrada <- system.file("extdata", "caso_completo2", package = "smapOnsR")
 
 saida <- executa_caso_oficial(pasta_entrada)
