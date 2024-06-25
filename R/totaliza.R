@@ -128,7 +128,7 @@ totaliza_previsao <- function(previsao, vazao_observada, configuracao) {
             nome_jusante <- configuracao[posto == configuracao_sem_postos_plu[indice_usina, posto_jusante], nome_real]
             if (length(nome_jusante) != 0) {
                 data_inicio <- max(max(previsao_totalizada[nome == nome_jusante, min(data_previsao)],
-                                    previsao_totalizada[nome == nome_jusante, min(data_previsao)],
+                                    previsao_totalizada[nome == nome_montante, min(data_previsao)],
                                     previsao[, unique(data_caso) - 60]))
                 if (configuracao_sem_postos_plu[indice_usina, tv] == 0){
                     n <- configuracao_sem_postos_plu[nome_real == nome_montante, n]
