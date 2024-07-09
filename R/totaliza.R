@@ -83,33 +83,35 @@ totaliza_previsao <- function(previsao, vazao_observada, configuracao) {
     data.table::setorder(previsao_totalizada, "data_rodada", "nome", "cenario", "data_previsao")
 
     # propaga postos flu
-    configuracao_postos_plu <- configuracao[bacia_smap == "posto_flu"]
-    ordem <- ordem_afluencia(configuracao_postos_plu$posto, configuracao_postos_plu$posto_jusante)
-    for (indice_ordem in 1:max(ordem)) {
-        indice_configuracao <- which(ordem == indice_ordem)
-        for (indice_usina in indice_configuracao) {
-            nome_montante <- configuracao_postos_plu[indice_usina, nome_real]
-            nome_jusante <- configuracao[posto == configuracao_postos_plu[indice_usina, posto_jusante], nome_real]
-            data_inicio <- max(max(previsao_totalizada[nome == nome_jusante, min(data_previsao)],
-                                previsao_totalizada[nome == nome_jusante, min(data_previsao)],
-                                previsao[, unique(data_caso) - 60]))
-            if (configuracao_postos_plu[indice_usina, tv] == 0){
-                n <- configuracao_postos_plu[nome_real == nome_montante, n]
-                coeficientes <- c(0, 0, 0)
-                coeficientes[1] <- configuracao_postos_plu[nome_real == nome_montante, c1]
-                coeficientes[2] <- configuracao_postos_plu[nome_real == nome_montante, c2]
-                coeficientes[3] <- configuracao_postos_plu[nome_real == nome_montante, c3]
-                for (nome_cenario in previsao_totalizada[, unique(cenario)]) {
-                    previsao_totalizada[nome == nome_jusante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_incremental := 
-                    propaga_muskingum(previsao_totalizada[nome == nome_montante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_incremental], 
-                    previsao_totalizada[nome == nome_jusante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_incremental], n, coeficientes)]
-                }
-            } else {
-                tv <- configuracao_postos_plu[nome_real == nome_montante, tv]
-                for (nome_cenario in previsao_totalizada[, unique(cenario)]) {
-                    previsao_totalizada[nome == nome_jusante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_incremental := 
-                    propaga_tv(previsao_totalizada[nome == nome_montante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_incremental], 
-                    previsao_totalizada[nome == nome_jusante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_incremental], tv)]
+    if(nrow(configuracao[bacia_smap == "posto_flu"]) > 0){
+        configuracao_postos_plu <- configuracao[bacia_smap == "posto_flu"]      
+        ordem <- ordem_afluencia(configuracao_postos_plu$posto, configuracao_postos_plu$posto_jusante)
+        for (indice_ordem in 1:max(ordem)) {
+            indice_configuracao <- which(ordem == indice_ordem)
+            for (indice_usina in indice_configuracao) {
+                nome_montante <- configuracao_postos_plu[indice_usina, nome_real]
+                nome_jusante <- configuracao[posto == configuracao_postos_plu[indice_usina, posto_jusante], nome_real]
+                data_inicio <- max(previsao_totalizada[nome == nome_jusante, min(data_previsao)],
+                                    previsao_totalizada[nome == nome_montante, min(data_previsao)],
+                                    previsao[, unique(data_caso) - 60])
+                if (configuracao_postos_plu[indice_usina, tv] == 0){
+                    n <- configuracao_postos_plu[nome_real == nome_montante, n]
+                    coeficientes <- c(0, 0, 0)
+                    coeficientes[1] <- configuracao_postos_plu[nome_real == nome_montante, c1]
+                    coeficientes[2] <- configuracao_postos_plu[nome_real == nome_montante, c2]
+                    coeficientes[3] <- configuracao_postos_plu[nome_real == nome_montante, c3]
+                    for (nome_cenario in previsao_totalizada[, unique(cenario)]) {
+                        previsao_totalizada[nome == nome_jusante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_incremental := 
+                        propaga_muskingum(previsao_totalizada[nome == nome_montante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_incremental], 
+                        previsao_totalizada[nome == nome_jusante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_incremental], n, coeficientes)]
+                    }
+                } else {
+                    tv <- configuracao_postos_plu[nome_real == nome_montante, tv]
+                    for (nome_cenario in previsao_totalizada[, unique(cenario)]) {
+                        previsao_totalizada[nome == nome_jusante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_incremental := 
+                        propaga_tv(previsao_totalizada[nome == nome_montante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_incremental], 
+                                previsao_totalizada[nome == nome_jusante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_incremental], tv)]
+                    }
                 }
             }
         }
@@ -127,9 +129,9 @@ totaliza_previsao <- function(previsao, vazao_observada, configuracao) {
             nome_montante <- configuracao_sem_postos_plu[indice_usina, nome_real]
             nome_jusante <- configuracao[posto == configuracao_sem_postos_plu[indice_usina, posto_jusante], nome_real]
             if (length(nome_jusante) != 0) {
-                data_inicio <- max(max(previsao_totalizada[nome == nome_jusante, min(data_previsao)],
-                                    previsao_totalizada[nome == nome_jusante, min(data_previsao)],
-                                    previsao[, unique(data_caso) - 60]))
+                data_inicio <- max(previsao_totalizada[nome == nome_jusante, min(data_previsao)],
+                                    previsao_totalizada[nome == nome_montante, min(data_previsao)],
+                                    previsao[, unique(data_caso) - 60])
                 if (configuracao_sem_postos_plu[indice_usina, tv] == 0){
                     n <- configuracao_sem_postos_plu[nome_real == nome_montante, n]
                     coeficientes <- c(0, 0, 0)
