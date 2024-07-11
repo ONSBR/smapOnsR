@@ -150,7 +150,7 @@ assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, preci
     colnames(otimizacao) <- "otimizacao"
     otimizacao[, limite_inferior := limite_inferior]
     otimizacao[, limite_superior := limite_superior]
-    otimizacao[, variavel := c(paste0("prec (t-", 31:1, ")"), "Ebin", "Supin")]
+    otimizacao[, variavel := c(paste0("prec (t-", numero_dias_assimilacao:1, ")"), "Ebin", "Supin")]
 
     saida <- list(ajuste = ajuste, simulacao = simulacao, otimizacao = otimizacao)
     saida
@@ -409,7 +409,7 @@ assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Su
     colnames(otimizacao) <- "otimizacao"
     otimizacao[, limite_inferior := limite_inferior]
     otimizacao[, limite_superior := limite_superior]
-    otimizacao[, variavel := c(paste0("prec (t-", 31:1,")"), paste0("etp (t-", 31:1,")"), "Ebin", "Supin")]
+    otimizacao[, variavel := c(paste0("prec (t-", numero_dias_assimilacao:1,")"), paste0("etp (t-", numero_dias_assimilacao:1,")"), "Ebin", "Supin")]
 
     saida <- list(ajuste = ajuste, simulacao = simulacao, otimizacao = otimizacao)
 
