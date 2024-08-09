@@ -33,6 +33,24 @@ Para a versao em desenvolvimento, deve-se utilizar o seguinte comando:
 devtools::install_github("ONSBR/smapOnsR")
 ```
 
+## Imagem Docker
+
+TODO - necessita revisão.
+
+É disponibilizada uma imagem com o intepretador da linguagem R a partir da imagem oficial no [DockerHub](https://hub.docker.com/_/r-base) com o `smapOnsR` instalado, juntamente com todas as suas dependências. A imagem está disponível em [smapOnsR](...) e pode ser utilizada por qualquer usuário para construir suas aplicações containerizadas. Um exemplo de `Dockerfile` utilizando a imagem:
+
+```Dockerfile
+
+FROM ONSBR/smapOnsR:latest
+
+WORKDIR /app
+
+COPY main.R .
+
+CMD ["Rscript", "main.R"]
+
+```
+
 ## Exemplo
 
 Exemplo de como executar um caso com os dados de entrada oficiais.
