@@ -1,16 +1,8 @@
-FROM r-base:latest
+FROM rocker/tidyverse:latest
 
-# Install ssl, curl, and ssh
-RUN apt-get update -qq && \
-    apt-get install -y libssl-dev libcurl4-openssl-dev libssh2-1-dev && \
-    apt-get install -y libharfbuzz-dev libfribidi-dev && \
-    apt-get install -y libfreetype6-dev libpng-dev libtiff5-dev libjpeg-dev && \
-    apt-get install -y libfontconfig1-dev libxml2-dev && \
-    apt-get clean
-
-# Copy the R script
-WORKDIR /app
+# Copy the repo files into the Docker image
+WORKDIR /build
 COPY . .
 
 # Install dependencies
-RUN Rscript packages.R
+RUN R -e "devtools::install(dependencies = TRUE)"

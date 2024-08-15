@@ -35,7 +35,7 @@ devtools::install_github("ONSBR/smapOnsR")
 
 ## Imagem Docker
 
-É disponibilizada uma imagem com o intepretador da linguagem R a partir da imagem oficial no [DockerHub](https://hub.docker.com/_/r-base) com o `smapOnsR` instalado, juntamente com todas as suas dependências. A imagem está disponível em [onstec/smaponsr](https://hub.docker.com/r/onstec/smaponsr) e pode ser utilizada por qualquer usuário para construir suas aplicações containerizadas. Um exemplo de `Dockerfile` utilizando a imagem, assumindo que todo o código que faz uso do `smapOnsR` está no arquivo `main.R`:
+É disponibilizada uma imagem com o intepretador da linguagem R a partir da imagem no [rocker/tidyverse](https://hub.docker.com/r/rocker/tidyverse) com o `smapOnsR` instalado, juntamente com todas as suas dependências. A imagem está disponível em [onstec/smaponsr](https://hub.docker.com/r/onstec/smaponsr) e pode ser utilizada por qualquer usuário para construir suas aplicações containerizadas. Um exemplo de `Dockerfile` utilizando a imagem, assumindo que todo o código que faz uso do `smapOnsR` está no arquivo `main.R`:
 
 ```Dockerfile
 
