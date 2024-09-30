@@ -164,8 +164,8 @@ executa_visualizador_calibracao <- function(){
                 parametros_posto <- parametros_posto()
                 postos_plu <- postos_plu()
                 modelo <- new_modelo_smap_ons(parametros_posto, postos_plu[postos_plu$nome == input$sub_bacia])
-                kt_max <- sum(modelo$kt[1:2] > 0)
-                kt_min <- sum(modelo$kt[4:63] > 0)
+                kt_max <- attributes(modelo)$kt_max
+                kt_min <- attributes(modelo)$kt_min
                 shiny::updateNumericInput(session, "str", value = vetor_modelo[1])
                 shiny::updateNumericInput(session, "k2t", value = vetor_modelo[2])
                 shiny::updateNumericInput(session, "crec", value = vetor_modelo[3])
