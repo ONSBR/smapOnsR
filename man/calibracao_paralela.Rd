@@ -22,7 +22,9 @@ calibracao_paralela(
   postos_plu,
   funcao_objetivo = calcula_dm,
   fnscale = 1,
-  pesos = rep(1/length(vazao[, valor]), length(vazao[, valor]))
+  pesos = rep(1/length(vazao[, valor]), length(vazao[, valor])),
+  tipo_escala = 0,
+  ndeps = 0.001
 )
 }
 \arguments{
@@ -84,6 +86,10 @@ calibracao_paralela(
 \item{fnscale}{1 indica minimizacao da funcao objetivo / -1 maximizacao}
 
 \item{pesos}{vetor de pesos a serem utilizados para cada data durante a calibracao}
+
+\item{tipo_escala}{indica a padronizacao dos parametros durante a otimizacao (parscale)}
+
+\item{ndeps}{parametro da otimizacao}
 }
 \value{
 ajuste valor da funcao objetivo
