@@ -4,8 +4,7 @@
 #' 
 #' Realiza a assimilacao de dados com a metodologia oficial
 #'
-#' @param vetor_modelo objeto de classe smap_ons
-#' @param area area da sub-bacia
+#' @param modelo objeto de classe smap_ons
 #' @param Supin Escoamento superficial inicial
 #' @param EbInic Escoamento Subterraneo inicial
 #' @param TuInic Taxa de umidade inicial do solo
@@ -20,9 +19,9 @@
 #' @param vazao vetor de vazao observada
 #' @param numero_dias_assimilacao numero de dias da assimilacao
 #' @param ajusta_precipitacao flag para a realizacao de ajuste da precipitacao observada pelo peso do penultimo dia de precipitacao
-#' @param limite_prec limites mínimo e máximo dos pesos utilizados para ponderar a precipitacao durante a etapa de assimilacao
-#' @param limite_ebin limites mínimo e máximo da vazao de base inicial
-#' @param limite_supin limites mínimo e máximo da vazao superficial inicial
+#' @param limite_prec limites minimo e maximo dos pesos utilizados para ponderar a precipitacao durante a etapa de assimilacao
+#' @param limite_ebin limites minimo e maximo da vazao de base inicial
+#' @param limite_supin limites minimo e maximo da vazao superficial inicial
 #' @param funcao_objetivo funcao objetivo a ser utilizada na assimilacao
 #' @param fnscale valor indicando se a funcao deve ser maximizada ou minimizada
 #'
@@ -79,16 +78,20 @@
 #'     }
 #' @export
 
-assimilacao_oficial <- function(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao_assimilacao,
+assimilacao_oficial <- function(modelo, EbInic, TuInic, Supin, precipitacao_assimilacao,
       evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias_assimilacao,
       ajusta_precipitacao, limite_prec = c(0.5, 2), limite_ebin = c(0.8, 1.2),
       limite_supin = c(0, 2), funcao_objetivo = calcula_dm, fnscale = 1) {
     
-    kt <- vetor_modelo[12:74]
-    kt_max <- sum(vetor_modelo[12:13] > 0)
-    kt_min <- sum(vetor_modelo[15:74] > 0)
+    
+    kt <- modelo$kt
+    vetor_modelo <- unlist(modelo)
+    area <- attributes(modelo)$area
+    kt_min <- attributes(modelo)$kt_min
+    kt_max <- attributes(modelo)$kt_max
+
     precipitacao_ponderada <- data.table::data.table(precipitacao_assimilacao)
-    precipitacao_ponderada[, valor := valor * vetor_modelo[75]]
+    precipitacao_ponderada[, valor := valor * modelo$pcof]
     precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada[, valor], kt,
                                                     kt_max, kt_min)
     vazao_observada_maxima <- max(vazao)
@@ -252,8 +255,7 @@ funcao_objetivo_assimilacao_oficial <- function(vetor_variaveis, vetor_modelo, T
 #'
 #' Realiza a assimilacao de dados considerando serie temporal de evapotranspiracao
 #'
-#' @param vetor_modelo objeto de classe smap_ons
-#' @param area area da sub-bacia
+#' @param modelo objeto de classe smap_ons
 #' @param Supin Escoamento superficial inicial
 #' @param EbInic Escoamento Subterraneo inicial
 #' @param TuInic Taxa de umidade inicial do solo
@@ -268,10 +270,10 @@ funcao_objetivo_assimilacao_oficial <- function(vetor_variaveis, vetor_modelo, T
 #' @param vazao vetor de vazao observada
 #' @param numero_dias_assimilacao numero de dias da assimilacao
 #' @param ajusta_precipitacao flag para a realizacao de ajuste da precipitacao observada pelo peso do penultimo dia de precipitacao
-#' @param limite_prec limites mínimo e máximo dos pesos utilizados para ponderar a precipitacao durante a etapa de assimilacao
-#' @param limite_etp limites mínimo e máximo dos pesos utilizados para ponderar a precipitacao durante a etapa de assimilacao
-#' @param limite_ebin limites mínimo e máximo da vazao de base inicial
-#' @param limite_supin limites mínimo e máximo da vazao superficial inicial
+#' @param limite_prec limites minimo e maximo dos pesos utilizados para ponderar a precipitacao durante a etapa de assimilacao
+#' @param limite_etp limites minimo e maximo dos pesos utilizados para ponderar a precipitacao durante a etapa de assimilacao
+#' @param limite_ebin limites minimo e maximo da vazao de base inicial
+#' @param limite_supin limites minimo e maximo da vazao superficial inicial
 #' @param funcao_objetivo funcao objetivo a ser utilizada na assimilacao
 #' @param fnscale valor indicando se a funcao deve ser maximizada ou minimizada
 #'
@@ -326,17 +328,19 @@ funcao_objetivo_assimilacao_oficial <- function(vetor_variaveis, vetor_modelo, T
 #'     }
 #' @export
 
-assimilacao_evapotranspiracao <- function(vetor_modelo, area, EbInic, TuInic, Supin, 
+assimilacao_evapotranspiracao <- function(modelo, EbInic, TuInic, Supin, 
       precipitacao_assimilacao, evapotranspiracao, evapotranspiracao_planicie,
       vazao, numero_dias_assimilacao, ajusta_precipitacao,
       limite_prec = c(0.5, 2), limite_etp = c(0.5, 2), limite_ebin = c(0.8, 1.2),
       limite_supin = c(0, 2), funcao_objetivo = calcula_dm, fnscale = 1) {
     
-    kt <- vetor_modelo[12:74]
-    kt_max <- sum(vetor_modelo[12:13] > 0)
-    kt_min <- sum(vetor_modelo[15:74] > 0)
+    kt <- modelo$kt
+    vetor_modelo <- unlist(modelo)
+    area <- attributes(modelo)$area
+    kt_min <- attributes(modelo)$kt_min
+    kt_max <- attributes(modelo)$kt_max
     precipitacao_ponderada <- data.table::data.table(precipitacao_assimilacao)
-    precipitacao_ponderada[, valor := valor * vetor_modelo[75]]
+    precipitacao_ponderada[, valor := valor * modelo$pcof]
     precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada[, valor], kt,
                                                     kt_max, kt_min)
 

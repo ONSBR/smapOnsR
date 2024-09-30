@@ -158,7 +158,7 @@ combina_observacao_previsao <- function(observado, previsto){
 #' @param datas_rodadas data table com as colunas
 #'     \itemize{
 #'     \item{data - data da rodada}
-#'     \item{numero_dias_previsao - numero de dias de previsão}
+#'     \item{numero_dias_previsao - numero de dias de previsao}
 #'     }
 #' @param precipitacao_prevista data.table com as colunas
 #'     \itemize{

@@ -41,21 +41,21 @@ test_that("testa a assimilacao de dados oficial", {
         precipitacao_ponderada, evapotranspiracao, evapotranspiracao_planicie, vazao, area,
         numero_dias)
 
-    saida <- assimilacao_oficial(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao,
+    saida <- assimilacao_oficial(modelo, EbInic, TuInic, Supin, precipitacao,
         evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias = dias_assimilacao,
         ajusta_precipitacao = 0)
 
     expect_equal((saida$ajuste$value < fo), TRUE)
 
     ## CT21.2
-    saida2 <- assimilacao_oficial(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao,
+    saida2 <- assimilacao_oficial(modelo, EbInic, TuInic, Supin, precipitacao,
         evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias = dias_assimilacao,
         ajusta_precipitacao = 0, funcao_objetivo = calcula_dm)
 
     expect_equal(saida, saida2)
 
     ## CT21.3
-    saida3 <- assimilacao_oficial(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao,
+    saida3 <- assimilacao_oficial(modelo, EbInic, TuInic, Supin, precipitacao,
         evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias = dias_assimilacao,
         ajusta_precipitacao = 0, funcao_objetivo = calcula_mape)
     idia <- dias_assimilacao:1
@@ -63,7 +63,7 @@ test_that("testa a assimilacao de dados oficial", {
     expect_equal(calcula_mape(saida3$simulacao[, 1], vazao, pesos), saida3$ajuste$value)
 
     ## CT21.4
-    saida4 <- assimilacao_oficial(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao,
+    saida4 <- assimilacao_oficial(modelo, EbInic, TuInic, Supin, precipitacao,
         evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias = dias_assimilacao,
         ajusta_precipitacao = 0, funcao_objetivo = calcula_nse, fnscale = -1)
     expect_equal(calcula_nse(saida4$simulacao[, 1], vazao, pesos), saida4$ajuste$value)
@@ -112,21 +112,21 @@ test_that("testa a assimilacao de dados com evapotranspiracao", {
         precipitacao_ponderada, evapotranspiracao, evapotranspiracao_planicie, vazao, area,
         numero_dias)
 
-    saida <- assimilacao_evapotranspiracao(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao,
+    saida <- assimilacao_evapotranspiracao(modelo, EbInic, TuInic, Supin, precipitacao,
         evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias = dias_assimilacao,
         ajusta_precipitacao = 0)
 
     expect_equal((saida$ajuste$value < fo), TRUE)
 
     ## CT21.6
-    saida2 <- assimilacao_evapotranspiracao(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao,
+    saida2 <- assimilacao_evapotranspiracao(modelo, EbInic, TuInic, Supin, precipitacao,
         evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias = dias_assimilacao,
         funcao_objetivo = calcula_dm, ajusta_precipitacao = 0)
 
     expect_equal(saida, saida2)
 
     ## CT21.7
-    saida3 <- assimilacao_evapotranspiracao(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao,
+    saida3 <- assimilacao_evapotranspiracao(modelo, EbInic, TuInic, Supin, precipitacao,
         evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias = dias_assimilacao,
         funcao_objetivo = calcula_mape, ajusta_precipitacao = 0)
     idia <- dias_assimilacao:1
@@ -134,7 +134,7 @@ test_that("testa a assimilacao de dados com evapotranspiracao", {
     expect_equal(calcula_mape(saida3$simulacao[, 1], vazao, pesos), saida3$ajuste$value)
 
     ## CT21.8
-    saida4 <- assimilacao_evapotranspiracao(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao,
+    saida4 <- assimilacao_evapotranspiracao(modelo, EbInic, TuInic, Supin, precipitacao,
         evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias = dias_assimilacao,
         ajusta_precipitacao = 0, funcao_objetivo = calcula_nse, fnscale = -1)
     expect_equal(calcula_nse(saida4$simulacao[, 1], vazao, pesos), saida4$ajuste$value)

@@ -48,8 +48,9 @@ le_entrada_parametros <- function(pasta_entrada, nome_subbacia) {
         parametros_smap[1, iparametro] <- as.numeric(parametros[(iparametro - 64), V1])
     }
 
-    parametros_smap[1, 81] <- sum(parametros_smap[, 7:66] > 0)
-    parametros_smap[1, 82] <- sum(parametros_smap[, 4:5] > 0)
+    parametros_smap[1, 81] <- max(which(parametros_smap[, 7:66] > 0)[length(which(parametros_smap[, 7:66] > 0))], 0, na.rm = TRUE)
+    parametros_smap[1, 82] <- max(sum(parametros_smap[, 4:5] > 0), 0, na.rm = TRUE)
+    
     if (any(is.na(parametros_smap[, 4:66]))) stop(paste0("Valor de kt nao numerico no arquivo ", arq))
     if (sum(parametros_smap[, 4:66]) < 0.995) stop(paste0("Somatorio dos kts inferior a 0.995 no arquivo ", arq))
     if (sum(parametros_smap[, 4:66]) > 1.005) stop(paste0("Somatorio dos kts superior a 1.005 no arquivo ", arq))

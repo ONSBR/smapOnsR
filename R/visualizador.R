@@ -1036,13 +1036,13 @@ executa_visualizador_calibracao <- function(){
                                           "grad_pcof", "grad_ecof", "grad_ecof2", "grad_alfa", 
                                           "grad_beta", paste0("grad_ke", 1:numero_postos_plu))
                     } else {
-                    colnames(tabela) <- c("step", "str", "k2t", "crec", "capc", "k_kt", "h1", "k2t2", 
-                                          "ai", "h", "k1t", "k3t", "pcof", "ecof", "ecof2", 
-                                          "alfa", "beta", "fn", "grad_str", "grad_k2t", "grad_crec", 
-                                          "grad_capc", "grad_k_kt", "grad_h1", "grad_k2t2", 
-                                          "grad_ai", "grad_h", "grad_k1t", "grad_k3t", 
-                                          "grad_pcof", "grad_ecof", "grad_ecof2", "grad_alfa", 
-                                          "grad_beta")
+                        colnames(tabela) <- c("step", "str", "k2t", "crec", "capc", "k_kt", "h1", "k2t2", 
+                                            "ai", "h", "k1t", "k3t", "pcof", "ecof", "ecof2", 
+                                            "alfa", "beta", "fn", "grad_str", "grad_k2t", "grad_crec", 
+                                            "grad_capc", "grad_k_kt", "grad_h1", "grad_k2t2", 
+                                            "grad_ai", "grad_h", "grad_k1t", "grad_k3t", 
+                                            "grad_pcof", "grad_ecof", "grad_ecof2", "grad_alfa", 
+                                            "grad_beta")
                     }
                     info_calibracao(tabela)
                 }

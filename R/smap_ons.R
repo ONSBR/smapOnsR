@@ -133,6 +133,8 @@ new_modelo_smap_ons <- function(parametros, postos_plu){
   #coeficiente temporal
   kt <- parametros[substr(parametro, 1, 2) == "Kt", valor]
   names(kt) <- parametros[substr(parametro, 1, 2) == "Kt", parametro]
+  kt_min <- max(which(kt[4:63] > 0)[length(which(kt[4:63] > 0))], 0, na.rm = TRUE)
+  kt_max <- max(sum(kt[1:2] > 0), 0, na.rm = TRUE)
 
   #coeficientes de ponderacao
   pcof <- parametros[parametro == "Pcof", valor]
@@ -146,6 +148,8 @@ new_modelo_smap_ons <- function(parametros, postos_plu){
   attr(modelo, "nome") <- parametros[, unique(nome)]
   attr(modelo, "area") <- area
   attr(modelo, "postos_plu") <- postos_plu
+  attr(modelo, "kt_max") <- kt_max
+  attr(modelo, "kt_min") <- kt_min
 
   class(modelo) <- "smap_ons"
   modelo
