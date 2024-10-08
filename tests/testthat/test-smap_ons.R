@@ -77,6 +77,24 @@ test_that("testa calculo de kt_min e kt_max", {
   expect_equal(attributes(modelo)$kt_min, 16)
 
   unlink(system.file("extdata", "Validacao", package = "smapOnsR"), recursive = TRUE)
+
+  pasta_entrada <- file.path(system.file("extdata", package = "smapOnsR"))
+  arquivos_zip <- unzip(system.file("extdata", "dados_entrada.zip", package = "smapOnsR"), 
+                  list = TRUE)
+  pasta_especifica <- "caso_completo2"
+  arquivos <- arquivos_zip$Name[grepl(pasta_especifica, arquivos_zip$Name)]
+  zip::unzip(system.file("extdata", "dados_entrada.zip", package = "smapOnsR"),
+            file = arquivos, 
+            exdir = pasta_entrada)
+  
+  pasta_entrada <- system.file("extdata", "caso_completo2", "Arq_Entrada", package = "smapOnsR")
+  entrada <- le_arq_entrada(pasta_entrada)
+
+  modelo <- new_modelo_smap_ons(entrada$parametros[nome == "tucurui"],
+            entrada$postos_plu[nome == "tucurui"])
+  expect_equal(attributes(modelo)$kt_max, 2)
+  expect_equal(attributes(modelo)$kt_min, 4)
+  unlink(system.file("extdata", "caso_completo2", package = "smapOnsR"), recursive = TRUE)
 })
 
   #modelo <- new_modelo_smap_ons(parametros[nome == sub_bacia], postos_plu[posto == sub_bacia])

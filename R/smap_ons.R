@@ -134,7 +134,7 @@ new_modelo_smap_ons <- function(parametros, postos_plu){
   kt <- parametros[substr(parametro, 1, 2) == "Kt", valor]
   names(kt) <- parametros[substr(parametro, 1, 2) == "Kt", parametro]
   kt_min <- max(which(kt[4:63] > 0)[length(which(kt[4:63] > 0))], 0, na.rm = TRUE)
-  kt_max <- max(sum(kt[1:2] > 0), 0, na.rm = TRUE)
+  kt_max <- sum(kt[1:2] > 0, na.rm = TRUE)
 
   #coeficientes de ponderacao
   pcof <- parametros[parametro == "Pcof", valor]
