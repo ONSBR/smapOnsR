@@ -1,3 +1,27 @@
+# smapOnsR 1.2.0
+
+## Minor changes
+
+* Parametros adicionais para a otimizacao da calibracao
+
+## Bug fixes
+
+* Correcao do calculo de kt min
+
+# smapOnsR 1.1.0
+
+## Major changes
+
+* Disponibilizacao de Docker
+
+## Minor changes
+
+* Ajuste na assimilacao para casos com menos de 31 dias
+
+* Ajuste na funcao de totalizacao
+
+* Ajuste no arquivo de configuracao exemplo
+
 # smapOnsR 1.0.0
 
 * Versão validada a ser utilizada oficialmente
@@ -6,7 +30,7 @@
 
 ## Major changes
 
-* Processo de calibração paralelizado
+* Processo de calibracao paralelizado
 
 ## Minor changes
 
@@ -53,7 +77,7 @@
 
 ## Major changes
 
-* Possibilidade de ajuste da precipitacao observada apos o processo de assimilacao. O processo de assimilacao permanece igual. Apos o termino da assimilacao a precipitação observada diaria e corrigida pelo fator do penultimo dia de assimilacao.
+* Possibilidade de ajuste da precipitacao observada apos o processo de assimilacao. O processo de assimilacao permanece igual. Apos o termino da assimilacao a precipitacao observada diaria e corrigida pelo fator do penultimo dia de assimilacao.
 
 ## Minor changes
 
@@ -73,4 +97,4 @@
 
 # smapOnsR 0.1.0
 
-* Versão inicial utilizada na validação do pacote smapOnsR
+* Versão inicial utilizada na validacao do pacote smapOnsR
