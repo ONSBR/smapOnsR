@@ -5,8 +5,7 @@
 \title{Assimilacao com evapotranspiracao}
 \usage{
 assimilacao_evapotranspiracao(
-  vetor_modelo,
-  area,
+  modelo,
   EbInic,
   TuInic,
   Supin,
@@ -25,9 +24,7 @@ assimilacao_evapotranspiracao(
 )
 }
 \arguments{
-\item{vetor_modelo}{objeto de classe smap_ons}
-
-\item{area}{area da sub-bacia}
+\item{modelo}{objeto de classe smap_ons}
 
 \item{EbInic}{Escoamento Subterraneo inicial}
 
@@ -52,13 +49,13 @@ assimilacao_evapotranspiracao(
 
 \item{ajusta_precipitacao}{flag para a realizacao de ajuste da precipitacao observada pelo peso do penultimo dia de precipitacao}
 
-\item{limite_prec}{limites mínimo e máximo dos pesos utilizados para ponderar a precipitacao durante a etapa de assimilacao}
+\item{limite_prec}{limites minimo e maximo dos pesos utilizados para ponderar a precipitacao durante a etapa de assimilacao}
 
-\item{limite_etp}{limites mínimo e máximo dos pesos utilizados para ponderar a precipitacao durante a etapa de assimilacao}
+\item{limite_etp}{limites minimo e maximo dos pesos utilizados para ponderar a precipitacao durante a etapa de assimilacao}
 
-\item{limite_ebin}{limites mínimo e máximo da vazao de base inicial}
+\item{limite_ebin}{limites minimo e maximo da vazao de base inicial}
 
-\item{limite_supin}{limites mínimo e máximo da vazao superficial inicial}
+\item{limite_supin}{limites minimo e maximo da vazao superficial inicial}
 
 \item{funcao_objetivo}{funcao objetivo a ser utilizada na assimilacao}
 

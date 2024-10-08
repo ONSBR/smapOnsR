@@ -332,6 +332,8 @@ calibracao <- function(vetor_modelo, kt_min, kt_max, area, EbInic, TuInic, Supin
 #' @param funcao_objetivo funcao objetivo a ser utilizada na calibracao
 #' @param fnscale 1 indica minimizacao da funcao objetivo / -1 maximizacao
 #' @param pesos vetor de pesos a serem utilizados para cada data durante a calibracao
+#' @param tipo_escala indica a padronizacao dos parametros durante a otimizacao (parscale)
+#' @param ndeps parametro da otimizacao
 #' @examples 
 #' nome2 <- "baixoig"
 #'  modelo <- new_modelo_smap_ons(parametros[nome == nome2], postos_plu[nome == nome2])
@@ -386,7 +388,8 @@ calibracao <- function(vetor_modelo, kt_min, kt_max, area, EbInic, TuInic, Supin
 calibracao_paralela <- function(vetor_modelo, kt_min, kt_max, area, EbInic, TuInic, Supin, precipitacao,
       evapotranspiracao, vazao, data_inicio_objetivo, data_fim_objetivo,
       limite_inferior, limite_superior, postos_plu, funcao_objetivo = calcula_dm, fnscale = 1,
-      pesos = rep(1 / length(vazao[, valor]), length(vazao[, valor]))) {
+      pesos = rep(1 / length(vazao[, valor]), length(vazao[, valor])),
+      tipo_escala = 0, ndeps = 0.001) {
 
   if (length(unique(limite_inferior == limite_superior)) == 2) {
     limite_superior[limite_inferior == limite_superior] <- limite_superior[limite_inferior == limite_superior] + 0.000001
@@ -396,6 +399,14 @@ calibracao_paralela <- function(vetor_modelo, kt_min, kt_max, area, EbInic, TuIn
   numero_dias <- nrow(evapotranspiracao)
   inicio_objetivo <- evapotranspiracao[data <= data_inicio_objetivo, .N]
   fim_objetivo <- evapotranspiracao[data <= data_fim_objetivo, .N]
+
+  if (tipo_escala == 0) {
+    parscale <- rep(1, length(vetor_modelo))
+  } else if (tipo_escala == 1) {
+    parscale <- limite_superior
+  }
+
+  ndeps <- rep(ndeps, length(vetor_modelo))
 
   #------------------paralelismo
   cores <- parallel::detectCores()
@@ -421,7 +432,8 @@ calibracao_paralela <- function(vetor_modelo, kt_min, kt_max, area, EbInic, TuIn
               numero_postos_plu = numero_postos_plu,
               funcao_objetivo = funcao_objetivo,
               parallel = list(cl = cl, forward = FALSE, loginfo = TRUE),
-              control = list(fnscale = fnscale))
+              control = list(fnscale = fnscale, parscale = parscale,
+              ndeps = ndeps))
 
   parallel::stopCluster(cl)
   

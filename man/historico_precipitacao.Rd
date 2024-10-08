@@ -24,7 +24,7 @@ ONS
 historico_precipitacao
 }
 \description{
-Historico de precipitação das sub-bacias modeladas pelo SMAP/ONS
+Historico de precipitacao das sub-bacias modeladas pelo SMAP/ONS
 para o periodo de 2010 a 2022
 }
 \keyword{datasets}

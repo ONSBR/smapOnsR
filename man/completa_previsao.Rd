@@ -19,7 +19,7 @@ completa_previsao(precipitacao_prevista, datas_rodadas, numero_dias = 2)
 \item{datas_rodadas}{data table com as colunas
 \itemize{
 \item{data - data da rodada}
-\item{numero_dias_previsao - numero de dias de previsão}
+\item{numero_dias_previsao - numero de dias de previsao}
 }}
 
 \item{numero_dias}{numero de dias alem da data final da previsao a ser verificado}

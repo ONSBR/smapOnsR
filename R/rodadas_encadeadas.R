@@ -149,11 +149,11 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
 
         modelo <- new_modelo_smap_ons(parametros[nome == sub_bacia], postos_plu[nome %in% sub_bacia])
         kt <- modelo$kt
-        kt_max <- sum(modelo$kt[1:2] > 0)
-        kt_min <- sum(modelo$kt[4:63] > 0)
-    
+
         vetor_modelo <- unlist(modelo)
         area <- attributes(modelo)$area
+        kt_min <- attributes(modelo)$kt_min
+        kt_max <- attributes(modelo)$kt_max
 
         for (idata in 1:numero_datas){
             dataRodada <- datas_rodadas[idata, data]  
@@ -187,10 +187,10 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
             precipitacao_assimilacao[, data_rodada := NULL]
 
             evapotranspiracao <- transforma_NC_serie(precipitacao_assimilacao[data < dataRodada & data >= (dataRodada - numero_dias_assimilacao)], normal_climatologica) 
-            evapotranspiracao_planicie <- evapotranspiracao[, valor] * vetor_modelo[77]
-            evapotranspiracao <- evapotranspiracao[, valor] * vetor_modelo[76]
+            evapotranspiracao_planicie <- evapotranspiracao[, valor] * modelo$ecof2
+            evapotranspiracao <- evapotranspiracao[, valor] * modelo$ecof
 
-            ajuste <- assimilacao_oficial(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao_assimilacao,
+            ajuste <- assimilacao_oficial(modelo, EbInic, TuInic, Supin, precipitacao_assimilacao,
                         evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias_assimilacao,
                         ajusta_precipitacao, limite_prec = c(limite_inferior_prec, limite_superior_prec),
                         limite_ebin = c(limite_inferior_ebin, limite_superior_ebin), funcao_objetivo = funcao_objetivo, fnscale = fnscale)
@@ -210,7 +210,7 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
 
             saida_precipitacao <- data.table::rbindlist(list(saida_precipitacao, precipitacao))
             
-            precipitacao[, valor := valor * vetor_modelo[75]]
+            precipitacao[, valor := valor * modelo$pcof]
             matriz_precipitacao <- array(precipitacao[data_previsao < (dataRodada + kt_max - 1) & data_rodada == dataRodada & 
                 data_previsao >= (dataRodada - numero_dias_assimilacao - kt_min), valor], c(numero_dias_assimilacao + kt_max + kt_min - 1, numero_cenarios))
             matriz_precipitacao <- t(ponderacao_temporal(matriz_precipitacao, kt, kt_max, kt_min))
@@ -235,8 +235,8 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
             precipitacao[, data_rodada := NULL]
             precipitacao[, cenario := NULL]
             evapotranspiracao <- transforma_NC_serie(precipitacao[data <= dataRodada + numero_dias_previsao - 1 & data >= (dataRodada - numero_dias_assimilacao)], normal_climatologica)
-            matriz_evapotranspiracao_planicie <- matrix(evapotranspiracao[, valor] * vetor_modelo[77], nrow = numero_cenarios, ncol = nrow(evapotranspiracao), byrow = TRUE)
-            matriz_evapotranspiracao <- matrix(evapotranspiracao[, valor] * vetor_modelo[76], nrow = numero_cenarios, ncol = nrow(evapotranspiracao), byrow = TRUE)
+            matriz_evapotranspiracao_planicie <- matrix(evapotranspiracao[, valor] * modelo$ecof2, nrow = numero_cenarios, ncol = nrow(evapotranspiracao), byrow = TRUE)
+            matriz_evapotranspiracao <- matrix(evapotranspiracao[, valor] * modelo$ecof, nrow = numero_cenarios, ncol = nrow(evapotranspiracao), byrow = TRUE)
 
             EbInic <- ajuste$ajuste$par[numero_dias_assimilacao + 1]
             Supin <-  ajuste$ajuste$par[numero_dias_assimilacao + 2]
@@ -435,8 +435,8 @@ rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observa
 
         modelo <- new_modelo_smap_ons(parametros[nome == sub_bacia], postos_plu[nome %in% sub_bacia])
         kt <- modelo$kt
-        kt_max <- sum(modelo$kt[1:2] > 0)
-        kt_min <- sum(modelo$kt[4:63] > 0)
+        kt_min <- attributes(modelo)$kt_min
+        kt_max <- attributes(modelo)$kt_max
         vetor_modelo <- unlist(modelo)
         area <- attributes(modelo)$area
 
@@ -472,7 +472,7 @@ rodada_encadeada_etp <- function(parametros, inicializacao, precipitacao_observa
             evapotranspiracao_planicie <- evapotranspiracao_observada[posto == sub_bacia & data < dataRodada & data >= (dataRodada - numero_dias_assimilacao), valor] * vetor_modelo[77]
             evapotranspiracao <- evapotranspiracao_observada[posto == sub_bacia & data < dataRodada & data >= (dataRodada - numero_dias_assimilacao), valor] * vetor_modelo[76]
 
-            ajuste <- assimilacao_evapotranspiracao(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao_assimilacao,
+            ajuste <- assimilacao_evapotranspiracao(modelo, EbInic, TuInic, Supin, precipitacao_assimilacao,
                         evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias_assimilacao, ajusta_precipitacao,
                         limite_prec = c(limite_inferior_prec, limite_superior_prec), limite_etp = c(0.5, 2),
                         limite_ebin = c(limite_inferior_ebin, limite_superior_ebin), limite_supin = c(0, 2),
@@ -709,8 +709,8 @@ rodada_sem_assimilacao <- function(parametros, inicializacao, precipitacao_obser
 
         modelo <- new_modelo_smap_ons(parametros[nome == sub_bacia], postos_plu[nome %in% sub_bacia])
         kt <- modelo$kt
-        kt_max <- parametros[nome == sub_bacia & parametro == "ktMax", valor]
-        kt_min <- parametros[nome == sub_bacia & parametro == "ktMin", valor]
+        kt_min <- attributes(modelo)$kt_min
+        kt_max <- attributes(modelo)$kt_max
         vetor_modelo <- unlist(modelo)
         area <- attributes(modelo)$area
 

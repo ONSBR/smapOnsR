@@ -125,6 +125,8 @@ executa_visualizador_calibracao <- function(){
                             shiny::dateRangeInput("zoom_calibracao", "Zoom calibracao", start = NULL, end = NULL, min = NULL, max = NULL),
                             dygraphs::dygraphOutput("dygraph_zoom", heigh = "600px"),
                             shiny::selectInput(inputId ="funcao_objetivo", label = shiny::h3("Selecione a funcao objetivo"), choices = c("dm", "nse", "mape", "kge"), selected = "dm"),
+                            shiny::selectInput(inputId = "tipo_escala", label = shiny::h3("Selecione a escala das variaveis"), choices = c(0, 1), selected = 0),
+                            shiny::selectInput(inputId ="ndeps", label = shiny::h3("Passo de otimizacao"), choices = c(1, 0.1, 0.001, 0.0001, 0.00001, 0.000001, 0.0000001), selected = 0.001),
                             shiny::column(1, shiny::actionButton(inputId = "botao_calibracao", label = "Calibrar", class = "btn-lg btn-success")),
                             shiny::column(1, shiny::checkboxGroupInput("variaveis", "variaveis", choices = c("Qsup1", "Qsup2", "Qplan"))),
                             shiny::column(1, shiny::textOutput("funcao_objetivo")),
@@ -162,8 +164,8 @@ executa_visualizador_calibracao <- function(){
                 parametros_posto <- parametros_posto()
                 postos_plu <- postos_plu()
                 modelo <- new_modelo_smap_ons(parametros_posto, postos_plu[postos_plu$nome == input$sub_bacia])
-                kt_max <- sum(vetor_modelo[1:2] > 0)
-                kt_min <- sum(modelo$kt[4:63] > 0)
+                kt_max <- attributes(modelo)$kt_max
+                kt_min <- attributes(modelo)$kt_min
                 shiny::updateNumericInput(session, "str", value = vetor_modelo[1])
                 shiny::updateNumericInput(session, "k2t", value = vetor_modelo[2])
                 shiny::updateNumericInput(session, "crec", value = vetor_modelo[3])
@@ -940,6 +942,8 @@ executa_visualizador_calibracao <- function(){
             Ebin <- input$Ebin
             Tuin <- input$Tuin
             Supin <- input$Supin
+            tipo_escala <- input$tipo_escala
+            ndeps <- as.numeric(input$ndeps)
 
             data_inicio_objetivo <- input$periodo_calibracao[1]
             data_fim_objetivo <- input$periodo_calibracao[2]
@@ -989,7 +993,7 @@ executa_visualizador_calibracao <- function(){
                 calibracao_paralela(vetor_modelo, kt_min, kt_max, area, Ebin, Tuin, Supin, precipitacao,
                                     evapotranspiracao_fo, vazao_fo, data_inicio_objetivo, data_fim_objetivo,
                                     limite_inferior, limite_superior, postos_plu[postos_plu$nome == input$sub_bacia],
-                                    funcao_objetivo, fnscale, vazao_fo[, peso])
+                                    funcao_objetivo, fnscale, vazao_fo[, peso], tipo_escala, ndeps)
             })
             
             shiny::observe({
@@ -1022,13 +1026,24 @@ executa_visualizador_calibracao <- function(){
                     shiny::updateActionButton(session, "botao_calibracao", label = "Calibrar")
 
                     tabela <- data.table::as.data.table(future::value(par)$loginfo)
-                    colnames(tabela) <- c("step", "str", "k2t", "crec", "capc", "k_kt", "h1", "k2t2", 
+                    if (numero_postos_plu > 1) {
+                        colnames(tabela) <- c("step", "str", "k2t", "crec", "capc", "k_kt", "h1", "k2t2", 
                                           "ai", "h", "k1t", "k3t", "pcof", "ecof", "ecof2", 
-                                          "alfa", "beta", "fn", "grad_str", "grad_k2t", "grad_crec", 
+                                          "alfa", "beta", paste0("ke", 1:numero_postos_plu),
+                                          "fn", "grad_str", "grad_k2t", "grad_crec", 
                                           "grad_capc", "grad_k_kt", "grad_h1", "grad_k2t2", 
                                           "grad_ai", "grad_h", "grad_k1t", "grad_k3t", 
                                           "grad_pcof", "grad_ecof", "grad_ecof2", "grad_alfa", 
-                                          "grad_beta")
+                                          "grad_beta", paste0("grad_ke", 1:numero_postos_plu))
+                    } else {
+                        colnames(tabela) <- c("step", "str", "k2t", "crec", "capc", "k_kt", "h1", "k2t2", 
+                                            "ai", "h", "k1t", "k3t", "pcof", "ecof", "ecof2", 
+                                            "alfa", "beta", "fn", "grad_str", "grad_k2t", "grad_crec", 
+                                            "grad_capc", "grad_k_kt", "grad_h1", "grad_k2t2", 
+                                            "grad_ai", "grad_h", "grad_k1t", "grad_k3t", 
+                                            "grad_pcof", "grad_ecof", "grad_ecof2", "grad_alfa", 
+                                            "grad_beta")
+                    }
                     info_calibracao(tabela)
                 }
             })

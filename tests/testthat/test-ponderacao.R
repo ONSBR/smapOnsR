@@ -17,6 +17,41 @@ test_that("Testa ponderacao temporal", {
   kt[2] <- kt[2] + 0.001
   saida <- ponderacao_temporal(serie_temporal, kt, kt_max, kt_min)
   expect_equal(saida[29], 4.95354)
+
+  #CT24.4
+  pasta_entrada <- file.path(system.file("extdata", package = "smapOnsR"), "Validacao")
+  dir.create(pasta_entrada)
+  arquivos_zip <- unzip(system.file("extdata", "validacao.zip", package = "smapOnsR"), 
+                  list = TRUE)
+  pasta_especifica <- "CN07/CT7.97/"
+  arquivos <- arquivos_zip$Name[grepl(pasta_especifica, arquivos_zip$Name)]
+  zip::unzip(system.file("extdata", "validacao.zip", package = "smapOnsR"),
+            file = arquivos, 
+            exdir = pasta_entrada)
+  pasta_entrada <- file.path(pasta_entrada, "CN07", "CT7.97")
+  entrada <- le_arq_entrada(pasta_entrada)
+
+  sub_bacia <- "jirau"
+  dataRodada <- entrada$datas_rodadas$data
+  previsao_rodada <- entrada$previsao_precipitacao[nome == sub_bacia]
+  numero_dias_assimilacao <- 31
+  modelo <- new_modelo_smap_ons(entrada$parametros[nome == "jirau"],
+            entrada$postos_plu[nome == "jirau"])
+  kt_max <- attributes(modelo)$kt_max
+  kt_min <- attributes(modelo)$kt_min
+  kt <- modelo$kt
+
+  precipitacao <- data.table::data.table(entrada$precipitacao[nome == sub_bacia &
+  data <= dataRodada & data >= (dataRodada  - kt_min)])
+  precipitacao[, data_rodada := dataRodada]
+  
+  precipitacao <- combina_observacao_previsao(precipitacao, previsao_rodada)
+  precipitacao <- precipitacao[data_previsao <= (dataRodada + kt_max) & 
+                data_previsao >= (dataRodada  - kt_min)]
+  previsao <- ponderacao_temporal(precipitacao[, valor], kt,
+                                                    kt_max, kt_min)
+  expect_equal(previsao, 3.9277411)
+  unlink(system.file("extdata", "Validacao", package = "smapOnsR"), recursive = TRUE)
 })
 
 test_that("Testa ponderacao espacial", {
