@@ -274,7 +274,7 @@ le_entrada_vazao <- function(pasta_entrada, nome_subbacia) {
         stop(paste0("nao existe o arquivo ", pattern))
     }
 
-    vazao <- data.table::fread(arq, header = FALSE, sep = "|", fill = TRUE)
+    vazao <- data.table::fread(arq, header = FALSE, sep = "|", fill = TRUE, dec = ".")
     if(ncol(vazao) != 6) stop(paste0("O arquivo ", arq, " deve possuir 6 colunas"))
 
     vazao[, V1 := NULL]
@@ -343,7 +343,7 @@ le_entrada_posto_plu <- function(pasta_entrada, nome_subbacia) {
 
     if (numero_postos == 0) stop(paste0("Valor nulo de postos plu no arquivo ", arq))
 
-    postos_plu <- data.table::fread(arq, header = FALSE, blank.lines.skip = TRUE, sep = " ")
+    postos_plu <- data.table::fread(arq, header = FALSE, blank.lines.skip = TRUE, sep = " ", dec = ".")
     
     if (ncol(postos_plu) != 2) stop(paste0("Arquivo ", arq, " com menos de 2 colunas"))
 
