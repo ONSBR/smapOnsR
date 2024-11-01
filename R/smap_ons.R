@@ -113,6 +113,68 @@ rodada_varios_dias <- function(modelo, inicializacao, precipitacao, evapotranspi
 #' @return objeto de classe \code{smap_ons}
 #' @export
 
+new_modelo_smap_ons_pmur <- function(parametros, postos_plu){
+  #Param. Gerais SMAP
+  str <- parametros[parametro == "Str", valor]
+  k2t <- parametros[parametro == "K2t", valor]
+  crec <- parametros[parametro == "Crec", valor]
+  capc <- parametros[parametro == "Capc", valor]
+  k_kt <- parametros[parametro == "K_kt", valor]
+  h1 <- parametros[parametro == "H1", valor]
+  k2t2 <- parametros[parametro == "K2t2", valor]
+  area <- parametros[parametro == "Area", valor]
+  lambda <- parametros[parametro == "Lambda", valor]
+
+  #Param. 4 Reserv
+  h <- parametros[parametro == "H", valor]
+  k1t <- parametros[parametro == "K1t", valor]
+  k3t <- parametros[parametro == "K3t", valor]
+
+  #coeficiente temporal
+  kt <- parametros[substr(parametro, 1, 2) == "Kt", valor]
+  names(kt) <- parametros[substr(parametro, 1, 2) == "Kt", parametro]
+  kt_min <- max(which(kt[4:63] > 0)[length(which(kt[4:63] > 0))], 0, na.rm = TRUE)
+  kt_max <- sum(kt[1:2] > 0, na.rm = TRUE)
+
+  #coeficientes de ponderacao
+  pcof <- parametros[parametro == "Pcof", valor]
+  ecof <- parametros[parametro == "Ecof", valor]
+  ecof2 <- parametros[parametro == "Ecof2", valor]
+  pmur <- parametros[parametro == "Pmur", valor]
+
+  modelo <- list(str = str, k2t = k2t, crec = crec, capc = capc, k_kt = k_kt,
+  h1 = h1, k2t2 = k2t2, lambda = lambda, h = h, k1t = k1t, k3t = k3t, kt = kt, pcof = pcof,
+  ecof = ecof, ecof2 = ecof2, pmur = pmur)
+
+  attr(modelo, "nome") <- parametros[, unique(nome)]
+  attr(modelo, "area") <- area
+  attr(modelo, "postos_plu") <- postos_plu
+  attr(modelo, "kt_max") <- kt_max
+  attr(modelo, "kt_min") <- kt_min
+
+  class(modelo) <- "smap_ons"
+  modelo
+}
+
+#' Construtor do modelo classe \code{smap_ons}
+#' 
+#' @param parametros data table com 8910 linhas and 3 colunas:
+#' \describe{
+#'   \itemize{
+#'     \item{nome - nome da sub-bacia}
+#'     \item{parametros - nome do parametros}
+#'     \item{valor - valor do parametro}
+#'     }
+#' }
+#' @param postos_plu data.table  com as colunas
+#'     \itemize{
+#'     \item{nome - nome da sub_bacia}
+#'     \item{posto - nome do posto plu}
+#'     \item{valor - peso do posto plu}
+#'     }
+#' @return objeto de classe \code{smap_ons}
+#' @export
+
 new_modelo_smap_ons <- function(parametros, postos_plu){
   #Param. Gerais SMAP
   str <- parametros[parametro == "Str", valor]
