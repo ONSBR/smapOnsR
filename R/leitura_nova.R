@@ -28,6 +28,8 @@ le_parametros <- function(arq) {
         stop("o arquivos deve deve possuir colunas 'nome', 'parametro' e 'valor'")
     }
 
+    dat <- dat[!grepl("data_", parametro)]
+
     dat[, valor := as.numeric(valor)]
 
     if (any(is.na(dat$valor))) {
