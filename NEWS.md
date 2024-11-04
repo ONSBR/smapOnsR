@@ -1,3 +1,9 @@
+# smapOnsR 1.3.0
+
+## Major changes
+
+* Inclusao da possibilidade de utilizacao dos aprimoramentos no Rsolo
+
 # smapOnsR 1.2.0
 
 ## Minor changes

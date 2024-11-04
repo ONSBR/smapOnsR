@@ -28,6 +28,8 @@ le_parametros <- function(arq) {
         stop("o arquivos deve deve possuir colunas 'nome', 'parametro' e 'valor'")
     }
 
+    dat <- dat[!grepl("data_", parametro)]
+
     dat[, valor := as.numeric(valor)]
 
     if (any(is.na(dat$valor))) {
@@ -53,13 +55,23 @@ le_parametros <- function(arq) {
         dat[duplicated(dat[, .(nome, parametro)]), nome], " no arquivo ", arq, " esta duplicado")
     }
 
-    parametros <- c("Area", "Str", "K2t", "Crec", "Ai", "Capc", 
+    parametros <- c("Area", "Str", "K2t", "Crec", "Ai", "Capc",
     "K_kt", "K2t2", "H1", "H", "K3t", "K1t", "Ecof", "Pcof", "Ecof2")
 
     teste <- dat[, setdiff(parametros, parametro), by = c("nome")]
 
     if (nrow(teste) != 0) {
-        stop(paste0("falta o parametro ", teste$V1, " para a sub-bacia ", teste$nome, " no arquivo ", arq, "\n"))
+
+        if (teste$V1 == "Ai") {
+            parametros <- c("Area", "Str", "K2t", "Crec", "Lambda", "Capc", "Pmur",
+            "K_kt", "K2t2", "H1", "H", "K3t", "K1t", "Ecof", "Pcof", "Ecof2")
+
+            teste <- dat[, setdiff(parametros, parametro), by = c("nome")]
+            
+            stop(paste0("falta o parametro ", teste$V1, " para a sub-bacia ", teste$nome, " no arquivo ", arq, "\n"))
+        } else {
+            stop(paste0("falta o parametro ", teste$V1, " para a sub-bacia ", teste$nome, " no arquivo ", arq, "\n"))
+        }
     }
 
     teste <- dat[substr(parametro, 1, 2) == "Kt", sum(valor), by = c("nome")]
@@ -640,7 +652,7 @@ le_arq_entrada_novo <- function(pasta_entrada) {
             if (precipitacao_observada[, min(data)] > (data_inicio - ktMin))
                 stop(paste0("O historico de precipitacao verificada da sub-bacia ", nome_subbacia, " deve comecar na data ", data_inicio - ktMin))
             if (precipitacao_observada[, max(data)] < (data_fim))
-                stop(paste0("O historico de precipitacao verificada da sub-bacia ", nome_subbacia, " deve terminar na data ", data_fim + ktMax))
+                stop(paste0("O historico de precipitacao verificada da sub-bacia ", nome_subbacia, " deve terminar na data ", data_fim))
         })
         } else {
         stop("nao existe o arquivo de precipitacao observada")
