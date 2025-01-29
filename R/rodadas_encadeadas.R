@@ -1590,7 +1590,7 @@ rodada_encadeada_pmur_nAssimilaEtp <- function(parametros, inicializacao, precip
 
             ajuste <- assimilacao_pmur(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao_assimilacao,
                         evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias_assimilacao, ajusta_precipitacao,
-                        limite_prec = c(limite_inferior_prec, limite_superior_prec), limite_etp = c(0.5, 2),
+                        limite_prec = c(limite_inferior_prec, limite_superior_prec),
                         limite_ebin = c(limite_inferior_ebin, limite_superior_ebin), limite_supin = c(0, 2),
                         funcao_objetivo = funcao_objetivo, fnscale = fnscale)
 
