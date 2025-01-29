@@ -1017,10 +1017,12 @@ rodada_encadeada_pmur_etp <- function(parametros, inicializacao, precipitacao_ob
             precipitacao[, valor := valor * vetor_modelo[75]]
             matriz_precipitacao <- array(precipitacao[data_previsao < (dataRodada + kt_max - 1) & data_rodada == dataRodada & 
                 data_previsao >= (dataRodada - numero_dias_assimilacao - kt_min), valor], c(numero_dias_assimilacao + kt_max + kt_min - 1, numero_cenarios))
-            matriz_precipitacao <- t(ponderacao_temporal(matriz_precipitacao, kt, kt_max, kt_min))
             if (numero_cenarios == 1) {
+                matriz_precipitacao <- funcaoSmapCpp::ponderacao_temporal_cpp(matriz_precipitacao, kt, kt_max, kt_min)
+                matriz_precipitacao <- array(matriz_precipitacao, c(1, length(matriz_precipitacao)))
                 matriz_precipitacao[, 1:(numero_dias_assimilacao - 1)] <- matriz_precipitacao[, 1:(numero_dias_assimilacao - 1)] * ajuste$ajuste$par[1:(numero_dias_assimilacao - 1)]
             } else {
+                matriz_precipitacao <- funcaoSmapCpp::ponderacao_temporal_cenario_cpp(matriz_precipitacao, kt, kt_max, kt_min)
                 matriz_precipitacao[, 1:(numero_dias_assimilacao - 1)] <- sweep(matriz_precipitacao[, 1:(numero_dias_assimilacao - 1)], 2, ajuste$ajuste$par[1:(numero_dias_assimilacao - 1)], `*`)
             }
 
@@ -1028,9 +1030,17 @@ rodada_encadeada_pmur_etp <- function(parametros, inicializacao, precipitacao_ob
                 precipitacao[data_previsao <= dataRodada, valor := 
                 valor * min(ajuste$ajuste$par[numero_dias_assimilacao - 1], 1)]
             }
-            matriz_precipitacao_previsao <- array(precipitacao[data_previsao < (dataRodada + numero_dias_previsao + kt_max) & data_rodada == dataRodada & 
-                data_previsao >= (dataRodada - kt_min - 1), valor], c(numero_dias_previsao + kt_max + kt_min + 1, numero_cenarios))
-            matriz_precipitacao_previsao <- t(ponderacao_temporal(matriz_precipitacao_previsao, kt, kt_max, kt_min))
+
+            if (numero_cenarios == 1) {
+                matriz_precipitacao_previsao <- array(precipitacao[data_previsao < (dataRodada + numero_dias_previsao + kt_max) & data_rodada == dataRodada & 
+                    data_previsao >= (dataRodada - kt_min - 1), valor], c(numero_dias_previsao + kt_max + kt_min + 1, numero_cenarios))
+                matriz_precipitacao_previsao <- funcaoSmapCpp::ponderacao_temporal_cpp(matriz_precipitacao_previsao, kt, kt_max, kt_min)
+                matriz_precipitacao_previsao <- array(matriz_precipitacao_previsao, c(1, length(matriz_precipitacao_previsao)))
+            } else {
+                matriz_precipitacao_previsao <- array(precipitacao[data_previsao < (dataRodada + numero_dias_previsao + kt_max) & data_rodada == dataRodada & 
+                    data_previsao >= (dataRodada - kt_min - 1), valor], c(numero_dias_previsao + kt_max + kt_min + 1, numero_cenarios))
+                matriz_precipitacao_previsao <- funcaoSmapCpp::ponderacao_temporal_cenario_cpp(matriz_precipitacao_previsao, kt, kt_max, kt_min)
+            }
 
             matriz_precipitacao <- cbind(matriz_precipitacao, matriz_precipitacao_previsao)
             previsao_evapotranspiracao_rodada <- evapotranspiracao_prevista[nome == sub_bacia & data_rodada == dataRodada & data_previsao < (dataRodada + numero_dias_previsao)]

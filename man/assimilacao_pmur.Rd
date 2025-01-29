@@ -104,7 +104,7 @@ Realiza a assimilacao de dados com a metodologia oficial
  kt <- vetor_modelo[12:74]
  precipitacao_ponderada <- data.table::data.table(precipitacao)
  precipitacao_ponderada[, valor := valor * vetor_modelo[75]]
- precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada[, valor], kt, kt_max, kt_min)
+ precipitacao_ponderada <- funcaoSmapCpp::ponderacao_temporal_cpp(precipitacao_ponderada[, valor], kt, kt_max, kt_min)
 
  pesos <- rep(1, numero_dias)
  limite_prec <- c(0.5, 2)
