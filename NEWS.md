@@ -1,3 +1,17 @@
+# smapOnsR 1.3.1
+
+## Minor changes
+
+* Otimizacao do codigo da funcao completa_previsao
+
+* Funcao de ponderacao temporal em c++
+
+* Adiciona nova função executa_caso_oficial_v2 para rodadas oficiais com novos aprimoramentos 
+
+* Padronizacao da variavel numero_dias_assimilacao nas entradas oficial e nova
+
+* Adiciona nova funcao de rodada com aprimoramentos, porem, sem assimilar a etp
+
 # smapOnsR 1.3.0
 
 ## Major changes
