@@ -23,7 +23,7 @@ utilizar o seguinte comando
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("ONSBR/smapOnsR@v1.0.0")
+devtools::install_github("ONSBR/smapOnsR@v1.2.0")
 ```
 
 Para a versao em desenvolvimento, deve-se utilizar o seguinte comando:
