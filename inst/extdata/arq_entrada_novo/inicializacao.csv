@@ -2,7 +2,7 @@ nome;variavel;valor
 avermelha;Ebin;161.12
 avermelha;Supin;31.33
 avermelha;Tuin;28.01
-avermelha;numero_dias_assimilacao;31
+avermelha;numero_dias_assimilacao;32
 avermelha;limite_inferior_ebin;0.8
 avermelha;limite_superior_ebin;1.2
 avermelha;limite_superior_prec;2
@@ -10,7 +10,7 @@ avermelha;limite_inferior_prec;0.5
 baixoig;Ebin;80.58
 baixoig;Supin;102.78
 baixoig;Tuin;72.52
-baixoig;numero_dias_assimilacao;31
+baixoig;numero_dias_assimilacao;32
 baixoig;limite_inferior_ebin;0.8
 baixoig;limite_superior_ebin;1.2
 baixoig;limite_superior_prec;2
@@ -18,7 +18,7 @@ baixoig;limite_inferior_prec;0.5
 candonga;Ebin;108.88
 candonga;Supin;156.73
 candonga;Tuin;37.12
-candonga;numero_dias_assimilacao;31
+candonga;numero_dias_assimilacao;32
 candonga;limite_inferior_ebin;0.8
 candonga;limite_superior_ebin;1.2
 candonga;limite_superior_prec;2
@@ -26,7 +26,7 @@ candonga;limite_inferior_prec;0.5
 capivara;Ebin;342.84
 capivara;Supin;12.15
 capivara;Tuin;29.51
-capivara;numero_dias_assimilacao;31
+capivara;numero_dias_assimilacao;32
 capivara;limite_inferior_ebin;0.8
 capivara;limite_superior_ebin;1.2
 capivara;limite_superior_prec;2
@@ -34,7 +34,7 @@ capivara;limite_inferior_prec;0.5
 colider;Ebin;444.06
 colider;Supin;509.21
 colider;Tuin;78.13
-colider;numero_dias_assimilacao;31
+colider;numero_dias_assimilacao;32
 colider;limite_inferior_ebin;0.8
 colider;limite_superior_ebin;1.2
 colider;limite_superior_prec;2
@@ -42,7 +42,7 @@ colider;limite_inferior_prec;0.5
 dfranc;Ebin;31.74
 dfranc;Supin;7.12
 dfranc;Tuin;49.62
-dfranc;numero_dias_assimilacao;31
+dfranc;numero_dias_assimilacao;32
 dfranc;limite_inferior_ebin;0.8
 dfranc;limite_superior_ebin;1.2
 dfranc;limite_superior_prec;2
@@ -50,7 +50,7 @@ dfranc;limite_inferior_prec;0.5
 irape;Ebin;23.87
 irape;Supin;178.65
 irape;Tuin;67.04
-irape;numero_dias_assimilacao;31
+irape;numero_dias_assimilacao;32
 irape;limite_inferior_ebin;0.8
 irape;limite_superior_ebin;1.2
 irape;limite_superior_prec;2
@@ -58,7 +58,7 @@ irape;limite_inferior_prec;0.5
 ita;Ebin;59.9
 ita;Supin;47.79
 ita;Tuin;69.94
-ita;numero_dias_assimilacao;31
+ita;numero_dias_assimilacao;32
 ita;limite_inferior_ebin;0.8
 ita;limite_superior_ebin;1.2
 ita;limite_superior_prec;2
@@ -66,7 +66,7 @@ ita;limite_inferior_prec;0.5
 manso;Ebin;47.97
 manso;Supin;45.33
 manso;Tuin;51.93
-manso;numero_dias_assimilacao;31
+manso;numero_dias_assimilacao;32
 manso;limite_inferior_ebin;0.8
 manso;limite_superior_ebin;1.2
 manso;limite_superior_prec;2
@@ -74,7 +74,7 @@ manso;limite_inferior_prec;0.5
 navanhanda;Ebin;134.02
 navanhanda;Supin;8.33
 navanhanda;Tuin;29.11
-navanhanda;numero_dias_assimilacao;31
+navanhanda;numero_dias_assimilacao;32
 navanhanda;limite_inferior_ebin;0.8
 navanhanda;limite_superior_ebin;1.2
 navanhanda;limite_superior_prec;2
@@ -82,7 +82,7 @@ navanhanda;limite_inferior_prec;0.5
 novaponte;Ebin;150
 novaponte;Supin;50
 novaponte;Tuin;33.5
-novaponte;numero_dias_assimilacao;31
+novaponte;numero_dias_assimilacao;32
 novaponte;limite_inferior_ebin;0.8
 novaponte;limite_superior_ebin;1.2
 novaponte;limite_superior_prec;2
@@ -90,7 +90,7 @@ novaponte;limite_inferior_prec;0.5
 pimentalt;Ebin;378.83
 pimentalt;Supin;1749.24
 pimentalt;Tuin;36.2
-pimentalt;numero_dias_assimilacao;31
+pimentalt;numero_dias_assimilacao;32
 pimentalt;limite_inferior_ebin;0.8
 pimentalt;limite_superior_ebin;1.2
 pimentalt;limite_superior_prec;2
@@ -98,7 +98,7 @@ pimentalt;limite_inferior_prec;0.5
 smesa;Ebin;320.93
 smesa;Supin;407.21
 smesa;Tuin;22.57
-smesa;numero_dias_assimilacao;31
+smesa;numero_dias_assimilacao;32
 smesa;limite_inferior_ebin;0.8
 smesa;limite_superior_ebin;1.2
 smesa;limite_superior_prec;2
@@ -106,7 +106,7 @@ smesa;limite_inferior_prec;0.5
 sobradinho;Ebin;541.06
 sobradinho;Supin;986.97
 sobradinho;Tuin;21.44
-sobradinho;numero_dias_assimilacao;31
+sobradinho;numero_dias_assimilacao;32
 sobradinho;limite_inferior_ebin;0.8
 sobradinho;limite_superior_ebin;1.2
 sobradinho;limite_superior_prec;2
@@ -114,7 +114,7 @@ sobradinho;limite_inferior_prec;0.5
 ssimao2;Ebin;395.24
 ssimao2;Supin;266.38
 ssimao2;Tuin;33.5
-ssimao2;numero_dias_assimilacao;31
+ssimao2;numero_dias_assimilacao;32
 ssimao2;limite_inferior_ebin;0.8
 ssimao2;limite_superior_ebin;1.2
 ssimao2;limite_superior_prec;2

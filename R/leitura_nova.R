@@ -311,6 +311,8 @@ le_inicializacao <- function(arq) {
         stop(paste0("falta a variavel ", teste$V1, " para a sub-bacia ", teste$nome, " no arquivo ", arq, "\n"))
     }
 
+    dat[variavel == "numero_dias_assimilacao", valor := valor - 1]
+
     data.table::setorder(dat, "nome")
     dat
 }

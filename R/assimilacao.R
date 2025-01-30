@@ -573,7 +573,7 @@ funcao_objetivo_assimilacao_evapotranspiracao <- function(vetor_variaveis, vetor
 #'  kt <- vetor_modelo[12:74]
 #'  precipitacao_ponderada <- data.table::data.table(precipitacao)
 #'  precipitacao_ponderada[, valor := valor * vetor_modelo[75]]
-#'  precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada[, valor], kt, kt_max, kt_min)
+#'  precipitacao_ponderada <- funcaoSmapCpp::ponderacao_temporal_cpp(precipitacao_ponderada[, valor], kt, kt_max, kt_min)
 #'
 #'  pesos <- rep(1, numero_dias)
 #'  limite_prec <- c(0.5, 2)
@@ -606,7 +606,7 @@ assimilacao_pmur_etp <- function(vetor_modelo, area, EbInic, TuInic, Supin,
     kt_min <- sum(vetor_modelo[15:74] > 0)
     precipitacao_ponderada <- data.table::data.table(precipitacao_assimilacao)
     precipitacao_ponderada[, valor := valor * vetor_modelo[75]]
-    precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada[, valor], kt,
+    precipitacao_ponderada <- funcaoSmapCpp::ponderacao_temporal_cpp(precipitacao_ponderada[, valor], kt,
                                                     kt_max, kt_min)
 
     vazao_observada_maxima <- max(vazao)
@@ -737,7 +737,7 @@ assimilacao_pmur_etp <- function(vetor_modelo, area, EbInic, TuInic, Supin,
 #' kt <- vetor_modelo[12:74]
 #' precipitacao_ponderada <- data.table::data.table(precipitacao)
 #' precipitacao_ponderada[, valor := valor * vetor_modelo[75]]
-#' precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada[, valor], kt, kt_max, kt_min)
+#' precipitacao_ponderada <- funcaoSmapCpp::ponderacao_temporal_cpp(precipitacao_ponderada[, valor], kt, kt_max, kt_min)
 #' 
 #' pesos <- rep(1, numero_dias)
 #' vetor_parametros <- c(pesos, EbInic, Supin)
@@ -837,7 +837,7 @@ funcao_objetivo_assimilacao_pmur_etp <- function(vetor_variaveis, vetor_modelo, 
 #'  kt <- vetor_modelo[12:74]
 #'  precipitacao_ponderada <- data.table::data.table(precipitacao)
 #'  precipitacao_ponderada[, valor := valor * vetor_modelo[75]]
-#'  precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada[, valor], kt, kt_max, kt_min)
+#'  precipitacao_ponderada <- funcaoSmapCpp::ponderacao_temporal_cpp(precipitacao_ponderada[, valor], kt, kt_max, kt_min)
 #'
 #'  pesos <- rep(1, numero_dias)
 #'  limite_prec <- c(0.5, 2)
@@ -869,7 +869,7 @@ assimilacao_pmur <- function(vetor_modelo, area, EbInic, TuInic, Supin, precipit
     kt_min <- sum(vetor_modelo[15:74] > 0)
     precipitacao_ponderada <- data.table::data.table(precipitacao_assimilacao)
     precipitacao_ponderada[, valor := valor * vetor_modelo[75]]
-    precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada[, valor], kt,
+    precipitacao_ponderada <- funcaoSmapCpp::ponderacao_temporal_cpp(precipitacao_ponderada[, valor], kt,
                                                     kt_max, kt_min)
 
     vazao_observada_maxima <- max(vazao)
@@ -988,7 +988,7 @@ assimilacao_pmur <- function(vetor_modelo, area, EbInic, TuInic, Supin, precipit
 #' kt <- vetor_modelo[12:74]
 #' precipitacao_ponderada <- data.table::data.table(precipitacao)
 #' precipitacao_ponderada[, valor := valor * vetor_modelo[75]]
-#' precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada[, valor], kt, kt_max, kt_min)
+#' precipitacao_ponderada <- funcaoSmapCpp::ponderacao_temporal_cpp(precipitacao_ponderada[, valor], kt, kt_max, kt_min)
 #' 
 #' pesos <- rep(1, numero_dias)
 #' vetor_parametros <- c(pesos, EbInic, Supin)

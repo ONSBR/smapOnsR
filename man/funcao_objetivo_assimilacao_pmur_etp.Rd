@@ -83,7 +83,7 @@ evapotranspiracao <- evapotranspiracao[, valor] * vetor_modelo[76]
 kt <- vetor_modelo[12:74]
 precipitacao_ponderada <- data.table::data.table(precipitacao)
 precipitacao_ponderada[, valor := valor * vetor_modelo[75]]
-precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada[, valor], kt, kt_max, kt_min)
+precipitacao_ponderada <- funcaoSmapCpp::ponderacao_temporal_cpp(precipitacao_ponderada[, valor], kt, kt_max, kt_min)
 
 pesos <- rep(1, numero_dias)
 vetor_parametros <- c(pesos, EbInic, Supin)

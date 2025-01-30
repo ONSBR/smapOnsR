@@ -31,7 +31,7 @@ Imports:
     doParallel,
     parallel,
     zoo
-Remotes: ONSBR/funcaoSmapCpp@develop
+Remotes: ONSBR/funcaoSmapCpp@v1.1.0
 LazyData: true
 LazyDataCompression: bzip2
 Suggests: 
