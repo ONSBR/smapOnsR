@@ -957,8 +957,8 @@ rodada_encadeada_pmur_etp <- function(parametros, inicializacao, precipitacao_ob
 
         modelo <- new_modelo_smap_ons_pmur(parametros[nome == sub_bacia], postos_plu[nome %in% sub_bacia])
         kt <- modelo$kt
-        kt_max <- sum(modelo$kt[1:2] > 0)
-        kt_min <- sum(modelo$kt[4:63] > 0)
+        kt_min <- attributes(modelo)$kt_min
+        kt_max <- attributes(modelo)$kt_max
         vetor_modelo <- unlist(modelo)
         area <- attributes(modelo)$area
 
@@ -994,7 +994,7 @@ rodada_encadeada_pmur_etp <- function(parametros, inicializacao, precipitacao_ob
             evapotranspiracao_planicie <- evapotranspiracao_observada[posto == sub_bacia & data < dataRodada & data >= (dataRodada - numero_dias_assimilacao), valor] * vetor_modelo[77]
             evapotranspiracao <- evapotranspiracao_observada[posto == sub_bacia & data < dataRodada & data >= (dataRodada - numero_dias_assimilacao), valor] * vetor_modelo[76]
 
-            ajuste <- assimilacao_pmur_etp(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao_assimilacao,
+            ajuste <- assimilacao_pmur_etp(modelo, EbInic, TuInic, Supin, precipitacao_assimilacao,
                         evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias_assimilacao, ajusta_precipitacao,
                         limite_prec = c(limite_inferior_prec, limite_superior_prec), limite_etp = c(0.5, 2),
                         limite_ebin = c(limite_inferior_ebin, limite_superior_ebin), limite_supin = c(0, 2),
@@ -1265,8 +1265,8 @@ rodada_encadeada_pmur <- function(parametros, inicializacao, precipitacao_observ
 
         modelo <- new_modelo_smap_ons_pmur(parametros[nome == sub_bacia], postos_plu[nome %in% sub_bacia])
         kt <- modelo$kt
-        kt_max <- sum(modelo$kt[1:2] > 0)
-        kt_min <- sum(modelo$kt[4:63] > 0)
+        kt_min <- attributes(modelo)$kt_min
+        kt_max <- attributes(modelo)$kt_max
     
         vetor_modelo <- unlist(modelo)
         area <- attributes(modelo)$area
@@ -1306,7 +1306,7 @@ rodada_encadeada_pmur <- function(parametros, inicializacao, precipitacao_observ
             evapotranspiracao_planicie <- evapotranspiracao[, valor] * vetor_modelo[77]
             evapotranspiracao <- evapotranspiracao[, valor] * vetor_modelo[76]
 
-            ajuste <- assimilacao_pmur(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao_assimilacao,
+            ajuste <- assimilacao_pmur(modelo, EbInic, TuInic, Supin, precipitacao_assimilacao,
                         evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias_assimilacao,
                         ajusta_precipitacao, limite_prec = c(limite_inferior_prec, limite_superior_prec),
                         limite_ebin = c(limite_inferior_ebin, limite_superior_ebin), funcao_objetivo = funcao_objetivo, fnscale = fnscale)
@@ -1551,8 +1551,8 @@ rodada_encadeada_pmur_nAssimilaEtp <- function(parametros, inicializacao, precip
 
         modelo <- new_modelo_smap_ons_pmur(parametros[nome == sub_bacia], postos_plu[nome %in% sub_bacia])
         kt <- modelo$kt
-        kt_max <- sum(modelo$kt[1:2] > 0)
-        kt_min <- sum(modelo$kt[4:63] > 0)
+        kt_min <- attributes(modelo)$kt_min
+        kt_max <- attributes(modelo)$kt_max
         vetor_modelo <- unlist(modelo)
         area <- attributes(modelo)$area
 
@@ -1588,7 +1588,7 @@ rodada_encadeada_pmur_nAssimilaEtp <- function(parametros, inicializacao, precip
             evapotranspiracao_planicie <- evapotranspiracao_observada[posto == sub_bacia & data < dataRodada & data >= (dataRodada - numero_dias_assimilacao), valor] * vetor_modelo[77]
             evapotranspiracao <- evapotranspiracao_observada[posto == sub_bacia & data < dataRodada & data >= (dataRodada - numero_dias_assimilacao), valor] * vetor_modelo[76]
 
-            ajuste <- assimilacao_pmur(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao_assimilacao,
+            ajuste <- assimilacao_pmur(modelo, EbInic, TuInic, Supin, precipitacao_assimilacao,
                         evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias_assimilacao, ajusta_precipitacao,
                         limite_prec = c(limite_inferior_prec, limite_superior_prec),
                         limite_ebin = c(limite_inferior_ebin, limite_superior_ebin), limite_supin = c(0, 2),
@@ -1648,8 +1648,8 @@ rodada_encadeada_pmur_nAssimilaEtp <- function(parametros, inicializacao, precip
             matriz_evapotranspiracao_planicie <- matrix(evapotranspiracao[, valor] * vetor_modelo[77], nrow = numero_cenarios, ncol = nrow(evapotranspiracao), byrow = TRUE)
             matriz_evapotranspiracao <- matrix(evapotranspiracao[, valor] * vetor_modelo[76], nrow = numero_cenarios, ncol = nrow(evapotranspiracao), byrow = TRUE)
 
-            EbInic <- ajuste$ajuste$par[numero_dias_assimilacao * 2 + 1]
-            Supin <-  ajuste$ajuste$par[numero_dias_assimilacao * 2 + 2]
+            EbInic <- ajuste$ajuste$par[numero_dias_assimilacao + 1]
+            Supin <-  ajuste$ajuste$par[numero_dias_assimilacao + 2]
             if (Supin < 0) { #L-BFGS-B as vezes fornece valor negativo próximo a 0 ('-1e-17')
                 Supin <- 0
             }

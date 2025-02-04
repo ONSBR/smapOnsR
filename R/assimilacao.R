@@ -595,15 +595,17 @@ funcao_objetivo_assimilacao_evapotranspiracao <- function(vetor_variaveis, vetor
 #'     }
 #' @export
 
-assimilacao_pmur_etp <- function(vetor_modelo, area, EbInic, TuInic, Supin, 
+assimilacao_pmur_etp <- function(modelo, EbInic, TuInic, Supin, 
       precipitacao_assimilacao, evapotranspiracao, evapotranspiracao_planicie,
       vazao, numero_dias_assimilacao, ajusta_precipitacao,
       limite_prec = c(0.5, 2), limite_etp = c(0.5, 2), limite_ebin = c(0.8, 1.2),
       limite_supin = c(0, 2), funcao_objetivo = calcula_dm, fnscale = 1) {
     
+    vetor_modelo <- unlist(modelo)
+    area <- attributes(modelo)$area
     kt <- vetor_modelo[12:74]
-    kt_max <- sum(vetor_modelo[12:13] > 0)
-    kt_min <- sum(vetor_modelo[15:74] > 0)
+    kt_min <- attributes(modelo)$kt_min
+    kt_max <- attributes(modelo)$kt_max
     precipitacao_ponderada <- data.table::data.table(precipitacao_assimilacao)
     precipitacao_ponderada[, valor := valor * vetor_modelo[75]]
     precipitacao_ponderada <- funcaoSmapCpp::ponderacao_temporal_cpp(precipitacao_ponderada[, valor], kt,
@@ -859,14 +861,16 @@ funcao_objetivo_assimilacao_pmur_etp <- function(vetor_variaveis, vetor_modelo, 
 #'     }
 #' @export
 
-assimilacao_pmur <- function(vetor_modelo, area, EbInic, TuInic, Supin, precipitacao_assimilacao,
+assimilacao_pmur <- function(modelo, EbInic, TuInic, Supin, precipitacao_assimilacao,
       evapotranspiracao, evapotranspiracao_planicie, vazao, numero_dias_assimilacao,
       ajusta_precipitacao, limite_prec = c(0.5, 2), limite_ebin = c(0.8, 1.2),
       limite_supin = c(0, 2), funcao_objetivo = calcula_dm, fnscale = 1) {
     
+    vetor_modelo <- unlist(modelo)
+    area <- attributes(modelo)$area
     kt <- vetor_modelo[12:74]
-    kt_max <- sum(vetor_modelo[12:13] > 0)
-    kt_min <- sum(vetor_modelo[15:74] > 0)
+    kt_min <- attributes(modelo)$kt_min
+    kt_max <- attributes(modelo)$kt_max
     precipitacao_ponderada <- data.table::data.table(precipitacao_assimilacao)
     precipitacao_ponderada[, valor := valor * vetor_modelo[75]]
     precipitacao_ponderada <- funcaoSmapCpp::ponderacao_temporal_cpp(precipitacao_ponderada[, valor], kt,
@@ -931,7 +935,7 @@ assimilacao_pmur <- function(vetor_modelo, area, EbInic, TuInic, Supin, precipit
     colnames(otimizacao) <- "otimizacao"
     otimizacao[, limite_inferior := limite_inferior]
     otimizacao[, limite_superior := limite_superior]
-    otimizacao[, variavel := c(paste0("prec (t-", 31:1, ")"), "Ebin", "Supin")]
+    otimizacao[, variavel :=  c(paste0("prec (t-", numero_dias_assimilacao:1, ")"), "Ebin", "Supin")]
 
     saida <- list(ajuste = ajuste, simulacao = simulacao, otimizacao = otimizacao)
     saida
