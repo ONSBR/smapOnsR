@@ -158,6 +158,14 @@ executa_visualizador_calibracao_pmur <- function(){
     servidor_calibracao <- function(input, output, session) {
 
         disable_button <- shiny::reactiveVal(FALSE)
+        
+        get_param_value <- function(param_name, default_value, parametros, limite) {
+            if (limite %in% colnames(parametros)) {
+                return(parametros[parametros$parametro == param_name, ..limite])
+            }
+            return(default_value)
+        }
+
 
         shiny::observeEvent(input$sub_bacia, {
             arquivo_parametros <- input$arquivo_parametros
@@ -193,41 +201,41 @@ executa_visualizador_calibracao_pmur <- function(){
                 shiny::updateNumericInput(session, "kt_max", value = kt_max)
                 shiny::updateNumericInput(session, "kt_min", value = kt_min)
 
-                shiny::updateNumericInput(session, "limite_inferior_str", value = vetor_modelo[1] * 0.5)
-                shiny::updateNumericInput(session, "limite_inferior_k2t", value = vetor_modelo[2] * 0.5)
-                shiny::updateNumericInput(session, "limite_inferior_crec", value = vetor_modelo[3] * 0.5)
-                shiny::updateNumericInput(session, "limite_inferior_capc", value = vetor_modelo[4] * 0.5)
-                shiny::updateNumericInput(session, "limite_inferior_k_kt", value = vetor_modelo[5] * 0.5)
-                shiny::updateNumericInput(session, "limite_inferior_h1", value = vetor_modelo[6] * 0.5)
-                shiny::updateNumericInput(session, "limite_inferior_k2t2", value = vetor_modelo[7] * 0.5)
-                shiny::updateNumericInput(session, "limite_inferior_lambda", value = vetor_modelo[8] * 0.5)
-                shiny::updateNumericInput(session, "limite_inferior_h", value = vetor_modelo[9] * 0.5)
-                shiny::updateNumericInput(session, "limite_inferior_k1t", value = vetor_modelo[10] * 0.5)
-                shiny::updateNumericInput(session, "limite_inferior_k3t", value = vetor_modelo[11] * 0.5)
-                shiny::updateNumericInput(session, "limite_inferior_pcof", value = 0.8)
-                shiny::updateNumericInput(session, "limite_inferior_ecof", value = 0.8)
-                shiny::updateNumericInput(session, "limite_inferior_ecof2", value = 0.8)
-                shiny::updateNumericInput(session, "limite_inferior_pmur", value = vetor_modelo[15] * 0.5)
-                shiny::updateNumericInput(session, "limite_inferior_alfa", value = 0.0000001)
-                shiny::updateNumericInput(session, "limite_inferior_beta", value = 0.0000001)
+                shiny::updateNumericInput(session, "limite_inferior_str",   value = get_param_value("Str", vetor_modelo[1] * 0.5, parametros_posto, "limite_inferior"))
+                shiny::updateNumericInput(session, "limite_inferior_k2t",   value = get_param_value("K2t", vetor_modelo[2] * 0.5, parametros_posto, "limite_inferior"))
+                shiny::updateNumericInput(session, "limite_inferior_crec",  value = get_param_value("Crec", vetor_modelo[3] * 0.5, parametros_posto, "limite_inferior"))
+                shiny::updateNumericInput(session, "limite_inferior_capc",  value = get_param_value("Capc", vetor_modelo[4] * 0.5, parametros_posto, "limite_inferior"))
+                shiny::updateNumericInput(session, "limite_inferior_k_kt",  value = get_param_value("K_kt", vetor_modelo[5] * 0.5, parametros_posto, "limite_inferior"))
+                shiny::updateNumericInput(session, "limite_inferior_h1",    value = get_param_value("H1", vetor_modelo[6] * 0.5, parametros_posto, "limite_inferior"))
+                shiny::updateNumericInput(session, "limite_inferior_k2t2",  value = get_param_value("K2t2", vetor_modelo[7] * 0.5, parametros_posto, "limite_inferior"))
+                shiny::updateNumericInput(session, "limite_inferior_lambda",value = get_param_value("Lambda", vetor_modelo[8] * 0.5, parametros_posto, "limite_inferior"))
+                shiny::updateNumericInput(session, "limite_inferior_h",     value = get_param_value("H", vetor_modelo[9] * 0.5, parametros_posto, "limite_inferior"))
+                shiny::updateNumericInput(session, "limite_inferior_k1t",   value = get_param_value("K1t", vetor_modelo[10] * 0.5, parametros_posto, "limite_inferior"))
+                shiny::updateNumericInput(session, "limite_inferior_k3t",   value = get_param_value("K3t", vetor_modelo[11] * 0.5, parametros_posto, "limite_inferior"))
+                shiny::updateNumericInput(session, "limite_inferior_pcof",  value = get_param_value("Pcof", 0.8, parametros_posto, "limite_inferior"))
+                shiny::updateNumericInput(session, "limite_inferior_ecof",  value = get_param_value("Ecof", 0.8, parametros_posto, "limite_inferior"))
+                shiny::updateNumericInput(session, "limite_inferior_ecof2", value = get_param_value("Ecof2", 0.8, parametros_posto, "limite_inferior"))
+                shiny::updateNumericInput(session, "limite_inferior_pmur",  value = get_param_value("Pmur", vetor_modelo[15] * 0.5, parametros_posto, "limite_inferior"))
+                shiny::updateNumericInput(session, "limite_inferior_alfa",  value = get_param_value("Alfa", 0.001, parametros_posto, "limite_inferior"))
+                shiny::updateNumericInput(session, "limite_inferior_beta",  value = get_param_value("Beta", 0.001, parametros_posto, "limite_inferior"))
 
-                shiny::updateNumericInput(session, "limite_superior_str", value = vetor_modelo[1] * 2)
-                shiny::updateNumericInput(session, "limite_superior_k2t", value = vetor_modelo[2] * 2)
-                shiny::updateNumericInput(session, "limite_superior_crec", value = vetor_modelo[3] * 2)
-                shiny::updateNumericInput(session, "limite_superior_capc", value = vetor_modelo[4] * 2)
-                shiny::updateNumericInput(session, "limite_superior_k_kt", value = vetor_modelo[5] * 2)
-                shiny::updateNumericInput(session, "limite_superior_h1", value = vetor_modelo[6] * 2)
-                shiny::updateNumericInput(session, "limite_superior_k2t2", value = vetor_modelo[7] * 2)
-                shiny::updateNumericInput(session, "limite_superior_lambda", value = vetor_modelo[8] * 2)
-                shiny::updateNumericInput(session, "limite_superior_h", value = vetor_modelo[9] * 2)
-                shiny::updateNumericInput(session, "limite_superior_k1t", value = vetor_modelo[10] * 2)
-                shiny::updateNumericInput(session, "limite_superior_k3t", value = vetor_modelo[11] * 2)
-                shiny::updateNumericInput(session, "limite_superior_pcof", value = 1.2)
-                shiny::updateNumericInput(session, "limite_superior_ecof", value = 1.2)
-                shiny::updateNumericInput(session, "limite_superior_ecof2", value = 1.2)
-                shiny::updateNumericInput(session, "limite_superior_pmur", value = vetor_modelo[4])
-                shiny::updateNumericInput(session, "limite_superior_alfa", value = 100)
-                shiny::updateNumericInput(session, "limite_superior_beta", value = 100)
+                shiny::updateNumericInput(session, "limite_superior_str", value = get_param_value("Str", vetor_modelo[1] * 2, parametros_posto, "limite_superior"))
+                shiny::updateNumericInput(session, "limite_superior_k2t", value = get_param_value("K2t", vetor_modelo[2] * 2, parametros_posto, "limite_superior"))
+                shiny::updateNumericInput(session, "limite_superior_crec",value = get_param_value("Crec", vetor_modelo[3] * 2, parametros_posto, "limite_superior"))
+                shiny::updateNumericInput(session, "limite_superior_capc",value = get_param_value("Capc", vetor_modelo[4] * 2, parametros_posto, "limite_superior"))
+                shiny::updateNumericInput(session, "limite_superior_k_kt",value = get_param_value("K_kt", vetor_modelo[5] * 2, parametros_posto, "limite_superior"))
+                shiny::updateNumericInput(session, "limite_superior_h1", value = get_param_value("H1", vetor_modelo[6] * 2, parametros_posto, "limite_superior"))
+                shiny::updateNumericInput(session, "limite_superior_k2t2",value = get_param_value("K2t2", vetor_modelo[7] * 2, parametros_posto, "limite_superior"))
+                shiny::updateNumericInput(session, "limite_superior_lambda", value = get_param_value("Lambda", vetor_modelo[8] * 2, parametros_posto, "limite_superior"))
+                shiny::updateNumericInput(session, "limite_superior_h", value = get_param_value("H", vetor_modelo[9] * 2, parametros_posto, "limite_superior"))
+                shiny::updateNumericInput(session, "limite_superior_k1t", value = get_param_value("K1t", vetor_modelo[10] * 2, parametros_posto, "limite_superior"))
+                shiny::updateNumericInput(session, "limite_superior_k3t", value = get_param_value("K3t", vetor_modelo[11] * 2, parametros_posto, "limite_superior"))
+                shiny::updateNumericInput(session, "limite_superior_pcof",value = get_param_value("Pcof", 0.8, parametros_posto, "limite_superior"))
+                shiny::updateNumericInput(session, "limite_superior_ecof",value = get_param_value("Ecof", 0.8, parametros_posto, "limite_superior"))
+                shiny::updateNumericInput(session, "limite_superior_ecof2", value = get_param_value("Ecof2", 0.8, parametros_posto, "limite_superior"))
+                shiny::updateNumericInput(session, "limite_superior_pmur",value = get_param_value("Pmur", vetor_modelo[15] * 2, parametros_posto, "limite_superior"))
+                shiny::updateNumericInput(session, "limite_superior_alfa",value = get_param_value("Alfa", 0.001, parametros_posto, "limite_superior"))
+                shiny::updateNumericInput(session, "limite_superior_beta",value = get_param_value("Beta", 0.001, parametros_posto, "limite_superior"))
                 precipitacao <- precipitacao_posto()
                 data_minimo <- (min(precipitacao$data) + kt_min)
                 data_maximo <- (max(precipitacao$data) - kt_max)
@@ -308,7 +316,25 @@ executa_visualizador_calibracao_pmur <- function(){
             arquivo_parametros <- input$arquivo_parametros$datapath
             if (!is.null(arquivo_parametros)) {
                 parametros <- parametros()
-                return(parametros[parametros$nome == input$sub_bacia])
+                parametros <- parametros[parametros$nome == input$sub_bacia]
+                if (any(parametros$parametro == "Pmur")){
+                    
+                } else {
+                    parametros <- rbind(parametros, data.table::data.table(nome = input$sub_bacia, 
+                    parametro = "Pmur", valor = parametros[parametros$parametro == "Str"]$valor * 
+                            parametros[parametros$parametro == "Capc"]$valor / 200,
+                            limite_inferior = parametros[parametros$parametro == "Capc"]$valor * 0.8 / 200,
+                            limite_superior = parametros[parametros$parametro == "Capc"]$valor * 1.2 / 200))
+                }
+                if (any(parametros$parametro == "Lambda")){
+                    
+                } else {
+                    parametros <- rbind(parametros, data.table::data.table(nome = input$sub_bacia, 
+                    parametro = "Lambda", valor = parametros[parametros$parametro == "Ai"]$valor ,
+                            limite_inferior = parametros[parametros$parametro == "Ai"]$valor * 0.8,
+                            limite_superior = parametros[parametros$parametro == "Ai"]$valor * 1.2))
+                }
+                return(parametros)
             }
         })
 
@@ -318,13 +344,6 @@ executa_visualizador_calibracao_pmur <- function(){
             if (!is.null(arquivo_parametros) & !is.null(arquivo_postos_plu)) {
                 postos_plu <- postos_plu()
                 parametros_posto <- parametros_posto()
-                if (any(parametros_posto$parametro == "Pmur")){
-                    pmur <- parametros_posto[parametros_posto$parametro == "Pmur"]$valor
-                } else {
-                    parametros_posto <- rbind(parametros_posto, data.table::data.table(nome = input$sub_bacia, 
-                    parametro = "Pmur", valor = parametros_posto[parametros_posto$parametro == "Str"]$valor * 
-                            parametros_posto[parametros_posto$parametro == "Capc"]$valor / 200))
-                }
                 modelo <- new_modelo_smap_ons_pmur(parametros_posto, postos_plu[postos_plu$nome == input$sub_bacia])
                 vetor_modelo <- unlist(modelo)
                 if (any(parametros_posto$parametro == "Alfa")){
@@ -1091,25 +1110,58 @@ executa_visualizador_calibracao_pmur <- function(){
             parametros$valor[parametros$parametro == "Pcof"] <- input$pcof
             parametros$valor[parametros$parametro == "Ecof"] <- input$ecof
             parametros$valor[parametros$parametro == "Ecof2"] <- input$ecof2
+
+            parametros$limite_inferior[parametros$parametro == "Str"] <- input$limite_inferior_str
+            parametros$limite_inferior[parametros$parametro == "K2t"] <- input$limite_inferior_k2t
+            parametros$limite_inferior[parametros$parametro == "Crec"] <- input$limite_inferior_crec
+            parametros$limite_inferior[parametros$parametro == "Capc"] <- input$limite_inferior_capc
+            parametros$limite_inferior[parametros$parametro == "K_kt"] <- input$limite_inferior_k_kt
+            parametros$limite_inferior[parametros$parametro == "H1"] <- input$limite_inferior_h1
+            parametros$limite_inferior[parametros$parametro == "K2t2"] <- input$limite_inferior_k2t2
+            parametros$limite_inferior[parametros$parametro == "Lambda"] <- input$limite_inferior_lambda
+            parametros$limite_inferior[parametros$parametro == "H"] <- input$limite_inferior_h
+            parametros$limite_inferior[parametros$parametro == "K1t"] <- input$limite_inferior_k1t
+            parametros$limite_inferior[parametros$parametro == "K3t"] <- input$limite_inferior_k3t
+            parametros$limite_inferior[parametros$parametro == "Pcof"] <- input$limite_inferior_pcof
+            parametros$limite_inferior[parametros$parametro == "Ecof"] <- input$limite_inferior_ecof
+            parametros$limite_inferior[parametros$parametro == "Ecof2"] <- input$limite_inferior_ecof2
+
+            parametros$limite_superior[parametros$parametro == "Str"] <- input$limite_superior_str
+            parametros$limite_superior[parametros$parametro == "K2t"] <- input$limite_superior_k2t
+            parametros$limite_superior[parametros$parametro == "Crec"] <- input$limite_superior_crec
+            parametros$limite_superior[parametros$parametro == "Capc"] <- input$limite_superior_capc
+            parametros$limite_superior[parametros$parametro == "K_kt"] <- input$limite_superior_k_kt
+            parametros$limite_superior[parametros$parametro == "H1"] <- input$limite_superior_h1
+            parametros$limite_superior[parametros$parametro == "K2t2"] <- input$limite_superior_k2t2
+            parametros$limite_superior[parametros$parametro == "Lambda"] <- input$limite_superior_lambda
+            parametros$limite_superior[parametros$parametro == "H"] <- input$limite_superior_h
+            parametros$limite_superior[parametros$parametro == "K1t"] <- input$limite_superior_k1t
+            parametros$limite_superior[parametros$parametro == "K3t"] <- input$limite_superior_k3t
+            parametros$limite_superior[parametros$parametro == "Pcof"] <- input$limite_superior_pcof
+            parametros$limite_superior[parametros$parametro == "Ecof"] <- input$limite_superior_ecof
+            parametros$limite_superior[parametros$parametro == "Ecof2"] <- input$limite_superior_ecof2
+
             parametros$valor[parametros$parametro == "Area"] <- area()
             parametros$valor[parametros$parametro == "ktMin"] <- input$kt_min
             parametros$valor[parametros$parametro == "ktMax"] <- input$kt_max
             if (nrow(parametros[parametros$parametro == "Pmur"]) == 0){
-                parametros <- data.table::rbindlist(list(parametros, data.table::data.table(nome = parametros[, unique(nome)], parametro = "Pmur", valor = input$pmur)))
+                parametros <- data.table::rbindlist(list(parametros, data.table::data.table(nome = parametros[, unique(nome)], 
+                            parametro = "Pmur", valor = input$pmur, limite_inferior = input$pmur * 0.8 , limite_superior = input$pmur * 1.2)))
             } else {
                 parametros$valor[parametros$parametro == "Pmur"] <- input$pmur
             }
             if (nrow(parametros[parametros$parametro == "Alfa"]) == 0){
-                parametros <- data.table::rbindlist(list(parametros, data.table::data.table(nome = parametros[, unique(nome)], parametro = "Alfa", valor = input$alfa)))
+                parametros <- data.table::rbindlist(list(parametros, data.table::data.table(nome = parametros[, unique(nome)], 
+                parametro = "Alfa", valor = input$alfa, limite_inferior = 0.001, limite_superior = 100)))
             } else {
                 parametros$valor[parametros$parametro == "Alfa"] <- input$alfa
             }
             if (nrow(parametros[parametros$parametro == "Beta"]) == 0){
-                parametros <- data.table::rbindlist(list(parametros, data.table::data.table(nome = parametros[, unique(nome)], parametro = "Beta", valor = input$beta)))
+                parametros <- data.table::rbindlist(list(parametros, data.table::data.table(nome = parametros[, unique(nome)], 
+                parametro = "Beta", valor = input$beta, limite_inferior = 0.001, limite_superior = 100)))
             } else {
                 parametros$valor[parametros$parametro == "Beta"] <- input$beta
             }
-            
 
             kt <- cria_kt(input$kt_max, input$kt_min, input$alfa, input$beta)
             parametros$valor[parametros$parametro %in% paste0("Kt", 2:-60)] <- kt
@@ -1118,34 +1170,45 @@ executa_visualizador_calibracao_pmur <- function(){
 
             parametros <- data.table::rbindlist(list(parametros, 
                             data.table::data.table(nome = parametros[, unique(nome)], 
-                            parametro = "data_inicio_simulacao", valor = as.character(input$periodo_simulacao[1]))))
+                            parametro = "data_inicio_simulacao", valor = as.character(input$periodo_simulacao[1]),
+                            limite_inferior = 0, limite_superior = 0)))
             parametros <- data.table::rbindlist(list(parametros, 
                             data.table::data.table(nome = parametros[, unique(nome)], 
-                            parametro = "data_final_simulacao", valor = as.character(input$periodo_simulacao[2]))))
+                            parametro = "data_final_simulacao", valor = as.character(input$periodo_simulacao[2]),
+                            limite_inferior = 0, limite_superior = 0)))
             parametros <- data.table::rbindlist(list(parametros, 
                             data.table::data.table(nome = parametros[, unique(nome)], 
-                            parametro = "data_inicio_objetivo", valor = as.character(input$periodo_calibracao[1]))))
+                            parametro = "data_inicio_objetivo", valor = as.character(input$periodo_calibracao[1]),
+                            limite_inferior = 0, limite_superior = 0)))
             parametros <- data.table::rbindlist(list(parametros, 
                             data.table::data.table(nome = parametros[, unique(nome)], 
-                            parametro = "data_final_objetivo", valor = as.character(input$periodo_calibracao[2]))))
+                            parametro = "data_final_objetivo", valor = as.character(input$periodo_calibracao[2]),
+                            limite_inferior = 0, limite_superior = 0)))
             parametros <- data.table::rbindlist(list(parametros, 
                             data.table::data.table(nome = parametros[, unique(nome)], 
-                            parametro = "Ebin", valor = as.character(input$Ebin))))
+                            parametro = "Ebin", valor = as.character(input$Ebin), 
+                            limite_inferior = 0, limite_superior = 0)))
             parametros <- data.table::rbindlist(list(parametros, 
                             data.table::data.table(nome = parametros[, unique(nome)], 
-                            parametro = "Supin", valor = as.character(input$Supin))))
+                            parametro = "Supin", valor = as.character(input$Supin),
+                            limite_inferior = 0, limite_superior = 0)))
             parametros <- data.table::rbindlist(list(parametros, 
                             data.table::data.table(nome = parametros[, unique(nome)], 
-                            parametro = "Tuin", valor = as.character(input$Tuin))))
+                            parametro = "Tuin", valor = as.character(input$Tuin),
+                            limite_inferior = 0, limite_superior = 0)))
 
             if (input$numero_periodo_desconsiderado >= 1) {
                 for (iperiodo in 1:input$numero_periodo_desconsiderado){
                         parametros <- data.table::rbindlist(list(parametros, 
                             data.table::data.table(nome = parametros[, unique(nome)], 
-                            parametro = paste0("inicio_periodo_desconsiderado_", iperiodo), valor = as.character(input[[paste0("periodo_desconsiderado_", iperiodo)]][1]))))
+                            parametro = paste0("inicio_periodo_desconsiderado_", iperiodo), 
+                            valor = as.character(input[[paste0("periodo_desconsiderado_", iperiodo)]][1]),
+                            limite_inferior = 0, limite_superior = 0)))
                         parametros <- data.table::rbindlist(list(parametros, 
                             data.table::data.table(nome = parametros[, unique(nome)], 
-                            parametro = paste0("final_periodo_desconsiderado_", iperiodo), valor = as.character(input[[paste0("periodo_desconsiderado_", iperiodo)]][2]))))
+                            parametro = paste0("final_periodo_desconsiderado_", iperiodo),
+                            valor = as.character(input[[paste0("periodo_desconsiderado_", iperiodo)]][2]),
+                            limite_inferior = 0, limite_superior = 0)))
                     }
             }
 

@@ -24,11 +24,13 @@ le_parametros <- function(arq) {
 
     dat <- data.table::fread(arq)
 
-    if (any(colnames(dat) != c("nome", "parametro", "valor"))) {
+    if (any(colnames(dat) != c("nome", "parametro", "valor", 
+                            "limite_inferior", "limite_superior"))) {
         stop("o arquivos deve deve possuir colunas 'nome', 'parametro' e 'valor'")
     }
 
     dat <- dat[!grepl("data_", parametro)]
+    dat <- dat[!grepl("_periodo", parametro)]
 
     dat[, valor := as.numeric(valor)]
 
