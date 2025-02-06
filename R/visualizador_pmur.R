@@ -239,9 +239,46 @@ executa_visualizador_calibracao_pmur <- function(){
                 precipitacao <- precipitacao_posto()
                 data_minimo <- (min(precipitacao$data) + kt_min)
                 data_maximo <- (max(precipitacao$data) - kt_max)
-                shiny::updateDateRangeInput(session, "periodo_simulacao", start = data_minimo, end = data_maximo, min = data_minimo, max = data_maximo)
-                shiny::updateDateRangeInput(session, "periodo_calibracao", start = data_minimo, end = data_maximo, min = data_minimo, max = data_maximo)
-                shiny::updateDateRangeInput(session, "zoom_calibracao", start = data_minimo, end = data_maximo, min = data_minimo, max = data_maximo)
+                data_inicio_simulacao <- data_minimo
+                data_final_simulacao <- data_maximo
+                data_inicio_objetivo <- data_minimo
+                data_final_objetivo <- data_maximo
+
+                periodos <- periodos()
+                if (nrow(periodos) > 0) {
+                    if (nrow(periodos[parametro == "data_inicio_simulacao"]) > 0) {
+                        if (periodos[parametro == "data_inicio_simulacao", valor] >= data_minimo) {
+                            data_inicio_simulacao <- periodos[parametro == "data_inicio_simulacao", valor]
+                        } else {
+                            data_inicio_simulacao <- data_minimo
+                        }
+                    }
+                    if (nrow(periodos[parametro == "data_final_simulacao"]) > 0) {
+                        if (periodos[parametro == "data_final_simulacao", valor] <= data_maximo) {
+                            data_final_simulacao <- periodos[parametro == "data_final_simulacao", valor]
+                        } else {
+                            data_final_simulacao <- data_maximo
+                        }
+                    }
+                    if (nrow(periodos[parametro == "data_inicio_objetivo"]) > 0) {
+                        if (periodos[parametro == "data_inicio_objetivo", valor] >= data_minimo) {
+                            data_inicio_objetivo <- periodos[parametro == "data_inicio_objetivo", valor]
+                        } else {
+                            data_inicio_objetivo <- data_minimo
+                        }
+                    }
+                    if (nrow(periodos[parametro == "data_final_objetivo"]) > 0) {
+                        if (periodos[parametro == "data_final_objetivo", valor] <= data_maximo) {
+                            data_final_objetivo <- periodos[parametro == "data_final_objetivo", valor]
+                        } else {
+                            data_final_objetivo <- data_maximo
+                        }
+                    }
+                }
+                
+                shiny::updateDateRangeInput(session, "periodo_simulacao", start = data_inicio_simulacao, end = data_final_simulacao, min = data_minimo, max = data_maximo)
+                shiny::updateDateRangeInput(session, "periodo_calibracao", start = data_inicio_objetivo, end = data_final_objetivo, min = data_minimo, max = data_maximo)
+                shiny::updateDateRangeInput(session, "zoom_calibracao", start = data_inicio_simulacao, end = data_final_simulacao, min = data_minimo, max = data_maximo)
             }
         })
 
@@ -261,10 +298,55 @@ executa_visualizador_calibracao_pmur <- function(){
         })
 
         shiny::observeEvent(input$periodo_simulacao, {
-            data_minimo <- input$periodo_simulacao[1]
-            data_maximo <- input$periodo_simulacao[2]
-            shiny::updateDateRangeInput(session, "periodo_calibracao", start = data_minimo, end = data_maximo, min = data_minimo, max = data_maximo)
-            shiny::updateDateRangeInput(session, "zoom_calibracao", start = data_minimo, end = data_maximo, min = data_minimo, max = data_maximo)
+            arquivo_parametros <- input$arquivo_parametros
+            if (!is.null(arquivo_parametros)) {
+                vetor_modelo <- vetor_modelo()
+                parametros_posto <- parametros_posto()
+                postos_plu <- postos_plu()
+                modelo <- new_modelo_smap_ons_pmur(parametros_posto, postos_plu[postos_plu$nome == input$sub_bacia])
+                kt_max <- attributes(modelo)$kt_max
+                kt_min <- attributes(modelo)$kt_min
+                precipitacao <- precipitacao_posto()
+                data_minimo <- (min(precipitacao$data) + kt_min)
+                data_maximo <- (max(precipitacao$data) - kt_max)
+                data_inicio_simulacao <- input$periodo_simulacao[1]
+                data_final_simulacao <- input$periodo_simulacao[2]
+                data_inicio_calibracao <- data_minimo
+                data_final_calibracao <- data_maximo
+                periodos <- periodos()
+                if (nrow(periodos) > 0) {
+                    if (nrow(periodos[parametro == "data_inicio_simulacao"]) > 0) {
+                        if (periodos[parametro == "data_inicio_simulacao", valor] >= data_minimo) {
+                            data_inicio_simulacao <- input$periodo_simulacao[1]
+                    } else {
+                            data_inicio_simulacao <- data_minimo
+                        }
+                    }
+                    if (nrow(periodos[parametro == "data_final_simulacao"]) > 0) {
+                        if (periodos[parametro == "data_final_simulacao", valor] >= data_minimo) {
+                            data_final_simulacao <- input$periodo_simulacao[2]
+                        } else {
+                            data_final_simulacao <- data_maximo
+                        }
+                    }
+                }
+
+                if (data_inicio_simulacao > input$periodo_calibracao[1]) {
+                    data_inicio_calibracao <- data_inicio_simulacao
+                } else {
+                    data_inicio_calibracao <- input$periodo_calibracao[1]
+                }
+
+                if (data_final_simulacao < input$periodo_calibracao[2]) {
+                    data_final_calibracao <- data_final_simulacao
+                } else {
+                    data_final_calibracao <- input$periodo_calibracao[2]
+                }
+
+                shiny::updateDateRangeInput(session, "periodo_simulacao", start = data_inicio_simulacao, end = data_final_simulacao, min = data_minimo, max = data_maximo)
+                shiny::updateDateRangeInput(session, "periodo_calibracao", start = data_inicio_calibracao, end = data_final_calibracao, min = data_minimo, max = data_maximo)
+                shiny::updateDateRangeInput(session, "zoom_calibracao", start = data_inicio_simulacao, end = data_final_simulacao, min = data_minimo, max = data_maximo)
+            }
         })
 
         shiny::observeEvent(input$kt_min, {
@@ -276,8 +358,27 @@ executa_visualizador_calibracao_pmur <- function(){
                 kt_max <- input$kt_max
                 data_minimo <- (min(precipitacao$data) + kt_min)
                 data_maximo <- (max(precipitacao$data) - kt_max)
-                shiny::updateDateRangeInput(session, "periodo_simulacao", start = data_minimo, end = data_maximo, min = data_minimo, max = data_maximo)
-                shiny::updateDateRangeInput(session, "zoom_calibracao", start = data_minimo, end = data_maximo, min = data_minimo, max = data_maximo)
+                data_inicio_simulacao <- data_minimo
+                data_final_simulacao <- data_maximo
+                periodos <- periodos()
+                if (nrow(periodos) > 0) {
+                    if (nrow(periodos[parametro == "data_inicio_simulacao"]) > 0) {
+                        if (periodos[parametro == "data_inicio_simulacao", valor] >= data_minimo) {
+                            data_inicio_simulacao <- periodos[parametro == "data_inicio_simulacao", valor]
+                        } else {
+                            data_inicio_simulacao <- data_minimo
+                        }
+                    }
+                    if (nrow(periodos[parametro == "data_final_simulacao"]) > 0) {
+                        if (periodos[parametro == "data_final_simulacao", valor] >= data_minimo) {
+                            data_final_simulacao <- periodos[parametro == "data_final_simulacao", valor]
+                        } else {
+                            data_final_simulacao <- data_maximo
+                        }
+                    }
+                }
+                shiny::updateDateRangeInput(session, "periodo_simulacao", start = data_inicio_simulacao, end = data_final_simulacao, min = data_minimo, max = data_maximo)
+                shiny::updateDateRangeInput(session, "zoom_calibracao", start = data_inicio_simulacao, end = data_final_simulacao, min = data_minimo, max = data_maximo)
             }
         })
 
@@ -290,8 +391,30 @@ executa_visualizador_calibracao_pmur <- function(){
                 kt_max <- input$kt_max
                 data_minimo <- (min(precipitacao$data) + kt_min)
                 data_maximo <- (max(precipitacao$data) - kt_max)
-                shiny::updateDateRangeInput(session, "periodo_simulacao", start = data_minimo, end = data_maximo, min = data_minimo, max = data_maximo)
-                shiny::updateDateRangeInput(session, "zoom_calibracao", start = data_minimo, end = data_maximo, min = data_minimo, max = data_maximo)
+                data_inicio_simulacao <- data_minimo
+                data_final_simulacao <- data_maximo
+                periodos <- periodos()
+                if (nrow(periodos) > 0) {
+                    if (nrow(periodos[parametro == "data_inicio_simulacao"]) > 0) {
+                        print("aqui7")
+                        if (periodos[parametro == "data_inicio_simulacao", valor] >= data_minimo) {
+                            print("aqui8")
+                            data_inicio_simulacao <- periodos[parametro == "data_inicio_simulacao", valor]
+                        } else {
+                            print("aqui9")
+                            data_inicio_simulacao <- data_minimo
+                        }
+                    }
+                    if (nrow(periodos[parametro == "data_final_simulacao"]) > 0) {
+                        if (periodos[parametro == "data_final_simulacao", valor] >= data_minimo) {
+                            data_final_simulacao <- periodos[parametro == "data_final_simulacao", valor]
+                        } else {
+                            data_final_simulacao <- data_minimo
+                        }
+                    }
+                }
+                shiny::updateDateRangeInput(session, "periodo_simulacao", start = data_inicio_simulacao, end = data_final_simulacao, min = data_minimo, max = data_maximo)
+                shiny::updateDateRangeInput(session, "zoom_calibracao", start = data_inicio_simulacao, end = data_final_simulacao, min = data_minimo, max = data_maximo)
             }
         })
         
@@ -300,6 +423,18 @@ executa_visualizador_calibracao_pmur <- function(){
             if (!is.null(arquivo_parametros)) {
                 parametros <- le_parametros(arquivo_parametros)
                 return(parametros)
+            }
+        })
+
+        periodos <- shiny::reactive({
+            arquivo_parametros <- input$arquivo_parametros$datapath
+            if (!is.null(arquivo_parametros)) {
+                periodos <- le_datas_calibracao(arquivo_parametros)
+                if (nrow(periodos > 0)) {
+                    return(periodos)
+                } else {
+                    return(data.table::data.table())
+                }
             }
         })
 
@@ -561,90 +696,92 @@ executa_visualizador_calibracao_pmur <- function(){
 
         saida <-  shiny::reactive({
             if (!is.null(input[[paste0("posto_plu_1")]])) {
-                vetor_modelo <- vetor_modelo()
-                vetor_modelo[1] <- input$str
-                vetor_modelo[2] <- input$k2t
-                vetor_modelo[3] <- input$crec
-                vetor_modelo[4] <- input$capc
-                vetor_modelo[5] <- input$k_kt
-                vetor_modelo[6] <- input$h1
-                vetor_modelo[7] <- input$k2t2
-                vetor_modelo[8] <- input$lambda
-                vetor_modelo[9] <- input$h
-                vetor_modelo[10] <- input$k1t
-                vetor_modelo[11] <- input$k3t
-                vetor_modelo[12] <- input$pcof
-                vetor_modelo[13] <- input$ecof
-                vetor_modelo[14] <- input$ecof2
-                vetor_modelo[15] <- input$pmur
-                vetor_modelo[16] <- input$alfa
-                vetor_modelo[17] <- input$beta
-                kt_max <- input$kt_max
-                kt_min <- input$kt_min
-                vazao <- vazao_posto()
-                evapotranspiracao <- evapotranspiracao_posto()
-                precipitacao <- precipitacao_posto()
-                Ebin <- input$Ebin
-                Tuin <- input$Tuin
-                Supin <- input$Supin
-                area <- area()
-                postos_plu <- postos_plu()
-                data_inicio_simulacao <- input$periodo_simulacao[1]
-                data_fim_simulacao <- input$periodo_simulacao[2]
-                data_inicio_simulacao <- data_inicio_simulacao - kt_min
-                data_fim_simulacao <- data_fim_simulacao + kt_max
+                if (!is.null(input$periodo_simulacao)) {
+                    vetor_modelo <- vetor_modelo()
+                    vetor_modelo[1] <- input$str
+                    vetor_modelo[2] <- input$k2t
+                    vetor_modelo[3] <- input$crec
+                    vetor_modelo[4] <- input$capc
+                    vetor_modelo[5] <- input$k_kt
+                    vetor_modelo[6] <- input$h1
+                    vetor_modelo[7] <- input$k2t2
+                    vetor_modelo[8] <- input$lambda
+                    vetor_modelo[9] <- input$h
+                    vetor_modelo[10] <- input$k1t
+                    vetor_modelo[11] <- input$k3t
+                    vetor_modelo[12] <- input$pcof
+                    vetor_modelo[13] <- input$ecof
+                    vetor_modelo[14] <- input$ecof2
+                    vetor_modelo[15] <- input$pmur
+                    vetor_modelo[16] <- input$alfa
+                    vetor_modelo[17] <- input$beta
+                    kt_max <- input$kt_max
+                    kt_min <- input$kt_min
+                    vazao <- vazao_posto()
+                    evapotranspiracao <- evapotranspiracao_posto()
+                    precipitacao <- precipitacao_posto()
+                    Ebin <- input$Ebin
+                    Tuin <- input$Tuin
+                    Supin <- input$Supin
+                    area <- area()
+                    postos_plu <- postos_plu()
+                    data_inicio_simulacao <- input$periodo_simulacao[1]
+                    data_fim_simulacao <- input$periodo_simulacao[2]
+                    data_inicio_simulacao <- data_inicio_simulacao - kt_min
+                    data_fim_simulacao <- data_fim_simulacao + kt_max
 
-                precipitacao <- precipitacao[data >= data_inicio_simulacao & data <= data_fim_simulacao]
-                evapotranspiracao <- evapotranspiracao[data >= data_inicio_simulacao + kt_min & data <= data_fim_simulacao - kt_max]
-                
-                kt <- cria_kt(kt_max, kt_min, vetor_modelo[16], vetor_modelo[17])
-                
-                inicializacao <- inicializacao_smap(vetor_modelo, area, Ebin, Tuin, Supin)
-                
-                numero_postos_plu <- nrow(postos_plu[postos_plu$nome == input$sub_bacia])
-                if (numero_postos_plu > 1) {
-                    for (iposto in 1: numero_postos_plu){
-                        vetor_modelo[(17 + iposto)] <- input[[paste0("posto_plu_", iposto)]]
-                        postos_plu[postos_plu$nome == input$sub_bacia]$valor[iposto] <- input[[paste0("posto_plu_", iposto)]]
+                    precipitacao <- precipitacao[data >= data_inicio_simulacao & data <= data_fim_simulacao]
+                    evapotranspiracao <- evapotranspiracao[data >= data_inicio_simulacao + kt_min & data <= data_fim_simulacao - kt_max]
+                    
+                    kt <- cria_kt(kt_max, kt_min, vetor_modelo[16], vetor_modelo[17])
+                    
+                    inicializacao <- inicializacao_smap(vetor_modelo, area, Ebin, Tuin, Supin)
+                    
+                    numero_postos_plu <- nrow(postos_plu[postos_plu$nome == input$sub_bacia])
+                    if (numero_postos_plu > 1) {
+                        for (iposto in 1: numero_postos_plu){
+                            vetor_modelo[(17 + iposto)] <- input[[paste0("posto_plu_", iposto)]]
+                            postos_plu[postos_plu$nome == input$sub_bacia]$valor[iposto] <- input[[paste0("posto_plu_", iposto)]]
+                        }
                     }
+
+                    precipitacao_ponderada <- ponderacao_espacial(precipitacao, postos_plu[postos_plu$nome == input$sub_bacia])
+
+                    precipitacao_ponderada <- precipitacao_ponderada$valor * vetor_modelo[12]
+                    precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada, kt, kt_max, kt_min)
+                    
+                    data_inicio_simulacao <- data_inicio_simulacao + kt_min
+                    data_fim_simulacao <- data_fim_simulacao - kt_max
+                    evapotranspiracao_ponderada <- data.table::data.table(evapotranspiracao[which((evapotranspiracao$data >= data_inicio_simulacao)
+                                                & (evapotranspiracao$data <= data_fim_simulacao))])
+                    evapotranspiracao_ponderada <- evapotranspiracao_ponderada$valor * vetor_modelo[13]
+                    evapotranspiracao_planicie_ponderada <- data.table::data.table(evapotranspiracao[which((evapotranspiracao$data >= data_inicio_simulacao)
+                                                & (evapotranspiracao$data <= data_fim_simulacao))])
+                    evapotranspiracao_planicie_ponderada <- evapotranspiracao_planicie_ponderada$valor * vetor_modelo[14]
+                    
+                    
+                    vetor_inicializacao <- unlist(inicializacao)
+                    numero_dias <- length(evapotranspiracao_planicie_ponderada)
+                    
+                    saida <- funcaoSmapCpp::rodada_pmur_cpp(vetor_modelo, vetor_inicializacao, area, precipitacao_ponderada,
+                                                                evapotranspiracao_ponderada, evapotranspiracao_planicie_ponderada, numero_dias)
+                    saida <- data.table::data.table(saida)
+                    saida$data <- seq.Date(data_inicio_simulacao, data_fim_simulacao, by = 1)
+                    saida$precipitacao_ponderada <- precipitacao_ponderada
+                    saida$evapotranspiracao_ponderada <- evapotranspiracao_ponderada
+                    saida <- merge(saida, vazao, by = "data")
+                    saida$posto <- NULL
+                    
+                    colnames(saida)[23] <- "vazao_observada"
+                    saida$Ed <- NULL
+                    saida$Ed2 <- NULL
+                    saida$Ed3 <- NULL
+                    saida$Eb <- NULL
+                    data.table::setcolorder(saida, c("data", "precipitacao_ponderada", "evapotranspiracao_ponderada", "vazao_observada", "Qcalc",
+                                                    "Qbase", "Qsup1", "Qsup2", "Qplan", "Rsolo", "Rsup", "Rsup2", "Rsub",
+                                                    "Es", "Er", "Rec", "Marg", "Tu", "Ai"))
+                    return(saida)
                 }
-
-                precipitacao_ponderada <- ponderacao_espacial(precipitacao, postos_plu[postos_plu$nome == input$sub_bacia])
-
-                precipitacao_ponderada <- precipitacao_ponderada$valor * vetor_modelo[12]
-                precipitacao_ponderada <- ponderacao_temporal(precipitacao_ponderada, kt, kt_max, kt_min)
-                
-                data_inicio_simulacao <- data_inicio_simulacao + kt_min
-                data_fim_simulacao <- data_fim_simulacao - kt_max
-                evapotranspiracao_ponderada <- data.table::data.table(evapotranspiracao[which((evapotranspiracao$data >= data_inicio_simulacao)
-                                            & (evapotranspiracao$data <= data_fim_simulacao))])
-                evapotranspiracao_ponderada <- evapotranspiracao_ponderada$valor * vetor_modelo[13]
-                evapotranspiracao_planicie_ponderada <- data.table::data.table(evapotranspiracao[which((evapotranspiracao$data >= data_inicio_simulacao)
-                                            & (evapotranspiracao$data <= data_fim_simulacao))])
-                evapotranspiracao_planicie_ponderada <- evapotranspiracao_planicie_ponderada$valor * vetor_modelo[14]
-                
-                
-                vetor_inicializacao <- unlist(inicializacao)
-                numero_dias <- length(evapotranspiracao_planicie_ponderada)
-                
-                saida <- funcaoSmapCpp::rodada_pmur_cpp(vetor_modelo, vetor_inicializacao, area, precipitacao_ponderada,
-                                                            evapotranspiracao_ponderada, evapotranspiracao_planicie_ponderada, numero_dias)
-                saida <- data.table::data.table(saida)
-                saida$data <- seq.Date(data_inicio_simulacao, data_fim_simulacao, by = 1)
-                saida$precipitacao_ponderada <- precipitacao_ponderada
-                saida$evapotranspiracao_ponderada <- evapotranspiracao_ponderada
-                saida <- merge(saida, vazao, by = "data")
-                saida$posto <- NULL
-                
-                colnames(saida)[23] <- "vazao_observada"
-                saida$Ed <- NULL
-                saida$Ed2 <- NULL
-                saida$Ed3 <- NULL
-                saida$Eb <- NULL
-                data.table::setcolorder(saida, c("data", "precipitacao_ponderada", "evapotranspiracao_ponderada", "vazao_observada", "Qcalc",
-                                                "Qbase", "Qsup1", "Qsup2", "Qplan", "Rsolo", "Rsup", "Rsup2", "Rsub",
-                                                "Es", "Er", "Rec", "Marg", "Tu", "Ai"))
-                return(saida)
             }
         })
 

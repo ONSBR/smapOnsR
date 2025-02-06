@@ -1,5 +1,43 @@
 # LEITURA DE ARQUIVOS DE ENTRADA NOVOS SMAP---------------------------------
 
+#' le_datas_calibracao
+#' 
+#' Leitor de arquivo de parametros para obtencao das datas utilizadas 
+#' na calibracao
+#' 
+#' Le arquivo de parametros "sub-bacia_PARAMETROS.txt".
+#' 
+#' @param arq o arquivo do tipo "sub-bacia_PARAMETROS.txt"
+#' @importFrom  data.table data.table
+#' @importFrom utils read.csv
+#' @return data.table com as colunas
+#'     \itemize{
+#'     \item{nome - nome da sub-bacia}
+#'     \item{parametro - nome do parametro}
+#'     \item{valor - valor do parametro}
+#'     }
+#' @export 
+le_datas_calibracao <- function(arq) {
+
+    if (!file.exists(arq)) {
+        stop("o arquivo de parametros nao existe.")
+    }
+
+    dat <- data.table::fread(arq)
+
+    if (any(colnames(dat) != c("nome", "parametro", "valor", 
+                            "limite_inferior", "limite_superior"))) {
+        stop("o arquivos deve deve possuir colunas 'nome', 'parametro' e 'valor'")
+    }
+
+    periodo <- dat[grepl("data_", parametro)]
+    periodo <- rbindlist(list(periodo, dat[grepl("_periodo_", parametro)]))
+
+    periodo[, valor := as.Date(valor, format = "%Y-%m-%d")]
+
+    periodo
+}
+
 #' le_parametros
 #' 
 #' Leitor de arquivo de parametros
