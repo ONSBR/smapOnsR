@@ -147,7 +147,8 @@ executa_visualizador_calibracao_pmur <- function(){
                 )
             ),
             shiny::tabPanel("Tabela Dados",
-                DT::dataTableOutput("tabela")
+                DT::dataTableOutput("tabela"),
+                shiny::downloadButton("download_simulacao", "Download simulacao_sub_bacia.csv")
             ),
             shiny::tabPanel("Tabela info calibracao",
                 DT::dataTableOutput("info_calibracao")
@@ -1379,6 +1380,15 @@ executa_visualizador_calibracao_pmur <- function(){
             },
             content = function(file) {
                 utils::write.table(postos_plu_exportacao(), file, quote = FALSE, row.names = FALSE, sep = ";")
+            }
+        )
+
+        output$download_simulacao <- shiny::downloadHandler(
+            filename = function() {
+                paste0("simulacao_", input$sub_bacia, ".csv")
+            },
+            content = function(file) {
+                utils::write.table(saida(), file, quote = FALSE, row.names = FALSE, sep = ";")
             }
         )
     }
