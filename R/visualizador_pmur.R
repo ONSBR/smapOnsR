@@ -359,24 +359,17 @@ executa_visualizador_calibracao_pmur <- function(){
                 kt_max <- input$kt_max
                 data_minimo <- (min(precipitacao$data) + kt_min)
                 data_maximo <- (max(precipitacao$data) - kt_max)
-                data_inicio_simulacao <- data_minimo
-                data_final_simulacao <- data_maximo
-                periodos <- periodos()
-                if (nrow(periodos) > 0) {
-                    if (nrow(periodos[parametro == "data_inicio_simulacao"]) > 0) {
-                        if (periodos[parametro == "data_inicio_simulacao", valor] >= data_minimo) {
-                            data_inicio_simulacao <- periodos[parametro == "data_inicio_simulacao", valor]
-                        } else {
-                            data_inicio_simulacao <- data_minimo
-                        }
-                    }
-                    if (nrow(periodos[parametro == "data_final_simulacao"]) > 0) {
-                        if (periodos[parametro == "data_final_simulacao", valor] >= data_minimo) {
-                            data_final_simulacao <- periodos[parametro == "data_final_simulacao", valor]
-                        } else {
-                            data_final_simulacao <- data_maximo
-                        }
-                    }
+                data_inicio_simulacao <- input$periodo_simulacao[1]
+                data_final_simulacao <- input$periodo_simulacao[2]
+                if (data_inicio_simulacao >= data_minimo) {
+                    data_inicio_simulacao <- data_inicio_simulacao
+                } else {
+                    data_inicio_simulacao <- data_minimo
+                }
+                if (data_final_simulacao <= data_minimo) {
+                    data_final_simulacao <- data_final_simulacao
+                } else {
+                    data_final_simulacao <- data_maximo
                 }
                 shiny::updateDateRangeInput(session, "periodo_simulacao", start = data_inicio_simulacao, end = data_final_simulacao, min = data_minimo, max = data_maximo)
                 shiny::updateDateRangeInput(session, "zoom_calibracao", start = data_inicio_simulacao, end = data_final_simulacao, min = data_minimo, max = data_maximo)
@@ -392,27 +385,17 @@ executa_visualizador_calibracao_pmur <- function(){
                 kt_max <- input$kt_max
                 data_minimo <- (min(precipitacao$data) + kt_min)
                 data_maximo <- (max(precipitacao$data) - kt_max)
-                data_inicio_simulacao <- data_minimo
-                data_final_simulacao <- data_maximo
-                periodos <- periodos()
-                if (nrow(periodos) > 0) {
-                    if (nrow(periodos[parametro == "data_inicio_simulacao"]) > 0) {
-                        print("aqui7")
-                        if (periodos[parametro == "data_inicio_simulacao", valor] >= data_minimo) {
-                            print("aqui8")
-                            data_inicio_simulacao <- periodos[parametro == "data_inicio_simulacao", valor]
-                        } else {
-                            print("aqui9")
-                            data_inicio_simulacao <- data_minimo
-                        }
-                    }
-                    if (nrow(periodos[parametro == "data_final_simulacao"]) > 0) {
-                        if (periodos[parametro == "data_final_simulacao", valor] >= data_minimo) {
-                            data_final_simulacao <- periodos[parametro == "data_final_simulacao", valor]
-                        } else {
-                            data_final_simulacao <- data_minimo
-                        }
-                    }
+                data_inicio_simulacao <- input$periodo_simulacao[1]
+                data_final_simulacao <- input$periodo_simulacao[2]
+                if (data_inicio_simulacao >= data_minimo) {
+                    data_inicio_simulacao <- data_inicio_simulacao
+                } else {
+                    data_inicio_simulacao <- data_minimo
+                }
+                if (data_final_simulacao <= data_minimo) {
+                    data_final_simulacao <- data_final_simulacao
+                } else {
+                    data_final_simulacao <- data_maximo
                 }
                 shiny::updateDateRangeInput(session, "periodo_simulacao", start = data_inicio_simulacao, end = data_final_simulacao, min = data_minimo, max = data_maximo)
                 shiny::updateDateRangeInput(session, "zoom_calibracao", start = data_inicio_simulacao, end = data_final_simulacao, min = data_minimo, max = data_maximo)
