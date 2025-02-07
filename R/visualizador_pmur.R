@@ -366,12 +366,28 @@ executa_visualizador_calibracao_pmur <- function(){
                 } else {
                     data_inicio_simulacao <- data_minimo
                 }
-                if (data_final_simulacao <= data_minimo) {
+                if (data_final_simulacao <= data_maximo) {
                     data_final_simulacao <- data_final_simulacao
                 } else {
                     data_final_simulacao <- data_maximo
                 }
+                
+                data_inicio_objetivo <- input$periodo_calibracao[1]
+                data_final_objetivo <- input$periodo_calibracao[2]
+                if (data_inicio_objetivo >= data_minimo) {
+                    data_inicio_objetivo <- data_inicio_objetivo
+                } else {
+                    data_inicio_objetivo <- data_minimo
+                }
+
+                if (data_final_objetivo <= data_maximo) {
+                    data_final_objetivo <- data_final_objetivo
+                } else {
+                    data_final_objetivo <- data_maximo
+                }
+
                 shiny::updateDateRangeInput(session, "periodo_simulacao", start = data_inicio_simulacao, end = data_final_simulacao, min = data_minimo, max = data_maximo)
+                shiny::updateDateRangeInput(session, "periodo_calibracao", start = data_inicio_objetivo, end = data_final_objetivo, min = data_minimo, max = data_maximo)
                 shiny::updateDateRangeInput(session, "zoom_calibracao", start = data_inicio_simulacao, end = data_final_simulacao, min = data_minimo, max = data_maximo)
             }
         })
@@ -392,12 +408,28 @@ executa_visualizador_calibracao_pmur <- function(){
                 } else {
                     data_inicio_simulacao <- data_minimo
                 }
-                if (data_final_simulacao <= data_minimo) {
+                if (data_final_simulacao <= data_maximo) {
                     data_final_simulacao <- data_final_simulacao
                 } else {
                     data_final_simulacao <- data_maximo
                 }
+
+                data_inicio_objetivo <- input$periodo_calibracao[1]
+                data_final_objetivo <- input$periodo_calibracao[2]
+                if (data_inicio_objetivo >= data_minimo) {
+                    data_inicio_objetivo <- data_inicio_objetivo
+                } else {
+                    data_inicio_objetivo <- data_minimo
+                }
+
+                if (data_final_objetivo <= data_maximo) {
+                    data_final_objetivo <- data_final_objetivo
+                } else {
+                    data_final_objetivo <- data_maximo
+                }
+
                 shiny::updateDateRangeInput(session, "periodo_simulacao", start = data_inicio_simulacao, end = data_final_simulacao, min = data_minimo, max = data_maximo)
+                shiny::updateDateRangeInput(session, "periodo_calibracao", start = data_inicio_objetivo, end = data_final_objetivo, min = data_minimo, max = data_maximo)
                 shiny::updateDateRangeInput(session, "zoom_calibracao", start = data_inicio_simulacao, end = data_final_simulacao, min = data_minimo, max = data_maximo)
             }
         })
