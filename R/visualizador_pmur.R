@@ -65,8 +65,8 @@ executa_visualizador_calibracao_pmur <- function(){
                                 shiny::numericInput(inputId = "limite_inferior_ecof", label = "LI ecof",value = NULL),
                                 shiny::numericInput(inputId = "limite_inferior_ecof2", label = "LI ecof2",value = NULL),
                                 shiny::numericInput(inputId = "limite_inferior_pmur", label = "LI pmur",value = NULL),
-                                shiny::numericInput(inputId = "limite_inferior_alfa", label = "LI alfa",value = NULL),
-                                shiny::numericInput(inputId = "limite_inferior_beta", label = "LI beta",value = NULL),
+                                shiny::numericInput(inputId = "limite_inferior_alfa", label = "LI alfa",value = NULL, step = 1),
+                                shiny::numericInput(inputId = "limite_inferior_beta", label = "LI beta",value = NULL, step = 0.1, min = 0.01, max = 0.99),
                                 shiny::numericInput(inputId = "kt_max", label = "kt max",value = NULL)
                             ),
                             shiny::column(3,
@@ -85,8 +85,8 @@ executa_visualizador_calibracao_pmur <- function(){
                                         shiny::numericInput(inputId = "ecof", label = "ecof",value = NULL),
                                         shiny::numericInput(inputId = "ecof2", label = "ecof2",value = NULL),
                                         shiny::numericInput(inputId = "pmur", label = "pmur",value = NULL),
-                                        shiny::numericInput(inputId = "alfa", label = "alfa",value = NULL),
-                                        shiny::numericInput(inputId = "beta", label = "beta",value = NULL),
+                                        shiny::numericInput(inputId = "alfa", label = "alfa",value = NULL, step = 0.1),
+                                        shiny::numericInput(inputId = "beta", label = "beta",value = NULL, step = 0.1, min = 0.01, max = 0.99),
                                         shiny::numericInput(inputId = "kt_min", label = "kt min",value = NULL)
                             ),
                             shiny::column(4, 
@@ -105,8 +105,8 @@ executa_visualizador_calibracao_pmur <- function(){
                                         shiny::numericInput(inputId = "limite_superior_ecof", label = "LS ecof",value = NULL),
                                         shiny::numericInput(inputId = "limite_superior_ecof2", label = "LS ecof2",value = NULL),
                                         shiny::numericInput(inputId = "limite_superior_pmur", label = "LS pmur",value = NULL),
-                                        shiny::numericInput(inputId = "limite_superior_alfa", label = "LS alfa",value = NULL),
-                                        shiny::numericInput(inputId = "limite_superior_beta", label = "LS beta",value = NULL)
+                                        shiny::numericInput(inputId = "limite_superior_alfa", label = "LS alfa",value = NULL, step = 0.1),
+                                        shiny::numericInput(inputId = "limite_superior_beta", label = "LS beta",value = NULL, step = 0.01, min = 0.01, max = 0.99)
                             ),
                         ),
                         shiny::hr(),
@@ -438,6 +438,7 @@ executa_visualizador_calibracao_pmur <- function(){
             arquivo_parametros <- input$arquivo_parametros$datapath
             if (!is.null(arquivo_parametros)) {
                 parametros <- le_parametros(arquivo_parametros)
+                parametros <- parametros[!(parametros$parametro %in% c("Ebin", "Supin", "Tuin"))]
                 return(parametros)
             }
         })
@@ -500,12 +501,12 @@ executa_visualizador_calibracao_pmur <- function(){
                 if (any(parametros_posto$parametro == "Alfa")){
                     alfa <- parametros_posto[parametros_posto$parametro == "Alfa"]$valor
                 } else{
-                    alfa <- 5
+                    alfa <- 0.5
                 }
                 if (any(parametros_posto$parametro == "Beta")){
                     beta <- parametros_posto[parametros_posto$parametro == "Beta"]$valor
                 } else{
-                    beta <- 5
+                    beta <- 0.5
                 }
                 vetor_modelo <- as.numeric(c(vetor_modelo[1:11], vetor_modelo[75:78], alfa, beta))
                 return(vetor_modelo)
@@ -1299,21 +1300,27 @@ executa_visualizador_calibracao_pmur <- function(){
             parametros$valor[parametros$parametro == "ktMax"] <- input$kt_max
             if (nrow(parametros[parametros$parametro == "Pmur"]) == 0){
                 parametros <- data.table::rbindlist(list(parametros, data.table::data.table(nome = parametros[, unique(nome)], 
-                            parametro = "Pmur", valor = input$pmur, limite_inferior = input$pmur * 0.8 , limite_superior = input$pmur * 1.2)))
+                            parametro = "Pmur", valor = input$pmur, limite_inferior = limite_inferior_pmur, limite_superior = limite_superior_pmur)))
             } else {
                 parametros$valor[parametros$parametro == "Pmur"] <- input$pmur
+                parametros$limite_inferior[parametros$parametro == "Pmur"] <- input$limite_inferior_pmur
+                parametros$limite_superior[parametros$parametro == "Pmur"] <- input$limite_superior_pmur
             }
             if (nrow(parametros[parametros$parametro == "Alfa"]) == 0){
                 parametros <- data.table::rbindlist(list(parametros, data.table::data.table(nome = parametros[, unique(nome)], 
-                parametro = "Alfa", valor = input$alfa, limite_inferior = 0.001, limite_superior = 100)))
+                parametro = "Alfa", valor = input$alfa, limite_inferior = limite_inferior_alfa, limite_superior = limite_superior_alfa)))
             } else {
                 parametros$valor[parametros$parametro == "Alfa"] <- input$alfa
+                parametros$limite_inferior[parametros$parametro == "Alfa"] <- input$limite_inferior_alfa
+                parametros$limite_superior[parametros$parametro == "Alfa"] <- input$limite_superior_alfa
             }
             if (nrow(parametros[parametros$parametro == "Beta"]) == 0){
                 parametros <- data.table::rbindlist(list(parametros, data.table::data.table(nome = parametros[, unique(nome)], 
-                parametro = "Beta", valor = input$beta, limite_inferior = 0.001, limite_superior = 100)))
+                parametro = "Beta", valor = input$beta, limite_inferior = limite_inferior_beta, limite_superior = limite_superior_beta)))
             } else {
                 parametros$valor[parametros$parametro == "Beta"] <- input$beta
+                parametros$limite_inferior[parametros$parametro == "Beta"] <- input$limite_inferior_beta
+                parametros$limite_superior[parametros$parametro == "Beta"] <- input$limite_superior_beta
             }
 
             kt <- cria_kt(input$kt_max, input$kt_min, input$alfa, input$beta)
