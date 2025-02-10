@@ -469,6 +469,15 @@ executa_visualizador_calibracao_pmur <- function(){
             if (!is.null(arquivo_parametros)) {
                 parametros <- parametros()
                 parametros <- parametros[parametros$nome == input$sub_bacia]
+
+                if (!"limite_inferior" %in% names(parametros)) {
+                    parametros[, limite_inferior := 0.8 * valor]
+                }
+
+                if (!"limite_superior" %in% names(parametros)) {
+                    parametros[, limite_superior := 1.2 * valor]
+                }
+
                 if (any(parametros$parametro == "Pmur")){
                     
                 } else {
