@@ -25,9 +25,21 @@ le_datas_calibracao <- function(arq) {
 
     dat <- data.table::fread(arq)
 
-    if (any(colnames(dat) != c("nome", "parametro", "valor", 
-                            "limite_inferior", "limite_superior"))) {
-        stop("o arquivos deve deve possuir colunas 'nome', 'parametro' e 'valor'")
+    # Definindo as colunas obrigatórias e as permitidas
+    colunas_obrigatorias <- c("nome", "parametro", "valor")
+    colunas_permitidas <- c("nome", "parametro", "valor", "limite_inferior", "limite_superior")
+
+    # 1. Verifica se todas as colunas obrigatórias estão presentes
+    if (!all(colunas_obrigatorias %in% names(dat))) {
+        stop(paste0("O arquivo ", arq, " deve conter as colunas obrigatórias: ", 
+        colunas_obrigatorias))
+    }
+
+    # 2. Verifica se há colunas fora do conjunto permitido
+    colunas_extras <- setdiff(names(dat), colunas_permitidas)
+    if (length(colunas_extras) > 0) {
+        stop(paste0("O arquivo ", arq, " possui colunas não permitidas: ",
+        paste0(colunas_extras, collapse = ", ")))
     }
 
     periodo <- dat[grepl("data_", parametro)]
@@ -62,9 +74,21 @@ le_parametros <- function(arq) {
 
     dat <- data.table::fread(arq)
 
-    if (any(colnames(dat) != c("nome", "parametro", "valor", 
-                            "limite_inferior", "limite_superior"))) {
-        stop("o arquivos deve deve possuir colunas 'nome', 'parametro' e 'valor'")
+    # Definindo as colunas obrigatórias e as permitidas
+    colunas_obrigatorias <- c("nome", "parametro", "valor")
+    colunas_permitidas <- c("nome", "parametro", "valor", "limite_inferior", "limite_superior")
+
+    # 1. Verifica se todas as colunas obrigatórias estão presentes
+    if (!all(colunas_obrigatorias %in% names(dat))) {
+        stop(paste0("O arquivo ", arq, " deve conter as colunas obrigatórias: ", 
+        colunas_obrigatorias))
+    }
+
+    # 2. Verifica se há colunas fora do conjunto permitido
+    colunas_extras <- setdiff(names(dat), colunas_permitidas)
+    if (length(colunas_extras) > 0) {
+        stop(paste0("O arquivo ", arq, " possui colunas não permitidas: ",
+        paste0(colunas_extras, collapse = ", ")))
     }
 
     dat <- dat[!grepl("data_", parametro)]
