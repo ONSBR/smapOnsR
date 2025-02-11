@@ -301,52 +301,55 @@ executa_visualizador_calibracao_pmur <- function(){
         shiny::observeEvent(input$periodo_simulacao, {
             arquivo_parametros <- input$arquivo_parametros
             if (!is.null(arquivo_parametros)) {
-                vetor_modelo <- vetor_modelo()
-                parametros_posto <- parametros_posto()
-                postos_plu <- postos_plu()
-                modelo <- new_modelo_smap_ons_pmur(parametros_posto, postos_plu[postos_plu$nome == input$sub_bacia])
-                kt_max <- attributes(modelo)$kt_max
-                kt_min <- attributes(modelo)$kt_min
-                precipitacao <- precipitacao_posto()
-                data_minimo <- (min(precipitacao$data) + kt_min)
-                data_maximo <- (max(precipitacao$data) - kt_max)
-                data_inicio_simulacao <- input$periodo_simulacao[1]
-                data_final_simulacao <- input$periodo_simulacao[2]
-                data_inicio_calibracao <- data_minimo
-                data_final_calibracao <- data_maximo
-                periodos <- periodos()
-                if (nrow(periodos) > 0) {
-                    if (nrow(periodos[parametro == "data_inicio_simulacao"]) > 0) {
-                        if (periodos[parametro == "data_inicio_simulacao", valor] >= data_minimo) {
-                            data_inicio_simulacao <- input$periodo_simulacao[1]
-                    } else {
-                            data_inicio_simulacao <- data_minimo
-                        }
-                    }
-                    if (nrow(periodos[parametro == "data_final_simulacao"]) > 0) {
-                        if (periodos[parametro == "data_final_simulacao", valor] >= data_minimo) {
-                            data_final_simulacao <- input$periodo_simulacao[2]
+                if (!is.na(input$periodo_simulacao[1]) & !is.na(input$periodo_simulacao[2]) &
+                    !is.na(input$periodo_calibracao[1]) & !is.na(input$periodo_calibracao[2])) {
+                    vetor_modelo <- vetor_modelo()
+                    parametros_posto <- parametros_posto()
+                    postos_plu <- postos_plu()
+                    modelo <- new_modelo_smap_ons_pmur(parametros_posto, postos_plu[postos_plu$nome == input$sub_bacia])
+                    kt_max <- attributes(modelo)$kt_max
+                    kt_min <- attributes(modelo)$kt_min
+                    precipitacao <- precipitacao_posto()
+                    data_minimo <- (min(precipitacao$data) + kt_min)
+                    data_maximo <- (max(precipitacao$data) - kt_max)
+                    data_inicio_simulacao <- input$periodo_simulacao[1]
+                    data_final_simulacao <- input$periodo_simulacao[2]
+                    data_inicio_calibracao <- data_minimo
+                    data_final_calibracao <- data_maximo
+                    periodos <- periodos()
+                    if (nrow(periodos) > 0) {
+                        if (nrow(periodos[parametro == "data_inicio_simulacao"]) > 0) {
+                            if (periodos[parametro == "data_inicio_simulacao", valor] >= data_minimo) {
+                                data_inicio_simulacao <- input$periodo_simulacao[1]
                         } else {
-                            data_final_simulacao <- data_maximo
+                                data_inicio_simulacao <- data_minimo
+                            }
+                        }
+                        if (nrow(periodos[parametro == "data_final_simulacao"]) > 0) {
+                            if (periodos[parametro == "data_final_simulacao", valor] >= data_minimo) {
+                                data_final_simulacao <- input$periodo_simulacao[2]
+                            } else {
+                                data_final_simulacao <- data_maximo
+                            }
                         }
                     }
-                }
 
-                if (data_inicio_simulacao > input$periodo_calibracao[1]) {
-                    data_inicio_calibracao <- data_inicio_simulacao
-                } else {
-                    data_inicio_calibracao <- input$periodo_calibracao[1]
-                }
+                    if (data_inicio_simulacao > input$periodo_calibracao[1]) {
+                        data_inicio_calibracao <- data_inicio_simulacao
+                    } else {
+                        data_inicio_calibracao <- input$periodo_calibracao[1]
+                    }
 
-                if (data_final_simulacao < input$periodo_calibracao[2]) {
-                    data_final_calibracao <- data_final_simulacao
-                } else {
-                    data_final_calibracao <- input$periodo_calibracao[2]
-                }
+                    if (data_final_simulacao < input$periodo_calibracao[2]) {
+                        data_final_calibracao <- data_final_simulacao
+                    } else {
+                        data_final_calibracao <- input$periodo_calibracao[2]
+                    }
 
-                shiny::updateDateRangeInput(session, "periodo_simulacao", start = data_inicio_simulacao, end = data_final_simulacao, min = data_minimo, max = data_maximo)
-                shiny::updateDateRangeInput(session, "periodo_calibracao", start = data_inicio_calibracao, end = data_final_calibracao, min = data_minimo, max = data_maximo)
-                shiny::updateDateRangeInput(session, "zoom_calibracao", start = data_inicio_simulacao, end = data_final_simulacao, min = data_minimo, max = data_maximo)
+                    shiny::updateDateRangeInput(session, "periodo_simulacao", start = data_inicio_simulacao, end = data_final_simulacao, min = data_minimo, max = data_maximo)
+                    shiny::updateDateRangeInput(session, "periodo_calibracao", start = data_inicio_calibracao, end = data_final_calibracao, min = data_minimo, max = data_maximo)
+                    shiny::updateDateRangeInput(session, "zoom_calibracao", start = data_inicio_simulacao, end = data_final_simulacao, min = data_minimo, max = data_maximo)
+                }
             }
         })
 
@@ -484,8 +487,8 @@ executa_visualizador_calibracao_pmur <- function(){
                     parametros <- rbind(parametros, data.table::data.table(nome = input$sub_bacia, 
                     parametro = "Pmur", valor = parametros[parametros$parametro == "Str"]$valor * 
                             parametros[parametros$parametro == "Capc"]$valor / 200,
-                            limite_inferior = parametros[parametros$parametro == "Capc"]$valor * 0.8 / 200,
-                            limite_superior = parametros[parametros$parametro == "Capc"]$valor * 1.2 / 200))
+                            limite_inferior = parametros[parametros$parametro == "Str"]$valor * 0.8 / 200,
+                            limite_superior = parametros[parametros$parametro == "Str"]$valor * 1.2 / 200))
                 }
                 if (any(parametros$parametro == "Lambda")){
                     
@@ -495,6 +498,7 @@ executa_visualizador_calibracao_pmur <- function(){
                             limite_inferior = parametros[parametros$parametro == "Ai"]$valor * 0.8,
                             limite_superior = parametros[parametros$parametro == "Ai"]$valor * 1.2))
                 }
+
                 return(parametros)
             }
         })
@@ -722,7 +726,7 @@ executa_visualizador_calibracao_pmur <- function(){
 
         saida <-  shiny::reactive({
             if (!is.null(input[[paste0("posto_plu_1")]])) {
-                if (!is.null(input$periodo_simulacao)) {
+                if (!is.na(input$periodo_simulacao[1]) & !is.na(input$periodo_simulacao[2])) {
                     vetor_modelo <- vetor_modelo()
                     vetor_modelo[1] <- input$str
                     vetor_modelo[2] <- input$k2t
@@ -751,6 +755,7 @@ executa_visualizador_calibracao_pmur <- function(){
                     Supin <- input$Supin
                     area <- area()
                     postos_plu <- postos_plu()
+
                     data_inicio_simulacao <- input$periodo_simulacao[1]
                     data_fim_simulacao <- input$periodo_simulacao[2]
                     data_inicio_simulacao <- data_inicio_simulacao - kt_min
@@ -907,165 +912,175 @@ executa_visualizador_calibracao_pmur <- function(){
 
         output$funcao_objetivo <- shiny::renderText({
             if (!is.null(input[[paste0("posto_plu_1")]])) {
-                data_inicio_objetivo <- input$periodo_calibracao[1]
-                data_fim_objetivo <- input$periodo_calibracao[2]
-                vazao <- vazao_posto()
+                if (!is.null(saida())) {
+                    data_inicio_objetivo <- input$periodo_calibracao[1]
+                    data_fim_objetivo <- input$periodo_calibracao[2]
+                    vazao <- vazao_posto()
 
-                vazao_fo <- vazao[which((vazao$data >= data_inicio_objetivo) & (vazao$data <= data_fim_objetivo))]
+                    vazao_fo <- vazao[which((vazao$data >= data_inicio_objetivo) & (vazao$data <= data_fim_objetivo))]
 
-                vazao_fo[, peso := 1 / .N]
+                    vazao_fo[, peso := 1 / .N]
 
-                if (input$numero_periodo_desconsiderado >= 1) {
-                    for (iperiodo in 1:input$numero_periodo_desconsiderado){
-                        vazao_fo[data >= input[[paste0("periodo_desconsiderado_", iperiodo)]][1] & data <= input[[paste0("periodo_desconsiderado_", iperiodo)]][2], peso := 0]
+                    if (input$numero_periodo_desconsiderado >= 1) {
+                        for (iperiodo in 1:input$numero_periodo_desconsiderado){
+                            vazao_fo[data >= input[[paste0("periodo_desconsiderado_", iperiodo)]][1] & data <= input[[paste0("periodo_desconsiderado_", iperiodo)]][2], peso := 0]
+                        }
+                        vazao_fo[peso != 0, peso := 1 / .N]
                     }
-                    vazao_fo[peso != 0, peso := 1 / .N]
-                }
 
-                if (input$funcao_objetivo == "dm") {
-                    calcula_funcao_objetivo <- calcula_dm
-                } else if (input$funcao_objetivo == "nse") {
-                    calcula_funcao_objetivo <- calcula_nse
-                } else if (input$funcao_objetivo == "mape") {
-                    calcula_funcao_objetivo <- calcula_mape
-                } else if (input$funcao_objetivo == "kge") {
-                    calcula_funcao_objetivo <- calcula_kge
-                }
+                    if (input$funcao_objetivo == "dm") {
+                        calcula_funcao_objetivo <- calcula_dm
+                    } else if (input$funcao_objetivo == "nse") {
+                        calcula_funcao_objetivo <- calcula_nse
+                    } else if (input$funcao_objetivo == "mape") {
+                        calcula_funcao_objetivo <- calcula_mape
+                    } else if (input$funcao_objetivo == "kge") {
+                        calcula_funcao_objetivo <- calcula_kge
+                    }
 
-                funcao_objetivo <- calcula_funcao_objetivo(saida()[data >= data_inicio_objetivo & data <= data_fim_objetivo, Qcalc], vazao_fo[, valor], vazao_fo[, peso])
-                paste0("funcao objetivo = ", round(funcao_objetivo, 4))
+                    funcao_objetivo <- calcula_funcao_objetivo(saida()[data >= data_inicio_objetivo & data <= data_fim_objetivo, Qcalc], vazao_fo[, valor], vazao_fo[, peso])
+                    paste0("funcao objetivo = ", round(funcao_objetivo, 4))
+                }
             }
         })
 
         output$tabela_metrica1 <- shiny::renderTable({
             if (!is.null(input[[paste0("posto_plu_1")]])) {
-                data_inicio_objetivo <- input$periodo_calibracao[1]
-                data_fim_objetivo <- input$periodo_calibracao[2]
-                vazao <- vazao_posto()
+                if (!is.null(saida())) {
+                    data_inicio_objetivo <- input$periodo_calibracao[1]
+                    data_fim_objetivo <- input$periodo_calibracao[2]
+                    vazao <- vazao_posto()
 
-                vazao_fo <- vazao[which((vazao$data >= data_inicio_objetivo) & (vazao$data <= data_fim_objetivo))]
+                    vazao_fo <- vazao[which((vazao$data >= data_inicio_objetivo) & (vazao$data <= data_fim_objetivo))]
 
-                vazao_fo[, peso := 1 / .N]
+                    vazao_fo[, peso := 1 / .N]
 
-                if (input$numero_periodo_desconsiderado >= 1) {
-                    for (iperiodo in 1:input$numero_periodo_desconsiderado){
-                        vazao_fo[data >= input[[paste0("periodo_desconsiderado_", iperiodo)]][1] & data <= input[[paste0("periodo_desconsiderado_", iperiodo)]][2], peso := 0]
+                    if (input$numero_periodo_desconsiderado >= 1) {
+                        for (iperiodo in 1:input$numero_periodo_desconsiderado){
+                            vazao_fo[data >= input[[paste0("periodo_desconsiderado_", iperiodo)]][1] & data <= input[[paste0("periodo_desconsiderado_", iperiodo)]][2], peso := 0]
+                        }
+                        vazao_fo[peso != 0, peso := 1 / .N]
                     }
-                    vazao_fo[peso != 0, peso := 1 / .N]
+
+                    saida_objetivo <- saida()[data >= data_inicio_objetivo & data <= data_fim_objetivo]
+
+                    metricas <- data.table::data.table(tipo = c("historico", "simulado"))
+                    metricas[tipo == "simulado", media := saida_objetivo[, mean(Qcalc)]]
+                    metricas[tipo == "simulado", dp := saida_objetivo[, sd(Qcalc)]]
+                    metricas[tipo == "simulado", assimetria := saida_objetivo[, moments::skewness(Qcalc)]]
+                    metricas[tipo == "simulado", curtose := saida_objetivo[, moments::kurtosis(Qcalc)]]
+                    metricas[tipo == "simulado", p95 := saida_objetivo[, quantile(Qcalc, 0.95)]]
+                    metricas[tipo == "simulado", max := saida_objetivo[, max(Qcalc)]]
+                    metricas[tipo == "historico", media := vazao_fo[, mean(valor)]]
+                    metricas[tipo == "historico", dp := vazao_fo[, sd(valor)]]
+                    metricas[tipo == "historico", assimetria := vazao_fo[, moments::skewness(valor)]]
+                    metricas[tipo == "historico", curtose := vazao_fo[, moments::kurtosis(valor)]]
+                    metricas[tipo == "historico", p95 := vazao_fo[, quantile(valor, 0.95)]]
+                    metricas[tipo == "historico", max := vazao_fo[, max(valor)]]
+                    metricas        
                 }
-
-                saida_objetivo <- saida()[data >= data_inicio_objetivo & data <= data_fim_objetivo]
-
-                metricas <- data.table::data.table(tipo = c("historico", "simulado"))
-                metricas[tipo == "simulado", media := saida_objetivo[, mean(Qcalc)]]
-                metricas[tipo == "simulado", dp := saida_objetivo[, sd(Qcalc)]]
-                metricas[tipo == "simulado", assimetria := saida_objetivo[, moments::skewness(Qcalc)]]
-                metricas[tipo == "simulado", curtose := saida_objetivo[, moments::kurtosis(Qcalc)]]
-                metricas[tipo == "simulado", p95 := saida_objetivo[, quantile(Qcalc, 0.95)]]
-                metricas[tipo == "simulado", max := saida_objetivo[, max(Qcalc)]]
-                metricas[tipo == "historico", media := vazao_fo[, mean(valor)]]
-                metricas[tipo == "historico", dp := vazao_fo[, sd(valor)]]
-                metricas[tipo == "historico", assimetria := vazao_fo[, moments::skewness(valor)]]
-                metricas[tipo == "historico", curtose := vazao_fo[, moments::kurtosis(valor)]]
-                metricas[tipo == "historico", p95 := vazao_fo[, quantile(valor, 0.95)]]
-                metricas[tipo == "historico", max := vazao_fo[, max(valor)]]
-                metricas        
             }
         })
 
         output$tabela_metrica2 <- shiny::renderTable({
             if (!is.null(input[[paste0("posto_plu_1")]])) {
-                data_inicio_objetivo <- input$periodo_calibracao[1]
-                data_fim_objetivo <- input$periodo_calibracao[2]
-                vazao <- vazao_posto()
+                if (!is.null(saida())) {
+                    data_inicio_objetivo <- input$periodo_calibracao[1]
+                    data_fim_objetivo <- input$periodo_calibracao[2]
+                    vazao <- vazao_posto()
 
-                vazao_fo <- vazao[which((vazao$data >= data_inicio_objetivo) & (vazao$data <= data_fim_objetivo))]
+                    vazao_fo <- vazao[which((vazao$data >= data_inicio_objetivo) & (vazao$data <= data_fim_objetivo))]
 
-                vazao_fo[, peso := 1 / .N]
+                    vazao_fo[, peso := 1 / .N]
 
-                if (input$numero_periodo_desconsiderado >= 1) {
-                    for (iperiodo in 1:input$numero_periodo_desconsiderado){
-                        vazao_fo[data >= input[[paste0("periodo_desconsiderado_", iperiodo)]][1] & data <= input[[paste0("periodo_desconsiderado_", iperiodo)]][2], peso := 0]
+                    if (input$numero_periodo_desconsiderado >= 1) {
+                        for (iperiodo in 1:input$numero_periodo_desconsiderado){
+                            vazao_fo[data >= input[[paste0("periodo_desconsiderado_", iperiodo)]][1] & data <= input[[paste0("periodo_desconsiderado_", iperiodo)]][2], peso := 0]
+                        }
+                        vazao_fo[peso != 0, peso := 1 / .N]
                     }
-                    vazao_fo[peso != 0, peso := 1 / .N]
+
+                    saida_objetivo <- saida()[data >= data_inicio_objetivo & data <= data_fim_objetivo]
+
+                    metricas <- data.table::data.table(metrica = as.character(), valor = as.numeric())
+
+                    metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "dm", valor = calcula_dm(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
+                    metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "mape", valor = calcula_mape(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
+                    metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "nse", valor = calcula_nse(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
+                    metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "pbias", valor = calcula_pbias(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
+                    metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "correl", valor = calcula_correlacao(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
+                    metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "kge", valor = calcula_kge(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
+                    metricas        
                 }
-
-                saida_objetivo <- saida()[data >= data_inicio_objetivo & data <= data_fim_objetivo]
-
-                metricas <- data.table::data.table(metrica = as.character(), valor = as.numeric())
-
-                metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "dm", valor = calcula_dm(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
-                metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "mape", valor = calcula_mape(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
-                metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "nse", valor = calcula_nse(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
-                metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "pbias", valor = calcula_pbias(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
-                metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "correl", valor = calcula_correlacao(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
-                metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "kge", valor = calcula_kge(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
-                metricas        
             }
         })
 
         output$metrica_mensal <- plotly::renderPlotly({
             if (!is.null(input[[paste0("posto_plu_1")]])) {
-                data_inicio_objetivo <- input$periodo_calibracao[1]
-                data_fim_objetivo <- input$periodo_calibracao[2]
-                vazao <- vazao_posto()
+                if (!is.null(saida())) {
+                    if (!is.na(input$periodo_calibracao[1]) & !is.na(input$periodo_calibracao[2])) {
+                        data_inicio_objetivo <- input$periodo_calibracao[1]
+                        data_fim_objetivo <- input$periodo_calibracao[2]
+                        vazao <- vazao_posto()
 
-                vazao_fo <- vazao[which((vazao$data >= data_inicio_objetivo) & (vazao$data <= data_fim_objetivo))]
+                        vazao_fo <- vazao[which((vazao$data >= data_inicio_objetivo) & (vazao$data <= data_fim_objetivo))]
 
-                vazao_fo[, peso := 1 / .N]
+                        vazao_fo[, peso := 1 / .N]
 
-                if (input$numero_periodo_desconsiderado >= 1) {
-                    for (iperiodo in 1:input$numero_periodo_desconsiderado){
-                        vazao_fo[data >= input[[paste0("periodo_desconsiderado_", iperiodo)]][1] & data <= input[[paste0("periodo_desconsiderado_", iperiodo)]][2], peso := 0]
+                        if (input$numero_periodo_desconsiderado >= 1) {
+                            for (iperiodo in 1:input$numero_periodo_desconsiderado){
+                                vazao_fo[data >= input[[paste0("periodo_desconsiderado_", iperiodo)]][1] & data <= input[[paste0("periodo_desconsiderado_", iperiodo)]][2], peso := 0]
+                            }
+                            vazao_fo[peso != 0, peso := 1 / .N]
+                        }
+                        saida_objetivo <- saida()[data >= data_inicio_objetivo & data <= data_fim_objetivo]
+
+                        metricas <- data.table::data.table(estatistica = as.character(), lubridate = as.integer(), V1 = as.numeric())
+                        simulacao <- saida_objetivo[, mean(Qcalc), by = lubridate::month(data)]
+                        simulacao[, estatistica := "media"]
+                        metricas <- rbindlist(list(metricas, simulacao), use.names=TRUE)
+
+                        simulacao <- saida_objetivo[, sd(Qcalc), by = lubridate::month(data)]
+                        simulacao[, estatistica := "dp"]
+                        metricas <- rbindlist(list(metricas, simulacao), use.names=TRUE)
+
+                        simulacao <- saida_objetivo[, moments::skewness(Qcalc), by = lubridate::month(data)]
+                        simulacao[, estatistica := "assimetria"]
+                        metricas <- rbindlist(list(metricas, simulacao), use.names=TRUE)
+
+                        simulacao <- saida_objetivo[, moments::kurtosis(Qcalc), by = lubridate::month(data)]
+                        simulacao[, estatistica := "curtose"]
+                        metricas <- rbindlist(list(metricas, simulacao), use.names=TRUE)
+                        metricas[, tipo := "simulado"]
+
+                        metricas2 <- data.table::data.table(estatistica = as.character(), lubridate = as.integer(), V1 = as.numeric())
+                        observado <- vazao_fo[, mean(valor), by = lubridate::month(data)]
+                        observado[, estatistica := "media"]
+                        metricas2 <- rbindlist(list(metricas2, observado), use.names=TRUE)
+
+                        observado <- vazao_fo[, sd(valor), by = lubridate::month(data)]
+                        observado[, estatistica := "dp"]
+                        metricas2 <- rbindlist(list(metricas2, observado), use.names=TRUE)
+
+                        observado <- vazao_fo[, moments::skewness(valor), by = lubridate::month(data)]
+                        observado[, estatistica := "assimetria"]
+                        metricas2 <- rbindlist(list(metricas2, observado), use.names=TRUE)
+
+                        observado <- vazao_fo[, moments::kurtosis(valor), by = lubridate::month(data)]
+                        observado[, estatistica := "curtose"]
+                        metricas2 <- rbindlist(list(metricas2, observado), use.names=TRUE)
+
+                        metricas2[, tipo := "observado"]
+
+                        metricas <- rbindlist(list(metricas, metricas2), use.names=TRUE)
+                        data.table::setnames(metricas, c("lubridate", "V1"), c("mes", "valor"))
+                        
+                        grafico_mensal <- ggplot2::ggplot(data = metricas[estatistica == input$estatistica], 
+                                            ggplot2::aes(x = mes, y = valor, color = tipo)) + ggplot2::geom_line() + ggplot2::theme_light()
+                        grafico_mensal <- plotly::ggplotly(grafico_mensal)
+                        grafico_mensal
                     }
-                    vazao_fo[peso != 0, peso := 1 / .N]
                 }
-                saida_objetivo <- saida()[data >= data_inicio_objetivo & data <= data_fim_objetivo]
-
-                metricas <- data.table::data.table(estatistica = as.character(), lubridate = as.integer(), V1 = as.numeric())
-                simulacao <- saida_objetivo[, mean(Qcalc), by = lubridate::month(data)]
-                simulacao[, estatistica := "media"]
-                metricas <- rbindlist(list(metricas, simulacao), use.names=TRUE)
-
-                simulacao <- saida_objetivo[, sd(Qcalc), by = lubridate::month(data)]
-                simulacao[, estatistica := "dp"]
-                metricas <- rbindlist(list(metricas, simulacao), use.names=TRUE)
-
-                simulacao <- saida_objetivo[, moments::skewness(Qcalc), by = lubridate::month(data)]
-                simulacao[, estatistica := "assimetria"]
-                metricas <- rbindlist(list(metricas, simulacao), use.names=TRUE)
-
-                simulacao <- saida_objetivo[, moments::kurtosis(Qcalc), by = lubridate::month(data)]
-                simulacao[, estatistica := "curtose"]
-                metricas <- rbindlist(list(metricas, simulacao), use.names=TRUE)
-                metricas[, tipo := "simulado"]
-
-                metricas2 <- data.table::data.table(estatistica = as.character(), lubridate = as.integer(), V1 = as.numeric())
-                observado <- vazao_fo[, mean(valor), by = lubridate::month(data)]
-                observado[, estatistica := "media"]
-                metricas2 <- rbindlist(list(metricas2, observado), use.names=TRUE)
-
-                observado <- vazao_fo[, sd(valor), by = lubridate::month(data)]
-                observado[, estatistica := "dp"]
-                metricas2 <- rbindlist(list(metricas2, observado), use.names=TRUE)
-
-                observado <- vazao_fo[, moments::skewness(valor), by = lubridate::month(data)]
-                observado[, estatistica := "assimetria"]
-                metricas2 <- rbindlist(list(metricas2, observado), use.names=TRUE)
-
-                observado <- vazao_fo[, moments::kurtosis(valor), by = lubridate::month(data)]
-                observado[, estatistica := "curtose"]
-                metricas2 <- rbindlist(list(metricas2, observado), use.names=TRUE)
-
-                metricas2[, tipo := "observado"]
-
-                metricas <- rbindlist(list(metricas, metricas2), use.names=TRUE)
-                data.table::setnames(metricas, c("lubridate", "V1"), c("mes", "valor"))
-                
-                grafico_mensal <- ggplot2::ggplot(data = metricas[estatistica == input$estatistica], 
-                                    ggplot2::aes(x = mes, y = valor, color = tipo)) + ggplot2::geom_line() + ggplot2::theme_light()
-                grafico_mensal <- plotly::ggplotly(grafico_mensal)
-                grafico_mensal
             }
         })
 
