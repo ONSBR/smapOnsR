@@ -1439,5 +1439,5 @@ executa_visualizador_calibracao_pmur <- function(){
         )
     }
 
-    shiny::shinyApp(ui = ui_calibracao, server = servidor_calibracao)
+    shiny::shinyApp(ui = ui_calibracao, server = servidor_calibracao, options = list(launch.browser = TRUE))
 }
