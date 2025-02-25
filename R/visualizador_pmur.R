@@ -162,7 +162,9 @@ executa_visualizador_calibracao_pmur <- function(){
         
         get_param_value <- function(param_name, default_value, parametros, limite) {
             if (limite %in% colnames(parametros)) {
-                return(parametros[parametros$parametro == param_name, ..limite])
+                if(nrow(parametros[parametros$parametro == param_name]) > 0) {
+                    return(parametros[parametros$parametro == param_name, ..limite])
+                }
             }
             return(default_value)
         }
@@ -172,16 +174,20 @@ executa_visualizador_calibracao_pmur <- function(){
             arquivo_parametros <- input$arquivo_parametros
             arquivo_postos_plu <- input$arquivo_postos_plu
             vazao <- vazao_posto()
-            shiny::updateNumericInput(session, "Ebin", value = vazao$valor[1] * 0.3)
-            shiny::updateNumericInput(session, "Supin", value = vazao$valor[1] * 0.7)
-            shiny::updateNumericInput(session, "Tuin", value = 0.3)
             if (!is.null(arquivo_parametros) & !is.null(arquivo_postos_plu)) {
+
                 vetor_modelo <- vetor_modelo()
                 parametros_posto <- parametros_posto()
                 postos_plu <- postos_plu()
+                periodos <- periodos()
                 modelo <- new_modelo_smap_ons_pmur(parametros_posto, postos_plu[postos_plu$nome == input$sub_bacia])
                 kt_max <- attributes(modelo)$kt_max
                 kt_min <- attributes(modelo)$kt_min
+
+                shiny::updateNumericInput(session, "Ebin", value = get_param_value("Ebin", vazao$valor[1] * 0.3, parametros_posto, "valor"))
+                shiny::updateNumericInput(session, "Supin", value = get_param_value("Supin", vazao$valor[1] * 0.7, parametros_posto, "valor"))
+                shiny::updateNumericInput(session, "Tuin", value = get_param_value("Tuin", 0.3, parametros_posto, "valor"))
+
                 shiny::updateNumericInput(session, "str", value = vetor_modelo[1])
                 shiny::updateNumericInput(session, "k2t", value = vetor_modelo[2])
                 shiny::updateNumericInput(session, "crec", value = vetor_modelo[3])
@@ -441,7 +447,6 @@ executa_visualizador_calibracao_pmur <- function(){
             arquivo_parametros <- input$arquivo_parametros$datapath
             if (!is.null(arquivo_parametros)) {
                 parametros <- le_parametros(arquivo_parametros)
-                parametros <- parametros[!(parametros$parametro %in% c("Ebin", "Supin", "Tuin"))]
                 return(parametros)
             }
         })
@@ -1346,6 +1351,32 @@ executa_visualizador_calibracao_pmur <- function(){
                 parametros$limite_inferior[parametros$parametro == "Beta"] <- input$limite_inferior_beta
                 parametros$limite_superior[parametros$parametro == "Beta"] <- input$limite_superior_beta
             }
+            
+            if (nrow(parametros[parametros$parametro == "Ebin"]) == 0){
+                parametros <- data.table::rbindlist(list(parametros, data.table::data.table(nome = parametros[, unique(nome)], 
+                parametro = "Ebin", valor = input$Ebin, limite_inferior = 0, limite_superior = 0)))
+            } else {
+                parametros$valor[parametros$parametro == "Ebin"] <- input$Ebin
+                parametros$limite_inferior[parametros$parametro == "Ebin"] <- 0
+                parametros$limite_superior[parametros$parametro == "Ebin"] <- 0
+            }
+            if (nrow(parametros[parametros$parametro == "Supin"]) == 0){
+                parametros <- data.table::rbindlist(list(parametros, data.table::data.table(nome = parametros[, unique(nome)], 
+                parametro = "Supin", valor = input$Supin, limite_inferior = 0, limite_superior = 0)))
+            } else {
+                parametros$valor[parametros$parametro == "Supin"] <- input$Supin
+                parametros$limite_inferior[parametros$parametro == "Supin"] <- 0
+                parametros$limite_superior[parametros$parametro == "Supin"] <- 0
+            }
+            if (nrow(parametros[parametros$parametro == "Tuin"]) == 0){
+                parametros <- data.table::rbindlist(list(parametros, data.table::data.table(nome = parametros[, unique(nome)], 
+                parametro = "Tuin", valor = input$Tuin, limite_inferior = 0, limite_superior = 0)))
+            } else {
+                parametros$valor[parametros$parametro == "Tuin"] <- input$Tuin
+                parametros$limite_inferior[parametros$parametro == "Tuin"] <- 0
+                parametros$limite_superior[parametros$parametro == "Tuin"] <- 0
+            }
+            
 
             kt <- cria_kt(input$kt_max, input$kt_min, input$alfa, input$beta)
             parametros$valor[parametros$parametro %in% paste0("Kt", 2:-60)] <- kt
@@ -1367,18 +1398,6 @@ executa_visualizador_calibracao_pmur <- function(){
             parametros <- data.table::rbindlist(list(parametros, 
                             data.table::data.table(nome = parametros[, unique(nome)], 
                             parametro = "data_final_objetivo", valor = as.character(input$periodo_calibracao[2]),
-                            limite_inferior = 0, limite_superior = 0)))
-            parametros <- data.table::rbindlist(list(parametros, 
-                            data.table::data.table(nome = parametros[, unique(nome)], 
-                            parametro = "Ebin", valor = as.character(input$Ebin), 
-                            limite_inferior = 0, limite_superior = 0)))
-            parametros <- data.table::rbindlist(list(parametros, 
-                            data.table::data.table(nome = parametros[, unique(nome)], 
-                            parametro = "Supin", valor = as.character(input$Supin),
-                            limite_inferior = 0, limite_superior = 0)))
-            parametros <- data.table::rbindlist(list(parametros, 
-                            data.table::data.table(nome = parametros[, unique(nome)], 
-                            parametro = "Tuin", valor = as.character(input$Tuin),
                             limite_inferior = 0, limite_superior = 0)))
 
             if (input$numero_periodo_desconsiderado >= 1) {
