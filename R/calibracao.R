@@ -273,8 +273,9 @@ funcao_objetivo_calibracao_pmur <- function(vetor_modelo, kt_min, kt_max, area, 
 #' @export
 cria_kt <- function(kt_max, kt_min, alfa, Ex){
   numero_kts <- kt_max + kt_min + 1
+  Ex <- 1 - Ex
+  beta <- (alfa * (1 - Ex) / Ex)
   quantis <- seq((1 / (numero_kts + 2)), 1, (1 / numero_kts))
-  beta <- 1 / (alfa * (1 - Ex) / Ex)
 
   aux <- stats::dbeta(quantis, shape1 = alfa, shape2 = beta)
 
