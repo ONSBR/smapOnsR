@@ -126,7 +126,7 @@ executa_visualizador_calibracao_pmur <- function(){
                     shiny::mainPanel(
                         shiny::fluidRow(
                             shiny::column(3, shiny::selectInput(inputId ="funcao_objetivo", label = shiny::h3("Selecione a funcao objetivo"), choices = c("dm", "nse", "mape", "kge"), selected = "dm")),
-                            shiny::column(3, shiny::selectInput(inputId = "tipo_escala", label = shiny::h3("Selecione a escala das variaveis"), choices = c(0, 1), selected = 0)),
+                            shiny::column(3, shiny::selectInput(inputId = "tipo_escala", label = shiny::h3("Selecione a escala das variaveis"), choices = c(0, 1), selected = 1)),
                             shiny::column(3, shiny::selectInput(inputId ="ndeps", label = shiny::h3("Passo de otimizacao"), choices = c(1, 0.1, 0.001, 0.0001, 0.00001, 0.000001, 0.0000001), selected = 0.001))
                         ), shiny::fluidRow(
                             shiny::column(1)
