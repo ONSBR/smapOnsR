@@ -138,7 +138,8 @@ le_parametros <- function(arq) {
         }
     }
 
-    teste <- dat[substr(parametro, 1, 2) == "Kt", sum(valor), by = c("nome")]
+    teste <- dat[parametro != "Ktmin" & parametro != "Ktmax" &
+                substr(parametro, 1, 2) == "Kt", sum(valor), by = c("nome")]
 
     if (max(teste$V1) > 1.005) {
         stop(paste0("o somatorio dos Kts da sub-bacia ", teste[V1 > 1.005, nome], ", e maior que 1.005 no arquivo ", arq, "\n"))
@@ -148,7 +149,9 @@ le_parametros <- function(arq) {
         stop(paste0("o somatorio dos Kts da sub-bacia ", teste[V1 < 0.995, nome], ", e menor que 0.995 no arquivo ", arq, "\n"))
     }
 
-    teste <- dat[substr(parametro, 1, 2) == "Kt", length(valor), by = "nome"]
+    teste <- dat[parametro != "Ktmin" & parametro != "Ktmax" &
+            substr(parametro, 1, 2) == "Kt", length(valor), by = "nome"]
+            
     if (any(teste$V1 != 63)) {
         stop(paste0("o somatorio dos Kts da sub-bacia ", teste[V1 != 63, nome], 
         "nao possui o valor para os 63 Kts no arquivo ", arq, ".\n"))
