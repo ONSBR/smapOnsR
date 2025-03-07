@@ -211,6 +211,8 @@ test_that("testa rodada com aprimoramentos", {
             entrada$evapotranspiracao_prevista, entrada$vazao_observada,
             entrada$postos_plu, entrada$datas_rodadas, entrada$sub_bacias$nome)
 
+  secao <- sessionInfo()
+
   if (secao$R.version$os == "mingw32") {
     expect_equal(round(saida$previsao[nome == "stoantjari" & variavel == "Qcalc" & 
                   cenario == "ecmwf_7", valor][35], 2), 1359.85)
