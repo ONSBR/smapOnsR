@@ -183,6 +183,13 @@ executa_visualizador_calibracao_pmur <- function(){
                 modelo <- new_modelo_smap_ons_pmur(parametros_posto, postos_plu[postos_plu$nome == input$sub_bacia])
                 kt_max <- attributes(modelo)$kt_max
                 kt_min <- attributes(modelo)$kt_min
+                if (nrow(parametros_posto[parametros_posto$parametro == "Ktmax"]) > 0) {
+                    kt_max <- parametros_posto[parametros_posto$parametro == "Ktmax", valor]
+                }
+
+                if (nrow(parametros_posto[parametros_posto$parametro == "Ktmin"]) > 0) {
+                    kt_max <- parametros_posto[parametros_posto$parametro == "Ktmax", valor]
+                }
 
                 shiny::updateNumericInput(session, "Ebin", value = get_param_value("Ebin", vazao$valor[1] * 0.3, parametros_posto, "valor"))
                 shiny::updateNumericInput(session, "Supin", value = get_param_value("Supin", vazao$valor[1] * 0.7, parametros_posto, "valor"))
