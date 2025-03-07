@@ -5,8 +5,7 @@
 \title{Assimilacao pmur etp}
 \usage{
 assimilacao_pmur_etp(
-  vetor_modelo,
-  area,
+  modelo,
   EbInic,
   TuInic,
   Supin,
@@ -25,9 +24,7 @@ assimilacao_pmur_etp(
 )
 }
 \arguments{
-\item{vetor_modelo}{objeto de classe smap_ons}
-
-\item{area}{area da sub-bacia}
+\item{modelo}{objeto de classe smap_ons}
 
 \item{EbInic}{Escoamento Subterraneo inicial}
 

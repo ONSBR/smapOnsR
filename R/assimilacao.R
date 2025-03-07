@@ -519,8 +519,7 @@ funcao_objetivo_assimilacao_evapotranspiracao <- function(vetor_variaveis, vetor
 #' 
 #' Realiza a assimilacao de dados smap/ons aprimorado com pmur e etp
 #'
-#' @param vetor_modelo objeto de classe smap_ons
-#' @param area area da sub-bacia
+#' @param modelo objeto de classe smap_ons
 #' @param Supin Escoamento superficial inicial
 #' @param EbInic Escoamento Subterraneo inicial
 #' @param TuInic Taxa de umidade inicial do solo
@@ -786,8 +785,7 @@ funcao_objetivo_assimilacao_pmur_etp <- function(vetor_variaveis, vetor_modelo, 
 #' 
 #' Realiza a assimilacao de dados com a metodologia oficial
 #'
-#' @param vetor_modelo objeto de classe smap_ons
-#' @param area area da sub-bacia
+#' @param modelo objeto de classe smap_ons
 #' @param Supin Escoamento superficial inicial
 #' @param EbInic Escoamento Subterraneo inicial
 #' @param TuInic Taxa de umidade inicial do solo

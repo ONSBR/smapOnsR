@@ -4,7 +4,7 @@
 \alias{cria_kt}
 \title{Funcao de criacao de vetor de kts}
 \usage{
-cria_kt(kt_max, kt_min, alfa, beta)
+cria_kt(kt_max, kt_min, alfa, Ex)
 }
 \arguments{
 \item{kt_max}{valor do maximo lag positivo}
@@ -13,7 +13,7 @@ cria_kt(kt_max, kt_min, alfa, beta)
 
 \item{alfa}{parametro alfa da distribuicao beta}
 
-\item{beta}{parametro beta da distribuicao beta}
+\item{Ex}{parametro Ex da distribuicao beta}
 }
 \value{
 kt vetor de kts

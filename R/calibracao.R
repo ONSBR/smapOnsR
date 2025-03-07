@@ -267,7 +267,7 @@ funcao_objetivo_calibracao_pmur <- function(vetor_modelo, kt_min, kt_max, area, 
 #' @param kt_max valor do maximo lag positivo
 #' @param kt_min valor do maximo lag maximo negativo
 #' @param alfa parametro alfa da distribuicao beta
-#' @param beta parametro beta da distribuicao beta
+#' @param Ex parametro Ex da distribuicao beta
 #' @importFrom stats dbeta
 #' @return kt vetor de kts
 #' @export
