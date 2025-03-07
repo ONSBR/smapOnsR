@@ -131,8 +131,10 @@ new_modelo_smap_ons_pmur <- function(parametros, postos_plu){
   k3t <- parametros[parametro == "K3t", valor]
 
   #coeficiente temporal
-  kt <- parametros[substr(parametro, 1, 2) == "Kt", valor]
-  names(kt) <- parametros[substr(parametro, 1, 2) == "Kt", parametro]
+  kt <- parametros[parametro != "Ktmin" & parametro != "Ktmax" &
+                  substr(parametro, 1, 2) == "Kt", valor]
+  names(kt) <- parametros[parametro != "Ktmin" & parametro != "Ktmax" &
+                  substr(parametro, 1, 2) == "Kt", parametro]
   kt_min <- max(which(kt[4:63] > 0)[length(which(kt[4:63] > 0))], 0, na.rm = TRUE)
   kt_max <- sum(kt[1:2] > 0, na.rm = TRUE)
 
@@ -193,8 +195,10 @@ new_modelo_smap_ons <- function(parametros, postos_plu){
   k3t <- parametros[parametro == "K3t", valor]
 
   #coeficiente temporal
-  kt <- parametros[substr(parametro, 1, 2) == "Kt", valor]
-  names(kt) <- parametros[substr(parametro, 1, 2) == "Kt", parametro]
+  kt <- parametros[parametro != "Ktmin" & parametro != "Ktmax" &
+                  substr(parametro, 1, 2) == "Kt", valor]
+  names(kt) <- parametros[parametro != "Ktmin" & parametro != "Ktmax" &
+                      substr(parametro, 1, 2) == "Kt", parametro]
   kt_min <- max(which(kt[4:63] > 0)[length(which(kt[4:63] > 0))], 0, na.rm = TRUE)
   kt_max <- sum(kt[1:2] > 0, na.rm = TRUE)
 
