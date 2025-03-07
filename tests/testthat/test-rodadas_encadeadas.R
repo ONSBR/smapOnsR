@@ -199,6 +199,34 @@ test_that("testa rodada com serie temporal etp", {
                 saida$previsao[data_previsao == "2020-05-05" & cenario == "historico", valor])
 })
 
+test_that("testa rodada com aprimoramentos", {
+  library(smapOnsR)
+  pasta_entrada <- system.file("extdata", "arq_entrada_pmur", package = "smapOnsR")
+  
+  entrada <- le_arq_entrada_novo(pasta_entrada)
+
+  saida <- rodada_encadeada_pmur_etp(entrada$parametros,
+            entrada$inicializacao, entrada$precipitacao_observada, entrada$precipitacao_prevista,
+            entrada$evapotranspiracao_observada,
+            entrada$evapotranspiracao_prevista, entrada$vazao_observada,
+            entrada$postos_plu, entrada$datas_rodadas, entrada$sub_bacias$nome)
+
+  if (secao$R.version$os == "mingw32") {
+    expect_equal(round(saida$previsao[nome == "stoantjari" & variavel == "Qcalc" & 
+                  cenario == "ecmwf_7", valor][35], 2), 1359.85)
+    expect_equal(round(saida$funcao_objetivo[, funcao_objetivo], 7),
+                      c(0.1816575, 0.0874436, 0.0003023, 0.4497266, 0.2600377, 0.7954831, 
+                       0.0417105, 0.2158114, 0.0667442, 0.0774363, 0.1783599, 0.1435794, 
+                       0.3211820, 0.2185778, 0.3094585, 0.1395097, 0.1784277, 0.1522340, 
+                       0.1845180, 0.0144009, 0.0623383))
+  } else {
+    expect_true(abs(round(saida$previsao[nome == "stoantjari" & variavel == "Qcalc" & 
+                  cenario == "ecmwf_7", valor][35], 2) - 1359.85) < 1359.85 * 0.01)
+  }
+
+})
+
+
 test_that("testa caso pegando a assimilacao original do aplicativo",{
     pasta_entrada <- system.file("extdata", "caso_completo", "Arq_Entrada", package = "smapOnsR")
     pasta_saida <- system.file("extdata", "caso_completo", "Arq_Saida", package = "smapOnsR")
