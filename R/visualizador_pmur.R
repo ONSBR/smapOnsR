@@ -1336,7 +1336,7 @@ executa_visualizador_calibracao_pmur <- function(){
             parametros$valor[parametros$parametro == "ktMax"] <- input$kt_max
             if (nrow(parametros[parametros$parametro == "Pmur"]) == 0){
                 parametros <- data.table::rbindlist(list(parametros, data.table::data.table(nome = parametros[, unique(nome)], 
-                            parametro = "Pmur", valor = input$pmur, limite_inferior = limite_inferior_pmur, limite_superior = limite_superior_pmur)))
+                            parametro = "Pmur", valor = input$pmur, limite_inferior = input$limite_inferior_pmur, limite_superior = input$limite_superior_pmur)))
             } else {
                 parametros$valor[parametros$parametro == "Pmur"] <- input$pmur
                 parametros$limite_inferior[parametros$parametro == "Pmur"] <- input$limite_inferior_pmur
@@ -1344,7 +1344,7 @@ executa_visualizador_calibracao_pmur <- function(){
             }
             if (nrow(parametros[parametros$parametro == "Alfa"]) == 0){
                 parametros <- data.table::rbindlist(list(parametros, data.table::data.table(nome = parametros[, unique(nome)], 
-                parametro = "Alfa", valor = input$alfa, limite_inferior = limite_inferior_alfa, limite_superior = limite_superior_alfa)))
+                parametro = "Alfa", valor = input$alfa, limite_inferior = input$limite_inferior_alfa, limite_superior = input$limite_superior_alfa)))
             } else {
                 parametros$valor[parametros$parametro == "Alfa"] <- input$alfa
                 parametros$limite_inferior[parametros$parametro == "Alfa"] <- input$limite_inferior_alfa
@@ -1352,7 +1352,7 @@ executa_visualizador_calibracao_pmur <- function(){
             }
             if (nrow(parametros[parametros$parametro == "Beta"]) == 0){
                 parametros <- data.table::rbindlist(list(parametros, data.table::data.table(nome = parametros[, unique(nome)], 
-                parametro = "Beta", valor = input$beta, limite_inferior = limite_inferior_beta, limite_superior = limite_superior_beta)))
+                parametro = "Beta", valor = input$beta, limite_inferior = input$limite_inferior_beta, limite_superior = input$limite_superior_beta)))
             } else {
                 parametros$valor[parametros$parametro == "Beta"] <- input$beta
                 parametros$limite_inferior[parametros$parametro == "Beta"] <- input$limite_inferior_beta
