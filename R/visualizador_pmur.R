@@ -188,7 +188,7 @@ executa_visualizador_calibracao_pmur <- function(){
                 }
 
                 if (nrow(parametros_posto[parametros_posto$parametro == "Ktmin"]) > 0) {
-                    kt_max <- parametros_posto[parametros_posto$parametro == "Ktmax", valor]
+                    kt_min <- parametros_posto[parametros_posto$parametro == "Ktmin", valor]
                 }
 
                 shiny::updateNumericInput(session, "Ebin", value = get_param_value("Ebin", vazao$valor[1] * 0.3, parametros_posto, "valor"))
