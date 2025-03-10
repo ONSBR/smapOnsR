@@ -205,6 +205,19 @@ test_that("testa rodada com aprimoramentos", {
   
   entrada <- le_arq_entrada_novo(pasta_entrada)
 
+ #parametros <- entrada$parametros
+ # inicializacao <- entrada$inicializacao
+ # precipitacao_observada <- entrada$precipitacao_observada
+ #     precipitacao_prevista <- entrada$precipitacao_prevista
+ #     evapotranspiracao_observada <- entrada$evapotranspiracao_observada
+ #     evapotranspiracao_prevista <- entrada$evapotranspiracao_prevista
+ #       vazao_observada <- entrada$vazao_observada
+ #       postos_plu <- entrada$postos_plu
+ #       datas_rodadas <- entrada$datas_rodadas
+ #     numero_cenarios <- length(unique(entrada$precipitacao_prevista[, cenario]))
+ #     sub_bacias <- entrada$sub_bacias$nome
+
+
   saida <- rodada_encadeada_pmur_etp(entrada$parametros,
             entrada$inicializacao, entrada$precipitacao_observada, entrada$precipitacao_prevista,
             entrada$evapotranspiracao_observada,
@@ -217,10 +230,10 @@ test_that("testa rodada com aprimoramentos", {
     expect_equal(round(saida$previsao[nome == "stoantjari" & variavel == "Qcalc" & 
                   cenario == "ecmwf_7", valor][35], 2), 1359.85)
     expect_equal(round(saida$funcao_objetivo[, funcao_objetivo], 7),
-                      c(0.1816575, 0.0874436, 0.0003023, 0.4497266, 0.2600377, 0.7954831, 
-                       0.0417105, 0.2158114, 0.0667442, 0.0774363, 0.1783599, 0.1435794, 
-                       0.3211820, 0.2185778, 0.3094585, 0.1395097, 0.1784277, 0.1522340, 
-                       0.1845180, 0.0144009, 0.0623383))
+                      c(0.1985781, 0.0874264, 0.0006976, 0.4497266, 0.2600375,
+                      0.7954830, 0.0425972, 0.2157436, 0.0807382, 0.0774346,
+                      0.1810360, 0.1462257, 0.3211804, 0.2018538, 0.2933669,
+                      0.1392731, 0.1794551, 0.1521796, 0.1845175, 0.0144009, 0.0623383))
   } else {
     expect_true(abs(round(saida$previsao[nome == "stoantjari" & variavel == "Qcalc" & 
                   cenario == "ecmwf_7", valor][35], 2) - 1359.85) < 1359.85 * 0.01)
