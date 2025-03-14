@@ -93,25 +93,21 @@ totaliza_previsao <- function(previsao, vazao_observada, configuracao) {
                 nome_jusante <- configuracao[posto == configuracao_postos_plu[indice_usina, posto_jusante], nome_real]
                 data_inicio <- max(previsao_totalizada[nome == nome_jusante, min(data_previsao)],
                                     previsao_totalizada[nome == nome_montante, min(data_previsao)],
-                                    previsao[, unique(data_caso) - 60])
+                                    previsao[, unique(data_caso) - 90])
+                jusante <- previsao_totalizada[nome == nome_jusante & data_previsao >= data_inicio]
+                montante <- previsao_totalizada[nome == nome_montante & data_previsao >= data_inicio]
                 if (configuracao_postos_plu[indice_usina, tv] == 0){
                     n <- configuracao_postos_plu[nome_real == nome_montante, n]
                     coeficientes <- c(0, 0, 0)
                     coeficientes[1] <- configuracao_postos_plu[nome_real == nome_montante, c1]
                     coeficientes[2] <- configuracao_postos_plu[nome_real == nome_montante, c2]
                     coeficientes[3] <- configuracao_postos_plu[nome_real == nome_montante, c3]
-                    for (nome_cenario in previsao_totalizada[, unique(cenario)]) {
-                        previsao_totalizada[nome == nome_jusante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_incremental := 
-                        propaga_muskingum(previsao_totalizada[nome == nome_montante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_incremental], 
-                        previsao_totalizada[nome == nome_jusante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_incremental], n, coeficientes)]
-                    }
+                    propagada <- propaga_muskingum(montante[, previsao_incremental], jusante[, previsao_incremental], n, coeficientes)
+                    previsao_totalizada[nome == nome_jusante & data_previsao >= data_inicio, previsao_incremental := propagada]
                 } else {
                     tv <- configuracao_postos_plu[nome_real == nome_montante, tv]
-                    for (nome_cenario in previsao_totalizada[, unique(cenario)]) {
-                        previsao_totalizada[nome == nome_jusante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_incremental := 
-                        propaga_tv(previsao_totalizada[nome == nome_montante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_incremental], 
-                                previsao_totalizada[nome == nome_jusante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_incremental], tv)]
-                    }
+                    propagada <- propaga_tv(montante[, previsao_incremental], jusante[, previsao_incremental], tv)
+                    previsao_totalizada[nome == nome_jusante & data_previsao >= data_inicio, previsao_incremental := propagada]
                 }
             }
         }
@@ -131,31 +127,27 @@ totaliza_previsao <- function(previsao, vazao_observada, configuracao) {
             if (length(nome_jusante) != 0) {
                 data_inicio <- max(previsao_totalizada[nome == nome_jusante, min(data_previsao)],
                                     previsao_totalizada[nome == nome_montante, min(data_previsao)],
-                                    previsao[, unique(data_caso) - 60])
+                                    previsao[, unique(data_caso) - 90])
+                jusante <- previsao_totalizada[nome == nome_jusante & data_previsao >= data_inicio]
+                montante <- previsao_totalizada[nome == nome_montante & data_previsao >= data_inicio]
                 if (configuracao_sem_postos_plu[indice_usina, tv] == 0){
                     n <- configuracao_sem_postos_plu[nome_real == nome_montante, n]
                     coeficientes <- c(0, 0, 0)
                     coeficientes[1] <- configuracao_sem_postos_plu[nome_real == nome_montante, c1]
                     coeficientes[2] <- configuracao_sem_postos_plu[nome_real == nome_montante, c2]
                     coeficientes[3] <- configuracao_sem_postos_plu[nome_real == nome_montante, c3]
-                    for (nome_cenario in previsao_totalizada[, unique(cenario)]) {
-                        previsao_totalizada[nome == nome_jusante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_total := 
-                            propaga_muskingum(previsao_totalizada[nome == nome_montante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_total], 
-                            previsao_totalizada[nome == nome_jusante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_total], n, coeficientes)]
-                        previsao_totalizada[nome == nome_jusante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_total_sem_tv := 
-                            previsao_totalizada[nome == nome_montante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_total_sem_tv] + 
-                            previsao_totalizada[nome == nome_jusante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_total_sem_tv]]
+                    if (n > 0) {
+                        propagada <- propaga_muskingum(montante[, previsao_total], jusante[, previsao_total], n, coeficientes)
+                        previsao_totalizada[nome == nome_jusante & data_previsao >= data_inicio, previsao_total := propagada]
+                        previsao_totalizada[nome == nome_jusante & data_previsao >= data_inicio, previsao_total_sem_tv := 
+                                        montante[, previsao_total_sem_tv] + jusante[, previsao_total_sem_tv]]
                     }
                 } else {
                     tv <- configuracao_sem_postos_plu[nome_real == nome_montante, tv]
-                    for (nome_cenario in previsao_totalizada[, unique(cenario)]) {
-                        previsao_totalizada[nome == nome_jusante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_total := 
-                        propaga_tv(previsao_totalizada[nome == nome_montante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_total], 
-                        previsao_totalizada[nome == nome_jusante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_total], tv)]
-                        previsao_totalizada[nome == nome_jusante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_total_sem_tv := 
-                            previsao_totalizada[nome == nome_montante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_total_sem_tv] +  
-                            previsao_totalizada[nome == nome_jusante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_total_sem_tv]]
-                    }
+                    propagada <- propaga_tv(montante[, previsao_total], jusante[, previsao_total], tv)
+                    previsao_totalizada[nome == nome_jusante & data_previsao >= data_inicio, previsao_total := propagada]
+                    previsao_totalizada[nome == nome_jusante & data_previsao >= data_inicio, previsao_total_sem_tv := 
+                                        montante[, previsao_total_sem_tv] + jusante[, previsao_total_sem_tv]]
                 }
             }
         }
