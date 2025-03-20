@@ -14,6 +14,8 @@
 
 * Adiciona caso exemplo com teste para casos com aprimoramentos
 
+* Eficientizacao das funcoes de propagacao e totalizacao
+
 # smapOnsR 1.3.1
 
 ## Minor changes
