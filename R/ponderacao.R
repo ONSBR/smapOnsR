@@ -117,8 +117,9 @@ ponderacao_espacial_previsao <- function(precipitacao_prevista, postos_plu) {
   precipitacao <- precipitacao_prevista[posto %in% postos_plu[, posto]]
   precipitacao <- merge(precipitacao, postos_plu, "posto")
   precipitacao <- precipitacao[, valor := sum(valor.x * valor.y), 
-                  by = c("data_rodada", "data_previsao", "cenario", "posto")]
-  precipitacao <- unique(precipitacao, by = c("data_rodada", "data_previsao", "cenario", "posto"))
+                  by = c("data_rodada", "data_previsao", "cenario", "nome")]
+  precipitacao <- unique(precipitacao, by = c("data_rodada", "data_previsao", "cenario", "nome"))
+
   precipitacao[, valor.x := NULL]
   precipitacao[, valor.y := NULL]
   precipitacao[, posto := NULL]

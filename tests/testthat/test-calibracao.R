@@ -19,7 +19,7 @@ test_that("Testa a funcao de calibracao", {
 
     area <- attributes(modelo)$area
     vetor_modelo <- unlist(modelo)
-    vetor_modelo <- c(vetor_modelo[1:11], vetor_modelo[75:77], 5, 5)
+    vetor_modelo <- c(vetor_modelo[1:11], vetor_modelo[75:77], 5, 0.5)
     numero_postos_plu <- nrow(postos_plu[nome == nome2])
 
 
@@ -34,7 +34,7 @@ test_that("Testa a funcao de calibracao", {
     limite_inferior[14] <- 0.8
     limite_superior[14] <- 1.2
     limite_inferior[15:16] <- 0.00001
-    limite_superior[15:16] <- 50
+    limite_superior[15:16] <- 0.99
 
     if (numero_postos_plu > 1) {
         vetor_modelo[17:(16 + numero_postos_plu)] <- postos_plu[nome == nome2, valor]

@@ -1,5 +1,55 @@
 # LEITURA DE ARQUIVOS DE ENTRADA NOVOS SMAP---------------------------------
 
+#' le_datas_calibracao
+#' 
+#' Leitor de arquivo de parametros para obtencao das datas utilizadas 
+#' na calibracao
+#' 
+#' Le arquivo de parametros "sub-bacia_PARAMETROS.txt".
+#' 
+#' @param arq o arquivo do tipo "sub-bacia_PARAMETROS.txt"
+#' @importFrom  data.table data.table
+#' @importFrom utils read.csv
+#' @return data.table com as colunas
+#'     \itemize{
+#'     \item{nome - nome da sub-bacia}
+#'     \item{parametro - nome do parametro}
+#'     \item{valor - valor do parametro}
+#'     }
+#' @export 
+le_datas_calibracao <- function(arq) {
+
+    if (!file.exists(arq)) {
+        stop("o arquivo de parametros nao existe.")
+    }
+
+    dat <- data.table::fread(arq)
+
+    # Definindo as colunas obrigatorias e as permitidas
+    colunas_obrigatorias <- c("nome", "parametro", "valor")
+    colunas_permitidas <- c("nome", "parametro", "valor", "limite_inferior", "limite_superior")
+
+    # 1. Verifica se todas as colunas obrigatorias estao presentes
+    if (!all(colunas_obrigatorias %in% names(dat))) {
+        stop(paste0("O arquivo ", arq, " deve conter as colunas obrigatorias: ", 
+        colunas_obrigatorias))
+    }
+
+    # 2. Verifica se ha colunas fora do conjunto permitido
+    colunas_extras <- setdiff(names(dat), colunas_permitidas)
+    if (length(colunas_extras) > 0) {
+        stop(paste0("O arquivo ", arq, " possui colunas nao permitidas: ",
+        paste0(colunas_extras, collapse = ", ")))
+    }
+
+    periodo <- dat[grepl("data_", parametro)]
+    periodo <- rbindlist(list(periodo, dat[grepl("_periodo_", parametro)]))
+
+    periodo[, valor := as.Date(valor, format = "%Y-%m-%d")]
+
+    periodo
+}
+
 #' le_parametros
 #' 
 #' Leitor de arquivo de parametros
@@ -24,11 +74,25 @@ le_parametros <- function(arq) {
 
     dat <- data.table::fread(arq)
 
-    if (any(colnames(dat) != c("nome", "parametro", "valor"))) {
-        stop("o arquivos deve deve possuir colunas 'nome', 'parametro' e 'valor'")
+    # Definindo as colunas obrigatorias e as permitidas
+    colunas_obrigatorias <- c("nome", "parametro", "valor")
+    colunas_permitidas <- c("nome", "parametro", "valor", "limite_inferior", "limite_superior")
+
+    # 1. Verifica se todas as colunas obrigatorias estao presentes
+    if (!all(colunas_obrigatorias %in% names(dat))) {
+        stop(paste0("O arquivo ", arq, " deve conter as colunas obrigatorias: ", 
+        colunas_obrigatorias))
+    }
+
+    # 2. Verifica se ha colunas fora do conjunto permitido
+    colunas_extras <- setdiff(names(dat), colunas_permitidas)
+    if (length(colunas_extras) > 0) {
+        stop(paste0("O arquivo ", arq, " possui colunas nao permitidas: ",
+        paste0(colunas_extras, collapse = ", ")))
     }
 
     dat <- dat[!grepl("data_", parametro)]
+    dat <- dat[!grepl("_periodo", parametro)]
 
     dat[, valor := as.numeric(valor)]
 
@@ -62,19 +126,21 @@ le_parametros <- function(arq) {
 
     if (nrow(teste) != 0) {
 
-        if (teste$V1 == "Ai") {
+        if (any(teste$V1 == "Ai")) {
             parametros <- c("Area", "Str", "K2t", "Crec", "Lambda", "Capc", "Pmur",
             "K_kt", "K2t2", "H1", "H", "K3t", "K1t", "Ecof", "Pcof", "Ecof2")
 
             teste <- dat[, setdiff(parametros, parametro), by = c("nome")]
-            
-            stop(paste0("falta o parametro ", teste$V1, " para a sub-bacia ", teste$nome, " no arquivo ", arq, "\n"))
+            if (nrow(teste) != 0) {
+                stop(paste0("falta o parametro ", teste$V1, " para a sub-bacia ", teste$nome, " no arquivo ", arq, "\n"))
+            }
         } else {
             stop(paste0("falta o parametro ", teste$V1, " para a sub-bacia ", teste$nome, " no arquivo ", arq, "\n"))
         }
     }
 
-    teste <- dat[substr(parametro, 1, 2) == "Kt", sum(valor), by = c("nome")]
+    teste <- dat[parametro != "Ktmin" & parametro != "Ktmax" &
+                substr(parametro, 1, 2) == "Kt", sum(valor), by = c("nome")]
 
     if (max(teste$V1) > 1.005) {
         stop(paste0("o somatorio dos Kts da sub-bacia ", teste[V1 > 1.005, nome], ", e maior que 1.005 no arquivo ", arq, "\n"))
@@ -84,7 +150,9 @@ le_parametros <- function(arq) {
         stop(paste0("o somatorio dos Kts da sub-bacia ", teste[V1 < 0.995, nome], ", e menor que 0.995 no arquivo ", arq, "\n"))
     }
 
-    teste <- dat[substr(parametro, 1, 2) == "Kt", length(valor), by = "nome"]
+    teste <- dat[parametro != "Ktmin" & parametro != "Ktmax" &
+            substr(parametro, 1, 2) == "Kt", length(valor), by = "nome"]
+            
     if (any(teste$V1 != 63)) {
         stop(paste0("o somatorio dos Kts da sub-bacia ", teste[V1 != 63, nome], 
         "nao possui o valor para os 63 Kts no arquivo ", arq, ".\n"))
@@ -676,7 +744,6 @@ le_arq_entrada_novo <- function(pasta_entrada) {
             ponderacao_espacial_previsao(precipitacao_prevista, postos_plu[nome %in% sub_bacia])
         }))
         precipitacao_prevista <- completa_previsao(precipitacao_prevista, datas_rodadas)
-        precipitacao_prevista <- precipitacao_prevista[, mean(valor), by = .(data_rodada, data_previsao, cenario, nome)]
         colnames(precipitacao_prevista)[5] <- "valor"
     } else {
         warning("nao existe arquivo de previsao de precipitacao, serao utilizados dados historicos")

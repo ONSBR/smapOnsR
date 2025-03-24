@@ -199,6 +199,49 @@ test_that("testa rodada com serie temporal etp", {
                 saida$previsao[data_previsao == "2020-05-05" & cenario == "historico", valor])
 })
 
+test_that("testa rodada com aprimoramentos", {
+  library(smapOnsR)
+  pasta_entrada <- system.file("extdata", "arq_entrada_pmur", package = "smapOnsR")
+  
+  entrada <- le_arq_entrada_novo(pasta_entrada)
+
+ #parametros <- entrada$parametros
+ # inicializacao <- entrada$inicializacao
+ # precipitacao_observada <- entrada$precipitacao_observada
+ #     precipitacao_prevista <- entrada$precipitacao_prevista
+ #     evapotranspiracao_observada <- entrada$evapotranspiracao_observada
+ #     evapotranspiracao_prevista <- entrada$evapotranspiracao_prevista
+ #       vazao_observada <- entrada$vazao_observada
+ #       postos_plu <- entrada$postos_plu
+ #       datas_rodadas <- entrada$datas_rodadas
+ #     numero_cenarios <- length(unique(entrada$precipitacao_prevista[, cenario]))
+ #     sub_bacias <- entrada$sub_bacias$nome
+
+
+  saida <- rodada_encadeada_pmur_etp(entrada$parametros,
+            entrada$inicializacao, entrada$precipitacao_observada, entrada$precipitacao_prevista,
+            entrada$evapotranspiracao_observada,
+            entrada$evapotranspiracao_prevista, entrada$vazao_observada,
+            entrada$postos_plu, entrada$datas_rodadas, entrada$sub_bacias$nome)
+
+  secao <- sessionInfo()
+
+  if (secao$R.version$os == "mingw32") {
+    expect_equal(round(saida$previsao[nome == "stoantjari" & variavel == "Qcalc" & 
+                  cenario == "ecmwf_7", valor][35], 2), 1359.85)
+    expect_equal(round(saida$funcao_objetivo[, funcao_objetivo], 7),
+                      c(0.1985781, 0.0874264, 0.0006976, 0.4497266, 0.2600375,
+                      0.7954830, 0.0425972, 0.2157436, 0.0807382, 0.0774346,
+                      0.1810360, 0.1462257, 0.3211804, 0.2018538, 0.2933669,
+                      0.1392731, 0.1794551, 0.1521796, 0.1845175, 0.0144009, 0.0623383))
+  } else {
+    expect_true(abs(round(saida$previsao[nome == "stoantjari" & variavel == "Qcalc" & 
+                  cenario == "ecmwf_7", valor][35], 2) - 1359.85) < 1359.85 * 0.01)
+  }
+
+})
+
+
 test_that("testa caso pegando a assimilacao original do aplicativo",{
     pasta_entrada <- system.file("extdata", "caso_completo", "Arq_Entrada", package = "smapOnsR")
     pasta_saida <- system.file("extdata", "caso_completo", "Arq_Saida", package = "smapOnsR")

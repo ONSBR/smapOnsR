@@ -50,18 +50,21 @@ valida_previsao_etp <- function(evapotranspiracao_prevista, precipitacao_previst
 #' @export 
 valida_cenarios <- function(evapotranspiracao_prevista, precipitacao_prevista) {
 
-    merged_data <- merge(precipitacao_prevista, evapotranspiracao_prevista,
-                     by = c("data_previsao", "nome", "data_rodada", "cenario"), all = TRUE)
+    etp <- data.table::copy(evapotranspiracao_prevista)
+    etp[, horizonte := as.numeric(data_previsao - data_rodada)]
+    etp <- etp[horizonte != 0]
+    merged_data <- merge(precipitacao_prevista, etp,
+                     by = c("data_rodada", "data_previsao", "nome", "cenario"), all = TRUE)
 
     if (nrow(merged_data[is.na(valor.x)]) != 0) {
-        stop(paste0("falta o cenario ", merged_data$cenario, " para a data de previsao ", 
-        merged_data$data_previsao, " da sub-bacia ", merged_data$nome, 
-        " do caso de ", merged_data$data_rodada, " no arquivo de previsao de precipitacao. \n"))
+        stop(paste0("falta o cenario ", merged_data[is.na(valor.x), cenario], " para a data de previsao ", 
+        merged_data[is.na(valor.x), data_previsao], " da sub-bacia ", merged_data[is.na(valor.x), nome],
+        " do caso de ", merged_data[is.na(valor.x), data_rodada], " no arquivo de previsao de precipitacao. \n"))
     }
 
     if (nrow(merged_data[is.na(valor.y)]) != 0) {
-        stop(paste0("falta o cenario ", merged_data$cenario, " para a data de previsao ", 
-        merged_data$data_previsao, " da sub-bacia ", merged_data$nome, 
-        " do caso de ", merged_data$data_rodada, " no arquivo de previsao de evapotranspiracao. \n"))
+        stop(paste0("falta o cenario ", merged_data[is.na(valor.y), cenario], " para a data de previsao ", 
+        merged_data[is.na(valor.y), data_previsao], " da sub-bacia ", merged_data[is.na(valor.y), nome],
+        " do caso de ", merged_data[is.na(valor.y), data_rodada], " no arquivo de previsao de evapotranspiracao. \n"))
     }
 }

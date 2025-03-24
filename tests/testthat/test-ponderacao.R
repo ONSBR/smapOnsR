@@ -75,3 +75,33 @@ test_that("Testa ponderacao espacial", {
   calculo <- precipitacao[data == (data_fim + kt_max), sum(valor* c(0.264, 0.037, 0.699))]
   expect_equal(precipitacao_ponderada[data == (data_fim + kt_max), valor], calculo)
 })
+
+test_that("Testa ponderacao espacial previsao", {
+  #CT24.5
+  sub_bacia <- "pimentalt"
+  modelo <- new_modelo_smap_ons(parametros[nome == sub_bacia], postos_plu[nome == sub_bacia])
+  kt <- unlist(modelo)[12:74]
+  kt_min <- sum(kt[4:63] > 0)
+  kt_max <- sum(kt[1:2] > 0)
+  data_inicio <- as.Date("2021-12-01")
+  data_fim <- as.Date("2021-12-29")
+  precipitacao <- historico_precipitacao[data <= data_fim &
+            data >= (data_inicio + 1) & posto %in% postos_plu[nome == sub_bacia, posto]]
+  precipitacao[, data_rodada := data_inicio]
+  colnames(precipitacao)[1] <- "data_previsao"
+  cenario2 <- data.table::copy(precipitacao)
+  cenario2[, valor := valor + 1]
+  precipitacao[, cenario := "cenario_1"]
+  cenario2[, cenario := "cenario_2"]
+  precipitacao <- rbind(precipitacao, cenario2)
+  datas_rodadas <- data.table::data.table(data = data_inicio,
+                  numero_dias_previsao = as.numeric(data_fim - data_inicio))
+
+  precipitacao_ponderada2 <- ponderacao_espacial_previsao(precipitacao, postos_plu[nome %in% sub_bacia])
+  precipitacao_prevista <- completa_previsao(precipitacao_ponderada2, datas_rodadas)
+  colnames(precipitacao_prevista)[5] <- "valor"
+
+  calculo <- precipitacao[data_previsao == (data_inicio + 1) & cenario == "cenario_2", sum(valor* c(0.264, 0.037, 0.699))]
+  expect_equal(precipitacao_ponderada2[data_previsao == (data_inicio + 1) & 
+            cenario == "cenario_2", valor], calculo)
+})

@@ -1,3 +1,21 @@
+# smapOnsR 1.3.2
+
+## Minor changes
+
+* Possibilidade de importar e exportar datas no processo de calibracao
+
+* Possibilidade de importar e exportar valores de inicializacao da calibracao
+
+* Possibilidade de exportacao da simulacao na calibracao
+
+* Reparametrizacao da funcao beta 
+
+* Reparametrizacao da variavel pmur, como percentual relativo ao capc
+
+* Adiciona caso exemplo com teste para casos com aprimoramentos
+
+* Eficientizacao das funcoes de propagacao e totalizacao
+
 # smapOnsR 1.3.1
 
 ## Minor changes

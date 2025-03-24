@@ -62,56 +62,64 @@ totaliza_previsao <- function(previsao, vazao_observada, configuracao) {
 
     #combina obs e prev
     obs <- data.table::copy(vazao_observada)
+    colnames(previsao)[1] <- "data_caso"
     obs[, data_rodada := previsao[, unique(data_caso)]]
     data.table::setnames(obs, "posto", "nome")
-    previsao_caso <- data.table::copy(previsao)
-    previsao_caso[, variavel := NULL]
-    data.table::setnames(previsao_caso, "data_caso", "data_rodada")
-    previsao_caso <- combina_observacao_previsao(obs, previsao_caso)
-    data.table::setorder(previsao_caso, "data_rodada", "nome", "cenario", "data_previsao")
+    previsao[, variavel := NULL]
+    data.table::setnames(previsao, "data_caso", "data_rodada")
+    previsao <- combina_observacao_previsao(obs, previsao)
+    previsao <- previsao[data_previsao >= (data_rodada - 90)]
+    data.table::setorder(previsao, "data_rodada", "nome", "cenario", "data_previsao")
 
     #distribui incrementais
-    previsao_totalizada <- data.table::data.table()
-    for (posto_total in configuracao$posto) {
-        previsao_totalizada_subbacia <- data.table::copy(previsao_caso[nome == configuracao[posto == posto_total, sub_bacia_agrupada]])
-        previsao_totalizada_subbacia[nome == configuracao[posto == posto_total, sub_bacia_agrupada], valor := valor * configuracao[posto == posto_total, fator]]
-        previsao_totalizada_subbacia[nome == configuracao[posto == posto_total, sub_bacia_agrupada], nome := configuracao[posto == posto_total, nome_real]]   
-        previsao_totalizada <- data.table::rbindlist(list(previsao_totalizada, previsao_totalizada_subbacia))
+    # Inicializa uma lista para acumular os data.tables
+    resultados <- vector("list", length(configuracao$posto))
+
+    # Loop otimizado
+    for (i in seq_along(configuracao$posto)) {
+        posto_total <- configuracao$posto[i]
+        sub_bacia_agrupada <- configuracao[posto == posto_total, sub_bacia_agrupada]
+        fator <- configuracao[posto == posto_total, fator]
+        nome_real <- configuracao[posto == posto_total, nome_real]
+
+        # Copia e faz os ajustes no data.table
+        previsao_totalizada_subbacia <- data.table::copy(previsao[nome == sub_bacia_agrupada])
+        previsao_totalizada_subbacia[, valor := valor * fator]
+        previsao_totalizada_subbacia[, nome := nome_real]
+        previsao_totalizada_subbacia[, posto := posto_total]
+
+        # Armazena o resultado em uma lista
+        resultados[[i]] <- previsao_totalizada_subbacia
     }
-    data.table::setnames(previsao_totalizada, "valor", "previsao_distribuida")
-    previsao_totalizada[, previsao_incremental := previsao_distribuida]
+
+    # Junta todos os data.tables de uma vez
+    previsao_totalizada <- data.table::rbindlist(resultados)
+    data.table::setnames(previsao_totalizada, "valor", "previsao_incremental")
     data.table::setorder(previsao_totalizada, "data_rodada", "nome", "cenario", "data_previsao")
 
     # propaga postos flu
-    if(nrow(configuracao[bacia_smap == "posto_flu"]) > 0){
-        configuracao_postos_plu <- configuracao[bacia_smap == "posto_flu"]      
+    if(nrow(configuracao[bacia_smap == "posto_flu"]) > 0) {
+        configuracao_postos_plu <- configuracao[bacia_smap == "posto_flu"]
         ordem <- ordem_afluencia(configuracao_postos_plu$posto, configuracao_postos_plu$posto_jusante)
         for (indice_ordem in 1:max(ordem)) {
             indice_configuracao <- which(ordem == indice_ordem)
             for (indice_usina in indice_configuracao) {
                 nome_montante <- configuracao_postos_plu[indice_usina, nome_real]
                 nome_jusante <- configuracao[posto == configuracao_postos_plu[indice_usina, posto_jusante], nome_real]
-                data_inicio <- max(previsao_totalizada[nome == nome_jusante, min(data_previsao)],
-                                    previsao_totalizada[nome == nome_montante, min(data_previsao)],
-                                    previsao[, unique(data_caso) - 60])
-                if (configuracao_postos_plu[indice_usina, tv] == 0){
+                jusante <- previsao_totalizada[nome == nome_jusante]
+                montante <- previsao_totalizada[nome == nome_montante]
+                if (configuracao_postos_plu[nome_real == nome_montante, n] == 0){
+                    tv <- configuracao_postos_plu[nome_real == nome_montante, tv]
+                    propagada <- funcaoSmapCpp::propaga_tv_cpp(montante[, previsao_incremental], jusante[, previsao_incremental], tv)
+                    previsao_totalizada[nome == nome_jusante, previsao_incremental := propagada]
+                } else {
                     n <- configuracao_postos_plu[nome_real == nome_montante, n]
                     coeficientes <- c(0, 0, 0)
                     coeficientes[1] <- configuracao_postos_plu[nome_real == nome_montante, c1]
                     coeficientes[2] <- configuracao_postos_plu[nome_real == nome_montante, c2]
                     coeficientes[3] <- configuracao_postos_plu[nome_real == nome_montante, c3]
-                    for (nome_cenario in previsao_totalizada[, unique(cenario)]) {
-                        previsao_totalizada[nome == nome_jusante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_incremental := 
-                        propaga_muskingum(previsao_totalizada[nome == nome_montante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_incremental], 
-                        previsao_totalizada[nome == nome_jusante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_incremental], n, coeficientes)]
-                    }
-                } else {
-                    tv <- configuracao_postos_plu[nome_real == nome_montante, tv]
-                    for (nome_cenario in previsao_totalizada[, unique(cenario)]) {
-                        previsao_totalizada[nome == nome_jusante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_incremental := 
-                        propaga_tv(previsao_totalizada[nome == nome_montante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_incremental], 
-                                previsao_totalizada[nome == nome_jusante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_incremental], tv)]
-                    }
+                    propagada <- funcaoSmapCpp::propaga_muskingum_cpp(montante[, previsao_incremental], jusante[, previsao_incremental], n, coeficientes)
+                    previsao_totalizada[nome == nome_jusante, previsao_incremental := propagada]
                 }
             }
         }
@@ -129,38 +137,48 @@ totaliza_previsao <- function(previsao, vazao_observada, configuracao) {
             nome_montante <- configuracao_sem_postos_plu[indice_usina, nome_real]
             nome_jusante <- configuracao[posto == configuracao_sem_postos_plu[indice_usina, posto_jusante], nome_real]
             if (length(nome_jusante) != 0) {
-                data_inicio <- max(previsao_totalizada[nome == nome_jusante, min(data_previsao)],
-                                    previsao_totalizada[nome == nome_montante, min(data_previsao)],
-                                    previsao[, unique(data_caso) - 60])
-                if (configuracao_sem_postos_plu[indice_usina, tv] == 0){
+                jusante <- previsao_totalizada[nome == nome_jusante]
+                montante <- previsao_totalizada[nome == nome_montante]
+                if (configuracao_sem_postos_plu[nome_real == nome_montante, n] == 0){
+                    tv <- configuracao_sem_postos_plu[nome_real == nome_montante, tv]
+                    propagada <- funcaoSmapCpp::propaga_tv_cpp(montante[, previsao_total], jusante[, previsao_total], tv)
+                    previsao_totalizada[nome == nome_jusante, previsao_total := propagada]
+                    previsao_totalizada[nome == nome_jusante, previsao_total_sem_tv := 
+                                        montante[, previsao_total_sem_tv] + jusante[, previsao_total_sem_tv]]
+                } else {
                     n <- configuracao_sem_postos_plu[nome_real == nome_montante, n]
                     coeficientes <- c(0, 0, 0)
                     coeficientes[1] <- configuracao_sem_postos_plu[nome_real == nome_montante, c1]
                     coeficientes[2] <- configuracao_sem_postos_plu[nome_real == nome_montante, c2]
                     coeficientes[3] <- configuracao_sem_postos_plu[nome_real == nome_montante, c3]
-                    for (nome_cenario in previsao_totalizada[, unique(cenario)]) {
-                        previsao_totalizada[nome == nome_jusante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_total := 
-                            propaga_muskingum(previsao_totalizada[nome == nome_montante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_total], 
-                            previsao_totalizada[nome == nome_jusante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_total], n, coeficientes)]
-                        previsao_totalizada[nome == nome_jusante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_total_sem_tv := 
-                            previsao_totalizada[nome == nome_montante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_total_sem_tv] + 
-                            previsao_totalizada[nome == nome_jusante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_total_sem_tv]]
-                    }
-                } else {
-                    tv <- configuracao_sem_postos_plu[nome_real == nome_montante, tv]
-                    for (nome_cenario in previsao_totalizada[, unique(cenario)]) {
-                        previsao_totalizada[nome == nome_jusante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_total := 
-                        propaga_tv(previsao_totalizada[nome == nome_montante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_total], 
-                        previsao_totalizada[nome == nome_jusante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_total], tv)]
-                        previsao_totalizada[nome == nome_jusante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_total_sem_tv := 
-                            previsao_totalizada[nome == nome_montante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_total_sem_tv] +  
-                            previsao_totalizada[nome == nome_jusante & cenario == nome_cenario & data_previsao >= data_inicio, previsao_total_sem_tv]]
-                    }
+                    propagada <- funcaoSmapCpp::propaga_muskingum_cpp(montante[, previsao_total], jusante[, previsao_total], n, coeficientes)
+                    previsao_totalizada[nome == nome_jusante, previsao_total := propagada]
+                    previsao_totalizada[nome == nome_jusante, previsao_total_sem_tv := 
+                                    montante[, previsao_total_sem_tv] + jusante[, previsao_total_sem_tv]]
                 }
             }
         }
     }
-    previsao_totalizada <- previsao_totalizada[nome %in% configuracao[!bacia_smap == "posto_flu", nome_real]]
+
+
+    previsao_totalizada[, previsao_inc_tv := previsao_total]
     previsao_totalizada <- previsao_totalizada[data_previsao >= data_rodada]
+    for (indice_ordem in 1:max(ordem)) {
+        indice_configuracao <- which(ordem == indice_ordem)
+        for (indice_usina in indice_configuracao) {
+            nome_montante <- configuracao_sem_postos_plu[indice_usina, nome_real]
+            nome_jusante <- configuracao[posto == configuracao_sem_postos_plu[indice_usina, posto_jusante], nome_real]
+            if (length(nome_jusante) != 0) {
+                jusante <- previsao_totalizada[nome == nome_jusante, previsao_inc_tv]
+                montante <- previsao_totalizada[nome == nome_montante, previsao_total]
+
+                previsao_totalizada[nome == nome_jusante, 
+                            previsao_inc_tv := jusante - montante]
+            }
+        }
+    }
+
+    previsao_totalizada <- previsao_totalizada[nome %in% configuracao[!bacia_smap == "posto_flu", nome_real]]
+    
     previsao_totalizada
 }
