@@ -287,13 +287,18 @@ cria_datas <- function(data_inicio, data_fim) {
 
 #' Cria arquivo de inicializacao
 #'
-#' @param parametros data.table com as colunas
+#' @param parametros (opcional) data.table com as colunas
 #'     \itemize{
 #'     \item{nome - nome da sub-bacia}
 #'     \item{parametro - nome do parametro}
 #'     \item{valor - valor do parametro}
 #'     }
-#'
+#' @param nome   (opcional) vetor de nomes (mesmo comprimento que Ebin, Supin, Tuin)
+#' @param Ebin   (opcional) vetor de valores para Ebin
+#' @param Supin  (opcional) vetor de valores para Supin
+#' @param Tuin   (opcional) vetor de valores para Tuin
+#' @param numero_dias_assimilacao (integer) valor fixo (padrao = 32)
+#' @param ajusta_precipitacao     (integer) valor fixo (padrao = 1)
 #' @return data.table com a inicializacao com as colunas
 #'     \itemize{
 #'     \item{nome - nome da sub_bacia}
@@ -303,37 +308,77 @@ cria_datas <- function(data_inicio, data_fim) {
 #' @importFrom data.table setorder rbindlist
 #' @export
 
-cria_inicializacao <- function(parametros, limite_inferior_ebin = 0.8, 
-                              limite_superior_ebin = 1.2, 
-                              limite_inferior_prec = 0.5, 
-                              limite_superior_prec = 2) {
+cria_inicializacao <- function(parametros = NULL,
+                              nome  = NULL,
+                              Ebin = NULL,
+                              Supin = NULL,
+                              Tuin = NULL, 
+                              limite_inferior_ebin = 0.8,
+                              limite_superior_ebin = 1.2,
+                              limite_inferior_prec = 0.5,
+                              limite_superior_prec = 2,
+                              numero_dias_assimilacao = 32L,
+                              ajusta_precipitacao = 1L) {
 
-  # 1) Filtrar apenas os parâmetros desejados (Ebin, Supin, Tuin)
-  param_desejados <- c("Ebin", "Supin", "Tuin")
-  dt_sel <- parametros[
-    parametro %chin% param_desejados,
-    .(nome, variavel = parametro, valor)
-  ]
-
-  # 2) Criar os parâmetros fixos para cada nome
-  dt_fixos <- unique(dt_sel[, .(nome)])[
-    , .(
-        variavel = c("numero_dias_assimilacao", "ajusta_precipitacao",
-                     "limite_inferior_ebin", "limite_superior_ebin",
-                     "limite_inferior_prec", "limite_superior_prec"),
-        valor     = c(32L, 1L, limite_inferior_ebin, limite_superior_ebin, 
-                    limite_inferior_prec, limite_superior_prec)
-      ),
-    by = nome
-  ]
-
-  # 3) Unir os dois conjuntos
-  inicializacao <- data.table::rbindlist(list(dt_sel, dt_fixos), use.names = TRUE)
-
-  # 4) (Opcional) Ordenar para visualização: primeiro pelo nome, depois por variavel
-  data.table::setorder(inicializacao, nome, variavel)
-
-  inicializacao
+  # 1) Monta dt_sel a partir de data.table ou vetores
+  if (is.null(parametros)) {
+    if (any(sapply(list(nome, Ebin, Supin, Tuin), is.null))) {
+      stop("Se 'parametros' for NULL, fornecer 'nome', 'Ebin', 'Supin' e 'Tuin'.")
+    }
+    if (! (length(nome)==length(Ebin) &&
+           length(nome)==length(Supin) &&
+           length(nome)==length(Tuin)) ) {
+      stop("'nome', 'Ebin', 'Supin' e 'Tuin' devem ter mesmo comprimento.")
+    }
+    # Cria uma data.table ampla e depois derrete
+    dt_base <- data.table(
+      nome  = nome,
+      Ebin  = Ebin,
+      Supin = Supin,
+      Tuin  = Tuin
+    )
+    dt_sel <- melt(
+      dt_base,
+      id.vars       = "nome",
+      measure.vars  = c("Ebin","Supin","Tuin"),
+      variable.name = "variavel",
+      value.name    = "valor"
+    )
+  } else {
+    if (!all(c("nome","parametro","valor") %in% names(parametros))) {
+      stop("O data.table 'parametros' deve ter colunas 'nome','parametro','valor'.")
+    }
+    dt_sel <- parametros[
+      parametro %chin% c("Ebin","Supin","Tuin"),
+      .(nome, variavel = parametro, valor)
+    ]
+  }
+  
+  # 2) Parâmetros fixos (6 por nome)
+  dt_fixos <- unique(dt_sel[, .(nome)])[ , .(
+    variavel = c(
+      "numero_dias_assimilacao",
+      "ajusta_precipitacao",
+      "limite_inferior_ebin",
+      "limite_superior_ebin",
+      "limite_inferior_prec",
+      "limite_superior_prec"
+    ),
+    valor = c(
+      numero_dias_assimilacao,
+      ajusta_precipitacao,
+      limite_inferior_ebin,
+      limite_superior_ebin,
+      limite_inferior_prec,
+      limite_superior_prec
+    )
+  ), by = nome ]
+  
+  # 3) Empilha e ordena
+  inicializacao <- rbindlist(list(dt_sel, dt_fixos), use.names = TRUE)
+  setorder(inicializacao, nome, variavel)
+  
+  return(inicializacao)
 }
 
 #' Cria arquivo de sub_bacias

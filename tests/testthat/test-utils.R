@@ -79,3 +79,110 @@ test_that("transformacao historico em previsao", {
   )
   expect_error(transforma_historico_previsao(precipitacao, datas_rodadas))
 })
+
+#------testes funcao cria_inicializacao------------------
+# 1) Testa a entrada via data.table
+test_that("Criacao de data.table inicializacao via data.table gera saída correta", {
+  dt_in <- data.table(
+    nome      = c("a", "a", "a", "b", "b", "b", "b"),
+    parametro = c("Ebin", "Supin", "Tuin", "Ebin", "Supin", "Tuin", "X"),
+    valor     = c(10, 5, 3, 20, 7, 4, 999)
+  )
+  # Deve ignorar o parâmetro "X"
+  dt_out <- cria_inicializacao(parametros = dt_in)
+
+  # Para cada nome deve ter exatamente 9 linhas
+  expect_equal(dt_out[nome == "a", .N], 9)
+  expect_equal(dt_out[nome == "b", .N], 9)
+
+  # Verifica que as variáveis estão corretas
+  vars_a <- dt_out[nome == "a", variavel]
+  expect_setequal(vars_a, c("Ebin", "Supin", "Tuin",
+                            "numero_dias_assimilacao", "ajusta_precipitacao",
+                            "limite_inferior_ebin", "limite_superior_ebin",
+                            "limite_inferior_prec", "limite_superior_prec"))
+  
+  # Valores fixos padrão
+  expect_equal(
+    dt_out[nome == "a" & variavel == "numero_dias_assimilacao", valor],
+    32L
+  )
+  expect_equal(
+    dt_out[nome == "b" & variavel == "ajusta_precipitacao", valor],
+    1L
+  )
+})
+
+# 2) Testa a entrada via vetores
+test_that("Entrada via vetores gera saída correta", {
+  nomes  <- c("x", "y")
+  Ebin   <- c(100, 200)
+  Supin  <- c(10, 20)
+  Tuin   <- c(1, 2)
+  dt_out <- cria_inicializacao(
+    nome  = nomes,
+    Ebin  = Ebin,
+    Supin = Supin,
+    Tuin  = Tuin
+  )
+  
+  # Linhas esperadas: 2 nomes × 9 variáveis = 10
+  expect_equal(nrow(dt_out), 18)
+  # Verifica combinação de nome e valores
+  expect_equal(
+    dt_out[variavel == "Ebin", valor],
+    c(100, 200)
+  )
+  expect_equal(
+    dt_out[variavel == "Tuin", valor],
+    c(1, 2)
+  )
+})
+
+# 3) Testa valores fixos customizados
+test_that("Parâmetros fixos customizados são aplicados", {
+  dt_out <- cria_inicializacao(
+    nome  = "zz",
+    Ebin  = 1,
+    Supin = 2,
+    Tuin  = 3,
+    numero_dias_assimilacao = 99L,
+    ajusta_precipitacao     = 0L
+  )
+  expect_equal(
+    dt_out[variavel=="numero_dias_assimilacao", valor],
+    99L
+  )
+  expect_equal(
+    dt_out[variavel=="ajusta_precipitacao", valor],
+    0L
+  )
+})
+
+# 4) Testa erros de validação
+test_that("Erro quando falta vetores obrigatórios", {
+  expect_error(
+    cria_inicializacao(nome = "a", Ebin = 1, Supin = 2),
+    "precisar fornecer 'nome', 'Ebin', 'Supin' e 'Tuin'"
+  )
+})
+
+test_that("Erro quando vetores têm comprimentos diferentes", {
+  expect_error(
+    cria_inicializacao(
+      nome  = c("a", "b"),
+      Ebin  = c(1, 2, 3),
+      Supin = c(4, 5),
+      Tuin  = c(6, 7)
+    ),
+    "devem ter o mesmo comprimento"
+  )
+})
+
+test_that("Erro quando data.table não tem colunas esperadas", {
+  dt_bad <- data.table(foo = 1, bar = 2)
+  expect_error(
+    cria_inicializacao(parametros = dt_bad),
+    "deve ter colunas 'nome', 'parametro' e 'valor'"
+  )
+})

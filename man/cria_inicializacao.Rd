@@ -4,15 +4,39 @@
 \alias{cria_inicializacao}
 \title{Cria arquivo de inicializacao}
 \usage{
-cria_inicializacao(parametros)
+cria_inicializacao(
+  parametros = NULL,
+  nome = NULL,
+  Ebin = NULL,
+  Supin = NULL,
+  Tuin = NULL,
+  limite_inferior_ebin = 0.8,
+  limite_superior_ebin = 1.2,
+  limite_inferior_prec = 0.5,
+  limite_superior_prec = 2,
+  numero_dias_assimilacao = 32L,
+  ajusta_precipitacao = 1L
+)
 }
 \arguments{
-\item{parametros}{data.table com as colunas
+\item{parametros}{(opcional) data.table com as colunas
 \itemize{
 \item{nome - nome da sub-bacia}
 \item{parametro - nome do parametro}
 \item{valor - valor do parametro}
 }}
+
+\item{nome}{(opcional) vetor de nomes (mesmo comprimento que Ebin, Supin, Tuin)}
+
+\item{Ebin}{(opcional) vetor de valores para Ebin}
+
+\item{Supin}{(opcional) vetor de valores para Supin}
+
+\item{Tuin}{(opcional) vetor de valores para Tuin}
+
+\item{numero_dias_assimilacao}{(integer) valor fixo (padrao = 32)}
+
+\item{ajusta_precipitacao}{(integer) valor fixo (padrao = 1)}
 }
 \value{
 data.table com a inicializacao com as colunas
