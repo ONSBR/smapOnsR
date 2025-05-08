@@ -135,3 +135,102 @@ executa_caso_oficial_v2 <- function(pasta_caso){
     write.table(saida$assimilacao, file = file.path(pasta_saida, 
                 "ajuste.csv"), row.names = FALSE, quote = FALSE, sep = ";")
 }
+
+#' Executa caso oficial com entrada nova e aprimoramentos
+#' 
+#' executa rodada oficial do modelo SMAP/ONS com dados de entrada novos
+#' e aprimoramentos
+#'
+#' @param pasta_caso caminho da pasta contendo as pastas "Arq_Entrada" e
+#' "Arq_Saida"
+#' @export
+executa_validacao_calibracao <- function(pasta_caso){
+
+    pasta_entrada <- file.path(pasta_caso, "Arq_Entrada")
+    pasta_saida <- file.path(pasta_caso, "Arq_Saida")
+    
+    if (!dir.exists(pasta_entrada)) {
+        stop("nao existe a pasta de entrada ", pasta_entrada)
+    }
+    if (!dir.exists(pasta_saida)) {
+        dir.create(pasta_saida)
+    }
+
+    arquivos <- le_arquivos(pasta_entrada)
+    arquivo_parametros <- file.path(pasta_entrada,arquivos[arquivo == "PARAMETROS", 
+                                    nome_arquivo])
+
+    periodos <- le_datas_calibracao(arquivo_parametros)
+    parametros <- le_parametros(arquivo_parametros)
+
+    datas <- cria_datas(periodos[parametro == "data_inicio_simulacao", valor], 
+                        periodos[parametro == "data_final_simulacao", valor])
+    inicializacao <- cria_inicializacao(parametros)
+    sub_bacias <- cria_sub_bacias(parametros)
+
+    write.table(datas, file = file.path(pasta_entrada, 
+                "datas_rodadas.csv"), row.names = FALSE, quote = FALSE, sep = ";")
+    write.table(inicializacao, file = file.path(pasta_entrada, 
+                "inicializacao.csv"), row.names = FALSE, quote = FALSE, sep = ";")
+    write.table(sub_bacias, file = file.path(pasta_entrada, 
+                "sub_bacias.csv"), row.names = FALSE, quote = FALSE, sep = ";")
+
+    entrada <- le_arq_entrada_novo(pasta_entrada)
+
+    if (nrow(entrada$evapotranspiracao_prevista) == 0) {
+        saida <- rodada_encadeada_oficial(entrada$parametros,
+            entrada$inicializacao, entrada$precipitacao_observada, entrada$precipitacao_prevista,
+            entrada$evapotranspiracao_nc, entrada$vazao,
+            entrada$postos_plu, entrada$datas_rodadas, entrada$sub_bacias$nome)
+    } else {
+        saida <- rodada_encadeada_pmur_etp(entrada$parametros,
+            entrada$inicializacao, entrada$precipitacao_observada, entrada$precipitacao_prevista,
+            entrada$evapotranspiracao_observada,
+            entrada$evapotranspiracao_prevista, entrada$vazao_observada,
+            entrada$postos_plu, entrada$datas_rodadas, entrada$sub_bacias$nome)
+    }
+
+    saida$previsao <- saida$previsao[variavel == "Qcalc"]
+    saida$previsao <- saida$previsao[data_caso >= periodos[parametro == "data_inicio_objetivo", valor] &
+                    data_caso <= periodos[parametro == "data_final_objetivo",valor]]
+
+    write.table(saida$previsao, file = file.path(pasta_saida, 
+                "previsao.csv"), row.names = FALSE, quote = FALSE, sep = ";")
+    write.table(saida$otimizacao, file = file.path(pasta_saida, 
+                "otimizacao.csv"), row.names = FALSE, quote = FALSE, sep = ";")
+    write.table(saida$funcao_objetivo, file = file.path(pasta_saida, 
+                "funcao_objetivo.csv"), row.names = FALSE, quote = FALSE, sep = ";")
+    write.table(saida$assimilacao, file = file.path(pasta_saida, 
+                "ajuste.csv"), row.names = FALSE, quote = FALSE, sep = ";")
+
+    resultado_mensal <- data.table::data.table()
+    resultado_semanal <- data.table::data.table()
+    resultado_diario <- data.table::data.table()
+    simulacao_semanal <- data.table::data.table()
+    avaliacao <- lapply(unique(saida$previsao[, nome]), function(sub_bacia) {
+        avaliacao <- analisa_previsoes(saida$previsao[nome == sub_bacia & variavel == "Qcalc"], 
+                        entrada$vazao_observada[posto == sub_bacia])
+
+        resultado_mensal <- data.table::rbindlist(list(resultado_mensal, avaliacao$resultado_mensal))
+        resultado_semanal <- data.table::rbindlist(list(resultado_semanal, avaliacao$resultado_semanal))
+        resultado_diario <- data.table::rbindlist(list(resultado_diario, avaliacao$resultado))
+        simulacao_semanal <- data.table::rbindlist(list(simulacao_semanal, avaliacao$simulacao_semanal))
+
+        saida <- list(resultado_diario = resultado_diario, resultado_semanal = resultado_semanal,
+                    resultado_mensal = resultado_mensal, simulacao_semanal = simulacao_semanal)
+    })
+
+    resultado_semanal <- data.table::rbindlist(lapply(avaliacao, "[[", "resultado_semanal"))
+    simulacao_semanal <- data.table::rbindlist(lapply(avaliacao, "[[", "simulacao_semanal"))
+    resultado_diario <- data.table::rbindlist(lapply(avaliacao, "[[", "resultado_diario"))
+    resultado_mensal <- data.table::rbindlist(lapply(avaliacao, "[[", "resultado_mensal"))
+
+    write.table(resultado_diario, file = file.path(pasta_saida, 
+                "resultado_diario.csv"), row.names = FALSE, quote = FALSE, sep = ";")
+    write.table(resultado_semanal, file = file.path(pasta_saida, 
+                "resultado_semanal.csv"), row.names = FALSE, quote = FALSE, sep = ";")
+    write.table(resultado_mensal, file = file.path(pasta_saida, 
+                "resultado_mensal.csv"), row.names = FALSE, quote = FALSE, sep = ";")
+    write.table(simulacao_semanal, file = file.path(pasta_saida, 
+                "simulacao_semanal.csv"), row.names = FALSE, quote = FALSE, sep = ";")
+}

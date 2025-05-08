@@ -253,3 +253,109 @@ ordem_afluencia <- function(montante, jusante) {
   }
   return(ord_aflu)
 }
+
+#' Cria arquivo de datas a serem simuladas
+#'
+#' @param data_inicio data inicio da simulacao
+#' @param data_fim data fim da simulacao
+#'
+#' @return data table contendo as datas dos casos a serem executados e seus respectivos horizontes:
+#'     \itemize{
+#'     \item{data - data do caso}
+#'     \item{numero_dias_previsao - horizonte do caso}
+#'     }
+#' @importFrom data.table data.table
+#' @export
+
+cria_datas <- function(data_inicio, data_fim) {
+
+  # 1) Calcular quantos dias até a próxima quinta-feira (4 = quinta em ISO-8601: domingo=7, segunda=1, ..., sábado=6)
+  dias_ate_quinta <- (4 - as.integer(format(data_inicio, "%u"))) %% 7
+  primeira_quinta <- data_inicio + dias_ate_quinta
+
+  # 2) Gerar sequência de quintas até a data_fim
+  datas_quinta <- seq(from = primeira_quinta, to = data_fim, by = "1 week")
+
+  # 3) Montar o data.table com numero_dias_previsao = 42
+  datas <- data.table::data.table(
+    data = datas_quinta,
+    numero_dias_previsao = rep(42L, length(datas_quinta))
+  )
+
+  datas
+}
+
+#' Cria arquivo de inicializacao
+#'
+#' @param parametros data.table com as colunas
+#'     \itemize{
+#'     \item{nome - nome da sub-bacia}
+#'     \item{parametro - nome do parametro}
+#'     \item{valor - valor do parametro}
+#'     }
+#'
+#' @return data.table com a inicializacao com as colunas
+#'     \itemize{
+#'     \item{nome - nome da sub_bacia}
+#'     \item{variavel - nome da variavel}
+#'     \item{valor - valor da variavel}
+#'     }
+#' @importFrom data.table setorder rbindlist
+#' @export
+
+cria_inicializacao <- function(parametros, limite_inferior_ebin = 0.8, 
+                              limite_superior_ebin = 1.2, 
+                              limite_inferior_prec = 0.5, 
+                              limite_superior_prec = 2) {
+
+  # 1) Filtrar apenas os parâmetros desejados (Ebin, Supin, Tuin)
+  param_desejados <- c("Ebin", "Supin", "Tuin")
+  dt_sel <- parametros[
+    parametro %chin% param_desejados,
+    .(nome, variavel = parametro, valor)
+  ]
+
+  # 2) Criar os parâmetros fixos para cada nome
+  dt_fixos <- unique(dt_sel[, .(nome)])[
+    , .(
+        variavel = c("numero_dias_assimilacao", "ajusta_precipitacao",
+                     "limite_inferior_ebin", "limite_superior_ebin",
+                     "limite_inferior_prec", "limite_superior_prec"),
+        valor     = c(32L, 1L, limite_inferior_ebin, limite_superior_ebin, 
+                    limite_inferior_prec, limite_superior_prec)
+      ),
+    by = nome
+  ]
+
+  # 3) Unir os dois conjuntos
+  inicializacao <- data.table::rbindlist(list(dt_sel, dt_fixos), use.names = TRUE)
+
+  # 4) (Opcional) Ordenar para visualização: primeiro pelo nome, depois por variavel
+  data.table::setorder(inicializacao, nome, variavel)
+
+  inicializacao
+}
+
+#' Cria arquivo de sub_bacias
+#'
+#' @param parametros data.table com as colunas
+#'     \itemize{
+#'     \item{nome - nome da sub-bacia}
+#'     \item{parametro - nome do parametro}
+#'     \item{valor - valor do parametro}
+#'     }
+#'
+#' @return data.table sub_bacia com as colunas
+#'     \itemize{
+#'     \item{nome - nome da sub_bacia}
+#'     }
+#' @export
+
+cria_sub_bacias <- function(parametros) {
+
+  sub_bacias <- data.table::data.table(
+    nome = unique(parametros$nome)
+  )
+
+  sub_bacias
+}

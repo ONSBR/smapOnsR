@@ -163,3 +163,129 @@ calcula_kge <- function(simulacao, observacao, pesos = rep(1 /length(observacao)
 
     kge
 }
+
+#' Analise das previsoes
+#' 
+#' Calcula diversas metricas de avaliacao para series diaria, podendo fazer acumulados semanais, mensais,
+#' sazonais, e anuais
+#' 
+#' 
+#' @param simulacao data table com a previsao contendo as seguintes colunas:
+#'     \itemize{
+#'     \item{data_caso}{data da rodada}
+#'     \item{data_previsao}{data da previsao}
+#'     \item{cenario}{nome do cenario}
+#'     \item{nome}{nome da sub-bacia}
+#'     \item{variavel}{nome da variavel}
+#'     \item{valor}{valor da variavel}
+#'     }
+#' @param observacao data table com o historico de vazao com as colunas:
+#'     \itemize{
+#'     \item{data}{data da observacao}
+#'     \item{posto}{nome do posto}
+#'     \item{valor}{valor da variavel}
+#'     }
+#' @param semanal booleano indicando se a analise deve ser feita em acumulados semanais
+#' @param mensal booleano indicando se a analise deve ser feita em acumulados semanais
+#' @param anual booleano indicando se a analise deve ser feita em acumulados semanais
+#' 
+#'
+#' @return saida lista contendo data table resultado com as colunas:
+#' \itemize{
+#'     \item{nome}{nome da sub-bacia}
+#'     \item{metrica}{nome da metrica}
+#'     \item{valor}{valor da metrica}
+#'     \item{dia_previsao}{horizonte da previsao}
+#'     }
+#' e data table resultado semanal com as colunas:
+#' \itemize{
+#'     \item{nome}{nome da sub-bacia}
+#'     \item{metrica}{nome da metrica}
+#'     \item{valor}{valor da metrica}
+#'     \item{numero_semana}{horizonte semanal da previsao}
+#'     }
+#' @export 
+
+analisa_previsoes <- function(simulacao, observacao, semanal = TRUE, mensal = TRUE, anual = FALSE){
+    colnames(simulacao)[2] <- "data"
+    simulacao[, dia_previsao := as.numeric(data - data_caso)]
+    resultado <- data.table::data.table()
+    dia_maximo <- max(simulacao[, dia_previsao])
+    dia_minimo <- min(simulacao[, dia_previsao])
+    numero_dias <- length(unique(simulacao[, dia_previsao]))
+    for (idia in 0:dia_maximo){
+        obs <- observacao[data %in% simulacao[dia_previsao == idia, data], valor]
+        prev <- simulacao[dia_previsao == idia, valor][1:length(obs)]
+        PBIAS <- smapOnsR::calcula_pbias(prev, obs)
+        resultado <- rbind(resultado, PBIAS)
+        NSE <- smapOnsR::calcula_nse(prev, obs)
+        resultado <- rbind(resultado, NSE)
+        MAPE <- smapOnsR::calcula_mape(prev, obs)
+        resultado <- rbind(resultado, MAPE)
+        DM <- smapOnsR::calcula_dm(prev, obs)
+        resultado <- rbind(resultado, DM)
+    }
+    nomes <- c("PBIAS", "NSE", "MAPE", "DM")
+    resultado[, metrica := rep(nomes, numero_dias)]
+    resultado[, dia_previsao := rep(dia_minimo:dia_maximo, each = 4)]
+    resultado[, nome := rep(unique(simulacao[, nome]), numero_dias * 4)]
+    colnames(resultado)[1] <- "valor"
+    data.table::setcolorder(resultado, c("nome", "metrica", "valor", "dia_previsao"))
+
+    if (semanal) {
+        merged_data <- merge(simulacao, observacao, by = "data")
+        data.table::setorder(merged_data, data_caso, data)
+        merged_data[, dia_semana := lubridate::wday(data)]
+        data.table::setDT(merged_data)
+
+        # Step 1: Exclude rows before the first "dia_semana" == 7 for each "data_caso"
+        merged_data <- merged_data[, .SD[dia_semana == 7 | (cumsum(dia_semana == 7) > 0)], by = data_caso]
+
+        # Step 2: Create a sequence for each "data_caso" based on the remainder when dividing by 7
+        merged_data[, numero_semana := rep(1:(.N %/% 7 + (ifelse(.N %% 7 == 0, 0, 1))), each = 7, length.out = .N), by = data_caso]
+
+        # Step 3: Calculate weekly mean and count
+        simulacao_semanal <- merged_data[, .(previsao_semanal = mean(valor.x), observacao_semanal = mean(valor.y), count = .N), by = .(data_caso, numero_semana, nome)]
+
+        resultado_semanal <- data.table::data.table()
+        for (isemana in unique(simulacao_semanal[, numero_semana])){
+            prev <- simulacao_semanal[numero_semana == isemana, previsao_semanal]
+            obs <- simulacao_semanal[numero_semana == isemana, observacao_semanal]
+            PBIAS <- smapOnsR::calcula_pbias(prev, obs)
+            resultado_semanal <- rbind(resultado_semanal, PBIAS)
+            NSE <- smapOnsR::calcula_nse(prev, obs)
+            resultado_semanal <- rbind(resultado_semanal, NSE)
+            MAPE <- smapOnsR::calcula_mape(prev, obs)
+            resultado_semanal <- rbind(resultado_semanal, MAPE)
+            DM <- smapOnsR::calcula_dm(prev, obs)
+            resultado_semanal <- rbind(resultado_semanal, DM)
+        }
+        resultado_semanal[, metrica := rep(nomes, ceiling(dia_maximo / 7))]
+        resultado_semanal[, numero_semana := rep(1:ceiling(dia_maximo / 7), each = 4)]
+        resultado_semanal[, nome := rep(unique(simulacao[, nome]), ceiling(dia_maximo / 7) * 4)]
+        colnames(resultado_semanal)[1] <- "valor"
+        data.table::setcolorder(resultado_semanal, c("nome", "metrica", "valor", "numero_semana"))
+    }
+    
+    if (mensal) {
+      resultado_mensal <- data.table::data.table()
+      
+      prev <- simulacao_semanal[numero_semana %in% c(1,4), mean(previsao_semanal), by = data_caso]
+      obs <- simulacao_semanal[numero_semana  %in% c(1,4), mean(observacao_semanal), by = data_caso]
+      PBIAS <- smapOnsR::calcula_pbias(prev$V1, obs$V1)
+      resultado_mensal <- rbind(resultado_mensal, PBIAS)
+      NSE <- smapOnsR::calcula_nse(prev$V1, obs$V1)
+      resultado_mensal <- rbind(resultado_mensal, NSE)
+      MAPE <- smapOnsR::calcula_mape(prev$V1, obs$V1)
+      resultado_mensal <- rbind(resultado_mensal, MAPE)
+      DM <- smapOnsR::calcula_dm(prev$V1, obs$V1)
+      resultado_mensal <- rbind(resultado_mensal, DM)
+
+      resultado_mensal[, metrica := nomes]
+      resultado_mensal[, nome := rep(unique(simulacao[, nome]), length(nomes))]
+    }
+    
+    saida <- list(resultado = resultado, resultado_semanal = resultado_semanal, simulacao_semanal = simulacao_semanal,
+                  resultado_mensal = resultado_mensal)
+    saida
+}
