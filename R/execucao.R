@@ -203,27 +203,19 @@ executa_validacao_calibracao <- function(pasta_caso){
     write.table(saida$assimilacao, file = file.path(pasta_saida, 
                 "ajuste.csv"), row.names = FALSE, quote = FALSE, sep = ";")
 
-    resultado_mensal <- data.table::data.table()
-    resultado_semanal <- data.table::data.table()
-    resultado_diario <- data.table::data.table()
-    simulacao_semanal <- data.table::data.table()
-    avaliacao <- lapply(unique(saida$previsao[, nome]), function(sub_bacia) {
-        avaliacao <- analisa_previsoes(saida$previsao[nome == sub_bacia & variavel == "Qcalc"], 
-                        entrada$vazao_observada[posto == sub_bacia])
+    sub_bacias <- unique(saida$previsao$nome)
 
-        resultado_mensal <- data.table::rbindlist(list(resultado_mensal, avaliacao$resultado_mensal))
-        resultado_semanal <- data.table::rbindlist(list(resultado_semanal, avaliacao$resultado_semanal))
-        resultado_diario <- data.table::rbindlist(list(resultado_diario, avaliacao$resultado))
-        simulacao_semanal <- data.table::rbindlist(list(simulacao_semanal, avaliacao$simulacao_semanal))
-
-        saida <- list(resultado_diario = resultado_diario, resultado_semanal = resultado_semanal,
-                    resultado_mensal = resultado_mensal, simulacao_semanal = simulacao_semanal)
+    avaliacoes <- lapply(sub_bacias, function(sb) {
+        previsao  <- saida$previsao[nome == sb & variavel == "Qcalc"]
+        obs     <- entrada$vazao_observada[posto == sb]
+        analisa_previsoes(previsao, obs)
     })
 
-    resultado_semanal <- data.table::rbindlist(lapply(avaliacao, "[[", "resultado_semanal"))
-    simulacao_semanal <- data.table::rbindlist(lapply(avaliacao, "[[", "simulacao_semanal"))
-    resultado_diario <- data.table::rbindlist(lapply(avaliacao, "[[", "resultado_diario"))
-    resultado_mensal <- data.table::rbindlist(lapply(avaliacao, "[[", "resultado_mensal"))
+    # 3) Combina cada componente apenas uma vez
+    resultado_diario   <- rbindlist(lapply(avaliacoes, `[[`, "resultado"))
+    resultado_semanal  <- rbindlist(lapply(avaliacoes, `[[`, "resultado_semanal"))
+    resultado_mensal   <- rbindlist(lapply(avaliacoes, `[[`, "resultado_mensal"))
+    simulacao_semanal  <- rbindlist(lapply(avaliacoes, `[[`, "simulacao_semanal"))
 
     write.table(resultado_diario, file = file.path(pasta_saida, 
                 "resultado_diario.csv"), row.names = FALSE, quote = FALSE, sep = ";")
