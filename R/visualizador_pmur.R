@@ -152,6 +152,48 @@ executa_visualizador_calibracao_pmur <- function(){
             ),
             shiny::tabPanel("Tabela info calibracao",
                 DT::dataTableOutput("info_calibracao")
+            ),
+            shiny::tabPanel("Validacao",
+                shiny::sidebarLayout(
+                    shiny::sidebarPanel(
+                        shiny::fluidRow(
+                            shiny::fileInput(inputId = "arquivo_previsao_prec", label = shiny::h3("Selecione o arquivo de precipitacao prevista")),
+                            shiny::fileInput(inputId = "arquivo_previsao_etp", label = shiny::h3("Selecione o arquivo de evapotranspiracao prevista"))
+                        ),
+                        shiny::hr(),
+                        shiny::fluidRow(
+                            shiny::column(4, shiny::numericInput(inputId = "Ebin_validacao", label = "Ebin", value = NULL)),
+                            shiny::column(3, shiny::numericInput(inputId = "Supin_validacao", label = "Supin", value = NULL)),
+                            shiny::column(4, shiny::numericInput(inputId = "Tuin_validacao", label = "Tuin", value = NULL))
+                        ),
+                        shiny::hr(),
+                        shiny::fluidRow(
+                            shiny::dateRangeInput(inputId = "periodo_simulacao_validacao", label = "Periodo de simulacao da validacao", start = NULL, end = NULL, min = NULL, max = NULL),
+                            shiny::dateRangeInput(inputId = "periodo_validacao", label = "Periodo de validacao", start = NULL, end = NULL, min = NULL, max = NULL)
+                        ),
+                        shiny::hr(),
+                        shiny::fluidRow(
+                            shiny::selectInput("discretizacao", "Discretizacao", choices = c("Diaria" = "diaria", "Semanal" = "semanal", "Mensal" = "mensal")),
+                            uiOutput("horizonte_ui")
+                        ),
+                        shiny::hr(),
+                        shiny::downloadButton("download_simulacao_validacao", "Download simulacao_validacao_sub_bacia.csv"),
+                        shiny::downloadButton("download_metricas_validacao", "Download  metricas_validacao_sub_bacia.csv")
+                    ),
+                    shiny::mainPanel(
+                        shiny::fluidRow(
+                            shiny::column(3, shiny::actionButton(inputId = "botao_validacao", label = "Executa validacao", class = "btn-lg btn-success"))
+                        ),
+                        shiny::fluidRow(
+                                shiny::tabPanel("Gráfico",
+                                dygraphs::dygraphOutput("grafico_dy")
+                            ),
+                                shiny::tabPanel("Tabela",
+                                shiny::tableOutput("tabela_metricas")
+                            )
+                        )
+                    )
+                )
             )
         )
     )
@@ -168,6 +210,23 @@ executa_visualizador_calibracao_pmur <- function(){
             }
             return(default_value)
         }
+
+        output$horizonte_ui <- renderUI({
+            switch(input$discretizacao,
+            diaria  = selectInput(
+                        "horizonte", "Horizonte", 
+                        choices = 0:42, selected = 0
+                        ),
+            semanal = selectInput(
+                        "horizonte", "Horizonte", 
+                        choices = 1:6, selected = 1
+                        ),
+            mensal  = selectInput(
+                        "horizonte", "Horizonte", 
+                        choices = 1, selected = 1
+                        )
+            )
+        })
 
 
         shiny::observeEvent(input$sub_bacia, {
@@ -194,6 +253,11 @@ executa_visualizador_calibracao_pmur <- function(){
                 shiny::updateNumericInput(session, "Ebin", value = get_param_value("Ebin", vazao$valor[1] * 0.3, parametros_posto, "valor"))
                 shiny::updateNumericInput(session, "Supin", value = get_param_value("Supin", vazao$valor[1] * 0.7, parametros_posto, "valor"))
                 shiny::updateNumericInput(session, "Tuin", value = get_param_value("Tuin", 0.3, parametros_posto, "valor"))
+
+                shiny::updateNumericInput(session, "Ebin_validacao", value = get_param_value("Ebin", vazao$valor[1] * 0.3, parametros_posto, "valor"))
+                shiny::updateNumericInput(session, "Supin_validacao", value = get_param_value("Supin", vazao$valor[1] * 0.7, parametros_posto, "valor"))
+                shiny::updateNumericInput(session, "Tuin_validacao", value = get_param_value("Tuin", 0.3, parametros_posto, "valor"))
+
 
                 shiny::updateNumericInput(session, "str", value = vetor_modelo[1])
                 shiny::updateNumericInput(session, "k2t", value = vetor_modelo[2])
@@ -257,6 +321,10 @@ executa_visualizador_calibracao_pmur <- function(){
                 data_final_simulacao <- data_maximo
                 data_inicio_objetivo <- data_minimo
                 data_final_objetivo <- data_maximo
+                data_inicio_simulacao_validacao <- data_minimo
+                data_final_simulacao_validacao <- data_maximo
+                data_inicio_objetivo_validacao <- data_minimo
+                data_final_objetivo_validacao <- data_maximo
 
                 periodos <- periodos()
                 if (nrow(periodos) > 0) {
@@ -288,10 +356,40 @@ executa_visualizador_calibracao_pmur <- function(){
                             data_final_objetivo <- data_maximo
                         }
                     }
+                    if (nrow(periodos[parametro == "data_inicio_simulacao_validacao"]) > 0) {
+                        if (periodos[parametro == "data_inicio_simulacao_validacao", valor] <= data_maximo) {
+                            data_inicio_simulacao_validacao <- periodos[parametro == "data_inicio_simulacao_validacao", valor]
+                        } else {
+                            data_inicio_simulacao_validacao <- data_minimo
+                        }
+                    }
+                    if (nrow(periodos[parametro == "data_final_simulacao_validacao"]) > 0) {
+                        if (periodos[parametro == "data_final_simulacao_validacao", valor] <= data_maximo) {
+                            data_final_simulacao_validacao <- periodos[parametro == "data_final_simulacao_validacao", valor]
+                        } else {
+                            data_final_simulacao_validacao <- data_maximo
+                        }
+                    }
+                    if (nrow(periodos[parametro == "data_inicio_objetivo_validacao"]) > 0) {
+                        if (periodos[parametro == "data_inicio_objetivo_validacao", valor] <= data_maximo) {
+                            data_inicio_objetivo_validacao <- periodos[parametro == "data_inicio_objetivo_validacao", valor]
+                        } else {
+                            data_inicio_objetivo_validacao <- data_minimo
+                        }
+                    }
+                    if (nrow(periodos[parametro == "data_final_objetivo_validacao"]) > 0) {
+                        if (periodos[parametro == "data_final_objetivo_validacao", valor] <= data_maximo) {
+                            data_final_objetivo_validacao <- periodos[parametro == "data_final_objetivo_validacao", valor]
+                        } else {
+                            data_final_objetivo_validacao <- data_maximo
+                        }
+                    }
                 }
                 
                 shiny::updateDateRangeInput(session, "periodo_simulacao", start = data_inicio_simulacao, end = data_final_simulacao, min = data_minimo, max = data_maximo)
                 shiny::updateDateRangeInput(session, "periodo_calibracao", start = data_inicio_objetivo, end = data_final_objetivo, min = data_minimo, max = data_maximo)
+                shiny::updateDateRangeInput(session, "periodo_simulacao_validacao", start = data_inicio_simulacao_validacao, end = data_final_simulacao_validacao, min = data_minimo, max = data_maximo)
+                shiny::updateDateRangeInput(session, "periodo_validacao", start = data_inicio_objetivo_validacao, end = data_final_objetivo_validacao, min = data_minimo, max = data_maximo)
                 shiny::updateDateRangeInput(session, "zoom_calibracao", start = data_inicio_simulacao, end = data_final_simulacao, min = data_minimo, max = data_maximo)
             }
         })
@@ -722,6 +820,10 @@ executa_visualizador_calibracao_pmur <- function(){
             shinyjs::toggleState(id = "botao_calibracao", condition = !disable_button())
         })
 
+        shiny::observe({
+            shinyjs::toggleState(id = "botao_validacao", condition = !disable_button())
+        })
+
         output$grafico_kts <- plotly::renderPlotly({
             vetor_modelo <- vetor_modelo()
             vetor_modelo[16] <- input$alfa
@@ -948,6 +1050,10 @@ executa_visualizador_calibracao_pmur <- function(){
                         calcula_funcao_objetivo <- calcula_mape
                     } else if (input$funcao_objetivo == "kge") {
                         calcula_funcao_objetivo <- calcula_kge
+                    } else if (input$funcao_objetivo == "dr") {
+                        calcula_funcao_objetivo <- calcula_dr
+                    } else if (input$funcao_objetivo == "mcrps") {
+                        calcula_funcao_objetivo <- calcula_mcrps
                     }
 
                     funcao_objetivo <- calcula_funcao_objetivo(saida()[data >= data_inicio_objetivo & data <= data_fim_objetivo, Qcalc], vazao_fo[, valor], vazao_fo[, peso])
@@ -1022,6 +1128,8 @@ executa_visualizador_calibracao_pmur <- function(){
                     metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "pbias", valor = calcula_pbias(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
                     metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "correl", valor = calcula_correlacao(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
                     metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "kge", valor = calcula_kge(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
+                    metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "dr", valor = calcula_dr(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
+                    metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "mcrps", valor = calcula_mcrps(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
                     metricas        
                 }
             }
@@ -1283,6 +1391,200 @@ executa_visualizador_calibracao_pmur <- function(){
             })
         })
 
+        # Armazenar resultados em reactiveValues
+        resultados <- shiny::reactiveValues(
+            previsao = NULL,
+            simulacao_semanal = NULL,
+            resultado_diario = NULL,
+            resultado_semanal = NULL,
+            resultado_mensal = NULL
+        )
+
+        shiny::observeEvent(input$botao_validacao,{
+            parametros <- parametros_posto()
+            parametros$valor[parametros$parametro == "Str"] <- input$str
+            parametros$valor[parametros$parametro == "K2t"] <- input$k2t
+            parametros$valor[parametros$parametro == "Crec"] <- input$crec
+            parametros$valor[parametros$parametro == "Capc"] <- input$capc
+            parametros$valor[parametros$parametro == "K_kt"] <- input$k_kt
+            parametros$valor[parametros$parametro == "H1"] <- input$h1
+            parametros$valor[parametros$parametro == "K2t2"] <- input$k2t2
+            parametros$valor[parametros$parametro == "Lambda"] <- input$lambda
+            parametros$valor[parametros$parametro == "H"] <- input$h
+            parametros$valor[parametros$parametro == "K1t"] <- input$k1t
+            parametros$valor[parametros$parametro == "K3t"] <- input$k3t
+            parametros$valor[parametros$parametro == "Pcof"] <- input$pcof
+            parametros$valor[parametros$parametro == "Ecof"] <- input$ecof
+            parametros$valor[parametros$parametro == "Ecof2"] <- input$ecof2
+            parametros$valor[parametros$parametro == "Area"] <- area()
+            parametros$valor[parametros$parametro == "ktMin"] <- input$kt_min
+            parametros$valor[parametros$parametro == "ktMax"] <- input$kt_max
+            if (nrow(parametros[parametros$parametro == "Pmur"]) == 0){
+                parametros <- data.table::rbindlist(list(parametros, data.table::data.table(nome = parametros[, unique(nome)], 
+                            parametro = "Pmur", valor = input$pmur, limite_inferior = input$limite_inferior_pmur, limite_superior = input$limite_superior_pmur)))
+            } else {
+                parametros$valor[parametros$parametro == "Pmur"] <- input$pmur
+                parametros$limite_inferior[parametros$parametro == "Pmur"] <- input$limite_inferior_pmur
+                parametros$limite_superior[parametros$parametro == "Pmur"] <- input$limite_superior_pmur
+            }
+
+            kt <- cria_kt(input$kt_max, input$kt_min, input$alfa, input$beta)
+            parametros$valor[parametros$parametro %in% paste0("Kt", 2:-60)] <- kt
+
+            inicializacao <- cria_inicializacao(nome  = unique(parametros$nome),
+                              Ebin = input$Ebin_validacao,
+                              Supin = input$Supin_validacao,
+                              Tuin = input$Tuin_validacao)
+
+            data_inicio_objetivo <- input$periodo_validacao[1]
+            data_fim_objetivo <- input$periodo_validacao[2]
+            kt_max <- input$kt_max
+            kt_min <- input$kt_min
+            data_inicio_simulacao <- input$periodo_simulacao_validacao[1] 
+            data_fim_simulacao <- input$periodo_simulacao_validacao[2]
+            data_inicio_simulacao <- data_inicio_simulacao
+            data_fim_simulacao <- data_fim_simulacao
+
+            vazao <- vazao_posto()
+            evapotranspiracao <- evapotranspiracao_posto()
+            precipitacao_observada <- precipitacao_posto()
+            postos_plu <- postos_plu()
+
+            datas_rodadas <- cria_datas(data_inicio_simulacao, data_fim_simulacao)
+
+            precipitacao_prevista <- data.table::copy(precipitacao_observada)
+            precipitacao_observada <- precipitacao_observada
+            precipitacao_observada <- ponderacao_espacial(precipitacao_observada, postos_plu)
+
+            evapotranspiracao_observada <- data.table::data.table(evapotranspiracao)
+            colnames(evapotranspiracao_observada)[2] <- "posto"
+
+            vazao_observada <- vazao
+            
+            precipitacao_prevista <- ponderacao_espacial(precipitacao_prevista, postos_plu)
+            precipitacao_prevista <- transforma_historico_previsao(precipitacao_prevista, datas_rodadas)
+
+            evapotranspiracao_prevista <- data.table::copy(evapotranspiracao_observada)
+            colnames(evapotranspiracao_prevista)[2] <- "nome"
+            evapotranspiracao_prevista <- transforma_historico_previsao(evapotranspiracao_prevista, datas_rodadas)
+            # Disable the run button
+            shiny::updateActionButton(session, "botao_validacao", label = "Validando...aguarde")
+            disable_button(TRUE)
+            shinyjs::disable("botao_validacao")
+            
+            # Execute the long-running function asynchronously
+            par <- future::future({
+                saida <- rodada_encadeada_pmur_etp(parametros,
+                    inicializacao, precipitacao_observada, precipitacao_prevista,
+                    evapotranspiracao_observada,
+                    evapotranspiracao_prevista, vazao_observada,
+                    postos_plu, datas_rodadas, unique(parametros$nome))
+            }, seed = TRUE)
+            
+            obs_r <- shiny::observeEvent(future::resolved(par), {
+                if (future::resolved(par)) {
+                    disable_button(FALSE)
+                    shinyjs::enable("botao_validacao")
+                    shiny::updateActionButton(session, "botao_validacao", label = "Executa validacao")
+
+                    previsao <- data.table::as.data.table(future::value(par)$previsao)
+                
+                    previsao <- previsao[variavel == "Qcalc"]
+                    previsao <- previsao[data_caso >= data_inicio_objetivo &
+                                        data_caso <= data_fim_objetivo]
+
+                    resultados$previsao <- as.data.table(previsao)
+                    avaliacoes <- lapply(sub_bacias, function(sb) {
+                        obs <- vazao_observada
+                        analisa_previsoes(resultados$previsao, obs)
+                    })
+                    resultados$simulacao_semanal <- rbindlist(lapply(avaliacoes, `[[`, "simulacao_semanal"))
+                    resultados$resultado  <- rbindlist(lapply(avaliacoes, `[[`, "resultado"))
+                    
+                }
+                
+            }, once = TRUE)             
+        })
+
+        # Tabela reativa conforme selecao
+        tabela_sel <- shiny::reactive({
+            shiny::req(resultados$previsao)
+            dt <- data.table::copy(resultados$resultado)
+            dt <- dt[discretizacao == input$discretizacao]
+            # Filtra métrica
+            dt <- dt[horizonte == input$horizonte]
+        })
+        
+        output$tabela_metricas <- shiny::renderTable({
+            shiny::req(resultados$previsao)
+            tabela_sel()
+        })
+
+        # Gráfico com dygraphs
+        grafico_xts <- shiny::reactive({
+            shiny::req(resultados$previsao)
+            
+            # --- 1) Merge previsão + observação (como antes) ---
+            dtp <- data.table::copy(resultados$previsao)[, vazao_prevista := valor
+            ][, horizonte := as.integer(data_previsao - data_caso)]
+            obs <- data.table::copy(vazao_posto())[, vazao_observada := valor]
+
+            m <- merge(
+                dtp, obs,
+                by.x = c("data_previsao","nome"),
+                by.y = c("data","posto"),
+                all.x = TRUE
+            )
+
+            # --- 2) Defino o tamanho da janela em dias ---
+            tamanho <- switch(
+                input$discretizacao,
+                diario  = 1,
+                semanal = 7,
+                mensal  = 30
+            )
+
+            # --- 3) Para cada linha, calcule o horizonte em que ela cai ---
+            #  horizon_calc = 1 se horizonte ∈ [1,tamanho],
+            #                2 se horizonte ∈ [tamanho+1,2*tamanho], etc.
+            m[, horizon_calc := floor(horizonte / tamanho) + 1]
+
+            # --- 4) Filtra apenas o horizonte escolhido ---
+            if (input$discretizacao == "diaria") {
+                # diário: filtra exatamente o horizonte (0,1,2,…)
+                m_sel <- m[horizonte == input$horizonte]
+            } else {
+                # semanal ou mensal: usa a janela que agrupa horizonte=0..tamanho-1 em horizon_calc=1, etc.
+                m_sel <- m[horizon_calc == input$horizonte]
+            }
+
+            # --- 5) (Opcional) Agregue por data_caso se quiser médias ---
+            resumo <- m_sel[
+            , .(
+                vazao_observada  = mean(vazao_observada, na.rm = TRUE),
+                vazao_prevista = mean(vazao_prevista, na.rm = TRUE),
+                n         = .N
+            ),
+            by = .(data_caso)
+            ]
+   
+            xts::xts(resumo[, .(data_caso, vazao_prevista, vazao_observada)], order.by = resumo$data_caso)
+        })
+        
+        output$grafico_dy <- dygraphs::renderDygraph({
+            shiny::req(resultados$previsao)
+            dygraphs::dygraph(grafico_xts(),
+                                main = input$sub_bacia) %>%
+            dygraphs::dyHighlight(highlightCircleSize = 5,
+                                highlightSeriesBackgroundAlpha = 0.2,
+                                hideOnMouseOut = FALSE,
+                                highlightSeriesOpts = list(strokeWidth = 2)) %>% 
+            dygraphs::dyRangeSelector() %>%
+            dygraphs::dyAxis("y", label = "Vazao (m3/s)", independentTicks = TRUE) %>%
+            dygraphs::dySeries("vazao_observada", color = "#0000FF")  %>%
+            dygraphs::dySeries("vazao_prevista", color = "#FF0000")
+        })
+
         parametros_exportacao <- shiny::reactive({
             parametros <- parametros_posto()
 
@@ -1461,6 +1763,24 @@ executa_visualizador_calibracao_pmur <- function(){
             },
             content = function(file) {
                 utils::write.table(saida(), file, quote = FALSE, row.names = FALSE, sep = ";")
+            }
+        )
+
+        output$download_simulacao_validacao <- shiny::downloadHandler(
+            filename = function() {
+                paste0("simulacao_validacao_", input$sub_bacia, ".csv")
+            },
+            content = function(file) {
+                utils::write.table(resultados$previsao, file, quote = FALSE, row.names = FALSE, sep = ";")
+            }
+        )
+
+        output$download_metricas_validacao <- shiny::downloadHandler(
+            filename = function() {
+                paste0("metricas_validacao_", input$sub_bacia, ".csv")
+            },
+            content = function(file) {
+                utils::write.table(resultados$resultado, file, quote = FALSE, row.names = FALSE, sep = ";")
             }
         )
     }

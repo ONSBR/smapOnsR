@@ -227,11 +227,13 @@ analisa_previsoes <- function(simulacao, observacao, semanal = TRUE, mensal = TR
     }
     nomes <- c("PBIAS", "NSE", "MAPE", "DM")
     resultado[, metrica := rep(nomes, numero_dias)]
-    resultado[, dia_previsao := rep(dia_minimo:dia_maximo, each = 4)]
+    resultado[, horizonte := rep(dia_minimo:dia_maximo, each = 4)]
     resultado[, nome := rep(unique(simulacao[, nome]), numero_dias * 4)]
+    resultado[, discretizacao := 'diaria']
     colnames(resultado)[1] <- "valor"
-    data.table::setcolorder(resultado, c("nome", "metrica", "valor", "dia_previsao"))
+    data.table::setcolorder(resultado, c("nome", "metrica", "valor", "discretizacao", "horizonte"))
 
+    resultado_semanal <- data.table::data.table()
     if (semanal) {
         merged_data <- merge(simulacao, observacao, by = "data")
         data.table::setorder(merged_data, data_caso, data)
@@ -247,7 +249,7 @@ analisa_previsoes <- function(simulacao, observacao, semanal = TRUE, mensal = TR
         # Step 3: Calculate weekly mean and count
         simulacao_semanal <- merged_data[, .(previsao_semanal = mean(valor.x), observacao_semanal = mean(valor.y), count = .N), by = .(data_caso, numero_semana, nome)]
 
-        resultado_semanal <- data.table::data.table()
+        
         for (isemana in unique(simulacao_semanal[, numero_semana])){
             prev <- simulacao_semanal[numero_semana == isemana, previsao_semanal]
             obs <- simulacao_semanal[numero_semana == isemana, observacao_semanal]
@@ -261,15 +263,15 @@ analisa_previsoes <- function(simulacao, observacao, semanal = TRUE, mensal = TR
             resultado_semanal <- rbind(resultado_semanal, DM)
         }
         resultado_semanal[, metrica := rep(nomes, ceiling(dia_maximo / 7))]
-        resultado_semanal[, numero_semana := rep(1:ceiling(dia_maximo / 7), each = 4)]
+        resultado_semanal[, horizonte := rep(1:ceiling(dia_maximo / 7), each = 4)]
         resultado_semanal[, nome := rep(unique(simulacao[, nome]), ceiling(dia_maximo / 7) * 4)]
+        resultado_semanal[, discretizacao := 'semanal']
         colnames(resultado_semanal)[1] <- "valor"
-        data.table::setcolorder(resultado_semanal, c("nome", "metrica", "valor", "numero_semana"))
+        data.table::setcolorder(resultado_semanal, c("nome", "metrica", "valor", "discretizacao", "horizonte"))
     }
-    
-    if (mensal) {
-      resultado_mensal <- data.table::data.table()
-      
+
+    resultado_mensal <- data.table::data.table()
+    if (mensal) {      
       prev <- simulacao_semanal[numero_semana %in% c(1,4), mean(previsao_semanal), by = data_caso]
       obs <- simulacao_semanal[numero_semana  %in% c(1,4), mean(observacao_semanal), by = data_caso]
       PBIAS <- smapOnsR::calcula_pbias(prev$V1, obs$V1)
@@ -283,9 +285,14 @@ analisa_previsoes <- function(simulacao, observacao, semanal = TRUE, mensal = TR
 
       resultado_mensal[, metrica := nomes]
       resultado_mensal[, nome := rep(unique(simulacao[, nome]), length(nomes))]
+      resultado_mensal[, discretizacao := 'mensal']
+      resultado_mensal[, horizonte := 1]
+      colnames(resultado_mensal)[1] <- "valor"
+      data.table::setcolorder(resultado_mensal, c("nome", "metrica", "valor", "discretizacao", "horizonte"))
     }
+    resultado <- data.table::rbindlist(list(resultado, resultado_semanal, resultado_mensal),
+     use.names = TRUE, fill = TRUE)
     
-    saida <- list(resultado = resultado, resultado_semanal = resultado_semanal, simulacao_semanal = simulacao_semanal,
-                  resultado_mensal = resultado_mensal)
+    saida <- list(resultado = resultado, simulacao_semanal = simulacao_semanal)
     saida
 }
