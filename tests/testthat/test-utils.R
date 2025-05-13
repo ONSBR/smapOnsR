@@ -163,7 +163,7 @@ test_that("Parâmetros fixos customizados são aplicados", {
 test_that("Erro quando falta vetores obrigatórios", {
   expect_error(
     cria_inicializacao(nome = "a", Ebin = 1, Supin = 2),
-    "precisar fornecer 'nome', 'Ebin', 'Supin' e 'Tuin'"
+    "Se 'parametros' for NULL, fornecer 'nome', 'Ebin', 'Supin' e 'Tuin'."
   )
 })
 
@@ -175,7 +175,7 @@ test_that("Erro quando vetores têm comprimentos diferentes", {
       Supin = c(4, 5),
       Tuin  = c(6, 7)
     ),
-    "devem ter o mesmo comprimento"
+    "'nome', 'Ebin', 'Supin' e 'Tuin' devem ter mesmo comprimento."
   )
 })
 
@@ -183,6 +183,6 @@ test_that("Erro quando data.table não tem colunas esperadas", {
   dt_bad <- data.table(foo = 1, bar = 2)
   expect_error(
     cria_inicializacao(parametros = dt_bad),
-    "deve ter colunas 'nome', 'parametro' e 'valor'"
+    "O data.table 'parametros' deve ter colunas 'nome','parametro','valor'."
   )
 })
