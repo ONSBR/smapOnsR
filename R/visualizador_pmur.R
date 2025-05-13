@@ -1050,10 +1050,6 @@ executa_visualizador_calibracao_pmur <- function(){
                         calcula_funcao_objetivo <- calcula_mape
                     } else if (input$funcao_objetivo == "kge") {
                         calcula_funcao_objetivo <- calcula_kge
-                    } else if (input$funcao_objetivo == "dr") {
-                        calcula_funcao_objetivo <- calcula_dr
-                    } else if (input$funcao_objetivo == "mcrps") {
-                        calcula_funcao_objetivo <- calcula_mcrps
                     }
 
                     funcao_objetivo <- calcula_funcao_objetivo(saida()[data >= data_inicio_objetivo & data <= data_fim_objetivo, Qcalc], vazao_fo[, valor], vazao_fo[, peso])
