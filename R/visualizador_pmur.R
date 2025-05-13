@@ -1124,8 +1124,6 @@ executa_visualizador_calibracao_pmur <- function(){
                     metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "pbias", valor = calcula_pbias(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
                     metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "correl", valor = calcula_correlacao(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
                     metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "kge", valor = calcula_kge(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
-                    metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "dr", valor = calcula_dr(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
-                    metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "mcrps", valor = calcula_mcrps(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
                     metricas        
                 }
             }
