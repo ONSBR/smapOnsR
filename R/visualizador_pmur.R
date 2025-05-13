@@ -174,7 +174,7 @@ executa_visualizador_calibracao_pmur <- function(){
                         shiny::hr(),
                         shiny::fluidRow(
                             shiny::selectInput("discretizacao", "Discretizacao", choices = c("Diaria" = "diaria", "Semanal" = "semanal", "Mensal" = "mensal")),
-                            uiOutput("horizonte_ui")
+                            shiny::uiOutput("horizonte_ui")
                         ),
                         shiny::hr(),
                         shiny::downloadButton("download_simulacao_validacao", "Download simulacao_validacao_sub_bacia.csv"),
@@ -211,17 +211,17 @@ executa_visualizador_calibracao_pmur <- function(){
             return(default_value)
         }
 
-        output$horizonte_ui <- renderUI({
+        output$horizonte_ui <- shiny::renderUI({
             switch(input$discretizacao,
-            diaria  = selectInput(
+            diaria  = shiny::selectInput(
                         "horizonte", "Horizonte", 
                         choices = 0:42, selected = 0
                         ),
-            semanal = selectInput(
+            semanal = shiny::selectInput(
                         "horizonte", "Horizonte", 
                         choices = 1:6, selected = 1
                         ),
-            mensal  = selectInput(
+            mensal  = shiny::selectInput(
                         "horizonte", "Horizonte", 
                         choices = 1, selected = 1
                         )
