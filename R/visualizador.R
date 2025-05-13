@@ -1164,21 +1164,28 @@ executa_visualizador_calibracao <- function(){
 #'     }
 #' @export
 
-executa_visualizador_previsao <- function(previsoes, assimilacao, precipitacao, funcao_objetivo){
+executa_visualizador_previsao <- function(){
     `%>%` <- magrittr::`%>%`
     
     ui_previsao <- shiny::fluidPage(
         shinyjs::useShinyjs(),
         shiny::titlePanel("Visualizador de cenarios do SMAP/ONS"),
         shiny::tabsetPanel(
+            shiny::tabPanel("Dados",
+                shiny::fileInput(inputId = "arquivo_previsao", label = shiny::h3("Selecione o arquivo de previsao de vazao")),
+                shiny::fileInput(inputId = "arquivo_precipitacao", label = shiny::h3("Selecione o arquivo de precipitacao")),
+                shiny::fileInput(inputId = "arquivo_assimilacao", label = shiny::h3("Selecione o arquivo de assimilacao")),
+                shiny::fileInput(inputId = "arquivo_funcao_objetivo", label = shiny::h3("Selecione o arquivo de funcao objetivo")),
+                shiny::fileInput(inputId = "arquivo_vazao_observada", label = shiny::h3("Selecione o arquivo de vazao observada"))
+            ),
             shiny::tabPanel("Cenarios SMAP/ONS",
                 shiny::sidebarLayout(
                     shiny::sidebarPanel(
                         shiny::fluidRow(
                             shiny::selectInput("data_caso", shiny::h3("Data do Caso"), 
-                            choices = unique(previsoes[, data_caso]), selected = NULL),
+                            choices = NULL),
                             shiny::selectInput("sub_bacia", shiny::h3("Sub-bacia"), 
-                            choices = unique(previsoes[, nome]), selected = NULL),
+                            choices = NULL),
                         )
                     ),
                     shiny::mainPanel(
@@ -1194,25 +1201,135 @@ executa_visualizador_previsao <- function(previsoes, assimilacao, precipitacao, 
             ),
             shiny::tabPanel("Tabela Assimilacao",
                 DT::dataTableOutput("tabela_assimilacao")
+            ),
+            shiny::tabPanel("Análise completa",
+                shiny::sidebarLayout(
+                    shiny::sidebarPanel(
+                        shiny::fluidRow(
+                            shiny::selectInput("sub_bacia_analise", shiny::h3("Sub-bacia"), 
+                            choices = NULL),
+                        ),
+                        shiny::fluidRow(
+                            shiny::dateRangeInput(inputId = "periodo_validacao", label = "Periodo de validacao", start = NULL, end = NULL, min = NULL, max = NULL)
+                        ),
+                        shiny::hr(),
+                        shiny::fluidRow(
+                            shiny::selectInput("discretizacao", "Discretizacao", choices = c("Diaria" = "diaria", "Semanal" = "semanal", "Mensal" = "mensal")),
+                            shiny::uiOutput("horizonte_ui")
+                        )
+                    ),
+                    shiny::mainPanel(
+                        shiny::fluidRow(
+                                shiny::tabPanel("Gráfico",
+                                dygraphs::dygraphOutput("grafico_dy")
+                            ),
+                                shiny::tabPanel("Tabela",
+                                shiny::tableOutput("tabela_metricas")
+                            )
+                        )
+                    )
+                )
             )
         )
     )
 
     servidor_previsao <- function(input, output, session) {
 
+        shiny::observeEvent(input$sub_bacia_analise, {
+            arquivo_previsao <- input$arquivo_previsao
+            arquivo_vazao_observada <- input$arquivo_vazao_observada
+            if (!is.null(arquivo_previsao) & !is.null(arquivo_vazao_observada)) {
+                previsao <- data.table::copy(previsao())
+                data_minimo <- min(previsao$data_caso)
+                data_maximo <- max(previsao$data_caso)
+                shiny::updateDateRangeInput(session, "periodo_validacao", 
+                    start = data_minimo, 
+                    end = data_maximo, min = data_minimo, 
+                    max = data_maximo)
+            }
+        })
+
+        previsao <- shiny::reactive({
+            arquivo_previsao <- input$arquivo_previsao$datapath
+            if (!is.null(arquivo_previsao)) {
+                previsao <- data.table::fread(arquivo_previsao)
+                return(previsao)
+            }
+        })
+
+        assimilacao <- shiny::reactive({
+            arquivo_assimilacao <- input$arquivo_assimilacao$datapath
+            if (!is.null(arquivo_assimilacao)) {
+                assimilacao <- data.table::fread(arquivo_assimilacao)
+                return(assimilacao)
+            }
+        })
+
+        vazao_observada <- shiny::reactive({
+            arquivo_vazao_observada <- input$arquivo_vazao_observada$datapath
+            if (!is.null(arquivo_vazao_observada)) {
+                vazao_observada <- le_historico_verificado(arquivo_vazao_observada)
+                return(vazao_observada)
+            }
+        })
+
+        funcao_objetivo <- shiny::reactive({
+            arquivo_funcao_objetivo <- input$arquivo_funcao_objetivo$datapath
+            if (!is.null(arquivo_funcao_objetivo)) {
+                funcao_objetivo <- data.table::fread(arquivo_funcao_objetivo)
+                return(funcao_objetivo)
+            }
+        })
+
+        precipitacao <- shiny::reactive({
+            arquivo_precipitacao <- input$arquivo_precipitacao$datapath
+            if (!is.null(arquivo_precipitacao)) {
+                precipitacao <- data.table::fread(arquivo_precipitacao)
+                return(precipitacao)
+            }
+        })
+
+        shiny::observeEvent(previsao(), {
+            shiny::updateSelectInput(session, "data_caso",
+                choices = sort(unique(previsao()$data_caso)))
+            shiny::updateSelectInput(session, "sub_bacia",
+                choices = sort(unique(previsao()$nome)))
+            shiny::updateSelectInput(session, "sub_bacia_analise",
+                choices = sort(unique(previsao()$nome)))
+        })
+
+        output$horizonte_ui <- shiny::renderUI({
+            switch(input$discretizacao,
+            diaria  = shiny::selectInput(
+                        "horizonte", "Horizonte", 
+                        choices = 0:42, selected = 0
+                        ),
+            semanal = shiny::selectInput(
+                        "horizonte", "Horizonte", 
+                        choices = 1:6, selected = 1
+                        ),
+            mensal  = shiny::selectInput(
+                        "horizonte", "Horizonte", 
+                        choices = 1, selected = 1
+                        )
+            )
+        })
+
         previsoes_sub_bacia <- shiny::reactive({
-            previsoes[nome == input$sub_bacia & data_caso == input$data_caso]
+            previsoes <- data.table::copy(previsao())
+            previsoes <- previsoes[nome == input$sub_bacia & data_caso == input$data_caso]
             previsoes
         })
 
         precipitacao_sub_bacia <- shiny::reactive({
-            precipitacao[nome == input$sub_bacia & data_rodada == input$data_caso]
+            precipitacao <- data.table::copy(precipitacao())
+            precipitacao <- precipitacao[nome == input$sub_bacia & data_rodada == input$data_caso]
             precipitacao
         })
 
-        output$tabela_previsao <- DT::renderDataTable(previsoes)
+        output$tabela_previsao <- DT::renderDataTable(previsao())
 
-        output$tabela_assimilacao <- DT::renderDataTable(assimilacao)
+        output$tabela_assimilacao <- DT::renderDataTable(assimilacao())
 
         output$plotly <- plotly::renderPlotly({
             formata_label <- function(breaks) formatC(breaks, format = "d", width = 6, flag = " ")
@@ -1308,8 +1425,112 @@ executa_visualizador_previsao <- function(previsoes, assimilacao, precipitacao, 
         output$tabela <- DT::renderDataTable(previsoes)
 
         output$funcao_objetivo <- shiny::renderText({
+            funcao_objetivo <- funcao_objetivo()
             paste0("funcao objetivo = ", funcao_objetivo$funcao_objetivo[(funcao_objetivo$nome == input$sub_bacia) & (funcao_objetivo$data_caso == input$data_caso)])
         })
+
+        resultados <- shiny::reactive({
+            previsao <- data.table::copy(previsao())
+            vazao_observada <- data.table::copy(vazao_observada())
+            shiny::req(previsao)
+            shiny::req(vazao_observada)
+            
+            data_inicio_objetivo <- input$periodo_validacao[1]
+            data_fim_objetivo <- input$periodo_validacao[2]
+            
+            previsao <- previsao[variavel == "Qcalc"]
+            previsao <- previsao[data_caso >= data_inicio_objetivo &
+                                data_caso <= data_fim_objetivo]
+            obs <- vazao_observada[posto == unique(previsao$nome)]
+            avaliacoes <- lapply(unique(previsao$nome), function(sb) {
+                obs <- vazao_observada[posto == sb]
+                analisa_previsoes(previsao[nome == sb], obs)
+            })
+            resultados <- rbindlist(lapply(avaliacoes, `[[`, "resultado"))
+            return(resultados)
+        })        
+
+        # Tabela reativa conforme selecao
+        tabela_sel <- shiny::reactive({
+            shiny::req(resultados())
+            dt <- resultados()
+            dt <- dt[discretizacao == input$discretizacao &
+                     horizonte == input$horizonte &
+                     nome == input$sub_bacia_analise]
+            dt
+        })
+
+        output$tabela_metricas <- shiny::renderTable({
+            shiny::req(resultados())
+            tabela_sel()
+        })
+
+        # Gráfico com dygraphs
+        grafico_xts <- shiny::reactive({
+            shiny::req(resultados())
+            vazao_observada <- data.table::copy(vazao_observada())
+            vazao_posto <- vazao_observada[posto == input$sub_bacia_analise]
+            # --- 1) Merge previsão + observação (como antes) ---
+            dtp <- data.table::copy(previsao())[, vazao_prevista := valor
+            ][, horizonte := as.integer(data_previsao - data_caso)]
+            dtp <- dtp[nome == input$sub_bacia_analise]
+            obs <- data.table::copy(vazao_posto)[, vazao_observada := valor]
+
+            m <- merge(
+                dtp, obs,
+                by.x = c("data_previsao","nome"),
+                by.y = c("data","posto"),
+                all.x = TRUE
+            )
+
+            # --- 2) Defino o tamanho da janela em dias ---
+            tamanho <- switch(
+                input$discretizacao,
+                diario  = 1,
+                semanal = 7,
+                mensal  = 30
+            )
+
+            # --- 3) Para cada linha, calcule o horizonte em que ela cai ---
+            #  horizon_calc = 1 se horizonte ∈ [1,tamanho],
+            #                2 se horizonte ∈ [tamanho+1,2*tamanho], etc.
+            m[, horizon_calc := floor(horizonte / tamanho) + 1]
+
+            # --- 4) Filtra apenas o horizonte escolhido ---
+            if (input$discretizacao == "diaria") {
+                # diário: filtra exatamente o horizonte (0,1,2,…)
+                m_sel <- m[horizonte == input$horizonte]
+            } else {
+                # semanal ou mensal: usa a janela que agrupa horizonte=0..tamanho-1 em horizon_calc=1, etc.
+                m_sel <- m[horizon_calc == input$horizonte]
+            }
+
+            # --- 5) (Opcional) Agregue por data_caso se quiser médias ---
+            resumo <- m_sel[
+            , .(
+                vazao_observada  = mean(vazao_observada, na.rm = TRUE),
+                vazao_prevista = mean(vazao_prevista, na.rm = TRUE),
+                n         = .N
+            ),
+            by = .(data_caso)
+            ]
+            xts::xts(resumo[, .(as.Date(data_caso), vazao_prevista, vazao_observada)], order.by = as.Date(resumo$data_caso))
+        })
+        
+        output$grafico_dy <- dygraphs::renderDygraph({
+            shiny::req(resultados())
+            dygraphs::dygraph(grafico_xts(),
+                                main = input$sub_bacia) %>%
+            dygraphs::dyHighlight(highlightCircleSize = 5,
+                                highlightSeriesBackgroundAlpha = 0.2,
+                                hideOnMouseOut = FALSE,
+                                highlightSeriesOpts = list(strokeWidth = 2)) %>% 
+            dygraphs::dyRangeSelector() %>%
+            dygraphs::dyAxis("y", label = "Vazao (m3/s)", independentTicks = TRUE) %>%
+            dygraphs::dySeries("vazao_observada", color = "#0000FF")  %>%
+            dygraphs::dySeries("vazao_prevista", color = "#FF0000")
+        })
+
 
     }
 
