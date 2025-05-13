@@ -178,6 +178,9 @@ executa_visualizador_calibracao_pmur <- function(){
                         ),
                         shiny::hr(),
                         shiny::downloadButton("download_simulacao_validacao", "Download simulacao_validacao_sub_bacia.csv"),
+                        shiny::downloadButton("download_assimilacao_validacao", "Download assimilacao_validacao_sub_bacia.csv"),
+                        shiny::downloadButton("download_precipitacao_validacao", "Download  precipitacao_validacao_sub_bacia.csv"),
+                        shiny::downloadButton("download_funcao_objetivo_validacao", "Download funcao_objetivo_validacao_sub_bacia.csv"),
                         shiny::downloadButton("download_metricas_validacao", "Download  metricas_validacao_sub_bacia.csv")
                     ),
                     shiny::mainPanel(
@@ -1389,9 +1392,10 @@ executa_visualizador_calibracao_pmur <- function(){
         resultados <- shiny::reactiveValues(
             previsao = NULL,
             simulacao_semanal = NULL,
-            resultado_diario = NULL,
-            resultado_semanal = NULL,
-            resultado_mensal = NULL
+            resultados = NULL,
+            assimilacao = NULL,
+            funcao_objetivo = NULL,
+            precipitacao = NULL
         )
 
         shiny::observeEvent(input$botao_validacao,{
@@ -1482,19 +1486,17 @@ executa_visualizador_calibracao_pmur <- function(){
                     shiny::updateActionButton(session, "botao_validacao", label = "Executa validacao")
 
                     previsao <- data.table::as.data.table(future::value(par)$previsao)
-                
                     previsao <- previsao[variavel == "Qcalc"]
-                    previsao <- previsao[data_caso >= data_inicio_objetivo &
-                                        data_caso <= data_fim_objetivo]
+                    assimilacao <- data.table::as.data.table(future::value(par)$assimilacao)
+                    assimilacao <- assimilacao[variavel == "Qcalc"]
+                    funcao_objetivo <- data.table::as.data.table(future::value(par)$funcao_objetivo)
+                    precipitacao <- data.table::as.data.table(future::value(par)$precipitacao)
 
                     resultados$previsao <- as.data.table(previsao)
-                    avaliacoes <- lapply(sub_bacias, function(sb) {
-                        obs <- vazao_observada
-                        analisa_previsoes(resultados$previsao, obs)
-                    })
-                    resultados$simulacao_semanal <- rbindlist(lapply(avaliacoes, `[[`, "simulacao_semanal"))
-                    resultados$resultado  <- rbindlist(lapply(avaliacoes, `[[`, "resultado"))
-                    
+                    resultados$assimilacao <- as.data.table(assimilacao)
+                    resultados$funcao_objetivo <- as.data.table(funcao_objetivo)
+                    resultados$precipitacao <- as.data.table(precipitacao)
+
                 }
                 
             }, once = TRUE)             
@@ -1503,6 +1505,18 @@ executa_visualizador_calibracao_pmur <- function(){
         # Tabela reativa conforme selecao
         tabela_sel <- shiny::reactive({
             shiny::req(resultados$previsao)
+            data_inicio_objetivo <- input$periodo_validacao[1]
+            data_fim_objetivo <- input$periodo_validacao[2]
+            previsao <- data.table::copy(resultados$previsao[data_caso >= data_inicio_objetivo &
+                                data_caso <= data_fim_objetivo])
+            vazao_observada <- data.table::copy(vazao_posto())
+            sub_bacias <- unique(previsao$nome)
+            avaliacoes <- lapply(sub_bacias, function(sb) {
+                obs <- vazao_observada
+                analisa_previsoes(previsao, obs)
+            })
+            resultados$simulacao_semanal <- rbindlist(lapply(avaliacoes, `[[`, "simulacao_semanal"))
+            resultados$resultado  <- rbindlist(lapply(avaliacoes, `[[`, "resultado"))
             dt <- data.table::copy(resultados$resultado)
             dt <- dt[discretizacao == input$discretizacao]
             # Filtra métrica
@@ -1766,6 +1780,33 @@ executa_visualizador_calibracao_pmur <- function(){
             },
             content = function(file) {
                 utils::write.table(resultados$previsao, file, quote = FALSE, row.names = FALSE, sep = ";")
+            }
+        )
+
+        output$download_assimilacao_validacao <- shiny::downloadHandler(
+            filename = function() {
+                paste0("assimilacao_validacao_", input$sub_bacia, ".csv")
+            },
+            content = function(file) {
+                utils::write.table(resultados$assimilacao, file, quote = FALSE, row.names = FALSE, sep = ";")
+            }
+        )
+
+        output$download_precipitacao_validacao <- shiny::downloadHandler(
+            filename = function() {
+                paste0("precipitacao_validacao_", input$sub_bacia, ".csv")
+            },
+            content = function(file) {
+                utils::write.table(resultados$precipitacao, file, quote = FALSE, row.names = FALSE, sep = ";")
+            }
+        )
+
+        output$download_funcao_objetivo_validacao <- shiny::downloadHandler(
+            filename = function() {
+                paste0("simulacao_funcao_objetivo_", input$sub_bacia, ".csv")
+            },
+            content = function(file) {
+                utils::write.table(resultados$funcao_objetivo, file, quote = FALSE, row.names = FALSE, sep = ";")
             }
         )
 
