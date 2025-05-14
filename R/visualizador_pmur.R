@@ -168,8 +168,18 @@ executa_visualizador_calibracao_pmur <- function(){
                         ),
                         shiny::hr(),
                         shiny::fluidRow(
+                            shiny::column(3, shiny::numericInput(inputId = "limite_inferior_ebin", label = "Limite Inferior Ebin", value = 0.8)),
+                            shiny::column(3, shiny::numericInput(inputId = "limite_superior_ebin", label = "Limite Superior Ebin", value = 1.2))
+                        ),
+                        shiny::fluidRow(
+                            shiny::column(3, shiny::numericInput(inputId = "limite_inferior_prec", label = "Limite Inferior Prec", value = 0.5)),
+                            shiny::column(3, shiny::numericInput(inputId = "limite_superior_prec", label = "Limite Superior Prec", value = 2))
+                        ),
+                        shiny::hr(),
+                        shiny::fluidRow(
                             shiny::dateRangeInput(inputId = "periodo_simulacao_validacao", label = "Periodo de simulacao da validacao", start = NULL, end = NULL, min = NULL, max = NULL),
-                            shiny::dateRangeInput(inputId = "periodo_validacao", label = "Periodo de validacao", start = NULL, end = NULL, min = NULL, max = NULL)
+                            shiny::dateRangeInput(inputId = "periodo_validacao", label = "Periodo de validacao", start = NULL, end = NULL, min = NULL, max = NULL),
+                            shiny::column(4, shiny::numericInput(inputId = "numero_dias_previsao", label = "Horizonte previsao", value = NULL)),
                         ),
                         shiny::hr(),
                         shiny::fluidRow(
@@ -215,18 +225,23 @@ executa_visualizador_calibracao_pmur <- function(){
         }
 
         output$horizonte_ui <- shiny::renderUI({
+            shiny::req(resultados$previsao)
+            tabela <- tabela_completa()
             switch(input$discretizacao,
             diaria  = shiny::selectInput(
                         "horizonte", "Horizonte", 
-                        choices = 0:42, selected = 0
+                        choices = tabela[discretizacao == "diaria",
+                                    unique(horizonte)], selected = 0
                         ),
             semanal = shiny::selectInput(
                         "horizonte", "Horizonte", 
-                        choices = 1:6, selected = 1
+                        choices = tabela[discretizacao == "semanal",
+                                    unique(horizonte)], selected = 1
                         ),
             mensal  = shiny::selectInput(
                         "horizonte", "Horizonte", 
-                        choices = 1, selected = 1
+                        choices = tabela[discretizacao == "mensal",
+                                    unique(horizonte)], selected = 1
                         )
             )
         })
@@ -1432,7 +1447,11 @@ executa_visualizador_calibracao_pmur <- function(){
             inicializacao <- cria_inicializacao(nome  = unique(parametros$nome),
                               Ebin = input$Ebin_validacao,
                               Supin = input$Supin_validacao,
-                              Tuin = input$Tuin_validacao)
+                              Tuin = input$Tuin_validacao,
+                              limite_inferior_ebin = input$limite_inferior_ebin,
+                              limite_superior_ebin = input$limite_superior_ebin,
+                              limite_inferior_prec = input$limite_inferior_prec,
+                              limite_superior_prec = input$limite_superior_prec)
 
             data_inicio_objetivo <- input$periodo_validacao[1]
             data_fim_objetivo <- input$periodo_validacao[2]
@@ -1448,7 +1467,7 @@ executa_visualizador_calibracao_pmur <- function(){
             precipitacao_observada <- precipitacao_posto()
             postos_plu <- postos_plu()
 
-            datas_rodadas <- cria_datas(data_inicio_simulacao, data_fim_simulacao)
+            datas_rodadas <- cria_datas(data_inicio_simulacao, data_fim_simulacao, input$numero_dias_previsao)
 
             precipitacao_prevista <- data.table::copy(precipitacao_observada)
             precipitacao_observada <- precipitacao_observada
@@ -1503,7 +1522,7 @@ executa_visualizador_calibracao_pmur <- function(){
         })
 
         # Tabela reativa conforme selecao
-        tabela_sel <- shiny::reactive({
+        tabela_completa <- shiny::reactive({
             shiny::req(resultados$previsao)
             data_inicio_objetivo <- input$periodo_validacao[1]
             data_fim_objetivo <- input$periodo_validacao[2]
@@ -1518,6 +1537,11 @@ executa_visualizador_calibracao_pmur <- function(){
             resultados$simulacao_semanal <- rbindlist(lapply(avaliacoes, `[[`, "simulacao_semanal"))
             resultados$resultado  <- rbindlist(lapply(avaliacoes, `[[`, "resultado"))
             dt <- data.table::copy(resultados$resultado)
+        })
+
+        tabela_sel <- shiny::reactive({
+            shiny::req(resultados$previsao)
+            dt <- data.table::copy(tabela_completa())
             dt <- dt[discretizacao == input$discretizacao]
             # Filtra métrica
             dt <- dt[horizonte == input$horizonte]
@@ -1553,8 +1577,8 @@ executa_visualizador_calibracao_pmur <- function(){
             )
 
             # --- 3) Para cada linha, calcule o horizonte em que ela cai ---
-            #  horizon_calc = 1 se horizonte ∈ [1,tamanho],
-            #                2 se horizonte ∈ [tamanho+1,2*tamanho], etc.
+            #  horizon_calc = 1 se horizonte [1,tamanho],
+            #                2 se horizonte [tamanho+1,2*tamanho], etc.
             m[, horizon_calc := floor(horizonte / tamanho) + 1]
 
             # --- 4) Filtra apenas o horizonte escolhido ---
@@ -1575,7 +1599,6 @@ executa_visualizador_calibracao_pmur <- function(){
             ),
             by = .(data_caso)
             ]
-   
             xts::xts(resumo[, .(data_caso, vazao_prevista, vazao_observada)], order.by = resumo$data_caso)
         })
         
@@ -1803,7 +1826,7 @@ executa_visualizador_calibracao_pmur <- function(){
 
         output$download_funcao_objetivo_validacao <- shiny::downloadHandler(
             filename = function() {
-                paste0("simulacao_funcao_objetivo_", input$sub_bacia, ".csv")
+                paste0("funcao_objetivo_validacao", input$sub_bacia, ".csv")
             },
             content = function(file) {
                 utils::write.table(resultados$funcao_objetivo, file, quote = FALSE, row.names = FALSE, sep = ";")

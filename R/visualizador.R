@@ -1235,24 +1235,16 @@ executa_visualizador_previsao <- function(){
 
     servidor_previsao <- function(input, output, session) {
 
-        shiny::observeEvent(input$sub_bacia_analise, {
-            arquivo_previsao <- input$arquivo_previsao
-            arquivo_vazao_observada <- input$arquivo_vazao_observada
-            if (!is.null(arquivo_previsao) & !is.null(arquivo_vazao_observada)) {
-                previsao <- data.table::copy(previsao())
+        previsao <- shiny::reactive({
+            arquivo_previsao <- input$arquivo_previsao$datapath
+            if (!is.null(arquivo_previsao)) {
+                previsao <- data.table::fread(arquivo_previsao)
                 data_minimo <- min(previsao$data_caso)
                 data_maximo <- max(previsao$data_caso)
                 shiny::updateDateRangeInput(session, "periodo_validacao", 
                     start = data_minimo, 
                     end = data_maximo, min = data_minimo, 
                     max = data_maximo)
-            }
-        })
-
-        previsao <- shiny::reactive({
-            arquivo_previsao <- input$arquivo_previsao$datapath
-            if (!is.null(arquivo_previsao)) {
-                previsao <- data.table::fread(arquivo_previsao)
                 return(previsao)
             }
         })
@@ -1299,18 +1291,23 @@ executa_visualizador_previsao <- function(){
         })
 
         output$horizonte_ui <- shiny::renderUI({
+            shiny::req(resultados())
+            tabela <- resultados()
             switch(input$discretizacao,
             diaria  = shiny::selectInput(
                         "horizonte", "Horizonte", 
-                        choices = 0:42, selected = 0
+                        choices = tabela[discretizacao == "diaria",
+                                    unique(horizonte)], selected = 0
                         ),
             semanal = shiny::selectInput(
                         "horizonte", "Horizonte", 
-                        choices = 1:6, selected = 1
+                        choices = tabela[discretizacao == "semanal",
+                                    unique(horizonte)], selected = 1
                         ),
             mensal  = shiny::selectInput(
                         "horizonte", "Horizonte", 
-                        choices = 1, selected = 1
+                        choices = tabela[discretizacao == "mensal",
+                                    unique(horizonte)], selected = 1
                         )
             )
         })
@@ -1437,7 +1434,6 @@ executa_visualizador_previsao <- function(){
             
             data_inicio_objetivo <- input$periodo_validacao[1]
             data_fim_objetivo <- input$periodo_validacao[2]
-            
             previsao <- previsao[variavel == "Qcalc"]
             previsao <- previsao[data_caso >= data_inicio_objetivo &
                                 data_caso <= data_fim_objetivo]
@@ -1465,12 +1461,12 @@ executa_visualizador_previsao <- function(){
             tabela_sel()
         })
 
-        # Gráfico com dygraphs
+        # Grafico com dygraphs
         grafico_xts <- shiny::reactive({
             shiny::req(resultados())
             vazao_observada <- data.table::copy(vazao_observada())
             vazao_posto <- vazao_observada[posto == input$sub_bacia_analise]
-            # --- 1) Merge previsão + observação (como antes) ---
+            # --- 1) Merge previsao + observacao (como antes) ---
             dtp <- data.table::copy(previsao())[, vazao_prevista := valor
             ][, horizonte := as.integer(data_previsao - data_caso)]
             dtp <- dtp[nome == input$sub_bacia_analise]
@@ -1492,8 +1488,8 @@ executa_visualizador_previsao <- function(){
             )
 
             # --- 3) Para cada linha, calcule o horizonte em que ela cai ---
-            #  horizon_calc = 1 se horizonte ∈ [1,tamanho],
-            #                2 se horizonte ∈ [tamanho+1,2*tamanho], etc.
+            #  horizon_calc = 1 se horizonte  [1,tamanho],
+            #                2 se horizonte  [tamanho+1,2*tamanho], etc.
             m[, horizon_calc := floor(horizonte / tamanho) + 1]
 
             # --- 4) Filtra apenas o horizonte escolhido ---

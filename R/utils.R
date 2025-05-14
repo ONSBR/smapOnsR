@@ -267,19 +267,24 @@ ordem_afluencia <- function(montante, jusante) {
 #' @importFrom data.table data.table
 #' @export
 
-cria_datas <- function(data_inicio, data_fim) {
+cria_datas <- function(data_inicio, data_fim, numero_dias_previsao = 42) {
 
   # 1) Calcular quantos dias até a próxima quinta-feira (4 = quinta em ISO-8601: domingo=7, segunda=1, ..., sábado=6)
   dias_ate_quinta <- (4 - as.integer(format(data_inicio, "%u"))) %% 7
   primeira_quinta <- data_inicio + dias_ate_quinta
 
   # 2) Gerar sequência de quintas até a data_fim
-  datas_quinta <- seq(from = primeira_quinta, to = data_fim, by = "1 week")
+  if (numero_dias_previsao > 42) {
+    intervalo <- "1 month"
+  } else {
+    intervalo <- "1 week"
+  }
+  datas_quinta <- seq(from = primeira_quinta, to = data_fim, by = intervalo)
 
   # 3) Montar o data.table com numero_dias_previsao = 42
   datas <- data.table::data.table(
     data = datas_quinta,
-    numero_dias_previsao = rep(42L, length(datas_quinta))
+    numero_dias_previsao = rep(numero_dias_previsao, length(datas_quinta))
   )
 
   datas
