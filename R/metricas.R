@@ -204,7 +204,7 @@ calcula_kge <- function(simulacao, observacao, pesos = rep(1 /length(observacao)
 #'     \item{valor}{valor da metrica}
 #'     \item{numero_semana}{horizonte semanal da previsao}
 #'     }
-#' @export 
+#' @export
 
 analisa_previsoes <- function(simulacao, observacao, semanal = TRUE, mensal = TRUE, anual = FALSE){
     colnames(simulacao)[2] <- "data"
@@ -226,11 +226,13 @@ analisa_previsoes <- function(simulacao, observacao, semanal = TRUE, mensal = TR
         resultado <- rbind(resultado, DM)
         KGE <- smapOnsR::calcula_kge(prev, obs)
         resultado <- rbind(resultado, KGE)
+        RMSE <- smapOnsR::calcula_rmse(prev, obs)
+        resultado <- rbind(resultado, RMSE)
     }
-    nomes_metr <- c("PBIAS", "NSE", "MAPE", "DM", "KGE")
+    nomes_metr <- c("PBIAS", "NSE", "MAPE", "DM", "KGE", "RMSE")
     resultado[, metrica := rep(nomes_metr, numero_dias)]
-    resultado[, horizonte := rep(dia_minimo:dia_maximo, each = 5)]
-    resultado[, nome := rep(unique(simulacao[, nome]), numero_dias * 5)]
+    resultado[, horizonte := rep(dia_minimo:dia_maximo, each = 6)]
+    resultado[, nome := rep(unique(simulacao[, nome]), numero_dias * 6)]
     resultado[, discretizacao := 'diaria']
     colnames(resultado)[1] <- "valor"
     data.table::setcolorder(resultado, c("nome", "metrica", "valor", "discretizacao", "horizonte"))
@@ -248,12 +250,13 @@ analisa_previsoes <- function(simulacao, observacao, semanal = TRUE, mensal = TR
                 smapOnsR::calcula_nse(previsao, observacao),
                 smapOnsR::calcula_mape(previsao, observacao),
                 smapOnsR::calcula_dm(previsao, observacao),
-                smapOnsR::calcula_kge(previsao, observacao)
+                smapOnsR::calcula_kge(previsao, observacao),
+                smapOnsR::calcula_rmse(previsao, observacao)
             )
             ),
         by = .(horizonte = horizonte)
         ]
-        resultado_semanal[, nome := rep(unique(simulacao[, nome]), ceiling(dia_maximo / 7) * 5)]
+        resultado_semanal[, nome := rep(unique(simulacao[, nome]), ceiling(dia_maximo / 7) * 6)]
         resultado_semanal[, discretizacao := 'semanal']
         data.table::setcolorder(resultado_semanal, c("nome", "metrica", "valor", "discretizacao", "horizonte"))
     }
@@ -271,7 +274,8 @@ analisa_previsoes <- function(simulacao, observacao, semanal = TRUE, mensal = TR
                 smapOnsR::calcula_nse(previsao, observacao),
                 smapOnsR::calcula_mape(previsao, observacao),
                 smapOnsR::calcula_dm(previsao, observacao),
-                smapOnsR::calcula_kge(previsao, observacao)
+                smapOnsR::calcula_kge(previsao, observacao),
+                smapOnsR::calcula_rmse(previsao, observacao)
             )
             ),
         by = .(horizonte = horizonte)
@@ -289,4 +293,26 @@ analisa_previsoes <- function(simulacao, observacao, semanal = TRUE, mensal = TR
     
     saida <- list(resultado = resultado, simulacao_semanal = simulacao_semanal)
     saida
+}
+
+#' Calcula RMSE
+#'
+#' Realiza o calculo da raiz do erro quadratico medio entre duas amostras
+#'
+#' @param simulacao vetor com os valores da serie simulada
+#' @param observacao vetor com os valores da serie observada
+#' @param pesos vetor de pesos a serem utilizados para cada data (default: pesos iguais)
+#'
+#' @examples
+#' observacao <- 1:30
+#' simulacao <- observacao + rnorm(30, 0, 1)
+#' rmse <- calcula_rmse(simulacao, observacao)
+#'
+#' @return erro quadratico medio (RMSE)
+#'
+#' @export
+
+calcula_rmse <- function(simulacao, observacao, pesos = rep(1 / length(observacao), length(observacao))) {
+  rmse <- sqrt(sum(((simulacao - observacao)^2) * pesos))
+  rmse
 }

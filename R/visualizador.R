@@ -1216,15 +1216,18 @@ executa_visualizador_previsao <- function(){
                         shiny::fluidRow(
                             shiny::selectInput("discretizacao", "Discretizacao", choices = c("Diaria" = "diaria", "Semanal" = "semanal", "Mensal" = "mensal")),
                             shiny::uiOutput("horizonte_ui")
-                        )
+                        ),
+                            shiny::tabPanel("Tabela",
+                            shiny::tableOutput("tabela_metricas")
+                        ),
                     ),
                     shiny::mainPanel(
                         shiny::fluidRow(
                                 shiny::tabPanel("Gráfico",
                                 dygraphs::dygraphOutput("grafico_dy")
                             ),
-                                shiny::tabPanel("Tabela",
-                                shiny::tableOutput("tabela_metricas")
+                                shiny::tabPanel("CDF",
+                                plotly::plotlyOutput("cdf_plot", height = "400px")
                             )
                         )
                     )
@@ -1526,7 +1529,67 @@ executa_visualizador_previsao <- function(){
             dygraphs::dySeries("vazao_observada", color = "#0000FF")  %>%
             dygraphs::dySeries("vazao_prevista", color = "#FF0000")
         })
+        
+         # reactive com o data.table filtrado
+        cdf_data <- shiny::reactive({
+            shiny::req(resultados()) 
+            previsao <- data.table::copy(previsao())
+            observacao <- data.table::copy(vazao_observada())
+            if (input$discretizacao == "diaria") {
+                previsao <- merge(
+                    previsao, observacao,
+                    by.x = c("data_previsao", "nome"),
+                    by.y = c("data", "posto"),
+                    all.x = TRUE
+                )
+                previsao[, horizonte := as.integer(data_previsao - data_caso)]
+                previsao[, discretizacao := "diaria"]
+                data.table::setnames(previsao, "valor.x", "previsao")
+                data.table::setnames(previsao, "valor.y", "observacao")
+            } else if (input$discretizacao == "semanal") {
+                previsao <- agrega_semanal(previsao, observacao)
+            } 
+            else if (input$discretizacao == "mensal") {
+                previsao <- agrega_mensal(previsao, observacao)
+            }
 
+            previsao <- previsao[
+                discretizacao == input$discretizacao &
+                horizonte     == input$horizonte
+            ]
+            previsao
+        })
+        
+        output$cdf_plot <- plotly::renderPlotly({
+            shiny::req(resultados()) 
+            dt <- cdf_data()
+            # constroi as ECDFs
+            ecdf_obs  <- ecdf(dt$observacao)
+            ecdf_pred <- ecdf(dt$previsao)
+            
+            # vetor de cortes em x
+            xs <- sort(unique(c(dt$observacao, dt$previsao)))
+            
+            # avalia ECDFs nos pontos xs
+            y_obs  <- ecdf_obs(xs)
+            y_pred <- ecdf_pred(xs)
+            
+            # plota com plotly
+            plotly::plot_ly(x = ~xs) %>%
+            plotly::add_lines(
+                y = ~y_obs, name = "Observado",
+                hoverinfo = "x+y", line = list(shape = "hv")
+            ) %>%
+            plotly::add_lines(
+                y = ~y_pred, name = "Previsto",
+                hoverinfo = "x+y", line = list(shape = "hv", dash = "dash")
+            ) %>%
+            plotly::layout(
+                title = paste0("CDF — ", input$discretizacao, " (h=", input$horizonte, ")"),
+                xaxis = list(title = "Vazão"),
+                yaxis = list(title = "Prob. Acumulada", range = c(0,1))
+            )
+        })
 
     }
 

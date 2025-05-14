@@ -1068,7 +1068,9 @@ executa_visualizador_calibracao_pmur <- function(){
                         calcula_funcao_objetivo <- calcula_mape
                     } else if (input$funcao_objetivo == "kge") {
                         calcula_funcao_objetivo <- calcula_kge
-                    }
+                    } else if (input$funcao_objetivo == "rmse") {
+                        calcula_funcao_objetivo <- calcula_rmse
+                    } 
 
                     funcao_objetivo <- calcula_funcao_objetivo(saida()[data >= data_inicio_objetivo & data <= data_fim_objetivo, Qcalc], vazao_fo[, valor], vazao_fo[, peso])
                     paste0("funcao objetivo = ", round(funcao_objetivo, 4))
@@ -1142,6 +1144,7 @@ executa_visualizador_calibracao_pmur <- function(){
                     metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "pbias", valor = calcula_pbias(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
                     metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "correl", valor = calcula_correlacao(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
                     metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "kge", valor = calcula_kge(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
+                    metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "rmse", valor = calcula_rmse(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
                     metricas        
                 }
             }
@@ -1287,7 +1290,11 @@ executa_visualizador_calibracao_pmur <- function(){
             } else if (input$funcao_objetivo == "kge") {
                 funcao_objetivo <- calcula_kge
                 fnscale = -1
-            }
+            } else if (input$funcao_objetivo == "rmse") {
+                funcao_objetivo <- calcula_rmse
+                fnscale = 1
+            } 
+
 
             area <- area()
             Ebin <- input$Ebin
@@ -1614,6 +1621,67 @@ executa_visualizador_calibracao_pmur <- function(){
             dygraphs::dyAxis("y", label = "Vazao (m3/s)", independentTicks = TRUE) %>%
             dygraphs::dySeries("vazao_observada", color = "#0000FF")  %>%
             dygraphs::dySeries("vazao_prevista", color = "#FF0000")
+        })
+
+        # reactive com o data.table filtrado
+        cdf_data <- shiny::reactive({
+            shiny::req(resultados$previsao)
+            previsao <- data.table::copy(resultados$previsao)
+            observacao <- data.table::copy(vazao_posto())
+            if (input$discretizacao == "diaria") {
+                previsao <- merge(
+                    previsao, observacao,
+                    by.x = c("data_previsao", "nome"),
+                    by.y = c("data", "posto"),
+                    all.x = TRUE
+                )
+                previsao[, horizonte := as.integer(data_previsao - data_caso)]
+                previsao[, discretizacao := "diaria"]
+                data.table::setnames(previsao, "valor.x", "previsao")
+                data.table::setnames(previsao, "valor.y", "observacao")
+            } else if (input$discretizacao == "semanal") {
+                previsao <- agrega_semanal(previsao, observacao)
+            } 
+            else if (input$discretizacao == "mensal") {
+                previsao <- agrega_mensal(previsao, observacao)
+            }
+
+            previsao <- previsao[
+                discretizacao == input$discretizacao &
+                horizonte     == input$horizonte
+            ]
+            previsao
+        })
+        
+        output$cdf_plot <- plotly::renderPlotly({
+            shiny::req(resultados$previsao)
+            dt <- cdf_data()
+            # constroi as ECDFs
+            ecdf_obs  <- ecdf(dt$observacao)
+            ecdf_pred <- ecdf(dt$previsao)
+            
+            # vetor de cortes em x
+            xs <- sort(unique(c(dt$observacao, dt$previsao)))
+            
+            # avalia ECDFs nos pontos xs
+            y_obs  <- ecdf_obs(xs)
+            y_pred <- ecdf_pred(xs)
+            
+            # plota com plotly
+            plotly::plot_ly(x = ~xs) %>%
+            plotly::add_lines(
+                y = ~y_obs, name = "Observado",
+                hoverinfo = "x+y", line = list(shape = "hv")
+            ) %>%
+            plotly::add_lines(
+                y = ~y_pred, name = "Previsto",
+                hoverinfo = "x+y", line = list(shape = "hv", dash = "dash")
+            ) %>%
+            plotly::layout(
+                title = paste0("CDF — ", input$discretizacao, " (h=", input$horizonte, ")"),
+                xaxis = list(title = "Vazão"),
+                yaxis = list(title = "Prob. Acumulada", range = c(0,1))
+            )
         })
 
         parametros_exportacao <- shiny::reactive({
