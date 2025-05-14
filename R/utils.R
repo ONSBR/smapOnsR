@@ -502,6 +502,8 @@ agrega_semanal <- function(simulacao, observacao) {
 agrega_mensal <- function(simulacao, observacao) {
     # 2) Atribui a cada linha o “mes” a que ela pertence (blocos de 30 dias)
     #    horizonte 0–29 mes 1, 30–59  mes 2, etc.
+    simulacao[, horizonte := as.integer(data.table::as.IDate(data_previsao) - 
+              data.table::as.IDate(data_caso))]
     simulacao[, horizonte := floor(horizonte / 30) + 1]
 
     # 3) Prepare observação do mesmo modo
@@ -527,7 +529,7 @@ agrega_mensal <- function(simulacao, observacao) {
     data.table::setcolorder(simulacao_mensal, 
         c("data_caso", "horizonte", "nome", 
         "previsao", "observacao"))
-    simulacao_mensal[, discretizacao := "semanal"]
+    simulacao_mensal[, discretizacao := "mensal"]
     data.table::setcolorder(simulacao_mensal, c("data_caso", "nome", "previsao", 
                   "observacao", "discretizacao", "horizonte"))
     simulacao_mensal
