@@ -224,16 +224,19 @@ analisa_previsoes <- function(simulacao, observacao, semanal = TRUE, mensal = TR
         resultado <- rbind(resultado, MAPE)
         DM <- smapOnsR::calcula_dm(prev, obs)
         resultado <- rbind(resultado, DM)
+        KGE <- smapOnsR::calcula_kge(prev, obs)
+        resultado <- rbind(resultado, KGE)
     }
-    nomes <- c("PBIAS", "NSE", "MAPE", "DM")
+    nomes <- c("PBIAS", "NSE", "MAPE", "DM", "KGE")
     resultado[, metrica := rep(nomes, numero_dias)]
-    resultado[, horizonte := rep(dia_minimo:dia_maximo, each = 4)]
-    resultado[, nome := rep(unique(simulacao[, nome]), numero_dias * 4)]
+    resultado[, horizonte := rep(dia_minimo:dia_maximo, each = 5)]
+    resultado[, nome := rep(unique(simulacao[, nome]), numero_dias * 5)]
     resultado[, discretizacao := 'diaria']
     colnames(resultado)[1] <- "valor"
     data.table::setcolorder(resultado, c("nome", "metrica", "valor", "discretizacao", "horizonte"))
 
     resultado_semanal <- data.table::data.table()
+    simulacao_semanal <- data.table::data.table()
     if (semanal) {
         merged_data <- merge(simulacao, observacao, by = "data")
         data.table::setorder(merged_data, data_caso, data)
@@ -261,10 +264,12 @@ analisa_previsoes <- function(simulacao, observacao, semanal = TRUE, mensal = TR
             resultado_semanal <- rbind(resultado_semanal, MAPE)
             DM <- smapOnsR::calcula_dm(prev, obs)
             resultado_semanal <- rbind(resultado_semanal, DM)
+            KGE <- smapOnsR::calcula_kge(prev, obs)
+            resultado_semanal <- rbind(resultado_semanal, KGE)
         }
         resultado_semanal[, metrica := rep(nomes, ceiling(dia_maximo / 7))]
-        resultado_semanal[, horizonte := rep(1:ceiling(dia_maximo / 7), each = 4)]
-        resultado_semanal[, nome := rep(unique(simulacao[, nome]), ceiling(dia_maximo / 7) * 4)]
+        resultado_semanal[, horizonte := rep(1:ceiling(dia_maximo / 7), each = 5)]
+        resultado_semanal[, nome := rep(unique(simulacao[, nome]), ceiling(dia_maximo / 7) * 5)]
         resultado_semanal[, discretizacao := 'semanal']
         colnames(resultado_semanal)[1] <- "valor"
         data.table::setcolorder(resultado_semanal, c("nome", "metrica", "valor", "discretizacao", "horizonte"))
@@ -282,6 +287,8 @@ analisa_previsoes <- function(simulacao, observacao, semanal = TRUE, mensal = TR
       resultado_mensal <- rbind(resultado_mensal, MAPE)
       DM <- smapOnsR::calcula_dm(prev$V1, obs$V1)
       resultado_mensal <- rbind(resultado_mensal, DM)
+      KGE <- smapOnsR::calcula_kge(prev$V1, obs$V1)
+      resultado_mensal <- rbind(resultado_mensal, KGE)
 
       resultado_mensal[, metrica := nomes]
       resultado_mensal[, nome := rep(unique(simulacao[, nome]), length(nomes))]
