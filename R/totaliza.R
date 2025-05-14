@@ -160,9 +160,9 @@ totaliza_previsao <- function(previsao, vazao_observada, configuracao) {
         }
     }
 
-
-    previsao_totalizada[, previsao_inc_tv := previsao_total]
+    previsao_totalizada <- previsao_totalizada[nome %in% configuracao[!bacia_smap == "posto_flu", nome_real]]
     previsao_totalizada <- previsao_totalizada[data_previsao >= data_rodada]
+    previsao_totalizada[, previsao_inc_tv := previsao_total]
     for (indice_ordem in 1:max(ordem)) {
         indice_configuracao <- which(ordem == indice_ordem)
         for (indice_usina in indice_configuracao) {
@@ -177,8 +177,6 @@ totaliza_previsao <- function(previsao, vazao_observada, configuracao) {
             }
         }
     }
-
-    previsao_totalizada <- previsao_totalizada[nome %in% configuracao[!bacia_smap == "posto_flu", nome_real]]
     
     previsao_totalizada
 }
