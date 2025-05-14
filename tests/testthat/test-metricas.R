@@ -99,3 +99,17 @@ test_that("analisa_previsoes retorna todas as combinações esperadas", {
   primeiros <- out[, .SD[1], by = discretizacao]
   expect_equal(c(0, 1, 1), primeiros$horizonte)
 })
+
+test_that("testa previsoes reais", {
+  pasta_saida <- system.file("extdata", "Arq_Saida", package = "smapOnsR")
+  simulacao <- data.table::fread(file.path(pasta_saida, "previsao.csv"))
+  observacao <- le_historico_verificado(file.path(pasta_saida, "vazao_observada.csv"))
+  resultado <- analisa_previsoes(simulacao, observacao, semanal = TRUE, mensal = TRUE, anual = FALSE)$resultado
+
+  expect_equal(resultado[discretizacao == "diaria" & horizonte == 8 
+                         & metrica == "PBIAS", valor], 0.92974236)
+  expect_equal(resultado[discretizacao == "semanal" & horizonte == 3 
+                         & metrica == "DM", valor], 0.1173216)
+  expect_equal(resultado[discretizacao == "mensal" & horizonte == 4 
+                         & metrica == "KGE", valor], 0.6635228)
+})

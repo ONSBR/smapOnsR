@@ -208,14 +208,14 @@ calcula_kge <- function(simulacao, observacao, pesos = rep(1 /length(observacao)
 
 analisa_previsoes <- function(simulacao, observacao, semanal = TRUE, mensal = TRUE, anual = FALSE){
     colnames(simulacao)[2] <- "data"
-    simulacao[, dia_previsao := as.numeric(data - data_caso)]
+    simulacao[, horizonte := as.numeric(data - data_caso)]
     resultado <- data.table::data.table()
-    dia_maximo <- max(simulacao[, dia_previsao])
-    dia_minimo <- min(simulacao[, dia_previsao])
-    numero_dias <- length(unique(simulacao[, dia_previsao]))
+    dia_maximo <- max(simulacao[, horizonte])
+    dia_minimo <- min(simulacao[, horizonte])
+    numero_dias <- length(unique(simulacao[, horizonte]))
     for (idia in 0:dia_maximo){
-        obs <- observacao[data %in% simulacao[dia_previsao == idia, data], valor]
-        prev <- simulacao[dia_previsao == idia, valor][1:length(obs)]
+        obs <- observacao[data %in% simulacao[horizonte == idia, data], valor]
+        prev <- simulacao[horizonte == idia, valor][1:length(obs)]
         PBIAS <- smapOnsR::calcula_pbias(prev, obs)
         resultado <- rbind(resultado, PBIAS)
         NSE <- smapOnsR::calcula_nse(prev, obs)
@@ -227,8 +227,8 @@ analisa_previsoes <- function(simulacao, observacao, semanal = TRUE, mensal = TR
         KGE <- smapOnsR::calcula_kge(prev, obs)
         resultado <- rbind(resultado, KGE)
     }
-    nomes <- c("PBIAS", "NSE", "MAPE", "DM", "KGE")
-    resultado[, metrica := rep(nomes, numero_dias)]
+    nomes_metr <- c("PBIAS", "NSE", "MAPE", "DM", "KGE")
+    resultado[, metrica := rep(nomes_metr, numero_dias)]
     resultado[, horizonte := rep(dia_minimo:dia_maximo, each = 5)]
     resultado[, nome := rep(unique(simulacao[, nome]), numero_dias * 5)]
     resultado[, discretizacao := 'diaria']
@@ -238,64 +238,51 @@ analisa_previsoes <- function(simulacao, observacao, semanal = TRUE, mensal = TR
     resultado_semanal <- data.table::data.table()
     simulacao_semanal <- data.table::data.table()
     if (semanal) {
-        merged_data <- merge(simulacao, observacao, by = "data")
-        data.table::setorder(merged_data, data_caso, data)
-        merged_data[, dia_semana := lubridate::wday(data)]
-        data.table::setDT(merged_data)
+        simulacao_semanal <- agrega_semanal(simulacao, observacao)
 
-        # Step 1: Exclude rows before the first "dia_semana" == 7 for each "data_caso"
-        merged_data <- merged_data[, .SD[dia_semana == 7 | (cumsum(dia_semana == 7) > 0)], by = data_caso]
-
-        # Step 2: Create a sequence for each "data_caso" based on the remainder when dividing by 7
-        merged_data[, numero_semana := rep(1:(.N %/% 7 + (ifelse(.N %% 7 == 0, 0, 1))), each = 7, length.out = .N), by = data_caso]
-
-        # Step 3: Calculate weekly mean and count
-        simulacao_semanal <- merged_data[, .(previsao_semanal = mean(valor.x), observacao_semanal = mean(valor.y), count = .N), by = .(data_caso, numero_semana, nome)]
-
-        
-        for (isemana in unique(simulacao_semanal[, numero_semana])){
-            prev <- simulacao_semanal[numero_semana == isemana, previsao_semanal]
-            obs <- simulacao_semanal[numero_semana == isemana, observacao_semanal]
-            PBIAS <- smapOnsR::calcula_pbias(prev, obs)
-            resultado_semanal <- rbind(resultado_semanal, PBIAS)
-            NSE <- smapOnsR::calcula_nse(prev, obs)
-            resultado_semanal <- rbind(resultado_semanal, NSE)
-            MAPE <- smapOnsR::calcula_mape(prev, obs)
-            resultado_semanal <- rbind(resultado_semanal, MAPE)
-            DM <- smapOnsR::calcula_dm(prev, obs)
-            resultado_semanal <- rbind(resultado_semanal, DM)
-            KGE <- smapOnsR::calcula_kge(prev, obs)
-            resultado_semanal <- rbind(resultado_semanal, KGE)
-        }
-        resultado_semanal[, metrica := rep(nomes, ceiling(dia_maximo / 7))]
-        resultado_semanal[, horizonte := rep(1:ceiling(dia_maximo / 7), each = 5)]
+        resultado_semanal <- simulacao_semanal[
+        , .(
+            metrica = nomes_metr,
+            valor   = c(
+                smapOnsR::calcula_pbias(previsao, observacao),
+                smapOnsR::calcula_nse(previsao, observacao),
+                smapOnsR::calcula_mape(previsao, observacao),
+                smapOnsR::calcula_dm(previsao, observacao),
+                smapOnsR::calcula_kge(previsao, observacao)
+            )
+            ),
+        by = .(horizonte = horizonte)
+        ]
         resultado_semanal[, nome := rep(unique(simulacao[, nome]), ceiling(dia_maximo / 7) * 5)]
         resultado_semanal[, discretizacao := 'semanal']
-        colnames(resultado_semanal)[1] <- "valor"
         data.table::setcolorder(resultado_semanal, c("nome", "metrica", "valor", "discretizacao", "horizonte"))
     }
 
     resultado_mensal <- data.table::data.table()
-    if (mensal) {      
-      prev <- simulacao_semanal[numero_semana %in% c(1,4), mean(previsao_semanal), by = data_caso]
-      obs <- simulacao_semanal[numero_semana  %in% c(1,4), mean(observacao_semanal), by = data_caso]
-      PBIAS <- smapOnsR::calcula_pbias(prev$V1, obs$V1)
-      resultado_mensal <- rbind(resultado_mensal, PBIAS)
-      NSE <- smapOnsR::calcula_nse(prev$V1, obs$V1)
-      resultado_mensal <- rbind(resultado_mensal, NSE)
-      MAPE <- smapOnsR::calcula_mape(prev$V1, obs$V1)
-      resultado_mensal <- rbind(resultado_mensal, MAPE)
-      DM <- smapOnsR::calcula_dm(prev$V1, obs$V1)
-      resultado_mensal <- rbind(resultado_mensal, DM)
-      KGE <- smapOnsR::calcula_kge(prev$V1, obs$V1)
-      resultado_mensal <- rbind(resultado_mensal, KGE)
+    if (mensal) {
+        colnames(simulacao)[2] <- "data_previsao"
+        blocos_mensais <- agrega_mensal(simulacao, observacao)
 
-      resultado_mensal[, metrica := nomes]
-      resultado_mensal[, nome := rep(unique(simulacao[, nome]), length(nomes))]
-      resultado_mensal[, discretizacao := 'mensal']
-      resultado_mensal[, horizonte := 1]
-      colnames(resultado_mensal)[1] <- "valor"
-      data.table::setcolorder(resultado_mensal, c("nome", "metrica", "valor", "discretizacao", "horizonte"))
+        resultado_mensal <- blocos_mensais[
+        , .(
+            metrica = nomes_metr,
+            valor   = c(
+                smapOnsR::calcula_pbias(previsao, observacao),
+                smapOnsR::calcula_nse(previsao, observacao),
+                smapOnsR::calcula_mape(previsao, observacao),
+                smapOnsR::calcula_dm(previsao, observacao),
+                smapOnsR::calcula_kge(previsao, observacao)
+            )
+            ),
+        by = .(horizonte = horizonte)
+        ]
+
+        resultado_mensal[, nome := simulacao[, unique(nome)]]
+        resultado_mensal[, discretizacao := 'mensal']
+        # 7) Reordena colunas
+        data.table::setcolorder(resultado_mensal,
+            c("nome", "metrica", "valor", "discretizacao", "horizonte")
+        )
     }
     resultado <- data.table::rbindlist(list(resultado, resultado_semanal, resultado_mensal),
      use.names = TRUE, fill = TRUE)

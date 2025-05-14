@@ -404,3 +404,126 @@ cria_sub_bacias <- function(parametros) {
 
   sub_bacias
 }
+
+#' Agrega previsao semanal
+#' 
+#' Realiza agregacao semanal da previsao e observacao levando em 
+#' consideracao semanas operativa de sabado a sexta
+#' 
+#' @param simulacao data table com a previsao contendo as seguintes colunas:
+#'     \itemize{
+#'     \item{data_caso}{data da rodada}
+#'     \item{data_previsao}{data da previsao}
+#'     \item{cenario}{nome do cenario}
+#'     \item{nome}{nome da sub-bacia}
+#'     \item{variavel}{nome da variavel}
+#'     \item{valor}{valor da variavel}
+#'     }
+#' @param observacao data table com o historico de vazao com as colunas:
+#'     \itemize{
+#'     \item{data}{data da observacao}
+#'     \item{posto}{nome do posto}
+#'     \item{valor}{valor da variavel}
+#'     }
+#' 
+#' @return data.table com as colunas
+#'     \itemize{
+#'     \item{data_caso}{data da rodada}
+#'     \item{nome}{nome da sub-bacia}
+#'     \item{previsao}{ valor da previsao semanal}
+#'     \item{observacao}{valor observacao semanal}
+#'     \item{discretizacao}{discretizacao da previsao}
+#'     \item{horizonte}{horizonte da previsao}
+#'     }
+#' 
+#' @export
+
+agrega_semanal <- function(simulacao, observacao) {
+    # Step 1: Merge the two data.tables by "data"
+    colnames(simulacao)[2] <- "data"
+    merged_data <- merge(simulacao, observacao, by = "data")
+    data.table::setorder(merged_data, data_caso, data)
+    merged_data[, dia_semana := lubridate::wday(data)]
+    data.table::setDT(merged_data)
+
+    # Step 1: Exclude rows before the first "dia_semana" == 7 for each "data_caso"
+    merged_data <- merged_data[, .SD[dia_semana == 7 | (cumsum(dia_semana == 7) > 0)], by = data_caso]
+
+    # Step 2: Create a sequence for each "data_caso" based on the remainder when dividing by 7
+    merged_data[, horizonte := rep(1:(.N %/% 7 + (ifelse(.N %% 7 == 0, 0, 1))), each = 7, length.out = .N), by = data_caso]
+
+    # Step 3: Calculate weekly mean and count
+    simulacao_semanal <- merged_data[, .(previsao = mean(valor.x), observacao = mean(valor.y), count = .N), by = .(data_caso, horizonte, nome)]
+    simulacao_semanal[, count := NULL]
+    simulacao_semanal[, discretizacao := "semanal"]
+    data.table::setcolorder(simulacao_semanal, c("data_caso", "nome", "previsao", 
+                  "observacao", "discretizacao", "horizonte"))
+    simulacao_semanal
+}
+
+#' Agrega previsao mensal
+#' 
+#' Realiza agregacao mensal da previsao e observacao
+#' 
+#' @param simulacao data table com a previsao contendo as seguintes colunas:
+#'     \itemize{
+#'     \item{data_caso}{data da rodada}
+#'     \item{data_previsao}{data da previsao}
+#'     \item{cenario}{nome do cenario}
+#'     \item{nome}{nome da sub-bacia}
+#'     \item{variavel}{nome da variavel}
+#'     \item{valor}{valor da variavel}
+#'     }
+#' @param observacao data table com o historico de vazao com as colunas:
+#'     \itemize{
+#'     \item{data}{data da observacao}
+#'     \item{posto}{nome do posto}
+#'     \item{valor}{valor da variavel}
+#'     }
+#' 
+#' @return data.table com as colunas
+#'     \itemize{
+#'     \item{data_caso}{data da rodada}
+#'     \item{nome}{nome da sub-bacia}
+#'     \item{previsao}{ valor da previsao semanal}
+#'     \item{observacao}{valor observacao semanal}
+#'     \item{discretizacao}{discretizacao da previsao}
+#'     \item{horizonte}{horizonte da previsao}
+#'     }
+#' 
+#' @export
+#' 
+
+agrega_mensal <- function(simulacao, observacao) {
+    # 2) Atribui a cada linha o “mes” a que ela pertence (blocos de 30 dias)
+    #    horizonte 0–29 mes 1, 30–59  mes 2, etc.
+    simulacao[, horizonte := floor(horizonte / 30) + 1]
+
+    # 3) Prepare observação do mesmo modo
+    observacao[, data := data.table::as.IDate(data)]  # se for IDate
+
+    # 4) Merge previsão + observação
+    dt <- merge(
+    simulacao[, .(data_caso, data_previsao, nome, prev = valor, horizonte)],
+    observacao[, .(data, nome = posto, obs = valor)],
+    by.x = c("data_previsao","nome"),
+    by.y = c("data","nome"),
+    all.x = TRUE
+    )
+
+    # 5) Agrega média dentro de cada bloco de 30 dias
+    simulacao_mensal <- dt[
+    , .( 
+        previsao = mean(prev, na.rm=TRUE),
+        observacao  = mean(obs,  na.rm=TRUE)
+        ),
+    by = .(nome, data_caso, horizonte)
+    ]
+    data.table::setcolorder(simulacao_mensal, 
+        c("data_caso", "horizonte", "nome", 
+        "previsao", "observacao"))
+    simulacao_mensal[, discretizacao := "semanal"]
+    data.table::setcolorder(simulacao_mensal, c("data_caso", "nome", "previsao", 
+                  "observacao", "discretizacao", "horizonte"))
+    simulacao_mensal
+}
