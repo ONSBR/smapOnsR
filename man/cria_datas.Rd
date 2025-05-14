@@ -4,7 +4,7 @@
 \alias{cria_datas}
 \title{Cria arquivo de datas a serem simuladas}
 \usage{
-cria_datas(data_inicio, data_fim)
+cria_datas(data_inicio, data_fim, numero_dias_previsao = 42)
 }
 \arguments{
 \item{data_inicio}{data inicio da simulacao}

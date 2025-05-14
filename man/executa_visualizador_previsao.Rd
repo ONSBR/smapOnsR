@@ -4,12 +4,7 @@
 \alias{executa_visualizador_previsao}
 \title{Visualizador SMAP/ONS}
 \usage{
-executa_visualizador_previsao(
-  previsoes,
-  assimilacao,
-  precipitacao,
-  funcao_objetivo
-)
+executa_visualizador_previsao()
 }
 \arguments{
 \item{previsoes}{contendo as seguintes colunas:
