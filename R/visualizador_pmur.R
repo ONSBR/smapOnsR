@@ -125,7 +125,7 @@ executa_visualizador_calibracao_pmur <- function(){
 
                     shiny::mainPanel(
                         shiny::fluidRow(
-                            shiny::column(3, shiny::selectInput(inputId ="funcao_objetivo", label = shiny::h3("Selecione a funcao objetivo"), choices = c("dm", "nse", "mape", "kge"), selected = "dm")),
+                            shiny::column(3, shiny::selectInput(inputId ="funcao_objetivo", label = shiny::h3("Selecione a funcao objetivo"), choices = c("dm", "nse", "mape", "kge", "rmse"), selected = "dm")),
                             shiny::column(3, shiny::selectInput(inputId = "tipo_escala", label = shiny::h3("Selecione a escala das variaveis"), choices = c(0, 1), selected = 1)),
                             shiny::column(3, shiny::selectInput(inputId ="ndeps", label = shiny::h3("Passo de otimizacao"), choices = c(1, 0.1, 0.001, 0.0001, 0.00001, 0.000001, 0.0000001), selected = 0.001))
                         ), shiny::fluidRow(
@@ -169,11 +169,11 @@ executa_visualizador_calibracao_pmur <- function(){
                         shiny::hr(),
                         shiny::fluidRow(
                             shiny::column(3, shiny::numericInput(inputId = "limite_inferior_ebin", label = "Limite Inferior Ebin", value = 0.8)),
-                            shiny::column(3, shiny::numericInput(inputId = "limite_superior_ebin", label = "Limite Superior Ebin", value = 1.2))
+                            shiny::column(4, shiny::numericInput(inputId = "limite_superior_ebin", label = "Limite Superior Ebin", value = 1.2))
                         ),
                         shiny::fluidRow(
                             shiny::column(3, shiny::numericInput(inputId = "limite_inferior_prec", label = "Limite Inferior Prec", value = 0.5)),
-                            shiny::column(3, shiny::numericInput(inputId = "limite_superior_prec", label = "Limite Superior Prec", value = 2))
+                            shiny::column(4, shiny::numericInput(inputId = "limite_superior_prec", label = "Limite Superior Prec", value = 2))
                         ),
                         shiny::hr(),
                         shiny::fluidRow(
@@ -200,7 +200,12 @@ executa_visualizador_calibracao_pmur <- function(){
                         shiny::fluidRow(
                                 shiny::tabPanel("Gráfico",
                                 dygraphs::dygraphOutput("grafico_dy")
-                            ),
+                            )
+                        ),
+                        shiny::tabPanel("CDF",
+                                plotly::plotlyOutput("cdf_plot", height = "400px")
+                        ),
+                        shiny::fluidRow(
                                 shiny::tabPanel("Tabela",
                                 shiny::tableOutput("tabela_metricas")
                             )
