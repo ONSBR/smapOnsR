@@ -168,11 +168,11 @@ executa_visualizador_calibracao_pmur <- function(){
                         ),
                         shiny::hr(),
                         shiny::fluidRow(
-                            shiny::column(3, shiny::numericInput(inputId = "limite_inferior_ebin", label = "Limite Inferior Ebin", value = 0.8)),
+                            shiny::column(4, shiny::numericInput(inputId = "limite_inferior_ebin", label = "Limite Inferior Ebin", value = 0.8)),
                             shiny::column(4, shiny::numericInput(inputId = "limite_superior_ebin", label = "Limite Superior Ebin", value = 1.2))
                         ),
                         shiny::fluidRow(
-                            shiny::column(3, shiny::numericInput(inputId = "limite_inferior_prec", label = "Limite Inferior Prec", value = 0.5)),
+                            shiny::column(4, shiny::numericInput(inputId = "limite_inferior_prec", label = "Limite Inferior Prec", value = 0.5)),
                             shiny::column(4, shiny::numericInput(inputId = "limite_superior_prec", label = "Limite Superior Prec", value = 2))
                         ),
                         shiny::hr(),
@@ -1517,9 +1517,7 @@ executa_visualizador_calibracao_pmur <- function(){
                     shiny::updateActionButton(session, "botao_validacao", label = "Executa validacao")
 
                     previsao <- data.table::as.data.table(future::value(par)$previsao)
-                    previsao <- previsao[variavel == "Qcalc"]
                     assimilacao <- data.table::as.data.table(future::value(par)$assimilacao)
-                    assimilacao <- assimilacao[variavel == "Qcalc"]
                     funcao_objetivo <- data.table::as.data.table(future::value(par)$funcao_objetivo)
                     precipitacao <- data.table::as.data.table(future::value(par)$precipitacao)
 
@@ -1527,7 +1525,6 @@ executa_visualizador_calibracao_pmur <- function(){
                     resultados$assimilacao <- as.data.table(assimilacao)
                     resultados$funcao_objetivo <- as.data.table(funcao_objetivo)
                     resultados$precipitacao <- as.data.table(precipitacao)
-
                 }
                 
             }, once = TRUE)             
@@ -1539,7 +1536,7 @@ executa_visualizador_calibracao_pmur <- function(){
             data_inicio_objetivo <- input$periodo_validacao[1]
             data_fim_objetivo <- input$periodo_validacao[2]
             previsao <- data.table::copy(resultados$previsao[data_caso >= data_inicio_objetivo &
-                                data_caso <= data_fim_objetivo])
+                                data_caso <= data_fim_objetivo & variavel == "Qcalc"])
             vazao_observada <- data.table::copy(vazao_posto())
             sub_bacias <- unique(previsao$nome)
             avaliacoes <- lapply(sub_bacias, function(sb) {
@@ -1569,7 +1566,7 @@ executa_visualizador_calibracao_pmur <- function(){
             shiny::req(resultados$previsao)
             
             # --- 1) Merge previsão + observação (como antes) ---
-            dtp <- data.table::copy(resultados$previsao)[, vazao_prevista := valor
+            dtp <- data.table::copy(resultados$previsao)[variavel == "Qcalc", vazao_prevista := valor
             ][, horizonte := as.integer(data_previsao - data_caso)]
             obs <- data.table::copy(vazao_posto())[, vazao_observada := valor]
 
@@ -1631,7 +1628,7 @@ executa_visualizador_calibracao_pmur <- function(){
         # reactive com o data.table filtrado
         cdf_data <- shiny::reactive({
             shiny::req(resultados$previsao)
-            previsao <- data.table::copy(resultados$previsao)
+            previsao <- data.table::copy(resultados$previsao[variavel == "Qcalc"])
             observacao <- data.table::copy(vazao_posto())
             if (input$discretizacao == "diaria") {
                 previsao <- merge(
