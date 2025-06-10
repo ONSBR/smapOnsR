@@ -232,8 +232,8 @@ executa_visualizador_calibracao_pmur <- function(){
                                 # Placeholder para seletor de casos
                                 uiOutput("variavel_validacao"),
                             ),
-                            shiny::column(3, shiny::actionButton("btn_all",  "Selecionar todos")),
-                            shiny::column(3, shiny::actionButton("btn_none", "Limpar todos"))
+                            shiny::column(3, shiny::actionButton("btn_all",  "Selecionar todas as datas")),
+                            shiny::column(3, shiny::actionButton("btn_none", "Limpar todas as datas"))
                         ),
                         shiny::fluidRow(
                             dygraphs::dygraphOutput("validacao_ano")
@@ -1470,8 +1470,8 @@ executa_visualizador_calibracao_pmur <- function(){
             parametros$valor[parametros$parametro == "Ecof"] <- input$ecof
             parametros$valor[parametros$parametro == "Ecof2"] <- input$ecof2
             parametros$valor[parametros$parametro == "Area"] <- area()
-            parametros$valor[parametros$parametro == "ktMin"] <- input$kt_min
-            parametros$valor[parametros$parametro == "ktMax"] <- input$kt_max
+            parametros$valor[parametros$parametro == "Ktmin"] <- input$kt_min
+            parametros$valor[parametros$parametro == "Ktmax"] <- input$kt_max
             if (nrow(parametros[parametros$parametro == "Pmur"]) == 0){
                 parametros <- data.table::rbindlist(list(parametros, data.table::data.table(nome = parametros[, unique(nome)], 
                             parametro = "Pmur", valor = input$pmur, limite_inferior = input$limite_inferior_pmur, limite_superior = input$limite_superior_pmur)))
@@ -1900,8 +1900,8 @@ executa_visualizador_calibracao_pmur <- function(){
             parametros$limite_superior[parametros$parametro == "Ecof2"] <- input$limite_superior_ecof2
 
             parametros$valor[parametros$parametro == "Area"] <- area()
-            parametros$valor[parametros$parametro == "ktMin"] <- input$kt_min
-            parametros$valor[parametros$parametro == "ktMax"] <- input$kt_max
+            parametros$valor[parametros$parametro == "Ktmin"] <- input$kt_min
+            parametros$valor[parametros$parametro == "Ktmax"] <- input$kt_max
             if (nrow(parametros[parametros$parametro == "Pmur"]) == 0){
                 parametros <- data.table::rbindlist(list(parametros, data.table::data.table(nome = parametros[, unique(nome)], 
                             parametro = "Pmur", valor = input$pmur, limite_inferior = input$limite_inferior_pmur, limite_superior = input$limite_superior_pmur)))
