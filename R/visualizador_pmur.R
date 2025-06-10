@@ -228,6 +228,10 @@ executa_visualizador_calibracao_pmur <- function(){
                                 # Placeholder para seletor de casos
                                 uiOutput("sel_casos_validacao"),
                             ),
+                            shiny::column(width = 3,
+                                # Placeholder para seletor de casos
+                                uiOutput("variavel_validacao"),
+                            ),
                             shiny::column(3, shiny::actionButton("btn_all",  "Selecionar todos")),
                             shiny::column(3, shiny::actionButton("btn_none", "Limpar todos"))
                         ),
@@ -1772,14 +1776,34 @@ executa_visualizador_calibracao_pmur <- function(){
             )
         })
 
+         # 3.3) seleciona variaveis
+        output$variavel_validacao <- shiny::renderUI({
+            variaveis <- NULL
+            if (!is.null(resultados$previsao)) {
+                variaveis <- sort(unique(resultados$previsao$variavel))
+            }
+            shiny::selectizeInput(
+            "variavel_validacao",
+            "Selecione as variaveis:",
+            choices  = variaveis,
+            multiple = TRUE,
+            selected = if (!is.null(resultados$previsao)) "Qcalc" else NULL,
+            options  = list(
+                placeholder = "Selecione variaveis…",
+                plugins     = list("remove_button"),
+                maxItems    = NULL
+            )
+            )
+        })
+
         # Prepara o objeto xts reativo para grafico de validacao por ano
         ts_data <- shiny::reactive({
             shiny::req(input$sel_casos_validacao)       # precisa de ao menos 1
             
             # filtra previsões pelo vetor de strings
             sim <- data.table::copy(resultados$previsao[data_caso %in% input$sel_casos_validacao 
-                                & variavel == "Qcalc"])
-            sim[, cenario := format(data_caso, "%Y-%m-%d")]
+                                & variavel %in% input$variavel_validacao])
+            sim[, cenario := paste0(variavel, "_", data_caso)]
             observada <- data.table::copy(vazao_posto())
             anosel <- as.integer(input$ano_validacao)
             casos_choices <- resultados$previsao[
