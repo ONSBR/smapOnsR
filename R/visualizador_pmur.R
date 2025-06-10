@@ -17,8 +17,8 @@ executa_visualizador_calibracao_pmur <- function(){
     `%>%` <- magrittr::`%>%`
     
     ui_calibracao <- shiny::fluidPage(
-        tags$head(
-            tags$style(HTML("
+        shiny::tags$head(
+            shiny::tags$style(shiny::HTML("
             /* limita altura do input com scroll interno */
             #sel_casos_validacao + .selectize-control .selectize-input {
                 max-height: 30px !important;
