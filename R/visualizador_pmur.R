@@ -222,15 +222,15 @@ executa_visualizador_calibracao_pmur <- function(){
                         shiny::fluidRow(
                             shiny::column(width = 3,
                                 # Placeholder para seletor de anos
-                                uiOutput("ano_validacao"),
+                                shiny::uiOutput("ano_validacao"),
                             ),
                             shiny::column(width = 3,
                                 # Placeholder para seletor de casos
-                                uiOutput("sel_casos_validacao"),
+                                shiny::uiOutput("sel_casos_validacao"),
                             ),
                             shiny::column(width = 3,
                                 # Placeholder para seletor de casos
-                                uiOutput("variavel_validacao"),
+                                shiny::uiOutput("variavel_validacao"),
                             ),
                             shiny::column(3, shiny::actionButton("btn_all",  "Selecionar todas as datas")),
                             shiny::column(3, shiny::actionButton("btn_none", "Limpar todas as datas"))
