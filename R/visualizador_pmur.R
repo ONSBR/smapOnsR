@@ -200,6 +200,7 @@ executa_visualizador_calibracao_pmur <- function(){
                         shiny::downloadButton("download_assimilacao_validacao", "Download assimilacao_validacao_sub_bacia.csv"),
                         shiny::downloadButton("download_precipitacao_validacao", "Download  precipitacao_validacao_sub_bacia.csv"),
                         shiny::downloadButton("download_funcao_objetivo_validacao", "Download funcao_objetivo_validacao_sub_bacia.csv"),
+                        shiny::downloadButton("download_otimizacao_validacao", "Download otimizacao_validacao_sub_bacia.csv"),
                         shiny::downloadButton("download_metricas_validacao", "Download  metricas_validacao_sub_bacia.csv")
                     ),
                     shiny::mainPanel(
@@ -1450,6 +1451,7 @@ executa_visualizador_calibracao_pmur <- function(){
             resultados = NULL,
             assimilacao = NULL,
             funcao_objetivo = NULL,
+            otimizacao = NULL,
             precipitacao = NULL
         )
 
@@ -1548,11 +1550,13 @@ executa_visualizador_calibracao_pmur <- function(){
                     assimilacao <- data.table::as.data.table(future::value(par)$assimilacao)
                     funcao_objetivo <- data.table::as.data.table(future::value(par)$funcao_objetivo)
                     precipitacao <- data.table::as.data.table(future::value(par)$precipitacao)
+                    otimizacao <- data.table::as.data.table(future::value(par)$otimizacao)
 
                     resultados$previsao <- as.data.table(previsao)
                     resultados$assimilacao <- as.data.table(assimilacao)
                     resultados$funcao_objetivo <- as.data.table(funcao_objetivo)
                     resultados$precipitacao <- as.data.table(precipitacao)
+                    resultados$otimizacao <- as.data.table(otimizacao)
                 }
                 
             }, once = TRUE)             
@@ -2065,6 +2069,15 @@ executa_visualizador_calibracao_pmur <- function(){
             },
             content = function(file) {
                 utils::write.table(resultados$funcao_objetivo, file, quote = FALSE, row.names = FALSE, sep = ";")
+            }
+        )
+
+        output$download_otimizacao_validacao <- shiny::downloadHandler(
+            filename = function() {
+                paste0("otimizacao_validacao_", input$sub_bacia, ".csv")
+            },
+            content = function(file) {
+                utils::write.table(resultados$otimizacao, file, quote = FALSE, row.names = FALSE, sep = ";")
             }
         )
 
