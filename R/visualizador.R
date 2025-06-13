@@ -1168,7 +1168,15 @@ executa_visualizador_previsao <- function(){
     `%>%` <- magrittr::`%>%`
     
     ui_previsao <- shiny::fluidPage(
-        shinyjs::useShinyjs(),
+        shiny::tags$head(
+            shiny::tags$style(shiny::HTML("
+            /* limita altura do input com scroll interno */
+            #sel_casos_validacao + .selectize-control .selectize-input {
+                max-height: 30px !important;
+                overflow-y: auto !important;
+            }
+            "))
+        ),shinyjs::useShinyjs(),
         shiny::titlePanel("Visualizador de cenarios do SMAP/ONS"),
         shiny::tabsetPanel(
             shiny::tabPanel("Dados",
@@ -1229,6 +1237,25 @@ executa_visualizador_previsao <- function(){
                                 shiny::tabPanel("CDF",
                                 plotly::plotlyOutput("cdf_plot", height = "400px")
                             )
+                        ),
+                        shiny::fluidRow(
+                            shiny::column(width = 3,
+                                # Placeholder para seletor de anos
+                                shiny::uiOutput("ano_validacao"),
+                            ),
+                            shiny::column(width = 3,
+                                # Placeholder para seletor de casos
+                                shiny::uiOutput("sel_casos_validacao"),
+                            ),
+                            shiny::column(width = 3,
+                                # Placeholder para seletor de casos
+                                shiny::uiOutput("variavel_validacao"),
+                            ),
+                            shiny::column(3, shiny::actionButton("btn_all",  "Selecionar todas as datas")),
+                            shiny::column(3, shiny::actionButton("btn_none", "Limpar todas as datas"))
+                        ),
+                        shiny::fluidRow(
+                            dygraphs::dygraphOutput("validacao_ano")
                         )
                     )
                 )
@@ -1242,6 +1269,8 @@ executa_visualizador_previsao <- function(){
             arquivo_previsao <- input$arquivo_previsao$datapath
             if (!is.null(arquivo_previsao)) {
                 previsao <- data.table::fread(arquivo_previsao)
+                previsao[, data_caso := as.Date(data_caso)]
+                previsao[, data_previsao := as.Date(data_previsao)]
                 data_minimo <- min(previsao$data_caso)
                 data_maximo <- max(previsao$data_caso)
                 shiny::updateDateRangeInput(session, "periodo_validacao", 
@@ -1470,7 +1499,7 @@ executa_visualizador_previsao <- function(){
             vazao_observada <- data.table::copy(vazao_observada())
             vazao_posto <- vazao_observada[posto == input$sub_bacia_analise]
             # --- 1) Merge previsao + observacao (como antes) ---
-            dtp <- data.table::copy(previsao())[, vazao_prevista := valor
+            dtp <- data.table::copy(previsao())[variavel == "Qcalc", vazao_prevista := valor
             ][, horizonte := as.integer(data_previsao - data_caso)]
             dtp <- dtp[nome == input$sub_bacia_analise]
             obs <- data.table::copy(vazao_posto)[, vazao_observada := valor]
@@ -1589,6 +1618,143 @@ executa_visualizador_previsao <- function(){
                 xaxis = list(title = "Vazão"),
                 yaxis = list(title = "Prob. Acumulada", range = c(0,1))
             )
+        })
+
+        # Selecionar / limpar todos os casos selecionado para validacao
+        shiny::observeEvent(input$btn_all, {
+            shiny::req(previsao(), input$ano_validacao)
+
+            # filtra apenas os casos do ano selecionado
+            casos_ano <- previsao()[
+                lubridate::year(data_caso) == input$ano_validacao,
+                unique(data_caso)
+            ]
+            
+            # atualiza o selectize com esses casos
+            shiny::updateSelectizeInput(
+                session,
+                "sel_casos_validacao",
+                choices  = as.character(casos_ano),   # opcional: atualizar choices também
+                selected = as.character(casos_ano)
+            )
+        })
+        shiny::observeEvent(input$btn_none, {
+            shiny::req(previsao())
+            shiny::updateSelectizeInput(session, "sel_casos_validacao", selected = character(0))
+        })
+
+        # 3.1) Após clicar em "Carregar anos", exibe seletor de anos
+        output$ano_validacao <- shiny::renderUI({
+            anos <- NULL
+            if (!is.null(previsao())) {
+            anos <- sort(unique(year(previsao()$data_caso)))
+            }
+            shiny::selectInput(
+            "ano_validacao",
+            "Selecione o ano:",
+            choices  = anos,
+            selected = if (length(anos)) anos[1] else NULL
+            )
+        })
+
+        # 3.2) Após selecionar ano, exibe seletor de casos apenas desse ano
+        output$sel_casos_validacao <- shiny::renderUI({
+            casos_choices <- NULL
+            if (!is.null(previsao()) && !is.null(input$ano_validacao)) {
+            anosel <- as.integer(input$ano_validacao)
+            casos_choices <- previsao()[
+                year(data_caso) == anosel,
+                unique(data_caso)
+            ]
+            casos_choices <- format(casos_choices, "%Y-%m-%d")
+            }
+            shiny::selectizeInput(
+            "sel_casos_validacao",
+            "Rodadas de validação:",
+            choices  = casos_choices,
+            selected = casos_choices,
+            multiple = TRUE,
+            options  = list(
+                placeholder = "Selecione datas…",
+                plugins     = list("remove_button"),
+                maxItems    = NULL
+            )
+            )
+        })
+
+         # 3.3) seleciona variaveis
+        output$variavel_validacao <- shiny::renderUI({
+            variaveis <- NULL
+            if (!is.null(previsao())) {
+                variaveis <- sort(unique(previsao()$variavel))
+            }
+            shiny::selectizeInput(
+            "variavel_validacao",
+            "Selecione as variaveis:",
+            choices  = variaveis,
+            multiple = TRUE,
+            selected = if (!is.null(previsao())) "Qcalc" else NULL,
+            options  = list(
+                placeholder = "Selecione variaveis…",
+                plugins     = list("remove_button"),
+                maxItems    = NULL
+            )
+            )
+        })
+
+        # Prepara o objeto xts reativo para grafico de validacao por ano
+        ts_data <- shiny::reactive({
+            shiny::req(input$sel_casos_validacao)       # precisa de ao menos 1
+            
+            # filtra previsões pelo vetor de strings
+            sim <- data.table::copy(previsao()[data_caso %in% input$sel_casos_validacao 
+                                & variavel %in% input$variavel_validacao])
+            sim[, cenario := paste0(variavel, "_", data_caso)]
+            observada <- data.table::copy(vazao_observada())
+            anosel <- as.integer(input$ano_validacao)
+            casos_choices <- previsao()[
+                year(data_caso) == anosel,
+                unique(data_caso)
+            ]
+            datas_completa <- previsao()[data_caso %in% casos_choices, unique(data_previsao)]
+            observada <- observada[data %in% datas_completa]
+            setnames(observada, c("valor"), c("vazao_observada"))
+            # wide: cada cenario vira coluna
+            wide_sim <- data.table::dcast(
+            sim,
+            data_previsao ~ cenario,
+            value.var = "valor"
+            )
+
+            # merge com observada
+            wide_all <- merge(
+            x = wide_sim,
+            y = observada[, .(data, vazao_observada)],
+            by.x = "data_previsao", by.y = "data",
+            all = TRUE
+            )
+            
+            # monta xts
+            z <- xts::xts(
+            x       = wide_all[, setdiff(names(wide_all), "data_previsao"), with = FALSE],
+            order.by = wide_all$data_previsao
+            )
+            
+            # reordena para garantir observada primeiro
+            cols <- colnames(z)
+            cols <- c("vazao_observada", setdiff(cols, "vazao_observada"))
+            z[, cols]
+        })
+
+        # Renderiza o dygraph
+        output$validacao_ano <- dygraphs::renderDygraph({
+            z <- ts_data()
+            dygraphs::dygraph(z, main = "Validacao") %>%
+            dygraphs::dyAxis("y", label = "Vazão (m³/s)") %>%
+            dygraphs::dyOptions(strokeWidth = 1, drawPoints = TRUE, pointSize = 1) %>%
+            dygraphs::dyLegend(show = "always", width = 300) %>%
+            dygraphs::dySeries("vazao_observada", color = "#0000FF")  %>%
+            dygraphs::dyRangeSelector()
         })
 
     }
