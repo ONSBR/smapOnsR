@@ -1250,7 +1250,9 @@ executa_visualizador_calibracao_pmur <- function(){
                         data.table::setnames(metricas, c("lubridate", "V1"), c("mes", "valor"))
                         
                         grafico_mensal <- ggplot2::ggplot(data = metricas[estatistica == input$estatistica], 
-                                            ggplot2::aes(x = mes, y = valor, color = tipo)) + ggplot2::geom_line() + ggplot2::theme_light()
+                                            ggplot2::aes(x = mes, y = valor, color = tipo)) + 
+                                            ggplot2::geom_line() + ggplot2::theme_light() +
+                                            ggplot2::scale_color_hue(direction = -1)
                         grafico_mensal <- plotly::ggplotly(grafico_mensal)
                         grafico_mensal
                     }
