@@ -10,6 +10,8 @@
 #' @importFrom future future value resolved
 #' @importFrom DT renderDataTable dataTableOutput
 #' @importFrom plotly renderPlotly plotlyOutput plot_ly
+#' @importFrom htmlwidgets saveWidget
+#' @importFrom webshot2 webshot
 #' @importFrom moments skewness kurtosis
 #' @export
 
@@ -201,7 +203,10 @@ executa_visualizador_calibracao_pmur <- function(){
                         shiny::downloadButton("download_precipitacao_validacao", "Download  precipitacao_validacao_sub_bacia.csv"),
                         shiny::downloadButton("download_funcao_objetivo_validacao", "Download funcao_objetivo_validacao_sub_bacia.csv"),
                         shiny::downloadButton("download_otimizacao_validacao", "Download otimizacao_validacao_sub_bacia.csv"),
-                        shiny::downloadButton("download_metricas_validacao", "Download  metricas_validacao_sub_bacia.csv")
+                        shiny::downloadButton("download_metricas_validacao", "Download metricas_validacao_sub_bacia.csv"),
+                        shiny::hr(),
+                        shiny::downloadButton("download_grafico_validacao", "Download grafico_validacao_sub_bacia.csv"),
+                        shiny::downloadButton("download_grafico_validacao_ano", "Download grafico_validacao_ano_sub_bacia.csv")
                     ),
                     shiny::mainPanel(
                         shiny::fluidRow(
@@ -1642,20 +1647,31 @@ executa_visualizador_calibracao_pmur <- function(){
             ]
             xts::xts(resumo[, .(data_caso, vazao_prevista, vazao_observada)], order.by = resumo$data_caso)
         })
-        
-        output$grafico_dy <- dygraphs::renderDygraph({
+
+        # Função auxiliar: salva o dygraph como um html temporário
+        save_dygraph_html <- function(widget, html_file) {
+            htmlwidgets::saveWidget(widget, html_file, selfcontained = TRUE)
+        }
+
+        grafico_dy_widget <- reactive({
             shiny::req(resultados$previsao)
-            dygraphs::dygraph(grafico_xts(),
-                                main = input$sub_bacia) %>%
-            dygraphs::dyHighlight(highlightCircleSize = 5,
-                                highlightSeriesBackgroundAlpha = 0.2,
-                                hideOnMouseOut = FALSE,
-                                highlightSeriesOpts = list(strokeWidth = 2)) %>% 
-            dygraphs::dyRangeSelector() %>%
-            dygraphs::dyAxis("y", label = "Vazao (m3/s)", independentTicks = TRUE) %>%
-            dygraphs::dySeries("vazao_observada", color = "#0000FF")  %>%
-            dygraphs::dySeries("vazao_prevista", color = "#FF0000")
+            dygraphs::dygraph(grafico_xts(), main = input$sub_bacia) %>%
+                dygraphs::dyHighlight(
+                highlightCircleSize = 5,
+                highlightSeriesBackgroundAlpha = 0.2,
+                hideOnMouseOut = FALSE,
+                highlightSeriesOpts = list(strokeWidth = 2)
+                ) %>% 
+                dygraphs::dyAxis("y", label = "Vazão (m³/s)", independentTicks = TRUE) %>%
+                dygraphs::dySeries("vazao_observada", color = "#0000FF")  %>%
+                dygraphs::dySeries("vazao_prevista",  color = "#FF0000")  %>%
+                dygraphs::dyRangeSelector()
         })
+
+        output$grafico_dy <- dygraphs::renderDygraph({
+            grafico_dy_widget()
+        })
+
 
         # reactive com o data.table filtrado
         cdf_data <- shiny::reactive({
@@ -1844,15 +1860,19 @@ executa_visualizador_calibracao_pmur <- function(){
             z[, cols]
         })
 
-        # Renderiza o dygraph
+        grafico_validacao_ano <- shiny::reactive({
+            shiny::req(resultados$previsao)
+                z <- ts_data()
+                dygraphs::dygraph(z, main = "Validacao") %>%
+                dygraphs::dyAxis("y", label = "Vazão (m³/s)") %>%
+                dygraphs::dyOptions(strokeWidth = 1, drawPoints = TRUE, pointSize = 1) %>%
+                dygraphs::dyLegend(show = "always", width = 300) %>%
+                dygraphs::dySeries("vazao_observada", color = "#0000FF")  %>%
+                dygraphs::dyRangeSelector()
+        })
+
         output$validacao_ano <- dygraphs::renderDygraph({
-            z <- ts_data()
-            dygraphs::dygraph(z, main = "Validacao") %>%
-            dygraphs::dyAxis("y", label = "Vazão (m³/s)") %>%
-            dygraphs::dyOptions(strokeWidth = 1, drawPoints = TRUE, pointSize = 1) %>%
-            dygraphs::dyLegend(show = "always", width = 300) %>%
-            dygraphs::dySeries("vazao_observada", color = "#0000FF")  %>%
-            dygraphs::dyRangeSelector()
+            grafico_validacao_ano()
         })
 
         parametros_exportacao <- shiny::reactive({
@@ -2088,6 +2108,53 @@ executa_visualizador_calibracao_pmur <- function(){
             content = function(file) {
                 utils::write.table(resultados$resultado, file, quote = FALSE, row.names = FALSE, sep = ";")
             }
+        )
+
+        # Handler para PNG
+        output$download_grafico_validacao <- shiny::downloadHandler(
+            filename = function() {
+                paste0("grafico_validacao_", input$sub_bacia, ".png")
+            },
+            content = function(file) {
+                # 1) gera o widget novamente
+                widget <- grafico_dy_widget()
+
+                # 2) salva um HTML self-contained num arquivo temporário
+                tmp_html <- tempfile(fileext = ".html")
+                htmlwidgets::saveWidget(widget, tmp_html, selfcontained = FALSE)
+
+                # 3) captura screenshot via webshot
+                webshot2::webshot(
+                    url       = tmp_html,
+                    file      = file,
+                    vwidth    = 1200,
+                    vheight   = 800
+                )
+            },
+            contentType = "image/png"
+        )
+
+        output$download_grafico_validacao_ano <- shiny::downloadHandler(
+            filename = function() {
+                paste0("grafico_validacao_ano", input$sub_bacia, ".png")
+            },
+            content = function(file) {
+                # 1) gera o widget novamente
+                widget <- grafico_validacao_ano()
+
+                # 2) salva um HTML self-contained num arquivo temporário
+                tmp_html <- tempfile(fileext = ".html")
+                htmlwidgets::saveWidget(widget, tmp_html, selfcontained = FALSE)
+
+                # 3) captura screenshot via webshot
+                webshot2::webshot(
+                    url       = tmp_html,
+                    file      = file,
+                    vwidth    = 1200,
+                    vheight   = 800
+                )
+            },
+            contentType = "image/png"
         )
     }
 

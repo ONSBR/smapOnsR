@@ -30,6 +30,8 @@ Imports:
     optimParallel,
     doParallel,
     parallel,
+    htmlwidgets,
+    webshot2,
     zoo
 Remotes: ONSBR/funcaoSmapCpp@v1.2.2
 LazyData: true
