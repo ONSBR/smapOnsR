@@ -165,15 +165,26 @@ executa_validacao_calibracao <- function(pasta_caso){
 
     datas <- cria_datas(periodos[parametro == "data_inicio_simulacao", valor], 
                         periodos[parametro == "data_final_simulacao", valor])
+    parametros[parametro == "Tuin", valor := valor * 100]
     inicializacao <- cria_inicializacao(parametros, limite_inferior_ebin = 1, 
                                         limite_superior_ebin = 1)
+    arq <- file.path(pasta_entrada, "inicializacao.csv")
+    inicializacao <- le_inicializacao(arq)
+    vazao <- le_historico_verificado(file.path(pasta_entrada, 
+                        arquivos[arquivo == "VAZAO_OBSERVADA", nome_arquivo]))
+    data_minima <- max(datas[, min(data)], 
+                (min(vazao$data) - 
+                inicializacao[variavel == "numero_dias_assimilacao", unique(valor)]))
+    data_maxima <- min(datas[, max(data)], 
+                (max(vazao$data) - datas[, unique(numero_dias_previsao)]))
+    datas <- datas[data >= data_minima & data <= data_maxima]
     sub_bacias <- cria_sub_bacias(parametros)
 
-    write.table(datas, file = file.path(pasta_entrada, 
+    write.table(datas, file = file.path(pasta_entrada,
                 "datas_rodadas.csv"), row.names = FALSE, quote = FALSE, sep = ";")
-    write.table(inicializacao, file = file.path(pasta_entrada, 
+    write.table(entrada$inicializacao, file = file.path(pasta_entrada,
                 "inicializacao.csv"), row.names = FALSE, quote = FALSE, sep = ";")
-    write.table(sub_bacias, file = file.path(pasta_entrada, 
+    write.table(sub_bacias, file = file.path(pasta_entrada,
                 "sub_bacias.csv"), row.names = FALSE, quote = FALSE, sep = ";")
 
     entrada <- le_arq_entrada_novo(pasta_entrada)
@@ -191,7 +202,7 @@ executa_validacao_calibracao <- function(pasta_caso){
             entrada$postos_plu, entrada$datas_rodadas, entrada$sub_bacias$nome)
     }
 
-    saida$previsao <- saida$previsao[variavel == "Qcalc"]
+    #saida$previsao <- saida$previsao[variavel == "Qcalc"]
     saida$previsao <- saida$previsao[data_caso >= periodos[parametro == "data_inicio_objetivo", valor] &
                     data_caso <= periodos[parametro == "data_final_objetivo",valor]]
 
