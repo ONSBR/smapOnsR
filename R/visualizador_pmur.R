@@ -205,8 +205,8 @@ executa_visualizador_calibracao_pmur <- function(){
                         shiny::downloadButton("download_otimizacao_validacao", "Download otimizacao_validacao_sub_bacia.csv"),
                         shiny::downloadButton("download_metricas_validacao", "Download metricas_validacao_sub_bacia.csv"),
                         shiny::hr(),
-                        shiny::downloadButton("download_grafico_validacao", "Download grafico_validacao_sub_bacia.csv"),
-                        shiny::downloadButton("download_grafico_validacao_ano", "Download grafico_validacao_ano_sub_bacia.csv")
+                        shiny::downloadButton("download_grafico_validacao", "Download grafico_validacao_sub_bacia.png"),
+                        shiny::downloadButton("download_grafico_validacao_ano", "Download grafico_validacao_ano_sub_bacia.png")
                     ),
                     shiny::mainPanel(
                         shiny::fluidRow(
@@ -1655,7 +1655,7 @@ executa_visualizador_calibracao_pmur <- function(){
             htmlwidgets::saveWidget(widget, html_file, selfcontained = TRUE)
         }
 
-        grafico_dy_widget <- reactive({
+        grafico_dy_widget <- shiny::reactive({
             shiny::req(resultados$previsao)
             dygraphs::dygraph(grafico_xts(), main = input$sub_bacia) %>%
                 dygraphs::dyHighlight(
