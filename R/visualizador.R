@@ -1193,7 +1193,7 @@ executa_visualizador_previsao <- function(){
                             shiny::selectInput("data_caso", shiny::h3("Data do Caso"), 
                             choices = NULL),
                             shiny::selectInput("sub_bacia", shiny::h3("Sub-bacia"), 
-                            choices = NULL),
+                            choices = NULL)
                         )
                     ),
                     shiny::mainPanel(
@@ -1225,9 +1225,15 @@ executa_visualizador_previsao <- function(){
                             shiny::selectInput("discretizacao", "Discretizacao", choices = c("Diaria" = "diaria", "Semanal" = "semanal", "Mensal" = "mensal")),
                             shiny::uiOutput("horizonte_ui")
                         ),
-                            shiny::tabPanel("Tabela",
+                        shiny::hr(),
+                        shiny::fluidRow(
                             shiny::tableOutput("tabela_metricas")
                         ),
+                        shiny::hr(),
+                        shiny::fluidRow(
+                            shiny::downloadButton("download_grafico_validacao", "Download grafico_validacao_sub_bacia.png"),
+                            shiny::downloadButton("download_grafico_validacao_ano", "Download grafico_validacao_ano_sub_bacia.png")
+                        )
                     ),
                     shiny::mainPanel(
                         shiny::fluidRow(
@@ -1264,6 +1270,9 @@ executa_visualizador_previsao <- function(){
     )
 
     servidor_previsao <- function(input, output, session) {
+        options(
+            shiny.maxRequestSize = 60 * 1024^2 # 30 MB
+        )
 
         previsao <- shiny::reactive({
             arquivo_previsao <- input$arquivo_previsao$datapath
@@ -1466,7 +1475,8 @@ executa_visualizador_previsao <- function(){
             
             data_inicio_objetivo <- input$periodo_validacao[1]
             data_fim_objetivo <- input$periodo_validacao[2]
-            previsao <- previsao[variavel == "Qcalc"]
+            previsao <- previsao[nome == input$sub_bacia_analise& 
+                                variavel == "Qcalc"]
             previsao <- previsao[data_caso >= data_inicio_objetivo &
                                 data_caso <= data_fim_objetivo]
             obs <- vazao_observada[posto == unique(previsao$nome)]
@@ -1499,8 +1509,8 @@ executa_visualizador_previsao <- function(){
             vazao_observada <- data.table::copy(vazao_observada())
             vazao_posto <- vazao_observada[posto == input$sub_bacia_analise]
             # --- 1) Merge previsao + observacao (como antes) ---
-            dtp <- data.table::copy(previsao())[variavel == "Qcalc", vazao_prevista := valor
-            ][, horizonte := as.integer(data_previsao - data_caso)]
+            dtp <- data.table::copy(previsao())[nome == input$sub_bacia_analise &
+            variavel == "Qcalc", vazao_prevista := valor][, horizonte := as.integer(data_previsao - data_caso)]
             dtp <- dtp[nome == input$sub_bacia_analise]
             obs <- data.table::copy(vazao_posto)[, vazao_observada := valor]
 
@@ -1544,8 +1554,13 @@ executa_visualizador_previsao <- function(){
             ]
             xts::xts(resumo[, .(as.Date(data_caso), vazao_prevista, vazao_observada)], order.by = as.Date(resumo$data_caso))
         })
-        
-        output$grafico_dy <- dygraphs::renderDygraph({
+
+        # Função auxiliar: salva o dygraph como um html temporário
+        save_dygraph_html <- function(widget, html_file) {
+            htmlwidgets::saveWidget(widget, html_file, selfcontained = TRUE)
+        }
+
+        grafico_dy_widget <- shiny::reactive({
             shiny::req(resultados())
             dygraphs::dygraph(grafico_xts(),
                                 main = input$sub_bacia) %>%
@@ -1558,15 +1573,20 @@ executa_visualizador_previsao <- function(){
             dygraphs::dySeries("vazao_observada", color = "#0000FF")  %>%
             dygraphs::dySeries("vazao_prevista", color = "#FF0000")
         })
+
+        output$grafico_dy <- dygraphs::renderDygraph({
+            grafico_dy_widget()
+        })
         
          # reactive com o data.table filtrado
         cdf_data <- shiny::reactive({
             shiny::req(resultados()) 
-            previsao <- data.table::copy(previsao())
-            observacao <- data.table::copy(vazao_observada())
+            previsao <- data.table::copy(previsao()[nome == input$sub_bacia_analise & variavel == "Qcalc"])
+            observacao <- data.table::copy(vazao_observada()[posto == input$sub_bacia_analise])
             if (input$discretizacao == "diaria") {
                 previsao <- merge(
-                    previsao, observacao,
+                    previsao, 
+                    observacao,
                     by.x = c("data_previsao", "nome"),
                     by.y = c("data", "posto"),
                     all.x = TRUE
@@ -1746,8 +1766,8 @@ executa_visualizador_previsao <- function(){
             z[, cols]
         })
 
-        # Renderiza o dygraph
-        output$validacao_ano <- dygraphs::renderDygraph({
+        grafico_validacao_ano <- shiny::reactive({
+            shiny::req(resultados())
             z <- ts_data()
             dygraphs::dygraph(z, main = "Validacao") %>%
             dygraphs::dyAxis("y", label = "Vazão (m³/s)") %>%
@@ -1756,6 +1776,57 @@ executa_visualizador_previsao <- function(){
             dygraphs::dySeries("vazao_observada", color = "#0000FF")  %>%
             dygraphs::dyRangeSelector()
         })
+
+        output$validacao_ano <- dygraphs::renderDygraph({
+            grafico_validacao_ano()
+        })
+
+        # Handler para PNG
+        output$download_grafico_validacao <- shiny::downloadHandler(
+            filename = function() {
+                paste0("grafico_validacao_", input$sub_bacia, ".png")
+            },
+            content = function(file) {
+                # 1) gera o widget novamente
+                widget <- grafico_dy_widget()
+
+                # 2) salva um HTML self-contained num arquivo temporário
+                tmp_html <- tempfile(fileext = ".html")
+                htmlwidgets::saveWidget(widget, tmp_html, selfcontained = FALSE)
+
+                # 3) captura screenshot via webshot
+                webshot2::webshot(
+                    url       = tmp_html,
+                    file      = file,
+                    vwidth    = 1200,
+                    vheight   = 800
+                )
+            },
+            contentType = "image/png"
+        )
+
+        output$download_grafico_validacao_ano <- shiny::downloadHandler(
+            filename = function() {
+                paste0("grafico_validacao_ano", input$sub_bacia, ".png")
+            },
+            content = function(file) {
+                # 1) gera o widget novamente
+                widget <- grafico_validacao_ano()
+
+                # 2) salva um HTML self-contained num arquivo temporário
+                tmp_html <- tempfile(fileext = ".html")
+                htmlwidgets::saveWidget(widget, tmp_html, selfcontained = FALSE)
+
+                # 3) captura screenshot via webshot
+                webshot2::webshot(
+                    url       = tmp_html,
+                    file      = file,
+                    vwidth    = 1200,
+                    vheight   = 800
+                )
+            },
+            contentType = "image/png"
+        )
 
     }
 
