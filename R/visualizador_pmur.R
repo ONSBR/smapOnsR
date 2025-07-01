@@ -1496,7 +1496,7 @@ executa_visualizador_calibracao_pmur <- function(){
             inicializacao <- cria_inicializacao(nome  = unique(parametros$nome),
                               Ebin = input$Ebin_validacao,
                               Supin = input$Supin_validacao,
-                              Tuin = input$Tuin_validacao * 100,
+                              Tuin = input$Tuin_validacao,
                               limite_inferior_ebin = input$limite_inferior_ebin,
                               limite_superior_ebin = input$limite_superior_ebin,
                               limite_inferior_prec = input$limite_inferior_prec,
