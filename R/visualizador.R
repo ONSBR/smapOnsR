@@ -1210,7 +1210,7 @@ executa_visualizador_previsao <- function(){
             shiny::tabPanel("Tabela Assimilacao",
                 DT::dataTableOutput("tabela_assimilacao")
             ),
-            shiny::tabPanel("Análise completa",
+            shiny::tabPanel("Analise completa",
                 shiny::sidebarLayout(
                     shiny::sidebarPanel(
                         shiny::fluidRow(
@@ -1232,12 +1232,13 @@ executa_visualizador_previsao <- function(){
                         shiny::hr(),
                         shiny::fluidRow(
                             shiny::downloadButton("download_grafico_validacao", "Download grafico_validacao_sub_bacia.png"),
-                            shiny::downloadButton("download_grafico_validacao_ano", "Download grafico_validacao_ano_sub_bacia.png")
+                            shiny::downloadButton("download_grafico_validacao_ano", "Download grafico_validacao_ano_sub_bacia.png"),
+                            shiny::downloadButton("baixar_todos_anos", "Baixar todos os anos (.zip)")
                         )
                     ),
                     shiny::mainPanel(
                         shiny::fluidRow(
-                                shiny::tabPanel("Gráfico",
+                                shiny::tabPanel("Grafico",
                                 dygraphs::dygraphOutput("grafico_dy")
                             ),
                                 shiny::tabPanel("CDF",
@@ -1536,7 +1537,7 @@ executa_visualizador_previsao <- function(){
 
             # --- 4) Filtra apenas o horizonte escolhido ---
             if (input$discretizacao == "diaria") {
-                # diário: filtra exatamente o horizonte (0,1,2,…)
+                # diario: filtra exatamente o horizonte (0,1,2,…)
                 m_sel <- m[horizonte == input$horizonte]
             } else {
                 # semanal ou mensal: usa a janela que agrupa horizonte=0..tamanho-1 em horizon_calc=1, etc.
@@ -1555,7 +1556,7 @@ executa_visualizador_previsao <- function(){
             xts::xts(resumo[, .(as.Date(data_caso), vazao_prevista, vazao_observada)], order.by = as.Date(resumo$data_caso))
         })
 
-        # Função auxiliar: salva o dygraph como um html temporário
+        # Funcao auxiliar: salva o dygraph como um html temporario
         save_dygraph_html <- function(widget, html_file) {
             htmlwidgets::saveWidget(widget, html_file, selfcontained = TRUE)
         }
@@ -1635,7 +1636,7 @@ executa_visualizador_previsao <- function(){
             ) %>%
             plotly::layout(
                 title = paste0("CDF — ", input$discretizacao, " (h=", input$horizonte, ")"),
-                xaxis = list(title = "Vazão"),
+                xaxis = list(title = "Vazao"),
                 yaxis = list(title = "Prob. Acumulada", range = c(0,1))
             )
         })
@@ -1663,7 +1664,7 @@ executa_visualizador_previsao <- function(){
             shiny::updateSelectizeInput(session, "sel_casos_validacao", selected = character(0))
         })
 
-        # 3.1) Após clicar em "Carregar anos", exibe seletor de anos
+        # 3.1) Apos clicar em "Carregar anos", exibe seletor de anos
         output$ano_validacao <- shiny::renderUI({
             anos <- NULL
             if (!is.null(previsao())) {
@@ -1677,20 +1678,20 @@ executa_visualizador_previsao <- function(){
             )
         })
 
-        # 3.2) Após selecionar ano, exibe seletor de casos apenas desse ano
+        # 3.2) Apos selecionar ano, exibe seletor de casos apenas desse ano
         output$sel_casos_validacao <- shiny::renderUI({
             casos_choices <- NULL
             if (!is.null(previsao()) && !is.null(input$ano_validacao)) {
             anosel <- as.integer(input$ano_validacao)
             casos_choices <- previsao()[
-                year(data_caso) == anosel,
+                lubridate::year(data_caso) == anosel,
                 unique(data_caso)
             ]
             casos_choices <- format(casos_choices, "%Y-%m-%d")
             }
             shiny::selectizeInput(
             "sel_casos_validacao",
-            "Rodadas de validação:",
+            "Rodadas de validacao:",
             choices  = casos_choices,
             selected = casos_choices,
             multiple = TRUE,
@@ -1722,64 +1723,100 @@ executa_visualizador_previsao <- function(){
             )
         })
 
-        # Prepara o objeto xts reativo para grafico de validacao por ano
-        ts_data <- shiny::reactive({
-            shiny::req(input$sel_casos_validacao)       # precisa de ao menos 1
-            
-            # filtra previsões pelo vetor de strings
-            sim <- data.table::copy(previsao()[data_caso %in% input$sel_casos_validacao 
-                                & variavel %in% input$variavel_validacao])
-            sim[, cenario := paste0(variavel, "_", data_caso)]
-            observada <- data.table::copy(vazao_observada())
-            anosel <- as.integer(input$ano_validacao)
-            casos_choices <- previsao()[
-                year(data_caso) == anosel,
-                unique(data_caso)
+        # 2.1) Reativa que gera o objeto xts dado um ano
+        ts_data_ano <- function(ano, sel_casos_validacao) {
+            sim <- data.table::copy(previsao())[
+                lubridate::year(data_caso) == ano & variavel %in% input$variavel_validacao &
+                data_caso %in% sel_casos_validacao & nome == input$sub_bacia_analise
             ]
-            datas_completa <- previsao()[data_caso %in% casos_choices, unique(data_previsao)]
-            observada <- observada[data %in% datas_completa]
-            setnames(observada, c("valor"), c("vazao_observada"))
-            # wide: cada cenario vira coluna
+            sim[, cenario := paste0(variavel, "_", data_caso)]
+            obs <- data.table::copy(vazao_observada()[posto == input$sub_bacia_analise])
+            datas_completa <- previsao()[lubridate::year(data_caso) == ano, unique(data_previsao)]
+            obs <- obs[data %in% datas_completa]
+            setnames(obs, "valor", "vazao_observada")
+            
             wide_sim <- data.table::dcast(
-            sim,
-            data_previsao ~ cenario,
-            value.var = "valor"
+                sim, data_previsao ~ cenario, value.var = "valor"
             )
-
-            # merge com observada
             wide_all <- merge(
-            x = wide_sim,
-            y = observada[, .(data, vazao_observada)],
-            by.x = "data_previsao", by.y = "data",
-            all = TRUE
+            wide_sim, obs[, .(data, vazao_observada)],
+                by.x = "data_previsao", by.y = "data", all = TRUE
             )
-            
-            # monta xts
             z <- xts::xts(
-            x       = wide_all[, setdiff(names(wide_all), "data_previsao"), with = FALSE],
-            order.by = wide_all$data_previsao
+                x        = wide_all[, setdiff(names(wide_all), "data_previsao"), with = FALSE],
+                order.by = wide_all$data_previsao
             )
-            
-            # reordena para garantir observada primeiro
+            # garante observada em primeiro
             cols <- colnames(z)
-            cols <- c("vazao_observada", setdiff(cols, "vazao_observada"))
-            z[, cols]
-        })
-
-        grafico_validacao_ano <- shiny::reactive({
-            shiny::req(resultados())
-            z <- ts_data()
-            dygraphs::dygraph(z, main = "Validacao") %>%
-            dygraphs::dyAxis("y", label = "Vazão (m³/s)") %>%
-            dygraphs::dyOptions(strokeWidth = 1, drawPoints = TRUE, pointSize = 1) %>%
-            dygraphs::dyLegend(show = "always", width = 300) %>%
-            dygraphs::dySeries("vazao_observada", color = "#0000FF")  %>%
-            dygraphs::dyRangeSelector()
-        })
-
+            z[, c("vazao_observada", setdiff(cols, "vazao_observada"))]
+        }
+        
+        # 2.2) Funçao que monta o dygraph a partir de um xts
+        grafico_ano_widget <- function(z, titulo) {
+            dygraphs::dygraph(z, main = titulo) %>%
+            dygraphs::dyAxis("y", label = "Vazao (m³/s)") %>%
+            dygraphs::dyOptions(strokeWidth = 1) %>%
+            dygraphs::dyUnzoom() %>%
+            dygraphs::dySeries("vazao_observada", color = "#0000FF", strokeWidth = 3) %>%
+            dygraphs::dyRangeSelector() %>%
+            dygraphs::dyLegend(show = "follow")
+        }
+        
+        # 2.3) Render no UI apenas para um ano (por exemplo input$ano_validacao)
         output$validacao_ano <- dygraphs::renderDygraph({
-            grafico_validacao_ano()
+            shiny::req(input$ano_validacao)
+            z <- ts_data_ano(as.integer(input$ano_validacao), input$sel_casos_validacao)
+            grafico_ano_widget(z, paste0("Validaçao ", input$ano_validacao))
         })
+        
+        # 2.4) DownloadHandler que gera todos os anos e zipa
+        output$baixar_todos_anos <- shiny::downloadHandler(
+            filename = function() {
+                paste0("graficos_validacao_anos_", Sys.Date(), ".zip")
+            },
+            content = function(zipfile) {
+            # 1) lista de anos a gerar
+            anos <- sort(unique(year(previsao()$data_caso)))
+            
+            # 2) para cada ano: gerar widget → html → png
+            tmp_dir <- tempdir()
+            png_files <- character(length(anos))
+            
+            for (i in seq_along(anos)) {
+                ano <- anos[i]
+                sel_casos <- previsao()[
+                    lubridate::year(data_caso) == anos[i],
+                    unique(data_caso)
+                ]
+                z    <- ts_data_ano(ano, sel_casos)
+                w    <- grafico_ano_widget(z, paste0("Validaçao ", ano))
+                
+                # salva HTML (sem selfcontained para nao precisar de pandoc)
+                htmlf <- file.path(tmp_dir, paste0("graf_", ano, ".html"))
+                htmlwidgets::saveWidget(w, htmlf, selfcontained = FALSE)
+                
+                # captura PNG com webshot (assegure que webshot2 ou phantomjs esteja instalado)
+                pngf <- file.path(tmp_dir, paste0("graf_", ano, ".png"))
+                webshot2::webshot(
+                    url      = htmlf,
+                    file     = pngf,
+                    vwidth   = 1600,
+                    vheight  = 600,
+                    cliprect = "viewport",
+                    delay    = 1
+                )
+                png_files[i] <- pngf
+            }
+            
+            # 3) zipa todos os PNGs num unico ZIP
+            # usa utils::zip (Windows) ou zip::zipr (cross-platform)
+            # aqui usaremos utils::zip:
+            owd <- setwd(tmp_dir)
+            on.exit(setwd(owd), add = TRUE)
+            utils::zip(zipfile, basename(png_files))
+            },
+            contentType = "application/zip"
+        )
 
         # Handler para PNG
         output$download_grafico_validacao <- shiny::downloadHandler(
@@ -1790,7 +1827,7 @@ executa_visualizador_previsao <- function(){
                 # 1) gera o widget novamente
                 widget <- grafico_dy_widget()
 
-                # 2) salva um HTML self-contained num arquivo temporário
+                # 2) salva um HTML self-contained num arquivo temporario
                 tmp_html <- tempfile(fileext = ".html")
                 htmlwidgets::saveWidget(widget, tmp_html, selfcontained = FALSE)
 
@@ -1811,11 +1848,13 @@ executa_visualizador_previsao <- function(){
             },
             content = function(file) {
                 # 1) gera o widget novamente
-                widget <- grafico_validacao_ano()
+                ano  <- input$ano_validacao
+                z    <- ts_data_ano(ano, input$sel_casos_validacao)
+                w    <- grafico_ano_widget(z, paste0("Validaçao ", ano))
 
-                # 2) salva um HTML self-contained num arquivo temporário
+                # 2) salva um HTML self-contained num arquivo temporario
                 tmp_html <- tempfile(fileext = ".html")
-                htmlwidgets::saveWidget(widget, tmp_html, selfcontained = FALSE)
+                htmlwidgets::saveWidget(w, tmp_html, selfcontained = FALSE)
 
                 # 3) captura screenshot via webshot
                 webshot2::webshot(
