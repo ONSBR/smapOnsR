@@ -2129,8 +2129,8 @@ executa_visualizador_calibracao_pmur <- function(){
                 webshot2::webshot(
                     url       = tmp_html,
                     file      = file,
-                    vwidth    = 1200,
-                    vheight   = 800
+                    vwidth    = 1600,
+                    vheight   = 600
                 )
             },
             contentType = "image/png"
