@@ -82,27 +82,27 @@ test_that("transformacao historico em previsao", {
 
 #------testes funcao cria_inicializacao------------------
 # 1) Testa a entrada via data.table
-test_that("Criacao de data.table inicializacao via data.table gera saída correta", {
+test_that("Criacao de data.table inicializacao via data.table gera saida correta", {
   dt_in <- data.table(
     nome      = c("a", "a", "a", "b", "b", "b", "b"),
     parametro = c("Ebin", "Supin", "Tuin", "Ebin", "Supin", "Tuin", "X"),
     valor     = c(10, 5, 3, 20, 7, 4, 999)
   )
-  # Deve ignorar o parâmetro "X"
+  # Deve ignorar o parametro "X"
   dt_out <- cria_inicializacao(parametros = dt_in)
 
   # Para cada nome deve ter exatamente 9 linhas
   expect_equal(dt_out[nome == "a", .N], 9)
   expect_equal(dt_out[nome == "b", .N], 9)
 
-  # Verifica que as variáveis estão corretas
+  # Verifica que as variaveis estao corretas
   vars_a <- dt_out[nome == "a", variavel]
   expect_setequal(vars_a, c("Ebin", "Supin", "Tuin",
                             "numero_dias_assimilacao", "ajusta_precipitacao",
                             "limite_inferior_ebin", "limite_superior_ebin",
                             "limite_inferior_prec", "limite_superior_prec"))
   
-  # Valores fixos padrão
+  # Valores fixos padrao
   expect_equal(
     dt_out[nome == "a" & variavel == "numero_dias_assimilacao", valor],
     32L
@@ -114,7 +114,7 @@ test_that("Criacao de data.table inicializacao via data.table gera saída corret
 })
 
 # 2) Testa a entrada via vetores
-test_that("Entrada via vetores gera saída correta", {
+test_that("Entrada via vetores gera saida correta", {
   nomes  <- c("x", "y")
   Ebin   <- c(100, 200)
   Supin  <- c(10, 20)
@@ -126,9 +126,9 @@ test_that("Entrada via vetores gera saída correta", {
     Tuin  = Tuin
   )
   
-  # Linhas esperadas: 2 nomes × 9 variáveis = 10
+  # Linhas esperadas: 2 nomes × 9 variaveis = 10
   expect_equal(nrow(dt_out), 18)
-  # Verifica combinação de nome e valores
+  # Verifica combinacao de nome e valores
   expect_equal(
     dt_out[variavel == "Ebin", valor],
     c(100, 200)
@@ -140,7 +140,7 @@ test_that("Entrada via vetores gera saída correta", {
 })
 
 # 3) Testa valores fixos customizados
-test_that("Parâmetros fixos customizados são aplicados", {
+test_that("Parametros fixos customizados sao aplicados", {
   dt_out <- cria_inicializacao(
     nome  = "zz",
     Ebin  = 1,
@@ -159,8 +159,8 @@ test_that("Parâmetros fixos customizados são aplicados", {
   )
 })
 
-# 4) Testa erros de validação
-test_that("Erro quando falta vetores obrigatórios", {
+# 4) Testa erros de validacao
+test_that("Erro quando falta vetores obrigatorios", {
   expect_error(
     cria_inicializacao(nome = "a", Ebin = 1, Supin = 2),
     "Se 'parametros' for NULL, fornecer 'nome', 'Ebin', 'Supin' e 'Tuin'."
@@ -179,7 +179,7 @@ test_that("Erro quando vetores têm comprimentos diferentes", {
   )
 })
 
-test_that("Erro quando data.table não tem colunas esperadas", {
+test_that("Erro quando data.table nao tem colunas esperadas", {
   dt_bad <- data.table(foo = 1, bar = 2)
   expect_error(
     cria_inicializacao(parametros = dt_bad),
