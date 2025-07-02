@@ -213,7 +213,7 @@ executa_visualizador_calibracao_pmur <- function(){
                             shiny::column(3, shiny::actionButton(inputId = "botao_validacao", label = "Executa validacao", class = "btn-lg btn-success"))
                         ),
                         shiny::fluidRow(
-                                shiny::tabPanel("Gráfico",
+                                shiny::tabPanel("Grafico",
                                 dygraphs::dygraphOutput("grafico_dy")
                             )
                         ),
@@ -1591,7 +1591,7 @@ executa_visualizador_calibracao_pmur <- function(){
             shiny::req(resultados$previsao)
             dt <- data.table::copy(tabela_completa())
             dt <- dt[discretizacao == input$discretizacao]
-            # Filtra métrica
+            # Filtra metrica
             dt <- dt[horizonte == input$horizonte]
         })
         
@@ -1600,11 +1600,11 @@ executa_visualizador_calibracao_pmur <- function(){
             tabela_sel()
         })
 
-        # Gráfico com dygraphs
+        # Grafico com dygraphs
         grafico_xts <- shiny::reactive({
             shiny::req(resultados$previsao)
             
-            # --- 1) Merge previsão + observação (como antes) ---
+            # --- 1) Merge previsao + observacao (como antes) ---
             dtp <- data.table::copy(resultados$previsao)[variavel == "Qcalc", vazao_prevista := valor
             ][, horizonte := as.integer(data_previsao - data_caso)]
             obs <- data.table::copy(vazao_posto())[, vazao_observada := valor]
@@ -1631,14 +1631,14 @@ executa_visualizador_calibracao_pmur <- function(){
 
             # --- 4) Filtra apenas o horizonte escolhido ---
             if (input$discretizacao == "diaria") {
-                # diário: filtra exatamente o horizonte (0,1,2,…)
+                # diario: filtra exatamente o horizonte (0,1,2,…)
                 m_sel <- m[horizonte == input$horizonte]
             } else {
                 # semanal ou mensal: usa a janela que agrupa horizonte=0..tamanho-1 em horizon_calc=1, etc.
                 m_sel <- m[horizon_calc == input$horizonte]
             }
 
-            # --- 5) (Opcional) Agregue por data_caso se quiser médias ---
+            # --- 5) (Opcional) Agregue por data_caso se quiser medias ---
             resumo <- m_sel[
             , .(
                 vazao_observada  = mean(vazao_observada, na.rm = TRUE),
@@ -1650,7 +1650,7 @@ executa_visualizador_calibracao_pmur <- function(){
             xts::xts(resumo[, .(data_caso, vazao_prevista, vazao_observada)], order.by = resumo$data_caso)
         })
 
-        # Função auxiliar: salva o dygraph como um html temporário
+        # Funcao auxiliar: salva o dygraph como um html temporario
         save_dygraph_html <- function(widget, html_file) {
             htmlwidgets::saveWidget(widget, html_file, selfcontained = TRUE)
         }
@@ -1664,7 +1664,7 @@ executa_visualizador_calibracao_pmur <- function(){
                 hideOnMouseOut = FALSE,
                 highlightSeriesOpts = list(strokeWidth = 2)
                 ) %>% 
-                dygraphs::dyAxis("y", label = "Vazão (m³/s)", independentTicks = TRUE) %>%
+                dygraphs::dyAxis("y", label = "Vazao (m³/s)", independentTicks = TRUE) %>%
                 dygraphs::dySeries("vazao_observada", color = "#0000FF")  %>%
                 dygraphs::dySeries("vazao_prevista",  color = "#FF0000")  %>%
                 dygraphs::dyRangeSelector()
@@ -1731,7 +1731,7 @@ executa_visualizador_calibracao_pmur <- function(){
             ) %>%
             plotly::layout(
                 title = paste0("CDF — ", input$discretizacao, " (h=", input$horizonte, ")"),
-                xaxis = list(title = "Vazão"),
+                xaxis = list(title = "Vazao"),
                 yaxis = list(title = "Prob. Acumulada", range = c(0,1))
             )
         })
@@ -1750,7 +1750,7 @@ executa_visualizador_calibracao_pmur <- function(){
             shiny::updateSelectizeInput(
                 session,
                 "sel_casos_validacao",
-                choices  = as.character(casos_ano),   # opcional: atualizar choices também
+                choices  = as.character(casos_ano),   # opcional: atualizar choices tambem
                 selected = as.character(casos_ano)
             )
         })
@@ -1759,7 +1759,7 @@ executa_visualizador_calibracao_pmur <- function(){
             shiny::updateSelectizeInput(session, "sel_casos_validacao", selected = character(0))
         })
 
-        # 3.1) Após clicar em "Carregar anos", exibe seletor de anos
+        # 3.1) Apos clicar em "Carregar anos", exibe seletor de anos
         output$ano_validacao <- shiny::renderUI({
             anos <- NULL
             if (!is.null(resultados$previsao)) {
@@ -1773,7 +1773,7 @@ executa_visualizador_calibracao_pmur <- function(){
             )
         })
 
-        # 3.2) Após selecionar ano, exibe seletor de casos apenas desse ano
+        # 3.2) Apos selecionar ano, exibe seletor de casos apenas desse ano
         output$sel_casos_validacao <- shiny::renderUI({
             casos_choices <- NULL
             if (!is.null(resultados$previsao) && !is.null(input$ano_validacao)) {
@@ -1786,7 +1786,7 @@ executa_visualizador_calibracao_pmur <- function(){
             }
             shiny::selectizeInput(
             "sel_casos_validacao",
-            "Rodadas de validação:",
+            "Rodadas de validacao:",
             choices  = casos_choices,
             selected = casos_choices,
             multiple = TRUE,
@@ -1822,7 +1822,7 @@ executa_visualizador_calibracao_pmur <- function(){
         ts_data <- shiny::reactive({
             shiny::req(input$sel_casos_validacao)       # precisa de ao menos 1
             
-            # filtra previsões pelo vetor de strings
+            # filtra previsoes pelo vetor de strings
             sim <- data.table::copy(resultados$previsao[data_caso %in% input$sel_casos_validacao 
                                 & variavel %in% input$variavel_validacao])
             sim[, cenario := paste0(variavel, "_", data_caso)]
@@ -1866,7 +1866,7 @@ executa_visualizador_calibracao_pmur <- function(){
             shiny::req(resultados$previsao)
                 z <- ts_data()
                 dygraphs::dygraph(z, main = "Validacao") %>%
-                dygraphs::dyAxis("y", label = "Vazão (m³/s)") %>%
+                dygraphs::dyAxis("y", label = "Vazao (m³/s)") %>%
                 dygraphs::dyOptions(strokeWidth = 1, drawPoints = TRUE, pointSize = 1) %>%
                 dygraphs::dyLegend(show = "always", width = 300) %>%
                 dygraphs::dySeries("vazao_observada", color = "#0000FF")  %>%
@@ -2121,7 +2121,7 @@ executa_visualizador_calibracao_pmur <- function(){
                 # 1) gera o widget novamente
                 widget <- grafico_dy_widget()
 
-                # 2) salva um HTML self-contained num arquivo temporário
+                # 2) salva um HTML self-contained num arquivo temporario
                 tmp_html <- tempfile(fileext = ".html")
                 htmlwidgets::saveWidget(widget, tmp_html, selfcontained = FALSE)
 
@@ -2144,7 +2144,7 @@ executa_visualizador_calibracao_pmur <- function(){
                 # 1) gera o widget novamente
                 widget <- grafico_validacao_ano()
 
-                # 2) salva um HTML self-contained num arquivo temporário
+                # 2) salva um HTML self-contained num arquivo temporario
                 tmp_html <- tempfile(fileext = ".html")
                 htmlwidgets::saveWidget(widget, tmp_html, selfcontained = FALSE)
 

@@ -1751,7 +1751,7 @@ executa_visualizador_previsao <- function(){
             z[, c("vazao_observada", setdiff(cols, "vazao_observada"))]
         }
         
-        # 2.2) Funçao que monta o dygraph a partir de um xts
+        # 2.2) Funcao que monta o dygraph a partir de um xts
         grafico_ano_widget <- function(z, titulo) {
             dygraphs::dygraph(z, main = titulo) %>%
             dygraphs::dyAxis("y", label = "Vazao (m³/s)") %>%
@@ -1766,7 +1766,7 @@ executa_visualizador_previsao <- function(){
         output$validacao_ano <- dygraphs::renderDygraph({
             shiny::req(input$ano_validacao)
             z <- ts_data_ano(as.integer(input$ano_validacao), input$sel_casos_validacao)
-            grafico_ano_widget(z, paste0("Validaçao ", input$ano_validacao))
+            grafico_ano_widget(z, paste0("Validacao ", input$ano_validacao))
         })
         
         # 2.4) DownloadHandler que gera todos os anos e zipa
@@ -1778,7 +1778,7 @@ executa_visualizador_previsao <- function(){
             # 1) lista de anos a gerar
             anos <- sort(unique(year(previsao()$data_caso)))
             
-            # 2) para cada ano: gerar widget → html → png
+            # 2) para cada ano: gerar widget -> html -> png
             tmp_dir <- tempdir()
             png_files <- character(length(anos))
             
@@ -1789,7 +1789,7 @@ executa_visualizador_previsao <- function(){
                     unique(data_caso)
                 ]
                 z    <- ts_data_ano(ano, sel_casos)
-                w    <- grafico_ano_widget(z, paste0("Validaçao ", ano))
+                w    <- grafico_ano_widget(z, paste0("Validacao ", ano))
                 
                 # salva HTML (sem selfcontained para nao precisar de pandoc)
                 htmlf <- file.path(tmp_dir, paste0("graf_", ano, ".html"))
@@ -1850,7 +1850,7 @@ executa_visualizador_previsao <- function(){
                 # 1) gera o widget novamente
                 ano  <- input$ano_validacao
                 z    <- ts_data_ano(ano, input$sel_casos_validacao)
-                w    <- grafico_ano_widget(z, paste0("Validaçao ", ano))
+                w    <- grafico_ano_widget(z, paste0("Validacao ", ano))
 
                 # 2) salva um HTML self-contained num arquivo temporario
                 tmp_html <- tempfile(fileext = ".html")
