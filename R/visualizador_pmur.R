@@ -26,6 +26,10 @@ executa_visualizador_calibracao_pmur <- function(){
                 max-height: 30px !important;
                 overflow-y: auto !important;
             }
+            #funcao_objetivo {
+                font-size: 20px;
+                color: #333333;
+              }
             "))
         ),
         shinyjs::useShinyjs(),
@@ -135,25 +139,63 @@ executa_visualizador_calibracao_pmur <- function(){
                     ),
 
                     shiny::mainPanel(
-                        shiny::fluidRow(
-                            shiny::column(3, shiny::selectInput(inputId ="funcao_objetivo", label = shiny::h3("Selecione a funcao objetivo"), choices = c("dm", "nse", "mape", "kge", "rmse"), selected = "dm")),
-                            shiny::column(3, shiny::selectInput(inputId = "tipo_escala", label = shiny::h3("Selecione a escala das variaveis"), choices = c(0, 1), selected = 1)),
-                            shiny::column(3, shiny::selectInput(inputId ="ndeps", label = shiny::h3("Passo de otimizacao"), choices = c(1, 0.1, 0.001, 0.0001, 0.00001, 0.000001, 0.0000001), selected = 0.001))
-                        ), shiny::fluidRow(
-                            shiny::column(1)
-                        ), shiny::fluidRow(
-                            shiny::dateRangeInput("zoom_calibracao", "Zoom calibracao", start = NULL, end = NULL, min = NULL, max = NULL),
-                            dygraphs::dygraphOutput("dygraph_zoom", heigh = "600px")
-                        ), shiny::fluidRow(
-                            shiny::column(1, shiny::actionButton(inputId = "botao_calibracao", label = "Calibrar", class = "btn-lg btn-success")),
-                            shiny::column(1, shiny::checkboxGroupInput("variaveis", "variaveis", choices = c("Qsup1", "Qsup2", "Qplan"))),
-                            shiny::column(1, shiny::textOutput("funcao_objetivo")),
-                            shiny::column(6, shiny::tableOutput("tabela_metrica1")),
-                            shiny::column(3, shiny::tableOutput("tabela_metrica2")),
-                            shiny::selectInput(inputId = "estatistica", label = shiny::h3("Estatisticas mensais"), choices = c("media", "dp", "assimetria", "curtose")),
-                            plotly::plotlyOutput("metrica_mensal"),
-                            plotly::plotlyOutput("grafico_kts")
+                      # Linha 0: Botao de calibracao
+                      shiny::fluidRow(shiny::column(3, shiny::actionButton("botao_calibracao", "Calibrar", class = "btn-lg btn-success"))
+                      ),
+                      shiny::hr(),
+                      
+                      # Linha 1: SelectInputs e botao de download
+                      shiny::fluidRow(
+                        shiny::column(3, shiny::selectInput("funcao_objetivo", "Metrica para funcao objetivo:", 
+                                           choices = c("dm", "nse", "mape", "kge", "rmse"), 
+                                           selected = "dm")
+                        ),
+                        shiny::column(3, shiny::selectInput("tipo_escala", "Escala:", choices = c(0, 1), selected = 1)
+                        ),
+                        shiny::column(3, shiny::selectInput("ndeps", "Passo otimizacao:", choices = c(1, 0.1, 0.001, 0.0001, 0.00001, 0.000001, 0.0000001), selected = 0.001)),
+                        shiny::column(3,  shiny::div(shiny::downloadButton("download_zoom_png", "Download grafico (PNG)", class = "btn-sm"), style = "margin-top: 25px;")),
+                      ),
+                      
+                      # Linha 2: Controles e botao de download
+                      shiny::fluidRow(
+                        shiny::column(3,  shiny::div(
+                                      shiny::tags$b("Valor da Funcao Objetivo:"),
+                                      shiny::textOutput("funcao_objetivo")
+                                      )
+                        ),
+                        shiny::column(3, dateRangeInput("zoom_calibracao", "Zoom visualizacao:", start = NULL, end = NULL, min = NULL, max = NULL, startview = "decade")
+                        ),
+                        shiny::column(3, shiny::checkboxGroupInput("variaveis", "Plotar variaveis:", choices = c("Qsup1", "Qsup2", "Qplan"), inline = TRUE)  # Checkboxes na horizontal
+                        ),
+                        shiny::column(3,  shiny::div(shiny::downloadButton("download_zoom_html", "Download grafico (HTML)", class = "btn-sm"), style = "margin-top: 15px;")
                         )
+                      ),
+                      # Linha 3: Grafico principal
+                      shiny::fluidRow(shiny::column(12, dygraphs::dygraphOutput("dygraph_zoom", height = "600px"))
+                      ),
+                      
+                      # Linha 4: Grafico kts e metricas
+                      shiny::fluidRow(shiny::column(6, plotly::plotlyOutput("grafico_kts", height = "400px")),
+                        shiny::column(3,  shiny::div(
+                                      shiny::tableOutput("tabela_metrica1"),
+                                      style = "display: flex; justify-content: flex-end;")
+                                      ),
+                        shiny::column(2,  shiny::div(
+                                      shiny::tableOutput("tabela_metrica2"),
+                                      style = "display: flex; justify-content: flex-end;")
+                                      ),
+                        shiny::column(1, )
+                      ),
+                      
+                      # Linha 5:
+                      shiny::fluidRow(
+                        shiny::column(1, ),
+                        shiny::column(11, shiny::selectInput(inputId = "estatistica", label = "Estatisticas mensais", choices = c("media", "dp", "assimetria", "curtose"))),
+                      ),
+                      # Linha 5: Graficos secundarios
+                      shiny::fluidRow(
+                        shiny::column(12, plotly::plotlyOutput("metrica_mensal"))
+                      )
                     )
                 )
             ),
@@ -882,17 +924,43 @@ executa_visualizador_calibracao_pmur <- function(){
         })
 
         output$grafico_kts <- plotly::renderPlotly({
-            vetor_modelo <- vetor_modelo()
-            vetor_modelo[16] <- input$alfa
-            vetor_modelo[17] <- input$beta
-            kt_max <- input$kt_max
-            kt_min <- input$kt_min
+          vetor_modelo <- vetor_modelo()
+          vetor_modelo[16] <- input$alfa
+          vetor_modelo[17] <- input$beta
+          kt_max <- input$kt_max
+          kt_min <- input$kt_min
+          
+          kt <- cria_kt(kt_max, kt_min, vetor_modelo[16], vetor_modelo[17])
+          kt <- data.table::data.table(kt)
+          kt$lag <- 2:-60
+          
+          plot <- plotly::plot_ly(data = kt[which(lag %in% kt_max:-kt_min)], 
+                                  x = ~lag, 
+                                  y = ~kt, 
+                                  name = 'Distribuicao dos Kts', 
+                                  type = 'scatter', 
+                                  mode = 'lines+markers') %>%
             
-            kt <- cria_kt(kt_max, kt_min, vetor_modelo[16], vetor_modelo[17])
-            kt <- data.table::data.table(kt)
-            kt$lag <- 2:-60
-
-            plot <- plotly::plot_ly(data = kt[which(lag %in% kt_max:-kt_min)], x = ~lag, y = ~kt, name = 'Distribuicao dos Kts', type = 'scatter', mode = 'lines', height = 4, width = 4) 
+            # Configuracoes do layout
+            plotly::layout(
+              # Configuracoes do eixo Y
+              yaxis = list(
+                title = "<b>Peso</b>",  # Titulo em negrito
+                range = c(0, 1),       # Intervalo fixo de 0 a 1
+                showline = TRUE,       # Mostra linha do eixo
+                dtick = 0.1,           # Linhas de grade a cada 0.1
+                zeroline = TRUE        # Mostra linha no zero
+              ),
+              
+              # Configuracoes do eixo X
+              xaxis = list(
+                title = "<b>kt</b>",   # Titulo em negrito
+                showline = TRUE,       # Mostra linha do eixo
+                dtick = 1            # Linhas de grade a cada 1 unidade
+              )
+            )
+          
+          plot
         })
 
         saida <-  shiny::reactive({
@@ -1030,49 +1098,57 @@ executa_visualizador_calibracao_pmur <- function(){
             }
         })
 
+        grafico_zoom <- shiny::reactive({
+          shiny::req(saida(), input$zoom_calibracao)
+          
+          variaveis_grafico <- c("Qcalc", "Qbase", input$variaveis)
+          vazao <- vazao_posto()
+          precipitacao <- precipitacao_posto()
+          postos_plu <- postos_plu()
+          
+          precipitacao <- precipitacao[data >= input$zoom_calibracao[1] & data <= input$zoom_calibracao[2]]
+          precipitacao <- ponderacao_espacial(precipitacao, postos_plu[postos_plu$nome == input$sub_bacia])
+          
+          saida_zoom <- saida()[data >= input$zoom_calibracao[1] & data <= input$zoom_calibracao[2]]
+          saida_zoom <- data.table::melt(saida_zoom, id.vars = c("data"), variable.name = "variavel", value.name = "valor")
+          
+          simulacao <- xts::xts()
+          for (variaveis in variaveis_grafico){
+            simulacao <- cbind(simulacao, xts::xts(
+              saida_zoom$valor[which((saida_zoom$variavel == variaveis))],
+              order.by = saida_zoom$data[which((saida_zoom$variavel == variaveis))]
+            ))
+          }
+          colnames(simulacao) <- variaveis_grafico
+          
+          observacao <- xts::xts(
+            x = vazao$valor[which((vazao$data >= input$zoom_calibracao[1]) & (vazao$data <= input$zoom_calibracao[2]))],
+            order.by = vazao$data[which((vazao$data >= input$zoom_calibracao[1]) & (vazao$data <= input$zoom_calibracao[2]))]
+          )
+          colnames(observacao) <- "vazao observada"
+          
+          prec_aux <- xts::xts(
+            x = precipitacao$valor,
+            order.by = precipitacao$data
+          )
+          colnames(prec_aux) <- "Precipitacao"
+          
+          dygraphs::dygraph(cbind(simulacao, observacao, prec_aux), main = paste(input$sub_bacia)) %>%
+          dygraphs::dyOptions(strokeWidth = 1) %>%
+          dygraphs::dyUnzoom() %>% 
+          dygraphs::dyCrosshair(direction = "vertical") %>%
+          dygraphs::dyRangeSelector() %>%
+          dygraphs::dyAxis("y", label = "Vazao (m³/s)", independentTicks = TRUE) %>%
+          dygraphs::dySeries("vazao.observada", color = "#0000FF", strokeWidth = 1) %>%
+          dygraphs::dyBarSeries("Precipitacao", axis = 'y2', color = "#008000") %>%
+          dygraphs::dyAxis("y2", label = "Precipitacao (mm)", valueRange = c(200, 0)) %>%
+          dygraphs::dySeries("Qcalc", color = "#FF0000", strokeWidth = 1) %>%
+          dygraphs::dySeries("Qbase", color = "#FFCC00", strokeWidth = 1) %>%
+          dygraphs::dyLegend(show = "onmouseover")
+        })
+
         output$dygraph_zoom <- dygraphs::renderDygraph({
-            if (!is.null(saida())) {
-                variaveis_grafico <- c("Qcalc", "Qbase", input$variaveis)
-                vazao <- vazao_posto()
-                evapotranspiracao <- evapotranspiracao_posto()
-                precipitacao <- precipitacao_posto()
-                postos_plu <- postos_plu()
-                data_inicio_simulacao <- input$periodo_simulacao[1]
-                data_fim_simulacao <- input$periodo_simulacao[2]
-
-                precipitacao <- precipitacao[data >= data_inicio_simulacao & data <= data_fim_simulacao]
-                evapotranspiracao <- evapotranspiracao[data >= data_inicio_simulacao & data <= data_fim_simulacao]
-
-                precipitacao <- ponderacao_espacial(precipitacao, postos_plu[postos_plu$nome == input$sub_bacia])
-                saida <- saida()
-                saida <- data.table::melt(saida, id.vars = c("data"), variable.name = "variavel",
-                                            value.name = "valor")
-                simulacao <- xts::xts()
-                for (variaveis in variaveis_grafico){
-                    simulacao <- cbind(simulacao, xts::xts(saida$valor[which((saida$variavel == variaveis) & (saida$data >= input$zoom_calibracao[1]) & (saida$data <= input$zoom_calibracao[2]))], order.by = saida$data[which((saida$variavel == variaveis) & (saida$data >= input$zoom_calibracao[1]) & (saida$data <= input$zoom_calibracao[2]))]))
-                }
-                colnames(simulacao) <- variaveis_grafico
-                observacao <- xts::xts(x = vazao$valor[which((vazao$data >= input$zoom_calibracao[1]) & (vazao$data <= input$zoom_calibracao[2]))], order.by =  vazao$data[which((vazao$data >= input$zoom_calibracao[1]) & (vazao$data <= input$zoom_calibracao[2]))])
-                colnames(observacao) <- "vazao observada"
-
-                prec_aux <- xts::xts(x = precipitacao$valor[which((precipitacao$data >= input$zoom_calibracao[1]) & (precipitacao$data <= input$zoom_calibracao[2]))], order.by =  precipitacao$data[which((precipitacao$data >= input$zoom_calibracao[1]) & (precipitacao$data <= input$zoom_calibracao[2]))])
-                colnames(prec_aux) <- "Precipitacao"
-
-                dygraphs::dygraph(cbind(simulacao, observacao, prec_aux),
-                                main = input$sub_bacia, ) %>%
-                dygraphs::dyHighlight(highlightCircleSize = 5,
-                                    highlightSeriesBackgroundAlpha = 0.2,
-                                    hideOnMouseOut = FALSE,
-                                    highlightSeriesOpts = list(strokeWidth = 2)) %>% 
-                dygraphs::dyRangeSelector() %>%
-                dygraphs::dyAxis("y", label = "Vazao (m3/s)", independentTicks = TRUE) %>%
-                dygraphs::dySeries("vazao.observada", color = "#0000FF") %>%
-                dygraphs::dyBarSeries("Precipitacao", axis = 'y2', color = "#008000") %>%
-                dygraphs::dyAxis("y2", label = "Precipitacao (mm)", valueRange = c(200, 0)) %>%
-                dygraphs::dySeries("Qcalc", color = "#FF0000") %>%
-                dygraphs::dySeries("Qbase", color = "#FFCC00") %>%
-                dygraphs::dyLegend(show = "follow")
-            }
+          grafico_zoom()
         })
 
         output$tabela <- DT::renderDataTable(saida())
@@ -1118,42 +1194,48 @@ executa_visualizador_calibracao_pmur <- function(){
         })
 
         output$tabela_metrica1 <- shiny::renderTable({
-            if (!is.null(input[[paste0("posto_plu_1")]])) {
-                if (!is.null(saida())) {
-                    data_inicio_objetivo <- input$periodo_calibracao[1]
-                    data_fim_objetivo <- input$periodo_calibracao[2]
-                    vazao <- vazao_posto()
-
-                    vazao_fo <- vazao[which((vazao$data >= data_inicio_objetivo) & (vazao$data <= data_fim_objetivo))]
-
-                    vazao_fo[, peso := 1 / .N]
-
-                    if (input$numero_periodo_desconsiderado >= 1) {
-                        for (iperiodo in 1:input$numero_periodo_desconsiderado){
-                            vazao_fo[data >= input[[paste0("periodo_desconsiderado_", iperiodo)]][1] & data <= input[[paste0("periodo_desconsiderado_", iperiodo)]][2], peso := 0]
-                        }
-                        vazao_fo[peso != 0, peso := 1 / .N]
-                    }
-
-                    saida_objetivo <- saida()[data >= data_inicio_objetivo & data <= data_fim_objetivo]
-
-                    metricas <- data.table::data.table(tipo = c("historico", "simulado"))
-                    metricas[tipo == "simulado", media := saida_objetivo[, mean(Qcalc)]]
-                    metricas[tipo == "simulado", dp := saida_objetivo[, sd(Qcalc)]]
-                    metricas[tipo == "simulado", assimetria := saida_objetivo[, moments::skewness(Qcalc)]]
-                    metricas[tipo == "simulado", curtose := saida_objetivo[, moments::kurtosis(Qcalc)]]
-                    metricas[tipo == "simulado", p95 := saida_objetivo[, quantile(Qcalc, 0.95)]]
-                    metricas[tipo == "simulado", max := saida_objetivo[, max(Qcalc)]]
-                    metricas[tipo == "historico", media := vazao_fo[, mean(valor)]]
-                    metricas[tipo == "historico", dp := vazao_fo[, sd(valor)]]
-                    metricas[tipo == "historico", assimetria := vazao_fo[, moments::skewness(valor)]]
-                    metricas[tipo == "historico", curtose := vazao_fo[, moments::kurtosis(valor)]]
-                    metricas[tipo == "historico", p95 := vazao_fo[, quantile(valor, 0.95)]]
-                    metricas[tipo == "historico", max := vazao_fo[, max(valor)]]
-                    metricas        
+          if (!is.null(input[[paste0("posto_plu_1")]])) {
+            if (!is.null(saida())) {
+              data_inicio_objetivo <- input$periodo_calibracao[1]
+              data_fim_objetivo <- input$periodo_calibracao[2]
+              vazao <- vazao_posto()
+              
+              vazao_fo <- vazao[which((vazao$data >= data_inicio_objetivo) & (vazao$data <= data_fim_objetivo))]
+              
+              vazao_fo[, peso := 1 / .N]
+              
+              if (input$numero_periodo_desconsiderado >= 1) {
+                for (iperiodo in 1:input$numero_periodo_desconsiderado){
+                  vazao_fo[data >= input[[paste0("periodo_desconsiderado_", iperiodo)]][1] & data <= input[[paste0("periodo_desconsiderado_", iperiodo)]][2], peso := 0]
                 }
+                vazao_fo[peso != 0, peso := 1 / .N]
+              }
+              
+              saida_objetivo <- saida()[data >= data_inicio_objetivo & data <= data_fim_objetivo]
+              
+              metricas <- data.table::data.table(tipo = c("historico", "simulado"))
+              metricas[tipo == "simulado", media := saida_objetivo[, mean(Qcalc)]]
+              metricas[tipo == "simulado", dp := saida_objetivo[, sd(Qcalc)]]
+              metricas[tipo == "simulado", assimetria := saida_objetivo[, moments::skewness(Qcalc)]]
+              metricas[tipo == "simulado", curtose := saida_objetivo[, moments::kurtosis(Qcalc)]]
+              metricas[tipo == "simulado", p95 := saida_objetivo[, quantile(Qcalc, 0.95)]]
+              metricas[tipo == "simulado", max := saida_objetivo[, max(Qcalc)]]
+              metricas[tipo == "historico", media := vazao_fo[, mean(valor)]]
+              metricas[tipo == "historico", dp := vazao_fo[, sd(valor)]]
+              metricas[tipo == "historico", assimetria := vazao_fo[, moments::skewness(valor)]]
+              metricas[tipo == "historico", curtose := vazao_fo[, moments::kurtosis(valor)]]
+              metricas[tipo == "historico", p95 := vazao_fo[, quantile(valor, 0.95)]]
+              metricas[tipo == "historico", max := vazao_fo[, max(valor)]]
+              
+              # Transpor a tabela
+              metricas_transpostas <- as.data.frame(t(metricas[,-1]))
+              colnames(metricas_transpostas) <- metricas$tipo
+              rownames(metricas_transpostas) <- c("Media", "Desvio Padrao", "Assimetria", "Curtose", "Percentil 95", "Maximo")
+              
+              metricas_transpostas
             }
-        })
+          }
+        }, rownames = TRUE)  # Adiciona rótulos de linha
 
         output$tabela_metrica2 <- shiny::renderTable({
             if (!is.null(input[[paste0("posto_plu_1")]])) {
@@ -1248,13 +1330,51 @@ executa_visualizador_calibracao_pmur <- function(){
 
                         metricas <- rbindlist(list(metricas, metricas2), use.names=TRUE)
                         data.table::setnames(metricas, c("lubridate", "V1"), c("mes", "valor"))
+                        metricas <- metricas[order(mes)]
                         
-                        grafico_mensal <- ggplot2::ggplot(data = metricas[estatistica == input$estatistica], 
-                                            ggplot2::aes(x = mes, y = valor, color = tipo)) + 
-                                            ggplot2::geom_line() + ggplot2::theme_light() +
-                                            ggplot2::scale_color_hue(direction = -1)
-                        grafico_mensal <- plotly::ggplotly(grafico_mensal)
-                        grafico_mensal
+                        plot <- plotly::plot_ly() %>%
+                          # Adiciona serie observada (azul)
+                          plotly::add_trace(
+                            data = metricas[estatistica == input$estatistica & tipo == "observado"],
+                            x = ~mes,
+                            y = ~valor,
+                            type = 'scatter',
+                            mode = 'lines+markers',
+                            name = 'Observado',
+                            line = list(color = '#0000FF'),
+                            marker = list(color = '#0000FF')
+                          ) %>%
+                          # Adiciona serie simulada (vermelho)
+                          plotly::add_trace(
+                            data = metricas[estatistica == input$estatistica & tipo == "simulado"],
+                            x = ~mes,
+                            y = ~valor,
+                            type = 'scatter',
+                            mode = 'lines+markers',
+                            name = 'Simulado',
+                            line = list(color = '#FF0000'),
+                            marker = list(color = '#FF0000')
+                          ) %>%
+                          # Configuracoes do layout
+                          plotly::layout(
+                            xaxis = list(
+                              title = "<b>Mês</b>",
+                              showline = TRUE,
+                              dtick = 1  # Linhas de grade a cada 1 mês
+                              # range = c(0.5, 12.5),  # Para melhor visualizacao dos pontos
+                              # tickvals = 1:12,
+                              # ticktext = month.abb[1:12]
+                            ),
+                            yaxis = list(
+                              title = paste0("<b>", tools::toTitleCase(input$estatistica), "</b>"),
+                              showline = TRUE
+                            ),
+                            showlegend = TRUE,
+                            legend = list(orientation = 'h', x = 0.5, y = 1.1),
+                            margin = list(l = 60, r = 40, b = 60, t = 40)
+                          )
+
+                        plot
                     }
                 }
             }
@@ -1863,14 +1983,14 @@ executa_visualizador_calibracao_pmur <- function(){
         })
 
         grafico_validacao_ano <- shiny::reactive({
-            shiny::req(resultados$previsao)
-                z <- ts_data()
-                dygraphs::dygraph(z, main = "Validacao") %>%
-                dygraphs::dyAxis("y", label = "Vazao (m³/s)") %>%
-                dygraphs::dyOptions(strokeWidth = 1, drawPoints = TRUE, pointSize = 1) %>%
-                dygraphs::dyLegend(show = "always", width = 300) %>%
-                dygraphs::dySeries("vazao_observada", color = "#0000FF")  %>%
-                dygraphs::dyRangeSelector()
+          shiny::req(resultados$previsao)
+          z <- ts_data()
+          dygraphs::dygraph(z, main = "Validacao") %>%
+            dygraphs::dyAxis("y", label = "Vazao (m³/s)") %>%
+            dygraphs::dyOptions(strokeWidth = 1) %>%
+            dygraphs::dyUnzoom() %>%
+            dygraphs::dySeries("vazao_observada", color = "#0000FF", strokeWidth = 3)  %>%
+            dygraphs::dyLegend(show = "follow")
         })
 
         output$validacao_ano <- dygraphs::renderDygraph({
@@ -2157,6 +2277,27 @@ executa_visualizador_calibracao_pmur <- function(){
                 )
             },
             contentType = "image/png"
+        )
+
+        output$download_zoom_png <- shiny::downloadHandler(
+          filename = function() {
+            paste0("grafico_calibracao_", input$sub_bacia, ".png")
+          },
+          content = function(file) {
+            # Usa o mesmo grafico ja renderizado na UI
+            widget <- grafico_zoom()
+
+            tmp_html <- tempfile(fileext = ".html")
+            htmlwidgets::saveWidget(widget, tmp_html, selfcontained = FALSE)
+
+            webshot2::webshot(
+              url = tmp_html,
+              file = file,
+              vwidth = 1600,
+              vheight = 600,
+            )
+          },
+          contentType = "image/png"
         )
     }
 
