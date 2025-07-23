@@ -358,29 +358,42 @@ cria_inicializacao <- function(parametros = NULL,
       .(nome, variavel = parametro, valor)
     ]
   }
+  dt_sel[, mes := 0]
   
   # 2) Parâmetros fixos (6 por nome)
   dt_fixos <- unique(dt_sel[, .(nome)])[ , .(
     variavel = c(
       "numero_dias_assimilacao",
-      "ajusta_precipitacao",
+      "ajusta_precipitacao"
+    ),
+    valor = c(
+      numero_dias_assimilacao,
+      ajusta_precipitacao
+    )
+  ), by = nome ]
+  dt_fixos[, mes := 0]
+  
+  # 2) Parâmetros fixos (6 por nome)
+  dt_sazonais <- unique(dt_sel[, .(nome)])[ , .(
+    variavel = c(
       "limite_inferior_ebin",
       "limite_superior_ebin",
       "limite_inferior_prec",
       "limite_superior_prec"
     ),
     valor = c(
-      numero_dias_assimilacao,
-      ajusta_precipitacao,
       limite_inferior_ebin,
       limite_superior_ebin,
       limite_inferior_prec,
       limite_superior_prec
     )
   ), by = nome ]
-  
+  dt_sazonais <- dt_sazonais[, .(mes = 1:12),
+           by = .(nome, variavel, valor)]
+
   # 3) Empilha e ordena
-  inicializacao <- rbindlist(list(dt_sel, dt_fixos), use.names = TRUE)
+  inicializacao <- rbindlist(list(dt_sel, dt_fixos, dt_sazonais), use.names = TRUE)
+            
   setorder(inicializacao, nome, variavel)
   
   return(inicializacao)

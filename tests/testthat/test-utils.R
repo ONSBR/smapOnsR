@@ -92,8 +92,8 @@ test_that("Criacao de data.table inicializacao via data.table gera saida correta
   dt_out <- cria_inicializacao(parametros = dt_in)
 
   # Para cada nome deve ter exatamente 9 linhas
-  expect_equal(dt_out[nome == "a", .N], 9)
-  expect_equal(dt_out[nome == "b", .N], 9)
+  expect_equal(dt_out[nome == "a", .N], 53)
+  expect_equal(dt_out[nome == "b", .N], 53)
 
   # Verifica que as variaveis estao corretas
   vars_a <- dt_out[nome == "a", variavel]
@@ -127,7 +127,7 @@ test_that("Entrada via vetores gera saida correta", {
   )
   
   # Linhas esperadas: 2 nomes × 9 variaveis = 10
-  expect_equal(nrow(dt_out), 18)
+  expect_equal(nrow(dt_out), 106)
   # Verifica combinacao de nome e valores
   expect_equal(
     dt_out[variavel == "Ebin", valor],

@@ -53,15 +53,15 @@ test_that("analisa_previsoes diária funciona para horizonte 1 com dois data_cas
                            mensal  = FALSE,
                            anual   = FALSE)$resultado
 
-  # Agora temos 3 horizontes * 4 métricas = 12 linhas
-  expect_equal(nrow(out), 12)
+  # Agora temos 3 horizontes * 6 métricas = 12 linhas
+  expect_equal(nrow(out), 18)
   
   # Recupera PBIAS e NSE para horizonte 1
   sub1 <- out[discretizacao=="diaria" & horizonte==1 & nome=="A"]
   
-  # Deve haver exatamente 4 métricas neste sub-grupo
-  expect_equal(nrow(sub1), 4L)
-  expect_setequal(sub1$metrica, c("PBIAS","NSE","MAPE","DM"))
+  # Deve haver exatamente 6 métricas neste sub-grupo
+  expect_equal(nrow(sub1), 6L)
+  expect_setequal(sub1$metrica, c("PBIAS","NSE","MAPE","DM", "KGE", "RMSE"))
   
   # Verifica que NSE não seja NA ou Inf
   nse1 <- sub1[metrica=="NSE", valor]

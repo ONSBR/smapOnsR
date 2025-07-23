@@ -190,7 +190,8 @@ test_that("testa rodada com serie temporal etp", {
     "limite_inferior_ebin", "limite_superior_ebin", "limite_superior_prec", "limite_inferior_prec",
     "ajusta_precipitacao"), 2),
     valor = c(218.71, 46.69, 0.2891, 31, 0.8, 1.2, 2, 0.5, 0, 441.67, 256.98, 0.3141, 31, 0.8, 1.2, 2, 0.5, 0))
-    
+    inicializacao[, mes := 5]
+
     saida <- rodada_encadeada_etp(parametros[nome %in% sub_bacias],
     inicializacao, precipitacao_observada, precipitacao_prevista, evapotranspiracao_observada, evapotranspiracao_prevista, vazao_observada,
     postos_plu, datas_rodadas, sub_bacias)
