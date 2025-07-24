@@ -1544,7 +1544,7 @@ executa_visualizador_previsao <- function(){
                 m_sel <- m[horizon_calc == input$horizonte]
             }
 
-            # --- 5) (Opcional) Agregue por data_caso se quiser médias ---
+            # --- 5) (Opcional) Agregue por data_caso se quiser medias ---
             resumo <- m_sel[
             , .(
                 vazao_observada  = mean(vazao_observada, na.rm = TRUE),
@@ -1655,7 +1655,7 @@ executa_visualizador_previsao <- function(){
             shiny::updateSelectizeInput(
                 session,
                 "sel_casos_validacao",
-                choices  = as.character(casos_ano),   # opcional: atualizar choices também
+                choices  = as.character(casos_ano),   # opcional: atualizar choices tambem
                 selected = as.character(casos_ano)
             )
         })

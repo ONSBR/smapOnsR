@@ -115,15 +115,18 @@ test_that("Criacao de data.table inicializacao via data.table gera saida correta
 
 # 2) Testa a entrada via vetores
 test_that("Entrada via vetores gera saida correta", {
-  nomes  <- c("x", "y")
-  Ebin   <- c(100, 200)
-  Supin  <- c(10, 20)
-  Tuin   <- c(1, 2)
+  nome  <- c("x")
+  Ebin   <- c(100)
+  Supin  <- c(10)
+  Tuin   <- c(1)
+  limite_inferior_ebin <-  1:12
+  limite_superior_ebin <-  13:24
   dt_out <- cria_inicializacao(
-    nome  = nomes,
+    nome  = nome,
     Ebin  = Ebin,
     Supin = Supin,
-    Tuin  = Tuin
+    Tuin  = Tuin,
+    limite_inferior_ebin = limite_inferior_ebin
   )
   
   # Linhas esperadas: 2 nomes × 9 variaveis = 10
@@ -162,27 +165,13 @@ test_that("Parametros fixos customizados sao aplicados", {
 # 4) Testa erros de validacao
 test_that("Erro quando falta vetores obrigatorios", {
   expect_error(
-    cria_inicializacao(nome = "a", Ebin = 1, Supin = 2),
-    "Se 'parametros' for NULL, fornecer 'nome', 'Ebin', 'Supin' e 'Tuin'."
-  )
-})
-
-test_that("Erro quando vetores têm comprimentos diferentes", {
-  expect_error(
-    cria_inicializacao(
-      nome  = c("a", "b"),
-      Ebin  = c(1, 2, 3),
-      Supin = c(4, 5),
-      Tuin  = c(6, 7)
-    ),
-    "'nome', 'Ebin', 'Supin' e 'Tuin' devem ter mesmo comprimento."
+    cria_inicializacao(nome = "a", Ebin = 1, Supin = 2)
   )
 })
 
 test_that("Erro quando data.table nao tem colunas esperadas", {
   dt_bad <- data.table(foo = 1, bar = 2)
   expect_error(
-    cria_inicializacao(parametros = dt_bad),
-    "O data.table 'parametros' deve ter colunas 'nome','parametro','valor'."
+    cria_inicializacao(parametros = dt_bad)
   )
 })

@@ -290,114 +290,104 @@ cria_datas <- function(data_inicio, data_fim, numero_dias_previsao = 42) {
   datas
 }
 
-#' Cria arquivo de inicializacao
+#' Cria arquivo de inicializacao para uma única sub-bacia
 #'
-#' @param parametros (opcional) data.table com as colunas
-#'     \itemize{
-#'     \item{nome - nome da sub-bacia}
-#'     \item{parametro - nome do parametro}
-#'     \item{valor - valor do parametro}
-#'     }
-#' @param nome   (opcional) vetor de nomes (mesmo comprimento que Ebin, Supin, Tuin)
-#' @param Ebin   (opcional) vetor de valores para Ebin
-#' @param Supin  (opcional) vetor de valores para Supin
-#' @param Tuin   (opcional) vetor de valores para Tuin
-#' @param numero_dias_assimilacao (integer) valor fixo (padrao = 32)
-#' @param ajusta_precipitacao     (integer) valor fixo (padrao = 1)
-#' @return data.table com a inicializacao com as colunas
-#'     \itemize{
-#'     \item{nome - nome da sub_bacia}
-#'     \item{variavel - nome da variavel}
-#'     \item{valor - valor da variavel}
-#'     }
+#' @param parametros (opcional) data.table com colunas:
+#'   \itemize{
+#'     \item{nome - nome da sub-bacia (único)}
+#'     \item{parametro - nome do parâmetro ("Ebin","Supin","Tuin")}
+#'     \item{valor - valor do parâmetro}
+#'   }
+#' @param nome   (opcional) nome da sub-bacia
+#' @param Ebin   valor para Ebin
+#' @param Supin  valor para Supin
+#' @param Tuin   valor para Tuin
+#' @param limite_inferior_ebin vetor (length 1 ou 12) para limite inferior de Ebin
+#' @param limite_superior_ebin vetor (length 1 ou 12) para limite superior de Ebin
+#' @param limite_inferior_prec  vetor (length 1 ou 12) para limite inferior de precipitação
+#' @param limite_superior_prec  vetor (length 1 ou 12) para limite superior de precipitação
+#' @param numero_dias_assimilacao (integer) valor fixo (padrão = 32)
+#' @param ajusta_precipitacao     (integer) valor fixo (padrão = 1)
+#' @return data.table com colunas: nome, variavel, mes, valor
 #' @importFrom data.table setorder rbindlist
 #' @export
-
-cria_inicializacao <- function(parametros = NULL,
-                              nome  = NULL,
-                              Ebin = NULL,
-                              Supin = NULL,
-                              Tuin = NULL, 
-                              limite_inferior_ebin = 0.8,
-                              limite_superior_ebin = 1.2,
-                              limite_inferior_prec = 0.5,
-                              limite_superior_prec = 2,
-                              numero_dias_assimilacao = 32L,
-                              ajusta_precipitacao = 1L) {
-
-  # 1) Monta dt_sel a partir de data.table ou vetores
+cria_inicializacao <- function(
+  parametros = NULL,
+  nome  = NULL,
+  Ebin  = NULL,
+  Supin = NULL,
+  Tuin  = NULL,
+  limite_inferior_ebin = 0.8,
+  limite_superior_ebin = 1.2,
+  limite_inferior_prec = 0.5,
+  limite_superior_prec = 2,
+  numero_dias_assimilacao = 32L,
+  ajusta_precipitacao     = 1L
+) {
+  # 1) Monta dt_sel para parâmetros não sazonais (mes = 0)
   if (is.null(parametros)) {
-    if (any(sapply(list(nome, Ebin, Supin, Tuin), is.null))) {
-      stop("Se 'parametros' for NULL, fornecer 'nome', 'Ebin', 'Supin' e 'Tuin'.")
+    if (is.null(nome) || is.null(Ebin) || is.null(Supin) || is.null(Tuin)) {
+      stop("Quando 'parametros' for NULL, forneça 'nome','Ebin','Supin' e 'Tuin'.")
     }
-    if (! (length(nome)==length(Ebin) &&
-           length(nome)==length(Supin) &&
-           length(nome)==length(Tuin)) ) {
-      stop("'nome', 'Ebin', 'Supin' e 'Tuin' devem ter mesmo comprimento.")
-    }
-    # Cria uma data.table ampla e depois derrete
-    dt_base <- data.table(
-      nome  = nome,
-      Ebin  = Ebin,
-      Supin = Supin,
-      Tuin  = Tuin
-    )
-    dt_sel <- melt(
-      dt_base,
-      id.vars       = "nome",
-      measure.vars  = c("Ebin","Supin","Tuin"),
-      variable.name = "variavel",
-      value.name    = "valor"
+    dt_sel <- data.table(
+      nome     = nome,
+      variavel = c("Ebin","Supin","Tuin"),
+      valor    = c(Ebin, Supin, Tuin),
+      mes      = 0L
     )
   } else {
+    # espera data.table de um único nome e variáveis Ebin/Supin/Tuin
     if (!all(c("nome","parametro","valor") %in% names(parametros))) {
-      stop("O data.table 'parametros' deve ter colunas 'nome','parametro','valor'.")
+      stop("O 'parametros' deve ter colunas 'nome','parametro','valor'.")
     }
-    dt_sel <- parametros[
-      parametro %chin% c("Ebin","Supin","Tuin"),
-      .(nome, variavel = parametro, valor)
-    ]
+    dt_sel <- parametros[ , .(
+      nome     = nome,
+      variavel = parametro,
+      valor    = valor,
+      mes      = 0L
+    )]
   }
-  dt_sel[, mes := 0]
-  
-  # 2) Parâmetros fixos (6 por nome)
-  dt_fixos <- unique(dt_sel[, .(nome)])[ , .(
-    variavel = c(
-      "numero_dias_assimilacao",
-      "ajusta_precipitacao"
-    ),
-    valor = c(
-      numero_dias_assimilacao,
-      ajusta_precipitacao
-    )
-  ), by = nome ]
-  dt_fixos[, mes := 0]
-  
-  # 2) Parâmetros fixos (6 por nome)
-  dt_sazonais <- unique(dt_sel[, .(nome)])[ , .(
-    variavel = c(
-      "limite_inferior_ebin",
-      "limite_superior_ebin",
-      "limite_inferior_prec",
-      "limite_superior_prec"
-    ),
-    valor = c(
-      limite_inferior_ebin,
-      limite_superior_ebin,
-      limite_inferior_prec,
-      limite_superior_prec
-    )
-  ), by = nome ]
-  dt_sazonais <- dt_sazonais[, .(mes = 1:12),
-           by = .(nome, variavel, valor)]
 
-  # 3) Empilha e ordena
-  inicializacao <- rbindlist(list(dt_sel, dt_fixos, dt_sazonais), use.names = TRUE)
-            
-  setorder(inicializacao, nome, variavel)
-  
+  # 2) Parâmetros fixos (mes = 0)
+  dt_fixos <- data.table(
+    nome     = dt_sel$nome[1],
+    variavel = c("numero_dias_assimilacao","ajusta_precipitacao"),
+    valor    = c(numero_dias_assimilacao, ajusta_precipitacao),
+    mes      = 0L
+  )
+
+  # 3) Parâmetros sazonais: limites em meses 1:12
+  lista_limits <- list(
+    limite_inferior_ebin = limite_inferior_ebin,
+    limite_superior_ebin = limite_superior_ebin,
+    limite_inferior_prec = limite_inferior_prec,
+    limite_superior_prec = limite_superior_prec
+  )
+
+  dt_sazonais <- data.table::rbindlist(
+    lapply(names(lista_limits), function(var) {
+      val <- lista_limits[[var]]
+      if (length(val) == 1L) {
+        val <- rep(val, 12L)
+      } else if (length(val) != 12L) {
+        stop(sprintf("'%s' deve ter length 1 ou 12, mas veio %d", var, length(val)))
+      }
+      data.table(
+        nome     = dt_sel$nome[1],
+        variavel = var,
+        mes      = seq_len(12L),
+        valor    = val
+      )
+    })
+  )
+
+  # 4) Empilha e ordena
+  inicializacao <- data.table::rbindlist(list(dt_sel, dt_fixos, dt_sazonais), use.names = TRUE)
+  data.table::setorder(inicializacao, variavel, mes)
+
   return(inicializacao)
 }
+
 
 #' Cria arquivo de sub_bacias
 #'
