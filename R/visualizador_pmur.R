@@ -166,8 +166,6 @@ executa_visualizador_calibracao_pmur <- function(){
                         shiny::column(3, dateRangeInput("zoom_calibracao", "Zoom visualizacao:", start = NULL, end = NULL, min = NULL, max = NULL, startview = "decade")
                         ),
                         shiny::column(3, shiny::checkboxGroupInput("variaveis", "Plotar variaveis:", choices = c("Qsup1", "Qsup2", "Qplan"), inline = TRUE)  # Checkboxes na horizontal
-                        ),
-                        shiny::column(3,  shiny::div(shiny::downloadButton("download_zoom_html", "Download grafico (HTML)", class = "btn-sm"), style = "margin-top: 15px;")
                         )
                       ),
                       # Linha 3: Grafico principal
@@ -221,15 +219,6 @@ executa_visualizador_calibracao_pmur <- function(){
                         ),
                         shiny::hr(),
                         shiny::fluidRow(
-                            shiny::column(4, shiny::numericInput(inputId = "limite_inferior_ebin", label = "Limite Inferior Ebin", value = 0.8)),
-                            shiny::column(4, shiny::numericInput(inputId = "limite_superior_ebin", label = "Limite Superior Ebin", value = 1.2))
-                        ),
-                        shiny::fluidRow(
-                            shiny::column(4, shiny::numericInput(inputId = "limite_inferior_prec", label = "Limite Inferior Prec", value = 0.5)),
-                            shiny::column(4, shiny::numericInput(inputId = "limite_superior_prec", label = "Limite Superior Prec", value = 2))
-                        ),
-                        shiny::hr(),
-                        shiny::fluidRow(
                             shiny::dateRangeInput(inputId = "periodo_simulacao_validacao", label = "Periodo de simulacao da validacao", start = NULL, end = NULL, min = NULL, max = NULL),
                             shiny::dateRangeInput(inputId = "periodo_validacao", label = "Periodo de validacao", start = NULL, end = NULL, min = NULL, max = NULL),
                             shiny::column(4, shiny::numericInput(inputId = "numero_dias_previsao", label = "Horizonte previsao", value = NULL)),
@@ -248,7 +237,22 @@ executa_visualizador_calibracao_pmur <- function(){
                         shiny::downloadButton("download_metricas_validacao", "Download metricas_validacao_sub_bacia.csv"),
                         shiny::hr(),
                         shiny::downloadButton("download_grafico_validacao", "Download grafico_validacao_sub_bacia.png"),
-                        shiny::downloadButton("download_grafico_validacao_ano", "Download grafico_validacao_ano_sub_bacia.png")
+                        shiny::downloadButton("download_grafico_validacao_ano", "Download grafico_validacao_ano_sub_bacia.png"),
+                        shiny::hr(),
+                        shiny::fluidRow(
+                            shiny::selectInput("discretizacao_ebin", "Discretizacao Ebin", choices = c("Unico" = "unico", "Sazonal" = "sazonal")),
+                        ),
+                        shiny::fluidRow(
+                            shiny::column(5, shiny::h3("Limite Inferior Ebin"), shiny::uiOutput("limite_inferior_ebin")),
+                            shiny::column(5, shiny::h3("Limite Superior Ebin"), shiny::uiOutput("limite_superior_ebin"))
+                        ),
+                        shiny::fluidRow(
+                            shiny::selectInput("discretizacao_prec", "Discretizacao Prec", choices = c("Unico" = "unico", "Sazonal" = "sazonal")),
+                        ),
+                        shiny::fluidRow(
+                            shiny::column(5, shiny::h3("Limite Inferior Prec"), shiny::uiOutput("limite_inferior_prec")),
+                            shiny::column(5, shiny::h3("Limite Superior Prec"), shiny::uiOutput("limite_superior_prec"))
+                        )
                     ),
                     shiny::mainPanel(
                         shiny::fluidRow(
@@ -911,6 +915,106 @@ executa_visualizador_calibracao_pmur <- function(){
                 evapotranspiracao <- transforma_NC_serie(precipitacao, evapotranspiracao)
             }
             return(evapotranspiracao)
+        })
+
+        output$limite_inferior_ebin <- shiny::renderUI({
+            shiny::req(input$discretizacao_ebin)
+            if (input$discretizacao_ebin == "unico") {
+            # apenas um numericInput
+            shiny::numericInput(
+                inputId = "limite_inferior_ebin_0",
+                label   = "Limite inferior Ebin",
+                value   = 0.8,
+                step    = 0.01
+            )
+            } else {
+            # 12 inputs sazonais
+            inputs <- lapply(1:12, function(i) {
+                shiny::numericInput(
+                inputId = paste0("limite_inferior_ebin_", i),
+                label   = paste0("Limite inferior Ebin (mes ", i, ")"),
+                value   = 0.8,
+                step    = 0.01
+                )
+            })
+            # tagList garante que a lista de tags será inserida no UI
+            do.call(shiny::tagList, inputs)
+            }
+        })
+
+        output$limite_superior_ebin <- shiny::renderUI({
+            shiny::req(input$discretizacao_ebin)
+            if (input$discretizacao_ebin == "unico") {
+            # apenas um numericInput
+            shiny::numericInput(
+                inputId = "limite_superior_ebin_0",
+                label   = "Limite superior Ebin",
+                value   = 1.2,
+                step    = 0.01
+            )
+            } else {
+            # 12 inputs sazonais
+            inputs <- lapply(1:12, function(i) {
+                shiny::numericInput(
+                inputId = paste0("limite_superior_ebin_", i),
+                label   = paste0("Limite superior Ebin (mes ", i, ")"),
+                value   = 1.2,
+                step    = 0.01
+                )
+            })
+            # tagList garante que a lista de tags será inserida no UI
+            do.call(shiny::tagList, inputs)
+            }
+        })
+
+        output$limite_inferior_prec <- shiny::renderUI({
+            shiny::req(input$discretizacao_prec)
+            if (input$discretizacao_prec == "unico") {
+            # apenas um numericInput
+            shiny::numericInput(
+                inputId = "limite_inferior_prec_0",
+                label   = "Limite inferior prec",
+                value   = 0.5,
+                step    = 0.01
+            )
+            } else {
+            # 12 inputs sazonais
+            inputs <- lapply(1:12, function(i) {
+                shiny::numericInput(
+                inputId = paste0("limite_inferior_prec_", i),
+                label   = paste0("Limite inferior prec (mes ", i, ")"),
+                value   = 0.5,
+                step    = 0.01
+                )
+            })
+            # tagList garante que a lista de tags será inserida no UI
+            do.call(shiny::tagList, inputs)
+            }
+        })
+
+        output$limite_superior_prec <- shiny::renderUI({
+            shiny::req(input$discretizacao_prec)
+            if (input$discretizacao_prec == "unico") {
+            # apenas um numericInput
+            numericInput(
+                inputId = "limite_superior_prec_0",
+                label   = "Limite superior prec",
+                value   = 2,
+                step    = 0.01
+            )
+            } else {
+            # 12 inputs sazonais
+            inputs <- lapply(1:12, function(i) {
+                shiny::numericInput(
+                inputId = paste0("limite_superior_prec_", i),
+                label   = paste0("Limite superior Prec (mes ", i, ")"),
+                value   = 2,
+                step    = 0.01
+                )
+            })
+            # tagList garante que a lista de tags será inserida no UI
+            do.call(shiny::tagList, inputs)
+            }
         })
 
 
@@ -1613,14 +1717,46 @@ executa_visualizador_calibracao_pmur <- function(){
             kt <- cria_kt(input$kt_max, input$kt_min, input$alfa, input$beta)
             parametros$valor[parametros$parametro %in% paste0("Kt", 2:-60)] <- kt
 
+            if (input$discretizacao_ebin == "unico") {
+                limite_inferior_ebin <- input$limite_inferior_ebin_0
+                limite_superior_ebin <- input$limite_superior_ebin_0
+            } else {
+                limite_inferior_ebin <- vapply(
+                    X = 1:12,
+                    FUN = function(i) input[[paste0("limite_inferior_ebin_", i)]],
+                    FUN.VALUE = numeric(1)
+                )
+                limite_superior_ebin <- vapply(
+                    X = 1:12,
+                    FUN = function(i) input[[paste0("limite_superior_ebin_", i)]],
+                    FUN.VALUE = numeric(1)
+                )
+            }
+
+            if (input$discretizacao_prec == "unico") {
+                limite_inferior_prec <- input$limite_inferior_prec_0
+                limite_superior_prec <- input$limite_superior_prec_0
+            } else {
+                limite_inferior_prec <- vapply(
+                    X = 1:12,
+                    FUN = function(i) input[[paste0("limite_inferior_prec_", i)]],
+                    FUN.VALUE = numeric(1)
+                )
+                limite_superior_prec <- vapply(
+                    X = 1:12,
+                    FUN = function(i) input[[paste0("limite_superior_prec_", i)]],
+                    FUN.VALUE = numeric(1)
+                )
+            }
+
             inicializacao <- cria_inicializacao(nome  = unique(parametros$nome),
                               Ebin = input$Ebin_validacao,
                               Supin = input$Supin_validacao,
                               Tuin = input$Tuin_validacao,
-                              limite_inferior_ebin = input$limite_inferior_ebin,
-                              limite_superior_ebin = input$limite_superior_ebin,
-                              limite_inferior_prec = input$limite_inferior_prec,
-                              limite_superior_prec = input$limite_superior_prec)
+                              limite_inferior_ebin = limite_inferior_ebin,
+                              limite_superior_ebin = limite_superior_ebin,
+                              limite_inferior_prec = limite_inferior_prec,
+                              limite_superior_prec = limite_superior_prec)
 
             data_inicio_objetivo <- input$periodo_validacao[1]
             data_fim_objetivo <- input$periodo_validacao[2]
