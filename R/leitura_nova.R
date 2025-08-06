@@ -812,7 +812,7 @@ le_arq_entrada_novo <- function(pasta_entrada) {
             datas_rodadas[, numero_dias_previsao := (numero_dias_previsao - 2)]
             evapotranspiracao_prevista <- data.table::copy(evapotranspiracao_observada)
             colnames(evapotranspiracao_prevista)[2] <- "nome"
-            evapotranspiracao_prevista <- transforma_historico_previsao(evapotranspiracao_prevista, datas_rodadas)
+            evapotranspiracao_prevista <- transforma_historico_previsao(evapotranspiracao_prevista, datas_rodadas, dia_inicial = 0)
             datas_rodadas[, numero_dias_previsao := (numero_dias_previsao + 2)]
         }
     }

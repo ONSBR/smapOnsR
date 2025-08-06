@@ -55,6 +55,7 @@ transforma_NC_serie <- function(serie_temporal, normal_climatologica) {
 #'     \item{data - data da rodada}
 #'     \item{numero_dias_previsao - numero de dias de previsao}
 #'      }
+#' @param dia_inicial dia inicial da previsao
 #' @importFrom data.table data.table setcolorder setorder
 #' @return data.table com as colunas
 #'     \itemize{
@@ -75,7 +76,7 @@ transforma_NC_serie <- function(serie_temporal, normal_climatologica) {
 #' 
 #' previsao <- transforma_historico_previsao(precipitacao, datas_rodadas)
 #' @export
-transforma_historico_previsao <- function(serie_temporal, datas_rodadas) {
+transforma_historico_previsao <- function(serie_temporal, datas_rodadas, dia_inicial = 1) {
 
     if (any(colnames(datas_rodadas) != c("data", "numero_dias_previsao"))) {
         stop("data table datas_rodadas deve possuir colunas 'data' e 'numero_dias_previsao'")
@@ -90,7 +91,7 @@ transforma_historico_previsao <- function(serie_temporal, datas_rodadas) {
         data_rodada <- datas_rodadas$data[i]
         numero_dias_previsao <- datas_rodadas$numero_dias_previsao[i]
 
-        data_previsao <- serie_temporal[data %in% seq.Date(data_rodada + 1, data_rodada + numero_dias_previsao + 2, by = 1)]
+        data_previsao <- serie_temporal[data %in% seq.Date(data_rodada + dia_inicial, data_rodada + numero_dias_previsao + 2, by = 1)]
         aux <- serie_temporal[data %in% data_previsao[, data]]
         colnames(aux)[1] <- "data_previsao"
         aux[, data_rodada := data_rodada]
@@ -269,11 +270,11 @@ ordem_afluencia <- function(montante, jusante) {
 
 cria_datas <- function(data_inicio, data_fim, numero_dias_previsao = 42) {
 
-  # 1) Calcular quantos dias até a próxima quinta-feira (4 = quinta em ISO-8601: domingo=7, segunda=1, ..., sábado=6)
+  # 1) Calcular quantos dias ate a proxima quinta-feira (4 = quinta em ISO-8601: domingo=7, segunda=1, ..., sabado=6)
   dias_ate_quinta <- (4 - as.integer(format(data_inicio, "%u"))) %% 7
   primeira_quinta <- data_inicio + dias_ate_quinta
 
-  # 2) Gerar sequência de quintas até a data_fim
+  # 2) Gerar sequencia de quintas ate a data_fim
   if (numero_dias_previsao > 42) {
     intervalo <- "1 month"
   } else {
@@ -290,13 +291,13 @@ cria_datas <- function(data_inicio, data_fim, numero_dias_previsao = 42) {
   datas
 }
 
-#' Cria arquivo de inicializacao para uma única sub-bacia
+#' Cria arquivo de inicializacao para uma unica sub-bacia
 #'
-#' @param parametros (opcional) data.table com colunas:
+#' @param parametros data.table com as colunas
 #'   \itemize{
-#'     \item{nome - nome da sub-bacia (único)}
-#'     \item{parametro - nome do parâmetro ("Ebin","Supin","Tuin")}
-#'     \item{valor - valor do parâmetro}
+#'     \item{nome - nome da sub-bacia (unico)}
+#'     \item{parametro - nome do parametro ("Ebin","Supin","Tuin")}
+#'     \item{valor - valor do parametro}
 #'   }
 #' @param nome   (opcional) nome da sub-bacia
 #' @param Ebin   valor para Ebin
@@ -304,10 +305,10 @@ cria_datas <- function(data_inicio, data_fim, numero_dias_previsao = 42) {
 #' @param Tuin   valor para Tuin
 #' @param limite_inferior_ebin vetor (length 1 ou 12) para limite inferior de Ebin
 #' @param limite_superior_ebin vetor (length 1 ou 12) para limite superior de Ebin
-#' @param limite_inferior_prec  vetor (length 1 ou 12) para limite inferior de precipitação
-#' @param limite_superior_prec  vetor (length 1 ou 12) para limite superior de precipitação
-#' @param numero_dias_assimilacao (integer) valor fixo (padrão = 32)
-#' @param ajusta_precipitacao     (integer) valor fixo (padrão = 1)
+#' @param limite_inferior_prec  vetor (length 1 ou 12) para limite inferior de precipitacao
+#' @param limite_superior_prec  vetor (length 1 ou 12) para limite superior de precipitacao
+#' @param numero_dias_assimilacao (integer) valor fixo (padrao = 32)
+#' @param ajusta_precipitacao     (integer) valor fixo (padrao = 1)
 #' @return data.table com colunas: nome, variavel, mes, valor
 #' @importFrom data.table setorder rbindlist
 #' @export
@@ -324,10 +325,10 @@ cria_inicializacao <- function(
   numero_dias_assimilacao = 32L,
   ajusta_precipitacao     = 1L
 ) {
-  # 1) Monta dt_sel para parâmetros não sazonais (mes = 0)
+  # 1) Monta dt_sel para parametros nao sazonais (mes = 0)
   if (is.null(parametros)) {
     if (is.null(nome) || is.null(Ebin) || is.null(Supin) || is.null(Tuin)) {
-      stop("Quando 'parametros' for NULL, forneça 'nome','Ebin','Supin' e 'Tuin'.")
+      stop("Quando 'parametros' for NULL, forneca 'nome','Ebin','Supin' e 'Tuin'.")
     }
     dt_sel <- data.table(
       nome     = nome,
@@ -336,7 +337,7 @@ cria_inicializacao <- function(
       mes      = 0L
     )
   } else {
-    # espera data.table de um único nome e variáveis Ebin/Supin/Tuin
+    # espera data.table de um unico nome e variaveis Ebin/Supin/Tuin
     if (!all(c("nome","parametro","valor") %in% names(parametros))) {
       stop("O 'parametros' deve ter colunas 'nome','parametro','valor'.")
     }
@@ -348,7 +349,7 @@ cria_inicializacao <- function(
     )]
   }
 
-  # 2) Parâmetros fixos (mes = 0)
+  # 2) Parametros fixos (mes = 0)
   dt_fixos <- data.table(
     nome     = dt_sel$nome[1],
     variavel = c("numero_dias_assimilacao","ajusta_precipitacao"),
@@ -356,7 +357,7 @@ cria_inicializacao <- function(
     mes      = 0L
   )
 
-  # 3) Parâmetros sazonais: limites em meses 1:12
+  # 3) Parametros sazonais: limites em meses 1:12
   lista_limits <- list(
     limite_inferior_ebin = limite_inferior_ebin,
     limite_superior_ebin = limite_superior_ebin,
@@ -509,10 +510,10 @@ agrega_mensal <- function(simulacao, observacao) {
               data.table::as.IDate(data_caso))]
     simulacao[, horizonte := floor(horizonte / 30) + 1]
 
-    # 3) Prepare observação do mesmo modo
+    # 3) Prepare observacao do mesmo modo
     observacao[, data := data.table::as.IDate(data)]  # se for IDate
 
-    # 4) Merge previsão + observação
+    # 4) Merge previsao + observacao
     dt <- merge(
     simulacao[, .(data_caso, data_previsao, nome, prev = valor, horizonte)],
     observacao[, .(data, nome = posto, obs = valor)],
@@ -521,7 +522,7 @@ agrega_mensal <- function(simulacao, observacao) {
     all.x = TRUE
     )
 
-    # 5) Agrega média dentro de cada bloco de 30 dias
+    # 5) Agrega media dentro de cada bloco de 30 dias
     simulacao_mensal <- dt[
     , .( 
         previsao = mean(prev, na.rm=TRUE),

@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{cria_inicializacao}
 \alias{cria_inicializacao}
-\title{Cria arquivo de inicializacao}
+\title{Cria arquivo de inicializacao para uma unica sub-bacia}
 \usage{
 cria_inicializacao(
   parametros = NULL,
@@ -19,33 +19,36 @@ cria_inicializacao(
 )
 }
 \arguments{
-\item{parametros}{(opcional) data.table com as colunas
+\item{parametros}{data.table com as colunas
 \itemize{
-\item{nome - nome da sub-bacia}
-\item{parametro - nome do parametro}
+\item{nome - nome da sub-bacia (unico)}
+\item{parametro - nome do parametro ("Ebin","Supin","Tuin")}
 \item{valor - valor do parametro}
 }}
 
-\item{nome}{(opcional) vetor de nomes (mesmo comprimento que Ebin, Supin, Tuin)}
+\item{nome}{(opcional) nome da sub-bacia}
 
-\item{Ebin}{(opcional) vetor de valores para Ebin}
+\item{Ebin}{valor para Ebin}
 
-\item{Supin}{(opcional) vetor de valores para Supin}
+\item{Supin}{valor para Supin}
 
-\item{Tuin}{(opcional) vetor de valores para Tuin}
+\item{Tuin}{valor para Tuin}
+
+\item{limite_inferior_ebin}{vetor (length 1 ou 12) para limite inferior de Ebin}
+
+\item{limite_superior_ebin}{vetor (length 1 ou 12) para limite superior de Ebin}
+
+\item{limite_inferior_prec}{vetor (length 1 ou 12) para limite inferior de precipitacao}
+
+\item{limite_superior_prec}{vetor (length 1 ou 12) para limite superior de precipitacao}
 
 \item{numero_dias_assimilacao}{(integer) valor fixo (padrao = 32)}
 
 \item{ajusta_precipitacao}{(integer) valor fixo (padrao = 1)}
 }
 \value{
-data.table com a inicializacao com as colunas
-\itemize{
-\item{nome - nome da sub_bacia}
-\item{variavel - nome da variavel}
-\item{valor - valor da variavel}
-}
+data.table com colunas: nome, variavel, mes, valor
 }
 \description{
-Cria arquivo de inicializacao
+Cria arquivo de inicializacao para uma unica sub-bacia
 }
