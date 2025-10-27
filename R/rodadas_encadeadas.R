@@ -120,10 +120,6 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
         EbInic <- inicializacao[nome == sub_bacia & variavel == "Ebin", valor]
         Supin <- inicializacao[nome == sub_bacia & variavel == "Supin", valor]
         TuInic <- inicializacao[nome == sub_bacia & variavel == "Tuin", valor]
-        limite_inferior_ebin <- inicializacao[nome == sub_bacia & variavel == "limite_inferior_ebin", valor]
-        limite_superior_ebin <- inicializacao[nome == sub_bacia & variavel == "limite_superior_ebin", valor]
-        limite_inferior_prec <- inicializacao[nome == sub_bacia & variavel == "limite_inferior_prec", valor]
-        limite_superior_prec <- inicializacao[nome == sub_bacia & variavel == "limite_superior_prec", valor]
         numero_dias_assimilacao <- inicializacao[nome == sub_bacia & variavel == "numero_dias_assimilacao", valor]
         
         if (nrow(inicializacao[nome == sub_bacia & variavel == "funcao_objetivo"]) > 0) {
@@ -157,6 +153,15 @@ rodada_encadeada_oficial <- function(parametros, inicializacao, precipitacao_obs
 
         for (idata in 1:numero_datas){
             dataRodada <- datas_rodadas[idata, data]  
+            mes_rodada <- lubridate::month(dataRodada)
+            limite_inferior_ebin <- inicializacao[nome == sub_bacia & 
+                    variavel == "limite_inferior_ebin" & mes == mes_rodada, valor]
+            limite_superior_ebin <- inicializacao[nome == sub_bacia & 
+                    variavel == "limite_superior_ebin" & mes == mes_rodada, valor]
+            limite_inferior_prec <- inicializacao[nome == sub_bacia & 
+                    variavel == "limite_inferior_prec" & mes == mes_rodada, valor]
+            limite_superior_prec <- inicializacao[nome == sub_bacia &
+                    variavel == "limite_superior_prec" & mes == mes_rodada, valor]
           
             nome_cenario <- precipitacao_prevista[data_rodada == dataRodada & nome == sub_bacia, unique(cenario)]
             numero_cenarios <- length(nome_cenario)
