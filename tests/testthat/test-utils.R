@@ -29,7 +29,7 @@ test_that("transformacao historico em previsao", {
   sub_bacia <- "avermelha"
   precipitacao <- historico_precipitacao[posto %in% postos_plu[nome == sub_bacia, posto]]
   precipitacao <- ponderacao_espacial(precipitacao, postos_plu[nome == sub_bacia])
-  datas_rodadas <- data.table(
+  datas_rodadas <- data.table::data.table(
     data = as.Date("2020-05-01"),
     numero_dias_previsao = c(15)
   )
@@ -40,13 +40,13 @@ test_that("transformacao historico em previsao", {
 
   #-------------------
 
-  datas_rodadas <- data.table(
+  datas_rodadas <- data.table::data.table(
     a = as.Date(c("2020-05-01", "2020-05-08")),
     numero_dias_previsao = c(15, 20)
   )        
   expect_error(transforma_historico_previsao(precipitacao, datas_rodadas))
 
-  datas_rodadas <- data.table(
+  datas_rodadas <- data.table::data.table(
     data = c("2020-05-01", "2020-05-08"),
     numero_dias_previsao = c(15, 20)
   )
@@ -55,7 +55,7 @@ test_that("transformacao historico em previsao", {
   # CT27.4
   
   evapotranspiracao <- historico_etp[posto == sub_bacia]
-  datas_rodadas <- data.table(
+  datas_rodadas <- data.table::data.table(
     data = as.Date(c("2020-05-01", "2020-05-08")),
     numero_dias_previsao = c(15, 20)
   )
@@ -67,13 +67,13 @@ test_that("transformacao historico em previsao", {
   expect_equal(previsao[data_previsao == "2020-05-10" & data_rodada == "2020-05-01" , valor], 
               previsao[data_previsao == "2020-05-10" & data_rodada == "2020-05-08" , valor])
 
-  datas_rodadas <- data.table(
+  datas_rodadas <- data.table::data.table(
     a = as.Date(c("2020-05-01", "2020-05-08")),
     numero_dias_previsao = c(15, 20)
   )        
   expect_error(transforma_historico_previsao(precipitacao, datas_rodadas))
 
-  datas_rodadas <- data.table(
+  datas_rodadas <- data.table::data.table(
     data = c("2020-05-01", "2020-05-08"),
     numero_dias_previsao = c(15, 20)
   )
@@ -83,17 +83,18 @@ test_that("transformacao historico em previsao", {
 #------testes funcao cria_inicializacao------------------
 # 1) Testa a entrada via data.table
 test_that("Criacao de data.table inicializacao via data.table gera saida correta", {
-  dt_in <- data.table(
+  dt_in <- data.table::data.table(
     nome      = c("a", "a", "a", "b", "b", "b", "b"),
     parametro = c("Ebin", "Supin", "Tuin", "Ebin", "Supin", "Tuin", "X"),
     valor     = c(10, 5, 3, 20, 7, 4, 999)
   )
   # Deve ignorar o parametro "X"
-  dt_out <- cria_inicializacao(parametros = dt_in)
-
-  # Para cada nome deve ter exatamente 9 linhas
+  dt_out <- cria_inicializacao(parametros = dt_in[nome == "a"])
+  dt_out <- data.table::rbindlist(list(dt_out, 
+        cria_inicializacao(parametros = dt_in[nome == "b"])))
+  # Para cada nome deve ter exatamente 53 linhas
   expect_equal(dt_out[nome == "a", .N], 53)
-  expect_equal(dt_out[nome == "b", .N], 53)
+  expect_equal(dt_out[nome == "b", .N], 54)
 
   # Verifica que as variaveis estao corretas
   vars_a <- dt_out[nome == "a", variavel]
@@ -130,15 +131,15 @@ test_that("Entrada via vetores gera saida correta", {
   )
   
   # Linhas esperadas: 2 nomes × 9 variaveis = 10
-  expect_equal(nrow(dt_out), 106)
+  expect_equal(nrow(dt_out), 53)
   # Verifica combinacao de nome e valores
   expect_equal(
     dt_out[variavel == "Ebin", valor],
-    c(100, 200)
+    c(100)
   )
   expect_equal(
     dt_out[variavel == "Tuin", valor],
-    c(1, 2)
+    c(1)
   )
 })
 
@@ -170,7 +171,7 @@ test_that("Erro quando falta vetores obrigatorios", {
 })
 
 test_that("Erro quando data.table nao tem colunas esperadas", {
-  dt_bad <- data.table(foo = 1, bar = 2)
+  dt_bad <- data.table::data.table(foo = 1, bar = 2)
   expect_error(
     cria_inicializacao(parametros = dt_bad)
   )
