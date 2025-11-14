@@ -989,7 +989,8 @@ le_arq_entrada <- function(pasta_entrada) {
     inicializacao <- data.table::rbindlist(list(inicializacao, 
         inicializacao[variavel %in% variaveis, .(mes = 1:12), by = .(nome, valor, variavel)]), fill = TRUE)
     inicializacao[is.na(mes), mes := 0]
-    
+    inicializacao <- inicializacao[!(variavel %in% variaveis & mes == 0)]
+
     datas_rodadas <- data.table::rbindlist(lapply(caso$nome_subbacia, function(sub_bacia) {
   result <- le_entrada_inicializacao(pasta_entrada, sub_bacia)
   result[[2]]
