@@ -301,6 +301,8 @@ le_precipitacao_prevista <- function(arq) {
         " do caso de ", teste_completo$data_rodada, "\n"))
     }
 
+    valida_previsao_prec(dat)
+
     dat
 }
 
