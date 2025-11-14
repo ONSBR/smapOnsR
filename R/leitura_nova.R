@@ -199,6 +199,10 @@ le_historico_verificado <- function(arq) {
     }
     dat[, data := as.Date(data, format = "%d/%m/%Y")]
     
+    # Identificar as colunas a serem convertidas (todas, exceto 'data')
+    cols_to_convert <- setdiff(names(dat), "data")
+    dat[, (cols_to_convert) := lapply(.SD, as.numeric), .SDcols = cols_to_convert]
+    
     if (any(duplicated(dat[, data]))) {
          stop(paste0("a data ", dat[duplicated(data), data], ", esta duplicada no arquivo ", arq, ".\n"))
     }
