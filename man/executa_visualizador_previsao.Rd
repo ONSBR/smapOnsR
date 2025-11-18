@@ -6,44 +6,6 @@
 \usage{
 executa_visualizador_previsao()
 }
-\arguments{
-\item{previsoes}{contendo as seguintes colunas:
-\itemize{
-\item{data_caso - data da rodada}
-\item{data_previsao - data da previsao}
-\item{cenario - nome do cenario}
-\item{nome - nome da sub-bacia}
-\item{variavel - nome da variavel}
-\item{valor - valor da variavel}
-}}
-
-\item{assimilacao}{data table com as colunas:
-\itemize{
-\item{data_caso - data da rodada}
-\item{data_assimilacao - data da assimilacao}
-\item{cenario - nome do cenario}
-\item{nome - nome da sub-bacia}
-\item{variavel - nome da variavel}
-\item{valor - valor da variavel}
-}}
-
-\item{precipitacao}{data table contendo precipitacao observada e previsata com as colunas:
-\itemize{
-\item{data_previsao - data da precipitacao}
-\item{data_rodada - data da rodada}
-\item{cenario - nome do cenario}
-\item{nome - nome da sub-bacia}
-\item{variavel - nome da variavel}
-\item{valor - valor da variavel}
-}}
-
-\item{funcao_objetivo}{data table com as colunas:
-\itemize{
-\item{funcao_objetivo - valor obtido da funcao objetivo durante a assimilacao}
-\item{nome - nome da sub-bacia}
-\item{data_caso - data do caso executado}
-}}
-}
 \description{
-Visualiza dos cenarios gerados pelo modelo SMAP/ONS
+Visualiza os cenarios gerados pelo modelo SMAP/ONS
 }

@@ -10,6 +10,8 @@ cria_datas(data_inicio, data_fim, numero_dias_previsao = 42)
 \item{data_inicio}{data inicio da simulacao}
 
 \item{data_fim}{data fim da simulacao}
+
+\item{numero_dias_previsao}{numero de dias de previsao (padrao = 42)}
 }
 \value{
 data table contendo as datas dos casos a serem executados e seus respectivos horizontes:

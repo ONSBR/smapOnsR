@@ -52,7 +52,7 @@ valida_previsao_prec <- function(precipitacao_prevista) {
 #' valida_duplicadas
 #' 
 #' Valida se existe linhas duplicadas no data.table
-#' @param precipitacao_prevista data.table com a precipitacao prevista com as colunas
+#' @param dt data.table com a precipitacao prevista com as colunas
 #'     \itemize{
 #'     \item{data_rodada - data da rodada do modelo que gerou a previsao}
 #'     \item{data_previsao - data da previsao}

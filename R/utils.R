@@ -259,6 +259,7 @@ ordem_afluencia <- function(montante, jusante) {
 #'
 #' @param data_inicio data inicio da simulacao
 #' @param data_fim data fim da simulacao
+#' @param numero_dias_previsao numero de dias de previsao (padrao = 42)
 #'
 #' @return data table contendo as datas dos casos a serem executados e seus respectivos horizontes:
 #'     \itemize{
