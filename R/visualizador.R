@@ -1542,7 +1542,7 @@ executa_visualizador_previsao <- function(){
 
             # --- 4) Filtra apenas o horizonte escolhido ---
             if (input$discretizacao == "diaria") {
-                # diario: filtra exatamente o horizonte (0,1,2,…)
+                # diario: filtra exatamente o horizonte (0,1,2,...)
                 m_sel <- m[horizonte == input$horizonte]
             } else {
                 # semanal ou mensal: usa a janela que agrupa horizonte=0..tamanho-1 em horizon_calc=1, etc.
