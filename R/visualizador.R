@@ -1439,7 +1439,7 @@ executa_visualizador_previsao <- function(){
                             legend.text = ggplot2::element_text(size = 8),
                             axis.title.x = ggplot2::element_blank(),
                             axis.text.y = ggplot2::element_text(family = "mono"),
-                            axis.text.x = ggplot2::element_text(angle = 45, hjust = 1, size = 9))+  # Rotação das datas
+                            axis.text.x = ggplot2::element_text(angle = 45, hjust = 1, size = 9))+  # Rotacao das datas
                 ggplot2::scale_x_date(date_breaks = "3 day", date_labels = "%d/%b") +
                 ggplot2::scale_y_continuous(labels = formata_label)
 
@@ -1468,19 +1468,19 @@ executa_visualizador_previsao <- function(){
 
             
             grafico_prec <- ggplot2::ggplot(data = quantis_prec[nome == input$sub_bacia], ggplot2::aes(x = data_previsao, y = valor, fill = variavel)) +
-                ggplot2::geom_bar(stat = "identity", position = "identity", width = 0.9) +  # position = "identity" é a correção
+                ggplot2::geom_bar(stat = "identity", position = "identity", width = 0.9) +  # position = "identity" e a correcao
                 ggplot2::scale_fill_manual(values = c("5%" = '#FF6D6D', "25%" = '#F4B183', "75%" = '#C5E0B4', 
                                             "95%" = '#BDD7EE', "100%" = '#5B9BD5'))  +
                 ggplot2::theme_light() +
                 ggplot2::ylab("Prec (mm/dia)")+
                 ggplot2::ggtitle(input$sub_bacia)+
                 ggplot2::scale_x_date(date_breaks = "3 day", date_labels = "%d/%b", position = "top") +
-                ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5, size = 20, face = 'bold'),  # Reduzir tamanho do título
+                ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5, size = 20, face = 'bold'),  # Reduzir tamanho do titulo
                             axis.title.x = ggplot2::element_blank(),
                             axis.text.y = ggplot2::element_text(family = "mono"),
-                            axis.text.x = ggplot2::element_text(angle = 45, hjust = 0, size = 9),  # Rotação das datas
+                            axis.text.x = ggplot2::element_text(angle = 45, hjust = 0, size = 9),  # Rotacao das datas
                             legend.position = "top",
-                            plot.margin = ggplot2::margin(t = 40, r = 5, b = 5, l = 5, unit = "pt")) +  # Margem para o título
+                            plot.margin = ggplot2::margin(t = 40, r = 5, b = 5, l = 5, unit = "pt")) +  # Margem para o titulo
                 ggplot2::guides(fill = ggplot2::guide_legend(nrow = 1)) + 
                 ggplot2::scale_y_reverse(labels = formata_label, limits = c(100, 0))
 

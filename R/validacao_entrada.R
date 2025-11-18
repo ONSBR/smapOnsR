@@ -72,7 +72,7 @@ valida_duplicadas <- function(dt, colunas_chave, nome_dt) {
         linhas_problematicas <- dt[chaves_duplicadas, on = colunas_chave, nomatch = 0]
         
         stop(paste0(
-            "As seguintes linhas no data.table ", nome_dt, " estão duplicadas:",
+            "As seguintes linhas no data.table ", nome_dt, " estao duplicadas:",
             paste(capture.output(print(unique(linhas_problematicas))), 
             collapse = "\n"), sep = "\n")
         )

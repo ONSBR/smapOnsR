@@ -937,7 +937,7 @@ executa_visualizador_calibracao_pmur <- function(){
                 step    = 0.01
                 )
             })
-            # tagList garante que a lista de tags será inserida no UI
+            # tagList garante que a lista de tags sera inserida no UI
             do.call(shiny::tagList, inputs)
             }
         })
@@ -962,7 +962,7 @@ executa_visualizador_calibracao_pmur <- function(){
                 step    = 0.01
                 )
             })
-            # tagList garante que a lista de tags será inserida no UI
+            # tagList garante que a lista de tags sera inserida no UI
             do.call(shiny::tagList, inputs)
             }
         })
@@ -987,7 +987,7 @@ executa_visualizador_calibracao_pmur <- function(){
                 step    = 0.01
                 )
             })
-            # tagList garante que a lista de tags será inserida no UI
+            # tagList garante que a lista de tags sera inserida no UI
             do.call(shiny::tagList, inputs)
             }
         })
@@ -1012,7 +1012,7 @@ executa_visualizador_calibracao_pmur <- function(){
                 step    = 0.01
                 )
             })
-            # tagList garante que a lista de tags será inserida no UI
+            # tagList garante que a lista de tags sera inserida no UI
             do.call(shiny::tagList, inputs)
             }
         })
