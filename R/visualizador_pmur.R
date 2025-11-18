@@ -1675,6 +1675,33 @@ executa_visualizador_calibracao_pmur <- function(){
             })
         })
 
+        ## ----------------Validacao------------------------
+
+        precipitacao_prevista <- shiny::reactive({
+            arquivo_previsao_prec <- input$arquivo_previsao_prec$datapath
+            if (!is.null(arquivo_previsao_prec)) {
+                precipitacao_prevista <- le_precipitacao_prevista(arquivo_previsao_prec)
+                data.table::setnames(precipitacao_prevista, "nome", "posto")
+                postos_plu <- postos_plu()
+                postos_plu <- postos_plu[postos_plu$nome %in% input$sub_bacia]
+                precipitacao_prevista <- ponderacao_espacial_previsao(precipitacao_prevista, postos_plu)
+                return(precipitacao_prevista)
+            } else {
+                precipitacao_prevista <- precipitacao_posto()
+                return(precipitacao_prevista)
+            }
+        })
+
+        evapotranspiracao_prevista <- shiny::reactive({
+            arquivo_previsao_etp <- input$arquivo_previsao_etp$datapath
+            if (!is.null(arquivo_previsao_etp)) {
+                evapotranspiracao_prevista <- le_precipitacao_prevista(arquivo_previsao_etp)
+                return(evapotranspiracao_prevista)
+            } else {
+                return(evapotranspiracao_posto())
+            }
+        })
+
         # Armazenar resultados em reactiveValues
         resultados <- shiny::reactiveValues(
             previsao = NULL,
@@ -1774,21 +1801,24 @@ executa_visualizador_calibracao_pmur <- function(){
 
             datas_rodadas <- cria_datas(data_inicio_simulacao, data_fim_simulacao, input$numero_dias_previsao)
 
-            precipitacao_prevista <- data.table::copy(precipitacao_observada)
-            precipitacao_observada <- precipitacao_observada
+            precipitacao_prevista <- precipitacao_prevista()
             precipitacao_observada <- ponderacao_espacial(precipitacao_observada, postos_plu)
 
             evapotranspiracao_observada <- data.table::data.table(evapotranspiracao)
             colnames(evapotranspiracao_observada)[2] <- "posto"
 
             vazao_observada <- vazao
-            
-            precipitacao_prevista <- ponderacao_espacial(precipitacao_prevista, postos_plu)
-            precipitacao_prevista <- transforma_historico_previsao(precipitacao_prevista, datas_rodadas)
 
-            evapotranspiracao_prevista <- data.table::copy(evapotranspiracao_observada)
-            colnames(evapotranspiracao_prevista)[2] <- "nome"
-            evapotranspiracao_prevista <- transforma_historico_previsao(evapotranspiracao_prevista, datas_rodadas)
+            if (is.null(input$arquivo_previsao_prec$datapath)) {
+                precipitacao_prevista <- ponderacao_espacial(precipitacao_prevista, postos_plu)
+                precipitacao_prevista <- transforma_historico_previsao(precipitacao_prevista, datas_rodadas)
+            }
+
+            evapotranspiracao_prevista <- evapotranspiracao_prevista()
+            if (is.null(input$arquivo_previsao_etp$datapath)) {
+                colnames(evapotranspiracao_prevista)[2] <- "nome"
+                evapotranspiracao_prevista <- transforma_historico_previsao(evapotranspiracao_prevista, datas_rodadas)
+            }
             # Disable the run button
             shiny::updateActionButton(session, "botao_validacao", label = "Validando...aguarde")
             disable_button(TRUE)
@@ -1832,6 +1862,8 @@ executa_visualizador_calibracao_pmur <- function(){
             data_fim_objetivo <- input$periodo_validacao[2]
             previsao <- data.table::copy(resultados$previsao[data_caso >= data_inicio_objetivo &
                                 data_caso <= data_fim_objetivo & variavel == "Qcalc"])
+            previsao[, valor := mean(valor), by = c("data_caso", "data_previsao", "nome")]
+            previsao <- previsao[cenario == previsao[, unique(cenario)][1]]
             vazao_observada <- data.table::copy(vazao_posto())
             sub_bacias <- unique(previsao$nome)
             avaliacoes <- lapply(sub_bacias, function(sb) {
@@ -1859,12 +1891,11 @@ executa_visualizador_calibracao_pmur <- function(){
         # Grafico com dygraphs
         grafico_xts <- shiny::reactive({
             shiny::req(resultados$previsao)
-            
             # --- 1) Merge previsao + observacao (como antes) ---
-            dtp <- data.table::copy(resultados$previsao)[variavel == "Qcalc", vazao_prevista := valor
-            ][, horizonte := as.integer(data_previsao - data_caso)]
+            dtp <- data.table::copy(resultados$previsao)[variavel == "Qcalc"][, horizonte := as.integer(data_previsao - data_caso)]
+            dtp[, vazao_prevista := mean(valor), by = c("data_caso", "data_previsao", "nome")]
+            dtp <- dtp[cenario == dtp[, unique(cenario)][1]]
             obs <- data.table::copy(vazao_posto())[, vazao_observada := valor]
-
             m <- merge(
                 dtp, obs,
                 by.x = c("data_previsao","nome"),
@@ -1935,6 +1966,8 @@ executa_visualizador_calibracao_pmur <- function(){
         cdf_data <- shiny::reactive({
             shiny::req(resultados$previsao)
             previsao <- data.table::copy(resultados$previsao[variavel == "Qcalc"])
+            previsao[, valor := mean(valor), by = c("data_caso", "data_previsao", "nome")]
+            previsao <- previsao[cenario == previsao[, unique(cenario)][1]]
             observacao <- data.table::copy(vazao_posto())
             if (input$discretizacao == "diaria") {
                 previsao <- merge(
@@ -2081,6 +2114,8 @@ executa_visualizador_calibracao_pmur <- function(){
             # filtra previsoes pelo vetor de strings
             sim <- data.table::copy(resultados$previsao[data_caso %in% input$sel_casos_validacao 
                                 & variavel %in% input$variavel_validacao])
+            sim[, valor := mean(valor), by = c("data_caso", "data_previsao", "nome", "variavel")]
+            sim <- sim[cenario == sim[, unique(cenario)][1]]
             sim[, cenario := paste0(variavel, "_", data_caso)]
             observada <- data.table::copy(vazao_posto())
             anosel <- as.integer(input$ano_validacao)
@@ -2093,17 +2128,17 @@ executa_visualizador_calibracao_pmur <- function(){
             setnames(observada, c("valor"), c("vazao_observada"))
             # wide: cada cenario vira coluna
             wide_sim <- data.table::dcast(
-            sim,
-            data_previsao ~ cenario,
-            value.var = "valor"
+                sim,
+                data_previsao ~ cenario,
+                value.var = "valor"
             )
             
             # merge com observada
             wide_all <- merge(
-            x = wide_sim,
-            y = observada[, .(data, vazao_observada)],
-            by.x = "data_previsao", by.y = "data",
-            all = TRUE
+                x = wide_sim,
+                y = observada[, .(data, vazao_observada)],
+                by.x = "data_previsao", by.y = "data",
+                all = TRUE
             )
             
             # monta xts

@@ -1480,6 +1480,8 @@ executa_visualizador_previsao <- function(){
                                 variavel == "Qcalc"]
             previsao <- previsao[data_caso >= data_inicio_objetivo &
                                 data_caso <= data_fim_objetivo]
+            previsao[, valor := mean(valor), by = c("data_caso", "data_previsao", "nome")]
+            previsao <- previsao[cenario == previsao[, unique(cenario)][1]]
             obs <- vazao_observada[posto == unique(previsao$nome)]
             avaliacoes <- lapply(unique(previsao$nome), function(sb) {
                 obs <- vazao_observada[posto == sb]
@@ -1729,6 +1731,8 @@ executa_visualizador_previsao <- function(){
                 lubridate::year(data_caso) == ano & variavel %in% input$variavel_validacao &
                 data_caso %in% sel_casos_validacao & nome == input$sub_bacia_analise
             ]
+            sim[, valor := mean(valor), by = .(data_caso, data_previsao, variavel)]
+            sim <- sim[cenario == sim[, unique(cenario)][1]]
             sim[, cenario := paste0(variavel, "_", data_caso)]
             obs <- data.table::copy(vazao_observada()[posto == input$sub_bacia_analise])
             datas_completa <- previsao()[lubridate::year(data_caso) == ano, unique(data_previsao)]
