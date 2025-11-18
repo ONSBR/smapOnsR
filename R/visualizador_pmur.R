@@ -2019,7 +2019,7 @@ executa_visualizador_calibracao_pmur <- function(){
                 hoverinfo = "x+y", line = list(shape = "hv", dash = "dash")
             ) %>%
             plotly::layout(
-                title = paste0("CDF — ", input$discretizacao, " (h=", input$horizonte, ")"),
+                title = paste0("CDF - ", input$discretizacao, " (h=", input$horizonte, ")"),
                 xaxis = list(title = "Vazao"),
                 yaxis = list(title = "Prob. Acumulada", range = c(0,1))
             )
