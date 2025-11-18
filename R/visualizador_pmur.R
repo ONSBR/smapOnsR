@@ -1242,7 +1242,7 @@ executa_visualizador_calibracao_pmur <- function(){
           dygraphs::dyUnzoom() %>% 
           dygraphs::dyCrosshair(direction = "vertical") %>%
           dygraphs::dyRangeSelector() %>%
-          dygraphs::dyAxis("y", label = "Vazao (m³/s)", independentTicks = TRUE) %>%
+          dygraphs::dyAxis("y", label = "Vazao (m3/s)", independentTicks = TRUE) %>%
           dygraphs::dySeries("vazao.observada", color = "#0000FF", strokeWidth = 1) %>%
           dygraphs::dyBarSeries("Precipitacao", axis = 'y2', color = "#008000") %>%
           dygraphs::dyAxis("y2", label = "Precipitacao (mm)", valueRange = c(200, 0)) %>%
@@ -1339,7 +1339,7 @@ executa_visualizador_calibracao_pmur <- function(){
               metricas_transpostas
             }
           }
-        }, rownames = TRUE)  # Adiciona rótulos de linha
+        }, rownames = TRUE)  # Adiciona rotulos de linha
 
         output$tabela_metrica2 <- shiny::renderTable({
             if (!is.null(input[[paste0("posto_plu_1")]])) {
@@ -1462,9 +1462,9 @@ executa_visualizador_calibracao_pmur <- function(){
                           # Configuracoes do layout
                           plotly::layout(
                             xaxis = list(
-                              title = "<b>Mês</b>",
+                              title = "<b>Mes</b>",
                               showline = TRUE,
-                              dtick = 1  # Linhas de grade a cada 1 mês
+                              dtick = 1  # Linhas de grade a cada 1 mes
                               # range = c(0.5, 12.5),  # Para melhor visualizacao dos pontos
                               # tickvals = 1:12,
                               # ticktext = month.abb[1:12]
@@ -1918,7 +1918,7 @@ executa_visualizador_calibracao_pmur <- function(){
 
             # --- 4) Filtra apenas o horizonte escolhido ---
             if (input$discretizacao == "diaria") {
-                # diario: filtra exatamente o horizonte (0,1,2,…)
+                # diario: filtra exatamente o horizonte (0,1,2,...)
                 m_sel <- m[horizonte == input$horizonte]
             } else {
                 # semanal ou mensal: usa a janela que agrupa horizonte=0..tamanho-1 em horizon_calc=1, etc.
@@ -1951,7 +1951,7 @@ executa_visualizador_calibracao_pmur <- function(){
                 hideOnMouseOut = FALSE,
                 highlightSeriesOpts = list(strokeWidth = 2)
                 ) %>% 
-                dygraphs::dyAxis("y", label = "Vazao (m³/s)", independentTicks = TRUE) %>%
+                dygraphs::dyAxis("y", label = "Vazao (m3/s)", independentTicks = TRUE) %>%
                 dygraphs::dySeries("vazao_observada", color = "#0000FF")  %>%
                 dygraphs::dySeries("vazao_prevista",  color = "#FF0000")  %>%
                 dygraphs::dyRangeSelector()
@@ -2080,7 +2080,7 @@ executa_visualizador_calibracao_pmur <- function(){
             selected = casos_choices,
             multiple = TRUE,
             options  = list(
-                placeholder = "Selecione datas…",
+                placeholder = "Selecione datas...",
                 plugins     = list("remove_button"),
                 maxItems    = NULL
             )
@@ -2100,7 +2100,7 @@ executa_visualizador_calibracao_pmur <- function(){
             multiple = TRUE,
             selected = if (!is.null(resultados$previsao)) "Qcalc" else NULL,
             options  = list(
-                placeholder = "Selecione variaveis…",
+                placeholder = "Selecione variaveis...",
                 plugins     = list("remove_button"),
                 maxItems    = NULL
             )
@@ -2157,7 +2157,7 @@ executa_visualizador_calibracao_pmur <- function(){
           shiny::req(resultados$previsao)
           z <- ts_data()
           dygraphs::dygraph(z, main = "Validacao") %>%
-            dygraphs::dyAxis("y", label = "Vazao (m³/s)") %>%
+            dygraphs::dyAxis("y", label = "Vazao (m3/s)") %>%
             dygraphs::dyOptions(strokeWidth = 1) %>%
             dygraphs::dyUnzoom() %>%
             dygraphs::dySeries("vazao_observada", color = "#0000FF", strokeWidth = 3)  %>%

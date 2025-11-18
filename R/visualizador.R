@@ -1640,7 +1640,7 @@ executa_visualizador_previsao <- function(){
                 hoverinfo = "x+y", line = list(shape = "hv", dash = "dash")
             ) %>%
             plotly::layout(
-                title = paste0("CDF — ", input$discretizacao, " (h=", input$horizonte, ")"),
+                title = paste0("CDF - ", input$discretizacao, " (h=", input$horizonte, ")"),
                 xaxis = list(title = "Vazao"),
                 yaxis = list(title = "Prob. Acumulada", range = c(0,1))
             )
@@ -1701,7 +1701,7 @@ executa_visualizador_previsao <- function(){
             selected = casos_choices,
             multiple = TRUE,
             options  = list(
-                placeholder = "Selecione datas…",
+                placeholder = "Selecione datas ...",
                 plugins     = list("remove_button"),
                 maxItems    = NULL
             )
@@ -1721,7 +1721,7 @@ executa_visualizador_previsao <- function(){
             multiple = TRUE,
             selected = if (!is.null(previsao())) "Qcalc" else NULL,
             options  = list(
-                placeholder = "Selecione variaveis…",
+                placeholder = "Selecione variaveis ...",
                 plugins     = list("remove_button"),
                 maxItems    = NULL
             )
@@ -1761,7 +1761,7 @@ executa_visualizador_previsao <- function(){
         # 2.2) Funcao que monta o dygraph a partir de um xts
         grafico_ano_widget <- function(z, titulo) {
             dygraphs::dygraph(z, main = titulo) %>%
-            dygraphs::dyAxis("y", label = "Vazao (m³/s)") %>%
+            dygraphs::dyAxis("y", label = "Vazao (m3/s)") %>%
             dygraphs::dyOptions(strokeWidth = 1) %>%
             dygraphs::dyUnzoom() %>%
             dygraphs::dySeries("vazao_observada", color = "#0000FF", strokeWidth = 3) %>%
