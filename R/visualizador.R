@@ -1199,7 +1199,7 @@ executa_visualizador_previsao <- function(){
                     shiny::mainPanel(
                         shiny::fluidRow(
                             plotly::plotlyOutput("plotly", heigh = "600px"),
-                            shiny::textOutput("funcao_objetivo")
+                            shiny::h3(shiny::textOutput("funcao_objetivo"))
                         )
                     )
                 )
@@ -1366,6 +1366,21 @@ executa_visualizador_previsao <- function(){
             precipitacao
         })
 
+        assimilacao_sub_bacia <- shiny::reactive({
+            assimilacao <- data.table::copy(assimilacao())
+            assimilacao <- assimilacao[nome == input$sub_bacia & data_caso == input$data_caso]
+            data.table::setnames(assimilacao, "data_assimilacao", "data_previsao")
+            assimilacao
+        })
+
+        vazao_observada_sub_bacia <- shiny::reactive({
+            vazao_observada <- data.table::copy(vazao_observada())
+            vazao_observada <- vazao_observada[posto == input$sub_bacia]
+            data.table::setnames(vazao_observada, c("data", "posto"), c("data_previsao", "nome"))
+            vazao_observada
+        })
+
+
         output$tabela_previsao <- DT::renderDataTable(previsao())
 
         output$tabela_assimilacao <- DT::renderDataTable(assimilacao())
@@ -1375,6 +1390,11 @@ executa_visualizador_previsao <- function(){
 
             previsoes_sub_bacia <- previsoes_sub_bacia()
             precipitacao_sub_bacia <- precipitacao_sub_bacia()
+            assimilacao_sub_bacia <- assimilacao_sub_bacia()
+            vazao_observada_sub_bacia <- vazao_observada_sub_bacia()
+
+            previsoes_sub_bacia <- rbindlist(list(previsoes_sub_bacia, 
+                            assimilacao_sub_bacia), use.names=TRUE, fill=TRUE)
 
             mediana <- previsoes_sub_bacia[variavel == "Qcalc", median(valor), by = c("data_previsao", "nome")]
             data.table::setnames(mediana, "V1", "mediana")
@@ -1390,6 +1410,8 @@ executa_visualizador_previsao <- function(){
             data.table::setnames(per_0_95, "V1", "per_0_95")
             maximo <- previsoes_sub_bacia[variavel == "Qcalc", max(valor), by = c("data_previsao", "nome")]
             data.table::setnames(maximo, "V1", "maximo")
+            vazao_observada_sub_bacia <- vazao_observada_sub_bacia[, .(valor), by = c("data_previsao", "nome")]
+            data.table::setnames(vazao_observada_sub_bacia, "valor", "vazao_observada")
 
             quantis <- merge(mediana, per_0_25, by = c("data_previsao", "nome"))
             quantis <- merge(quantis, per_0_75, by = c("data_previsao", "nome"))
@@ -1397,7 +1419,7 @@ executa_visualizador_previsao <- function(){
             quantis <- merge(quantis, per_0_05, by = c("data_previsao", "nome"))
             quantis <- merge(quantis, minimo, by = c("data_previsao", "nome"))
             quantis <- merge(quantis, maximo, by = c("data_previsao", "nome"))
-
+            quantis <- merge(quantis, vazao_observada_sub_bacia, by = c("data_previsao", "nome"))
 
             grafico_vazao <- ggplot2::ggplot(data = quantis[nome == input$sub_bacia], ggplot2::aes(x = data_previsao)) +
                 ggplot2::geom_ribbon(ggplot2::aes(x = data_previsao, ymin = minimo, ymax = per_0_05, fill = "0%-5%"), alpha = 0.7) +
@@ -1406,16 +1428,18 @@ executa_visualizador_previsao <- function(){
                 ggplot2::geom_ribbon(ggplot2::aes(x = data_previsao, ymin = per_0_75, ymax = per_0_95, fill = "75%-95%"), alpha = 0.8) +
                 ggplot2::geom_ribbon(ggplot2::aes(x = data_previsao, ymin = per_0_95, ymax = maximo, fill = "95%-100%"), alpha = 1) +
                 ggplot2::geom_line(ggplot2::aes(y = mediana, color = "mediana"), linetype = "dotted",size=1.3) + 
+                ggplot2::geom_line(ggplot2::aes(y = vazao_observada, color = "vazao_observada"),size=1.3) + 
                 ggplot2::ylab("Vazao Incremental (m3/s)") +
                 ggplot2::theme_light() +
                 ggplot2::scale_fill_manual(values=c("0%-5%" = '#FF6D6D', "5%-25%" = '#F4B183',
                                         "25%-75%" = '#C5E0B4', "75%-95%" = '#BDD7EE',
                                         '95%-100%' = '#5B9BD5'), name = "")+
-                
-                ggplot2::scale_color_manual(values=c('Observado'='black','mediana'='red'),name="")+
-                
-                ggplot2::theme(legend.position="bottom",legend.text = ggplot2::element_text(size = 8),axis.title.x = ggplot2::element_blank(),axis.text.y = ggplot2::element_text(family = "mono"))+
-                
+                ggplot2::scale_color_manual(values=c('vazao_observada'='#002efa','mediana'='red'),name="")+
+                ggplot2::theme(legend.position="bottom",
+                            legend.text = ggplot2::element_text(size = 8),
+                            axis.title.x = ggplot2::element_blank(),
+                            axis.text.y = ggplot2::element_text(family = "mono"),
+                            axis.text.x = ggplot2::element_text(angle = 45, hjust = 1, size = 9))+  # Rotação das datas
                 ggplot2::scale_x_date(date_breaks = "3 day", date_labels = "%d/%b") +
                 ggplot2::scale_y_continuous(labels = formata_label)
 
@@ -1440,32 +1464,44 @@ executa_visualizador_previsao <- function(){
             quantis_prec <- merge(quantis_prec, p100, by = c("data_previsao", "nome"))
 
             quantis_prec <- data.table::melt(quantis_prec, id.vars = c("data_previsao", "nome"), variable.name = "variavel", value.name = "valor")
-            quantis_prec$variavel <- factor(quantis_prec$variavel, , levels = c("100%", "95%", "75%", "25%","5%"))
+            quantis_prec$variavel <- factor(quantis_prec$variavel, levels = c("100%", "95%", "75%", "25%","5%"))
 
-
+            
             grafico_prec <- ggplot2::ggplot(data = quantis_prec[nome == input$sub_bacia], ggplot2::aes(x = data_previsao, y = valor, fill = variavel)) +
-                ggplot2::geom_bar(data = quantis_prec[nome == input$sub_bacia], ggplot2::aes(x = data_previsao, y = valor, fill = variavel), stat = "identity") +
-                ggplot2::scale_fill_manual(values = c( "5%" = '#FF6D6D', "25%" = '#F4B183', "75%" = '#C5E0B4', 
+                ggplot2::geom_bar(stat = "identity", position = "identity", width = 0.9) +  # position = "identity" é a correção
+                ggplot2::scale_fill_manual(values = c("5%" = '#FF6D6D', "25%" = '#F4B183', "75%" = '#C5E0B4', 
                                             "95%" = '#BDD7EE', "100%" = '#5B9BD5'))  +
-            ggplot2::theme_light() +
-            ggplot2::ylab("Prec (mm/dia)")+
-            ggplot2::ggtitle(input$sub_bacia)+
-                ggplot2::scale_x_date(date_breaks= "3 day", date_labels = "%d/%b", position = "top") +
-                ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5, size = 24, face = 'bold'), axis.title.x = ggplot2::element_blank(), axis.text.y = ggplot2::element_text(family = "mono"),
-                    legend.position = "top")+ ggplot2::guides(fill = ggplot2::guide_legend(nrow = 1)) + ggplot2::scale_y_reverse(labels = formata_label, limits = c(100, 0)) 
+                ggplot2::theme_light() +
+                ggplot2::ylab("Prec (mm/dia)")+
+                ggplot2::ggtitle(input$sub_bacia)+
+                ggplot2::scale_x_date(date_breaks = "3 day", date_labels = "%d/%b", position = "top") +
+                ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5, size = 20, face = 'bold'),  # Reduzir tamanho do título
+                            axis.title.x = ggplot2::element_blank(),
+                            axis.text.y = ggplot2::element_text(family = "mono"),
+                            axis.text.x = ggplot2::element_text(angle = 45, hjust = 0, size = 9),  # Rotação das datas
+                            legend.position = "top",
+                            plot.margin = ggplot2::margin(t = 40, r = 5, b = 5, l = 5, unit = "pt")) +  # Margem para o título
+                ggplot2::guides(fill = ggplot2::guide_legend(nrow = 1)) + 
+                ggplot2::scale_y_reverse(labels = formata_label, limits = c(100, 0))
 
             grafico_vazao_plotly <- plotly::ggplotly(grafico_vazao)
             grafico_prec_plotly <- plotly::ggplotly(grafico_prec)
 
-            layout <- plotly::subplot(grafico_prec_plotly, grafico_vazao_plotly, nrows = 2, heights = c(0.2, 0.8))
+            
+            layout <- plotly::subplot(grafico_prec_plotly, grafico_vazao_plotly, 
+                                    nrows = 2, heights = c(0.2, 0.8), 
+                                    titleY = TRUE, titleX = TRUE, margin = 0.05)
+            
+            
+            layout <- plotly::layout(layout, margin = list(t = 80, b = 50, l = 50, r = 50))
+            
             layout
         })
-
         output$tabela <- DT::renderDataTable(previsoes)
 
         output$funcao_objetivo <- shiny::renderText({
             funcao_objetivo <- funcao_objetivo()
-            paste0("funcao objetivo = ", funcao_objetivo$funcao_objetivo[(funcao_objetivo$nome == input$sub_bacia) & (funcao_objetivo$data_caso == input$data_caso)])
+            paste0("funcao objetivo = ", round(funcao_objetivo$funcao_objetivo[(funcao_objetivo$nome == input$sub_bacia) & (funcao_objetivo$data_caso == input$data_caso)], digits = 4))
         })
 
         resultados <- shiny::reactive({
