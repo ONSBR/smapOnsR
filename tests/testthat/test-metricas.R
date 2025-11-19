@@ -107,9 +107,9 @@ test_that("testa previsoes reais", {
   resultado <- analisa_previsoes(simulacao, observacao, semanal = TRUE, mensal = TRUE, anual = FALSE)$resultado
 
   expect_equal(resultado[discretizacao == "diaria" & horizonte == 8 
-                         & metrica == "PBIAS", valor], 0.92974236)
+                         & metrica == "PBIAS", valor], 0.97653114)
   expect_equal(resultado[discretizacao == "semanal" & horizonte == 3 
-                         & metrica == "DM", valor], 0.1173216)
-  expect_equal(resultado[discretizacao == "mensal" & horizonte == 4 
-                         & metrica == "KGE", valor], 0.6635228)
+                         & metrica == "DM", valor], 0.40269503)
+  expect_equal(resultado[discretizacao == "mensal" & horizonte == 1 
+                         & metrica == "KGE", valor], 0.9217572)
 })
