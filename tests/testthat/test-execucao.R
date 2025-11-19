@@ -15,7 +15,13 @@ test_that("testa execucao oficial", {
   } else {
     expect_true(abs(round(saida[, valor][10], 0) - 3493) < 3493 * 0.01)
   }
-  
+ unlink(system.file("extdata", "Arq_Entrada", package = "smapOnsR"), recursive = TRUE)
+  unlink(system.file("extdata", "arq_entrada_novo_sem_etp", package = "smapOnsR"), recursive = TRUE)
+  unlink(system.file("extdata", "Arq_Entrada0", package = "smapOnsR"), recursive = TRUE)
+  unlink(system.file("extdata", "Arq_Entrada1", package = "smapOnsR"), recursive = TRUE)
+  unlink(system.file("extdata", "caso_completo", package = "smapOnsR"), recursive = TRUE)
+  unlink(system.file("extdata", "caso_completo2", package = "smapOnsR"), recursive = TRUE)
+
   #CN12.2
   pasta_caso <- system.file("extdata", package = "smapOnsR")
   expect_error(executa_caso_oficial(pasta_caso))
@@ -26,6 +32,8 @@ test_that("testa execucao oficial", {
 })
 
 test_that("testa execucao novo formato", {
+  zip::unzip(system.file("extdata", "dados_entrada.zip", package = "smapOnsR"), exdir = system.file("extdata", package = "smapOnsR"))
+
   library(smapOnsR)
   pasta_entrada <- system.file("extdata", "arq_entrada_novo", package = "smapOnsR")
 

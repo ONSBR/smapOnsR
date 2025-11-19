@@ -55,6 +55,7 @@ transforma_NC_serie <- function(serie_temporal, normal_climatologica) {
 #'     \item{data - data da rodada}
 #'     \item{numero_dias_previsao - numero de dias de previsao}
 #'      }
+#' @param dia_inicial dia inicial da previsao
 #' @importFrom data.table data.table setcolorder setorder
 #' @return data.table com as colunas
 #'     \itemize{
@@ -75,7 +76,7 @@ transforma_NC_serie <- function(serie_temporal, normal_climatologica) {
 #' 
 #' previsao <- transforma_historico_previsao(precipitacao, datas_rodadas)
 #' @export
-transforma_historico_previsao <- function(serie_temporal, datas_rodadas) {
+transforma_historico_previsao <- function(serie_temporal, datas_rodadas, dia_inicial = 1) {
 
     if (any(colnames(datas_rodadas) != c("data", "numero_dias_previsao"))) {
         stop("data table datas_rodadas deve possuir colunas 'data' e 'numero_dias_previsao'")
@@ -90,7 +91,7 @@ transforma_historico_previsao <- function(serie_temporal, datas_rodadas) {
         data_rodada <- datas_rodadas$data[i]
         numero_dias_previsao <- datas_rodadas$numero_dias_previsao[i]
 
-        data_previsao <- serie_temporal[data %in% seq.Date(data_rodada + 1, data_rodada + numero_dias_previsao + 2, by = 1)]
+        data_previsao <- serie_temporal[data %in% seq.Date(data_rodada + dia_inicial, data_rodada + numero_dias_previsao + 2, by = 1)]
         aux <- serie_temporal[data %in% data_previsao[, data]]
         colnames(aux)[1] <- "data_previsao"
         aux[, data_rodada := data_rodada]
@@ -252,4 +253,289 @@ ordem_afluencia <- function(montante, jusante) {
     }
   }
   return(ord_aflu)
+}
+
+#' Cria arquivo de datas a serem simuladas
+#'
+#' @param data_inicio data inicio da simulacao
+#' @param data_fim data fim da simulacao
+#' @param numero_dias_previsao numero de dias de previsao (padrao = 42)
+#'
+#' @return data table contendo as datas dos casos a serem executados e seus respectivos horizontes:
+#'     \itemize{
+#'     \item{data - data do caso}
+#'     \item{numero_dias_previsao - horizonte do caso}
+#'     }
+#' @importFrom data.table data.table
+#' @export
+
+cria_datas <- function(data_inicio, data_fim, numero_dias_previsao = 42) {
+
+  # 1) Calcular quantos dias ate a proxima quinta-feira (4 = quinta em ISO-8601: domingo=7, segunda=1, ..., sabado=6)
+  dias_ate_quinta <- (4 - as.integer(format(data_inicio, "%u"))) %% 7
+  primeira_quinta <- data_inicio + dias_ate_quinta
+
+  # 2) Gerar sequencia de quintas ate a data_fim
+  if (numero_dias_previsao > 42) {
+    intervalo <- "1 month"
+  } else {
+    intervalo <- "1 week"
+  }
+  datas_quinta <- seq(from = primeira_quinta, to = data_fim, by = intervalo)
+
+  # 3) Montar o data.table com numero_dias_previsao = 42
+  datas <- data.table::data.table(
+    data = datas_quinta,
+    numero_dias_previsao = rep(numero_dias_previsao, length(datas_quinta))
+  )
+
+  datas
+}
+
+#' Cria arquivo de inicializacao para uma unica sub-bacia
+#'
+#' @param parametros data.table com as colunas
+#'   \itemize{
+#'     \item{nome - nome da sub-bacia (unico)}
+#'     \item{parametro - nome do parametro ("Ebin","Supin","Tuin")}
+#'     \item{valor - valor do parametro}
+#'   }
+#' @param nome   (opcional) nome da sub-bacia
+#' @param Ebin   valor para Ebin
+#' @param Supin  valor para Supin
+#' @param Tuin   valor para Tuin
+#' @param limite_inferior_ebin vetor (length 1 ou 12) para limite inferior de Ebin
+#' @param limite_superior_ebin vetor (length 1 ou 12) para limite superior de Ebin
+#' @param limite_inferior_prec  vetor (length 1 ou 12) para limite inferior de precipitacao
+#' @param limite_superior_prec  vetor (length 1 ou 12) para limite superior de precipitacao
+#' @param numero_dias_assimilacao (integer) valor fixo (padrao = 32)
+#' @param ajusta_precipitacao     (integer) valor fixo (padrao = 1)
+#' @return data.table com colunas: nome, variavel, mes, valor
+#' @importFrom data.table setorder rbindlist
+#' @export
+cria_inicializacao <- function(
+  parametros = NULL,
+  nome  = NULL,
+  Ebin  = NULL,
+  Supin = NULL,
+  Tuin  = NULL,
+  limite_inferior_ebin = 0.8,
+  limite_superior_ebin = 1.2,
+  limite_inferior_prec = 0.5,
+  limite_superior_prec = 2,
+  numero_dias_assimilacao = 32L,
+  ajusta_precipitacao     = 1L
+) {
+  # 1) Monta dt_sel para parametros nao sazonais (mes = 0)
+  if (is.null(parametros)) {
+    if (is.null(nome) || is.null(Ebin) || is.null(Supin) || is.null(Tuin)) {
+      stop("Quando 'parametros' for NULL, forneca 'nome','Ebin','Supin' e 'Tuin'.")
+    }
+    dt_sel <- data.table(
+      nome     = nome,
+      variavel = c("Ebin","Supin","Tuin"),
+      valor    = c(Ebin, Supin, Tuin),
+      mes      = 0L
+    )
+  } else {
+    # espera data.table de um unico nome e variaveis Ebin/Supin/Tuin
+    if (!all(c("nome","parametro","valor") %in% names(parametros))) {
+      stop("O 'parametros' deve ter colunas 'nome','parametro','valor'.")
+    }
+    dt_sel <- parametros[ , .(
+      nome     = nome,
+      variavel = parametro,
+      valor    = valor,
+      mes      = 0L
+    )]
+  }
+
+  # 2) Parametros fixos (mes = 0)
+  dt_fixos <- data.table(
+    nome     = dt_sel$nome[1],
+    variavel = c("numero_dias_assimilacao","ajusta_precipitacao"),
+    valor    = c(numero_dias_assimilacao, ajusta_precipitacao),
+    mes      = 0L
+  )
+
+  # 3) Parametros sazonais: limites em meses 1:12
+  lista_limits <- list(
+    limite_inferior_ebin = limite_inferior_ebin,
+    limite_superior_ebin = limite_superior_ebin,
+    limite_inferior_prec = limite_inferior_prec,
+    limite_superior_prec = limite_superior_prec
+  )
+
+  dt_sazonais <- data.table::rbindlist(
+    lapply(names(lista_limits), function(var) {
+      val <- lista_limits[[var]]
+      if (length(val) == 1L) {
+        val <- rep(val, 12L)
+      } else if (length(val) != 12L) {
+        stop(sprintf("'%s' deve ter length 1 ou 12, mas veio %d", var, length(val)))
+      }
+      data.table(
+        nome     = dt_sel$nome[1],
+        variavel = var,
+        mes      = seq_len(12L),
+        valor    = val
+      )
+    })
+  )
+
+  # 4) Empilha e ordena
+  inicializacao <- data.table::rbindlist(list(dt_sel, dt_fixos, dt_sazonais), use.names = TRUE)
+  data.table::setorder(inicializacao, variavel, mes)
+
+  return(inicializacao)
+}
+
+
+#' Cria arquivo de sub_bacias
+#'
+#' @param parametros data.table com as colunas
+#'     \itemize{
+#'     \item{nome - nome da sub-bacia}
+#'     \item{parametro - nome do parametro}
+#'     \item{valor - valor do parametro}
+#'     }
+#'
+#' @return data.table sub_bacia com as colunas
+#'     \itemize{
+#'     \item{nome - nome da sub_bacia}
+#'     }
+#' @export
+
+cria_sub_bacias <- function(parametros) {
+
+  sub_bacias <- data.table::data.table(
+    nome = unique(parametros$nome)
+  )
+
+  sub_bacias
+}
+
+#' Agrega previsao semanal
+#' 
+#' Realiza agregacao semanal da previsao e observacao levando em 
+#' consideracao semanas operativa de sabado a sexta
+#' 
+#' @param simulacao data table com a previsao contendo as seguintes colunas:
+#'     \itemize{
+#'     \item{data_caso}{data da rodada}
+#'     \item{data_previsao}{data da previsao}
+#'     \item{cenario}{nome do cenario}
+#'     \item{nome}{nome da sub-bacia}
+#'     \item{variavel}{nome da variavel}
+#'     \item{valor}{valor da variavel}
+#'     }
+#' @param observacao data table com o historico de vazao com as colunas:
+#'     \itemize{
+#'     \item{data}{data da observacao}
+#'     \item{posto}{nome do posto}
+#'     \item{valor}{valor da variavel}
+#'     }
+#' 
+#' @return data.table com as colunas
+#'     \itemize{
+#'     \item{data_caso}{data da rodada}
+#'     \item{nome}{nome da sub-bacia}
+#'     \item{previsao}{ valor da previsao semanal}
+#'     \item{observacao}{valor observacao semanal}
+#'     \item{discretizacao}{discretizacao da previsao}
+#'     \item{horizonte}{horizonte da previsao}
+#'     }
+#' 
+#' @export
+
+agrega_semanal <- function(simulacao, observacao) {
+    # Step 1: Merge the two data.tables by "data"
+    colnames(simulacao)[2] <- "data"
+    merged_data <- merge(simulacao, observacao, by = "data")
+    data.table::setorder(merged_data, data_caso, data)
+    merged_data[, dia_semana := lubridate::wday(data)]
+    data.table::setDT(merged_data)
+
+    # Step 1: Exclude rows before the first "dia_semana" == 7 for each "data_caso"
+    merged_data <- merged_data[, .SD[dia_semana == 7 | (cumsum(dia_semana == 7) > 0)], by = data_caso]
+
+    # Step 2: Create a sequence for each "data_caso" based on the remainder when dividing by 7
+    merged_data[, horizonte := rep(1:(.N %/% 7 + (ifelse(.N %% 7 == 0, 0, 1))), each = 7, length.out = .N), by = data_caso]
+
+    # Step 3: Calculate weekly mean and count
+    simulacao_semanal <- merged_data[, .(previsao = mean(valor.x), observacao = mean(valor.y), count = .N), by = .(data_caso, horizonte, nome)]
+    simulacao_semanal[, count := NULL]
+    simulacao_semanal[, discretizacao := "semanal"]
+    data.table::setcolorder(simulacao_semanal, c("data_caso", "nome", "previsao", 
+                  "observacao", "discretizacao", "horizonte"))
+    simulacao_semanal
+}
+
+#' Agrega previsao mensal
+#' 
+#' Realiza agregacao mensal da previsao e observacao
+#' 
+#' @param simulacao data table com a previsao contendo as seguintes colunas:
+#'     \itemize{
+#'     \item{data_caso}{data da rodada}
+#'     \item{data_previsao}{data da previsao}
+#'     \item{cenario}{nome do cenario}
+#'     \item{nome}{nome da sub-bacia}
+#'     \item{variavel}{nome da variavel}
+#'     \item{valor}{valor da variavel}
+#'     }
+#' @param observacao data table com o historico de vazao com as colunas:
+#'     \itemize{
+#'     \item{data}{data da observacao}
+#'     \item{posto}{nome do posto}
+#'     \item{valor}{valor da variavel}
+#'     }
+#' 
+#' @return data.table com as colunas
+#'     \itemize{
+#'     \item{data_caso}{data da rodada}
+#'     \item{nome}{nome da sub-bacia}
+#'     \item{previsao}{ valor da previsao semanal}
+#'     \item{observacao}{valor observacao semanal}
+#'     \item{discretizacao}{discretizacao da previsao}
+#'     \item{horizonte}{horizonte da previsao}
+#'     }
+#' 
+#' @export
+#' 
+
+agrega_mensal <- function(simulacao, observacao) {
+    # 2) Atribui a cada linha o “mes” a que ela pertence (blocos de 30 dias)
+    #    horizonte 0–29 mes 1, 30–59  mes 2, etc.
+    simulacao[, horizonte := as.integer(data.table::as.IDate(data_previsao) - 
+              data.table::as.IDate(data_caso))]
+    simulacao[, horizonte := floor(horizonte / 30) + 1]
+
+    # 3) Prepare observacao do mesmo modo
+    observacao[, data := data.table::as.IDate(data)]  # se for IDate
+
+    # 4) Merge previsao + observacao
+    dt <- merge(
+    simulacao[, .(data_caso, data_previsao, nome, prev = valor, horizonte)],
+    observacao[, .(data, nome = posto, obs = valor)],
+    by.x = c("data_previsao","nome"),
+    by.y = c("data","nome"),
+    all.x = TRUE
+    )
+
+    # 5) Agrega media dentro de cada bloco de 30 dias
+    simulacao_mensal <- dt[
+    , .( 
+        previsao = mean(prev, na.rm=TRUE),
+        observacao  = mean(obs,  na.rm=TRUE)
+        ),
+    by = .(nome, data_caso, horizonte)
+    ]
+    data.table::setcolorder(simulacao_mensal, 
+        c("data_caso", "horizonte", "nome", 
+        "previsao", "observacao"))
+    simulacao_mensal[, discretizacao := "mensal"]
+    data.table::setcolorder(simulacao_mensal, c("data_caso", "nome", "previsao", 
+                  "observacao", "discretizacao", "horizonte"))
+    simulacao_mensal
 }

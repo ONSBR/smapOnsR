@@ -4,7 +4,7 @@
 \alias{transforma_historico_previsao}
 \title{Transforma historico de serie temporal em data table de previsao}
 \usage{
-transforma_historico_previsao(serie_temporal, datas_rodadas)
+transforma_historico_previsao(serie_temporal, datas_rodadas, dia_inicial = 1)
 }
 \arguments{
 \item{serie_temporal}{data.table com as colunas
@@ -20,6 +20,8 @@ transforma_historico_previsao(serie_temporal, datas_rodadas)
 \item{data - data da rodada}
 \item{numero_dias_previsao - numero de dias de previsao}
 }}
+
+\item{dia_inicial}{dia inicial da previsao}
 }
 \value{
 data.table com as colunas

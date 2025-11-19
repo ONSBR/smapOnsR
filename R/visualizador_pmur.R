@@ -10,6 +10,8 @@
 #' @importFrom future future value resolved
 #' @importFrom DT renderDataTable dataTableOutput
 #' @importFrom plotly renderPlotly plotlyOutput plot_ly
+#' @importFrom htmlwidgets saveWidget
+#' @importFrom webshot2 webshot
 #' @importFrom moments skewness kurtosis
 #' @export
 
@@ -17,6 +19,19 @@ executa_visualizador_calibracao_pmur <- function(){
     `%>%` <- magrittr::`%>%`
     
     ui_calibracao <- shiny::fluidPage(
+        shiny::tags$head(
+            shiny::tags$style(shiny::HTML("
+            /* limita altura do input com scroll interno */
+            #sel_casos_validacao + .selectize-control .selectize-input {
+                max-height: 30px !important;
+                overflow-y: auto !important;
+            }
+            #funcao_objetivo {
+                font-size: 20px;
+                color: #333333;
+              }
+            "))
+        ),
         shinyjs::useShinyjs(),
         shiny::titlePanel("Calibracao SMAP/ONS"),
         shiny::tabsetPanel(
@@ -124,25 +139,61 @@ executa_visualizador_calibracao_pmur <- function(){
                     ),
 
                     shiny::mainPanel(
-                        shiny::fluidRow(
-                            shiny::column(3, shiny::selectInput(inputId ="funcao_objetivo", label = shiny::h3("Selecione a funcao objetivo"), choices = c("dm", "nse", "mape", "kge"), selected = "dm")),
-                            shiny::column(3, shiny::selectInput(inputId = "tipo_escala", label = shiny::h3("Selecione a escala das variaveis"), choices = c(0, 1), selected = 1)),
-                            shiny::column(3, shiny::selectInput(inputId ="ndeps", label = shiny::h3("Passo de otimizacao"), choices = c(1, 0.1, 0.001, 0.0001, 0.00001, 0.000001, 0.0000001), selected = 0.001))
-                        ), shiny::fluidRow(
-                            shiny::column(1)
-                        ), shiny::fluidRow(
-                            shiny::dateRangeInput("zoom_calibracao", "Zoom calibracao", start = NULL, end = NULL, min = NULL, max = NULL),
-                            dygraphs::dygraphOutput("dygraph_zoom", heigh = "600px")
-                        ), shiny::fluidRow(
-                            shiny::column(1, shiny::actionButton(inputId = "botao_calibracao", label = "Calibrar", class = "btn-lg btn-success")),
-                            shiny::column(1, shiny::checkboxGroupInput("variaveis", "variaveis", choices = c("Qsup1", "Qsup2", "Qplan"))),
-                            shiny::column(1, shiny::textOutput("funcao_objetivo")),
-                            shiny::column(6, shiny::tableOutput("tabela_metrica1")),
-                            shiny::column(3, shiny::tableOutput("tabela_metrica2")),
-                            shiny::selectInput(inputId = "estatistica", label = shiny::h3("Estatisticas mensais"), choices = c("media", "dp", "assimetria", "curtose")),
-                            plotly::plotlyOutput("metrica_mensal"),
-                            plotly::plotlyOutput("grafico_kts")
+                      # Linha 0: Botao de calibracao
+                      shiny::fluidRow(shiny::column(3, shiny::actionButton("botao_calibracao", "Calibrar", class = "btn-lg btn-success"))
+                      ),
+                      shiny::hr(),
+                      
+                      # Linha 1: SelectInputs e botao de download
+                      shiny::fluidRow(
+                        shiny::column(3, shiny::selectInput("funcao_objetivo", "Metrica para funcao objetivo:", 
+                                           choices = c("dm", "nse", "mape", "kge", "rmse"), 
+                                           selected = "dm")
+                        ),
+                        shiny::column(3, shiny::selectInput("tipo_escala", "Escala:", choices = c(0, 1), selected = 1)
+                        ),
+                        shiny::column(3, shiny::selectInput("ndeps", "Passo otimizacao:", choices = c(1, 0.1, 0.001, 0.0001, 0.00001, 0.000001, 0.0000001), selected = 0.001)),
+                        shiny::column(3,  shiny::div(shiny::downloadButton("download_zoom_png", "Download grafico (PNG)", class = "btn-sm"), style = "margin-top: 25px;")),
+                      ),
+                      
+                      # Linha 2: Controles e botao de download
+                      shiny::fluidRow(
+                        shiny::column(3,  shiny::div(
+                                      shiny::tags$b("Valor da Funcao Objetivo:"),
+                                      shiny::textOutput("funcao_objetivo")
+                                      )
+                        ),
+                        shiny::column(3, dateRangeInput("zoom_calibracao", "Zoom visualizacao:", start = NULL, end = NULL, min = NULL, max = NULL, startview = "decade")
+                        ),
+                        shiny::column(3, shiny::checkboxGroupInput("variaveis", "Plotar variaveis:", choices = c("Qsup1", "Qsup2", "Qplan"), inline = TRUE)  # Checkboxes na horizontal
                         )
+                      ),
+                      # Linha 3: Grafico principal
+                      shiny::fluidRow(shiny::column(12, dygraphs::dygraphOutput("dygraph_zoom", height = "600px"))
+                      ),
+                      
+                      # Linha 4: Grafico kts e metricas
+                      shiny::fluidRow(shiny::column(6, plotly::plotlyOutput("grafico_kts", height = "400px")),
+                        shiny::column(3,  shiny::div(
+                                      shiny::tableOutput("tabela_metrica1"),
+                                      style = "display: flex; justify-content: flex-end;")
+                                      ),
+                        shiny::column(2,  shiny::div(
+                                      shiny::tableOutput("tabela_metrica2"),
+                                      style = "display: flex; justify-content: flex-end;")
+                                      ),
+                        shiny::column(1, )
+                      ),
+                      
+                      # Linha 5:
+                      shiny::fluidRow(
+                        shiny::column(1, ),
+                        shiny::column(11, shiny::selectInput(inputId = "estatistica", label = "Estatisticas mensais", choices = c("media", "dp", "assimetria", "curtose"))),
+                      ),
+                      # Linha 5: Graficos secundarios
+                      shiny::fluidRow(
+                        shiny::column(12, plotly::plotlyOutput("metrica_mensal"))
+                      )
                     )
                 )
             ),
@@ -152,6 +203,95 @@ executa_visualizador_calibracao_pmur <- function(){
             ),
             shiny::tabPanel("Tabela info calibracao",
                 DT::dataTableOutput("info_calibracao")
+            ),
+            shiny::tabPanel("Validacao",
+                shiny::sidebarLayout(
+                    shiny::sidebarPanel(
+                        shiny::fluidRow(
+                            shiny::fileInput(inputId = "arquivo_previsao_prec", label = shiny::h3("Selecione o arquivo de precipitacao prevista")),
+                            shiny::fileInput(inputId = "arquivo_previsao_etp", label = shiny::h3("Selecione o arquivo de evapotranspiracao prevista"))
+                        ),
+                        shiny::hr(),
+                        shiny::fluidRow(
+                            shiny::column(4, shiny::numericInput(inputId = "Ebin_validacao", label = "Ebin", value = NULL)),
+                            shiny::column(3, shiny::numericInput(inputId = "Supin_validacao", label = "Supin", value = NULL)),
+                            shiny::column(4, shiny::numericInput(inputId = "Tuin_validacao", label = "Tuin", value = NULL))
+                        ),
+                        shiny::hr(),
+                        shiny::fluidRow(
+                            shiny::dateRangeInput(inputId = "periodo_simulacao_validacao", label = "Periodo de simulacao da validacao", start = NULL, end = NULL, min = NULL, max = NULL),
+                            shiny::dateRangeInput(inputId = "periodo_validacao", label = "Periodo de validacao", start = NULL, end = NULL, min = NULL, max = NULL),
+                            shiny::column(4, shiny::numericInput(inputId = "numero_dias_previsao", label = "Horizonte previsao", value = NULL)),
+                        ),
+                        shiny::hr(),
+                        shiny::fluidRow(
+                            shiny::selectInput("discretizacao", "Discretizacao", choices = c("Diaria" = "diaria", "Semanal" = "semanal", "Mensal" = "mensal")),
+                            shiny::uiOutput("horizonte_ui")
+                        ),
+                        shiny::hr(),
+                        shiny::downloadButton("download_simulacao_validacao", "Download simulacao_validacao_sub_bacia.csv"),
+                        shiny::downloadButton("download_assimilacao_validacao", "Download assimilacao_validacao_sub_bacia.csv"),
+                        shiny::downloadButton("download_precipitacao_validacao", "Download  precipitacao_validacao_sub_bacia.csv"),
+                        shiny::downloadButton("download_funcao_objetivo_validacao", "Download funcao_objetivo_validacao_sub_bacia.csv"),
+                        shiny::downloadButton("download_otimizacao_validacao", "Download otimizacao_validacao_sub_bacia.csv"),
+                        shiny::downloadButton("download_metricas_validacao", "Download metricas_validacao_sub_bacia.csv"),
+                        shiny::hr(),
+                        shiny::downloadButton("download_grafico_validacao", "Download grafico_validacao_sub_bacia.png"),
+                        shiny::downloadButton("download_grafico_validacao_ano", "Download grafico_validacao_ano_sub_bacia.png"),
+                        shiny::hr(),
+                        shiny::fluidRow(
+                            shiny::selectInput("discretizacao_ebin", "Discretizacao Ebin", choices = c("Unico" = "unico", "Sazonal" = "sazonal")),
+                        ),
+                        shiny::fluidRow(
+                            shiny::column(5, shiny::h3("Limite Inferior Ebin"), shiny::uiOutput("limite_inferior_ebin")),
+                            shiny::column(5, shiny::h3("Limite Superior Ebin"), shiny::uiOutput("limite_superior_ebin"))
+                        ),
+                        shiny::fluidRow(
+                            shiny::selectInput("discretizacao_prec", "Discretizacao Prec", choices = c("Unico" = "unico", "Sazonal" = "sazonal")),
+                        ),
+                        shiny::fluidRow(
+                            shiny::column(5, shiny::h3("Limite Inferior Prec"), shiny::uiOutput("limite_inferior_prec")),
+                            shiny::column(5, shiny::h3("Limite Superior Prec"), shiny::uiOutput("limite_superior_prec"))
+                        )
+                    ),
+                    shiny::mainPanel(
+                        shiny::fluidRow(
+                            shiny::column(3, shiny::actionButton(inputId = "botao_validacao", label = "Executa validacao", class = "btn-lg btn-success"))
+                        ),
+                        shiny::fluidRow(
+                                shiny::tabPanel("Grafico",
+                                dygraphs::dygraphOutput("grafico_dy")
+                            )
+                        ),
+                        shiny::tabPanel("CDF",
+                                plotly::plotlyOutput("cdf_plot", height = "400px")
+                        ),
+                        shiny::fluidRow(
+                                shiny::tabPanel("Tabela",
+                                shiny::tableOutput("tabela_metricas")
+                            )
+                        ),
+                        shiny::fluidRow(
+                            shiny::column(width = 3,
+                                # Placeholder para seletor de anos
+                                shiny::uiOutput("ano_validacao"),
+                            ),
+                            shiny::column(width = 3,
+                                # Placeholder para seletor de casos
+                                shiny::uiOutput("sel_casos_validacao"),
+                            ),
+                            shiny::column(width = 3,
+                                # Placeholder para seletor de casos
+                                shiny::uiOutput("variavel_validacao"),
+                            ),
+                            shiny::column(3, shiny::actionButton("btn_all",  "Selecionar todas as datas")),
+                            shiny::column(3, shiny::actionButton("btn_none", "Limpar todas as datas"))
+                        ),
+                        shiny::fluidRow(
+                            dygraphs::dygraphOutput("validacao_ano")
+                        )
+                    )
+                )
             )
         )
     )
@@ -168,6 +308,28 @@ executa_visualizador_calibracao_pmur <- function(){
             }
             return(default_value)
         }
+
+        output$horizonte_ui <- shiny::renderUI({
+            shiny::req(resultados$previsao)
+            tabela <- tabela_completa()
+            switch(input$discretizacao,
+            diaria  = shiny::selectInput(
+                        "horizonte", "Horizonte", 
+                        choices = tabela[discretizacao == "diaria",
+                                    unique(horizonte)], selected = 0
+                        ),
+            semanal = shiny::selectInput(
+                        "horizonte", "Horizonte", 
+                        choices = tabela[discretizacao == "semanal",
+                                    unique(horizonte)], selected = 1
+                        ),
+            mensal  = shiny::selectInput(
+                        "horizonte", "Horizonte", 
+                        choices = tabela[discretizacao == "mensal",
+                                    unique(horizonte)], selected = 1
+                        )
+            )
+        })
 
 
         shiny::observeEvent(input$sub_bacia, {
@@ -194,6 +356,11 @@ executa_visualizador_calibracao_pmur <- function(){
                 shiny::updateNumericInput(session, "Ebin", value = get_param_value("Ebin", vazao$valor[1] * 0.3, parametros_posto, "valor"))
                 shiny::updateNumericInput(session, "Supin", value = get_param_value("Supin", vazao$valor[1] * 0.7, parametros_posto, "valor"))
                 shiny::updateNumericInput(session, "Tuin", value = get_param_value("Tuin", 0.3, parametros_posto, "valor"))
+
+                shiny::updateNumericInput(session, "Ebin_validacao", value = get_param_value("Ebin", vazao$valor[1] * 0.3, parametros_posto, "valor"))
+                shiny::updateNumericInput(session, "Supin_validacao", value = get_param_value("Supin", vazao$valor[1] * 0.7, parametros_posto, "valor"))
+                shiny::updateNumericInput(session, "Tuin_validacao", value = get_param_value("Tuin", 0.3, parametros_posto, "valor"))
+
 
                 shiny::updateNumericInput(session, "str", value = vetor_modelo[1])
                 shiny::updateNumericInput(session, "k2t", value = vetor_modelo[2])
@@ -257,6 +424,10 @@ executa_visualizador_calibracao_pmur <- function(){
                 data_final_simulacao <- data_maximo
                 data_inicio_objetivo <- data_minimo
                 data_final_objetivo <- data_maximo
+                data_inicio_simulacao_validacao <- data_minimo
+                data_final_simulacao_validacao <- data_maximo
+                data_inicio_objetivo_validacao <- data_minimo
+                data_final_objetivo_validacao <- data_maximo
 
                 periodos <- periodos()
                 if (nrow(periodos) > 0) {
@@ -288,10 +459,40 @@ executa_visualizador_calibracao_pmur <- function(){
                             data_final_objetivo <- data_maximo
                         }
                     }
+                    if (nrow(periodos[parametro == "data_inicio_simulacao_validacao"]) > 0) {
+                        if (periodos[parametro == "data_inicio_simulacao_validacao", valor] <= data_maximo) {
+                            data_inicio_simulacao_validacao <- periodos[parametro == "data_inicio_simulacao_validacao", valor]
+                        } else {
+                            data_inicio_simulacao_validacao <- data_minimo
+                        }
+                    }
+                    if (nrow(periodos[parametro == "data_final_simulacao_validacao"]) > 0) {
+                        if (periodos[parametro == "data_final_simulacao_validacao", valor] <= data_maximo) {
+                            data_final_simulacao_validacao <- periodos[parametro == "data_final_simulacao_validacao", valor]
+                        } else {
+                            data_final_simulacao_validacao <- data_maximo
+                        }
+                    }
+                    if (nrow(periodos[parametro == "data_inicio_objetivo_validacao"]) > 0) {
+                        if (periodos[parametro == "data_inicio_objetivo_validacao", valor] <= data_maximo) {
+                            data_inicio_objetivo_validacao <- periodos[parametro == "data_inicio_objetivo_validacao", valor]
+                        } else {
+                            data_inicio_objetivo_validacao <- data_minimo
+                        }
+                    }
+                    if (nrow(periodos[parametro == "data_final_objetivo_validacao"]) > 0) {
+                        if (periodos[parametro == "data_final_objetivo_validacao", valor] <= data_maximo) {
+                            data_final_objetivo_validacao <- periodos[parametro == "data_final_objetivo_validacao", valor]
+                        } else {
+                            data_final_objetivo_validacao <- data_maximo
+                        }
+                    }
                 }
                 
                 shiny::updateDateRangeInput(session, "periodo_simulacao", start = data_inicio_simulacao, end = data_final_simulacao, min = data_minimo, max = data_maximo)
                 shiny::updateDateRangeInput(session, "periodo_calibracao", start = data_inicio_objetivo, end = data_final_objetivo, min = data_minimo, max = data_maximo)
+                shiny::updateDateRangeInput(session, "periodo_simulacao_validacao", start = data_inicio_simulacao_validacao, end = data_final_simulacao_validacao, min = data_minimo, max = data_maximo)
+                shiny::updateDateRangeInput(session, "periodo_validacao", start = data_inicio_objetivo_validacao, end = data_final_objetivo_validacao, min = data_minimo, max = data_maximo)
                 shiny::updateDateRangeInput(session, "zoom_calibracao", start = data_inicio_simulacao, end = data_final_simulacao, min = data_minimo, max = data_maximo)
             }
         })
@@ -716,24 +917,154 @@ executa_visualizador_calibracao_pmur <- function(){
             return(evapotranspiracao)
         })
 
+        output$limite_inferior_ebin <- shiny::renderUI({
+            shiny::req(input$discretizacao_ebin)
+            if (input$discretizacao_ebin == "unico") {
+            # apenas um numericInput
+            shiny::numericInput(
+                inputId = "limite_inferior_ebin_0",
+                label   = "Limite inferior Ebin",
+                value   = 0.8,
+                step    = 0.01
+            )
+            } else {
+            # 12 inputs sazonais
+            inputs <- lapply(1:12, function(i) {
+                shiny::numericInput(
+                inputId = paste0("limite_inferior_ebin_", i),
+                label   = paste0("Limite inferior Ebin (mes ", i, ")"),
+                value   = 0.8,
+                step    = 0.01
+                )
+            })
+            # tagList garante que a lista de tags sera inserida no UI
+            do.call(shiny::tagList, inputs)
+            }
+        })
+
+        output$limite_superior_ebin <- shiny::renderUI({
+            shiny::req(input$discretizacao_ebin)
+            if (input$discretizacao_ebin == "unico") {
+            # apenas um numericInput
+            shiny::numericInput(
+                inputId = "limite_superior_ebin_0",
+                label   = "Limite superior Ebin",
+                value   = 1.2,
+                step    = 0.01
+            )
+            } else {
+            # 12 inputs sazonais
+            inputs <- lapply(1:12, function(i) {
+                shiny::numericInput(
+                inputId = paste0("limite_superior_ebin_", i),
+                label   = paste0("Limite superior Ebin (mes ", i, ")"),
+                value   = 1.2,
+                step    = 0.01
+                )
+            })
+            # tagList garante que a lista de tags sera inserida no UI
+            do.call(shiny::tagList, inputs)
+            }
+        })
+
+        output$limite_inferior_prec <- shiny::renderUI({
+            shiny::req(input$discretizacao_prec)
+            if (input$discretizacao_prec == "unico") {
+            # apenas um numericInput
+            shiny::numericInput(
+                inputId = "limite_inferior_prec_0",
+                label   = "Limite inferior prec",
+                value   = 0.5,
+                step    = 0.01
+            )
+            } else {
+            # 12 inputs sazonais
+            inputs <- lapply(1:12, function(i) {
+                shiny::numericInput(
+                inputId = paste0("limite_inferior_prec_", i),
+                label   = paste0("Limite inferior prec (mes ", i, ")"),
+                value   = 0.5,
+                step    = 0.01
+                )
+            })
+            # tagList garante que a lista de tags sera inserida no UI
+            do.call(shiny::tagList, inputs)
+            }
+        })
+
+        output$limite_superior_prec <- shiny::renderUI({
+            shiny::req(input$discretizacao_prec)
+            if (input$discretizacao_prec == "unico") {
+            # apenas um numericInput
+            numericInput(
+                inputId = "limite_superior_prec_0",
+                label   = "Limite superior prec",
+                value   = 2,
+                step    = 0.01
+            )
+            } else {
+            # 12 inputs sazonais
+            inputs <- lapply(1:12, function(i) {
+                shiny::numericInput(
+                inputId = paste0("limite_superior_prec_", i),
+                label   = paste0("Limite superior Prec (mes ", i, ")"),
+                value   = 2,
+                step    = 0.01
+                )
+            })
+            # tagList garante que a lista de tags sera inserida no UI
+            do.call(shiny::tagList, inputs)
+            }
+        })
+
 
         # Enable/disable the run button
         shiny::observe({
             shinyjs::toggleState(id = "botao_calibracao", condition = !disable_button())
         })
 
-        output$grafico_kts <- plotly::renderPlotly({
-            vetor_modelo <- vetor_modelo()
-            vetor_modelo[16] <- input$alfa
-            vetor_modelo[17] <- input$beta
-            kt_max <- input$kt_max
-            kt_min <- input$kt_min
-            
-            kt <- cria_kt(kt_max, kt_min, vetor_modelo[16], vetor_modelo[17])
-            kt <- data.table::data.table(kt)
-            kt$lag <- 2:-60
+        shiny::observe({
+            shinyjs::toggleState(id = "botao_validacao", condition = !disable_button())
+        })
 
-            plot <- plotly::plot_ly(data = kt[which(lag %in% kt_max:-kt_min)], x = ~lag, y = ~kt, name = 'Distribuicao dos Kts', type = 'scatter', mode = 'lines', height = 4, width = 4) 
+        output$grafico_kts <- plotly::renderPlotly({
+          vetor_modelo <- vetor_modelo()
+          vetor_modelo[16] <- input$alfa
+          vetor_modelo[17] <- input$beta
+          kt_max <- input$kt_max
+          kt_min <- input$kt_min
+          
+          kt <- cria_kt(kt_max, kt_min, vetor_modelo[16], vetor_modelo[17])
+          kt <- data.table::data.table(kt)
+          kt$lag <- 2:-60
+          
+          plot <- plotly::plot_ly(data = kt[which(lag %in% kt_max:-kt_min)], 
+                                  x = ~lag, 
+                                  y = ~kt, 
+                                  name = 'Distribuicao dos Kts', 
+                                  type = 'scatter', 
+                                  mode = 'lines+markers') %>%
+            
+            # Configuracoes do layout
+            plotly::layout(
+              # Configuracoes do eixo Y
+              yaxis = list(
+                title = "<b>Peso</b>",  # Titulo em negrito
+                range = c(0, 1),       # Intervalo fixo de 0 a 1
+                showline = TRUE,       # Mostra linha do eixo
+                dtick = 0.1,           # Linhas de grade a cada 0.1
+                zeroline = TRUE        # Mostra linha no zero
+              ),
+              
+              # Configuracoes do eixo X
+              xaxis = list(
+                title = "<b>kt</b>",   # Titulo em negrito
+                showline = TRUE,       # Mostra linha do eixo
+                dtick = 1            # Linhas de grade a cada 1 unidade
+              )
+            )
+          
+          plot
         })
 
         saida <-  shiny::reactive({
@@ -871,49 +1202,57 @@ executa_visualizador_calibracao_pmur <- function(){
             }
         })
 
+        grafico_zoom <- shiny::reactive({
+          shiny::req(saida(), input$zoom_calibracao)
+          
+          variaveis_grafico <- c("Qcalc", "Qbase", input$variaveis)
+          vazao <- vazao_posto()
+          precipitacao <- precipitacao_posto()
+          postos_plu <- postos_plu()
+          
+          precipitacao <- precipitacao[data >= input$zoom_calibracao[1] & data <= input$zoom_calibracao[2]]
+          precipitacao <- ponderacao_espacial(precipitacao, postos_plu[postos_plu$nome == input$sub_bacia])
+          
+          saida_zoom <- saida()[data >= input$zoom_calibracao[1] & data <= input$zoom_calibracao[2]]
+          saida_zoom <- data.table::melt(saida_zoom, id.vars = c("data"), variable.name = "variavel", value.name = "valor")
+          
+          simulacao <- xts::xts()
+          for (variaveis in variaveis_grafico){
+            simulacao <- cbind(simulacao, xts::xts(
+              saida_zoom$valor[which((saida_zoom$variavel == variaveis))],
+              order.by = saida_zoom$data[which((saida_zoom$variavel == variaveis))]
+            ))
+          }
+          colnames(simulacao) <- variaveis_grafico
+          
+          observacao <- xts::xts(
+            x = vazao$valor[which((vazao$data >= input$zoom_calibracao[1]) & (vazao$data <= input$zoom_calibracao[2]))],
+            order.by = vazao$data[which((vazao$data >= input$zoom_calibracao[1]) & (vazao$data <= input$zoom_calibracao[2]))]
+          )
+          colnames(observacao) <- "vazao observada"
+          
+          prec_aux <- xts::xts(
+            x = precipitacao$valor,
+            order.by = precipitacao$data
+          )
+          colnames(prec_aux) <- "Precipitacao"
+          
+          dygraphs::dygraph(cbind(simulacao, observacao, prec_aux), main = paste(input$sub_bacia)) %>%
+          dygraphs::dyOptions(strokeWidth = 1) %>%
+          dygraphs::dyUnzoom() %>% 
+          dygraphs::dyCrosshair(direction = "vertical") %>%
+          dygraphs::dyRangeSelector() %>%
+          dygraphs::dyAxis("y", label = "Vazao (m3/s)", independentTicks = TRUE) %>%
+          dygraphs::dySeries("vazao.observada", color = "#0000FF", strokeWidth = 1) %>%
+          dygraphs::dyBarSeries("Precipitacao", axis = 'y2', color = "#008000") %>%
+          dygraphs::dyAxis("y2", label = "Precipitacao (mm)", valueRange = c(200, 0)) %>%
+          dygraphs::dySeries("Qcalc", color = "#FF0000", strokeWidth = 1) %>%
+          dygraphs::dySeries("Qbase", color = "#FFCC00", strokeWidth = 1) %>%
+          dygraphs::dyLegend(show = "onmouseover")
+        })
+
         output$dygraph_zoom <- dygraphs::renderDygraph({
-            if (!is.null(saida())) {
-                variaveis_grafico <- c("Qcalc", "Qbase", input$variaveis)
-                vazao <- vazao_posto()
-                evapotranspiracao <- evapotranspiracao_posto()
-                precipitacao <- precipitacao_posto()
-                postos_plu <- postos_plu()
-                data_inicio_simulacao <- input$periodo_simulacao[1]
-                data_fim_simulacao <- input$periodo_simulacao[2]
-
-                precipitacao <- precipitacao[data >= data_inicio_simulacao & data <= data_fim_simulacao]
-                evapotranspiracao <- evapotranspiracao[data >= data_inicio_simulacao & data <= data_fim_simulacao]
-
-                precipitacao <- ponderacao_espacial(precipitacao, postos_plu[postos_plu$nome == input$sub_bacia])
-                saida <- saida()
-                saida <- data.table::melt(saida, id.vars = c("data"), variable.name = "variavel",
-                                            value.name = "valor")
-                simulacao <- xts::xts()
-                for (variaveis in variaveis_grafico){
-                    simulacao <- cbind(simulacao, xts::xts(saida$valor[which((saida$variavel == variaveis) & (saida$data >= input$zoom_calibracao[1]) & (saida$data <= input$zoom_calibracao[2]))], order.by = saida$data[which((saida$variavel == variaveis) & (saida$data >= input$zoom_calibracao[1]) & (saida$data <= input$zoom_calibracao[2]))]))
-                }
-                colnames(simulacao) <- variaveis_grafico
-                observacao <- xts::xts(x = vazao$valor[which((vazao$data >= input$zoom_calibracao[1]) & (vazao$data <= input$zoom_calibracao[2]))], order.by =  vazao$data[which((vazao$data >= input$zoom_calibracao[1]) & (vazao$data <= input$zoom_calibracao[2]))])
-                colnames(observacao) <- "vazao observada"
-
-                prec_aux <- xts::xts(x = precipitacao$valor[which((precipitacao$data >= input$zoom_calibracao[1]) & (precipitacao$data <= input$zoom_calibracao[2]))], order.by =  precipitacao$data[which((precipitacao$data >= input$zoom_calibracao[1]) & (precipitacao$data <= input$zoom_calibracao[2]))])
-                colnames(prec_aux) <- "Precipitacao"
-
-                dygraphs::dygraph(cbind(simulacao, observacao, prec_aux),
-                                main = input$sub_bacia, ) %>%
-                dygraphs::dyHighlight(highlightCircleSize = 5,
-                                    highlightSeriesBackgroundAlpha = 0.2,
-                                    hideOnMouseOut = FALSE,
-                                    highlightSeriesOpts = list(strokeWidth = 2)) %>% 
-                dygraphs::dyRangeSelector() %>%
-                dygraphs::dyAxis("y", label = "Vazao (m3/s)", independentTicks = TRUE) %>%
-                dygraphs::dySeries("vazao.observada", color = "#0000FF") %>%
-                dygraphs::dyBarSeries("Precipitacao", axis = 'y2', color = "#008000") %>%
-                dygraphs::dyAxis("y2", label = "Precipitacao (mm)", valueRange = c(200, 0)) %>%
-                dygraphs::dySeries("Qcalc", color = "#FF0000") %>%
-                dygraphs::dySeries("Qbase", color = "#FFCC00") %>%
-                dygraphs::dyLegend(show = "follow")
-            }
+          grafico_zoom()
         })
 
         output$tabela <- DT::renderDataTable(saida())
@@ -948,7 +1287,9 @@ executa_visualizador_calibracao_pmur <- function(){
                         calcula_funcao_objetivo <- calcula_mape
                     } else if (input$funcao_objetivo == "kge") {
                         calcula_funcao_objetivo <- calcula_kge
-                    }
+                    } else if (input$funcao_objetivo == "rmse") {
+                        calcula_funcao_objetivo <- calcula_rmse
+                    } 
 
                     funcao_objetivo <- calcula_funcao_objetivo(saida()[data >= data_inicio_objetivo & data <= data_fim_objetivo, Qcalc], vazao_fo[, valor], vazao_fo[, peso])
                     paste0("funcao objetivo = ", round(funcao_objetivo, 4))
@@ -957,42 +1298,48 @@ executa_visualizador_calibracao_pmur <- function(){
         })
 
         output$tabela_metrica1 <- shiny::renderTable({
-            if (!is.null(input[[paste0("posto_plu_1")]])) {
-                if (!is.null(saida())) {
-                    data_inicio_objetivo <- input$periodo_calibracao[1]
-                    data_fim_objetivo <- input$periodo_calibracao[2]
-                    vazao <- vazao_posto()
-
-                    vazao_fo <- vazao[which((vazao$data >= data_inicio_objetivo) & (vazao$data <= data_fim_objetivo))]
-
-                    vazao_fo[, peso := 1 / .N]
-
-                    if (input$numero_periodo_desconsiderado >= 1) {
-                        for (iperiodo in 1:input$numero_periodo_desconsiderado){
-                            vazao_fo[data >= input[[paste0("periodo_desconsiderado_", iperiodo)]][1] & data <= input[[paste0("periodo_desconsiderado_", iperiodo)]][2], peso := 0]
-                        }
-                        vazao_fo[peso != 0, peso := 1 / .N]
-                    }
-
-                    saida_objetivo <- saida()[data >= data_inicio_objetivo & data <= data_fim_objetivo]
-
-                    metricas <- data.table::data.table(tipo = c("historico", "simulado"))
-                    metricas[tipo == "simulado", media := saida_objetivo[, mean(Qcalc)]]
-                    metricas[tipo == "simulado", dp := saida_objetivo[, sd(Qcalc)]]
-                    metricas[tipo == "simulado", assimetria := saida_objetivo[, moments::skewness(Qcalc)]]
-                    metricas[tipo == "simulado", curtose := saida_objetivo[, moments::kurtosis(Qcalc)]]
-                    metricas[tipo == "simulado", p95 := saida_objetivo[, quantile(Qcalc, 0.95)]]
-                    metricas[tipo == "simulado", max := saida_objetivo[, max(Qcalc)]]
-                    metricas[tipo == "historico", media := vazao_fo[, mean(valor)]]
-                    metricas[tipo == "historico", dp := vazao_fo[, sd(valor)]]
-                    metricas[tipo == "historico", assimetria := vazao_fo[, moments::skewness(valor)]]
-                    metricas[tipo == "historico", curtose := vazao_fo[, moments::kurtosis(valor)]]
-                    metricas[tipo == "historico", p95 := vazao_fo[, quantile(valor, 0.95)]]
-                    metricas[tipo == "historico", max := vazao_fo[, max(valor)]]
-                    metricas        
+          if (!is.null(input[[paste0("posto_plu_1")]])) {
+            if (!is.null(saida())) {
+              data_inicio_objetivo <- input$periodo_calibracao[1]
+              data_fim_objetivo <- input$periodo_calibracao[2]
+              vazao <- vazao_posto()
+              
+              vazao_fo <- vazao[which((vazao$data >= data_inicio_objetivo) & (vazao$data <= data_fim_objetivo))]
+              
+              vazao_fo[, peso := 1 / .N]
+              
+              if (input$numero_periodo_desconsiderado >= 1) {
+                for (iperiodo in 1:input$numero_periodo_desconsiderado){
+                  vazao_fo[data >= input[[paste0("periodo_desconsiderado_", iperiodo)]][1] & data <= input[[paste0("periodo_desconsiderado_", iperiodo)]][2], peso := 0]
                 }
+                vazao_fo[peso != 0, peso := 1 / .N]
+              }
+              
+              saida_objetivo <- saida()[data >= data_inicio_objetivo & data <= data_fim_objetivo]
+              
+              metricas <- data.table::data.table(tipo = c("historico", "simulado"))
+              metricas[tipo == "simulado", media := saida_objetivo[, mean(Qcalc)]]
+              metricas[tipo == "simulado", dp := saida_objetivo[, sd(Qcalc)]]
+              metricas[tipo == "simulado", assimetria := saida_objetivo[, moments::skewness(Qcalc)]]
+              metricas[tipo == "simulado", curtose := saida_objetivo[, moments::kurtosis(Qcalc)]]
+              metricas[tipo == "simulado", p95 := saida_objetivo[, quantile(Qcalc, 0.95)]]
+              metricas[tipo == "simulado", max := saida_objetivo[, max(Qcalc)]]
+              metricas[tipo == "historico", media := vazao_fo[, mean(valor)]]
+              metricas[tipo == "historico", dp := vazao_fo[, sd(valor)]]
+              metricas[tipo == "historico", assimetria := vazao_fo[, moments::skewness(valor)]]
+              metricas[tipo == "historico", curtose := vazao_fo[, moments::kurtosis(valor)]]
+              metricas[tipo == "historico", p95 := vazao_fo[, quantile(valor, 0.95)]]
+              metricas[tipo == "historico", max := vazao_fo[, max(valor)]]
+              
+              # Transpor a tabela
+              metricas_transpostas <- as.data.frame(t(metricas[,-1]))
+              colnames(metricas_transpostas) <- metricas$tipo
+              rownames(metricas_transpostas) <- c("Media", "Desvio Padrao", "Assimetria", "Curtose", "Percentil 95", "Maximo")
+              
+              metricas_transpostas
             }
-        })
+          }
+        }, rownames = TRUE)  # Adiciona rotulos de linha
 
         output$tabela_metrica2 <- shiny::renderTable({
             if (!is.null(input[[paste0("posto_plu_1")]])) {
@@ -1022,6 +1369,7 @@ executa_visualizador_calibracao_pmur <- function(){
                     metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "pbias", valor = calcula_pbias(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
                     metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "correl", valor = calcula_correlacao(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
                     metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "kge", valor = calcula_kge(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
+                    metricas <- rbindlist(list(metricas, data.table::data.table(metrica = "rmse", valor = calcula_rmse(saida_objetivo[, Qcalc], vazao_fo[, valor], vazao_fo[, peso]))))
                     metricas        
                 }
             }
@@ -1086,11 +1434,51 @@ executa_visualizador_calibracao_pmur <- function(){
 
                         metricas <- rbindlist(list(metricas, metricas2), use.names=TRUE)
                         data.table::setnames(metricas, c("lubridate", "V1"), c("mes", "valor"))
+                        metricas <- metricas[order(mes)]
                         
-                        grafico_mensal <- ggplot2::ggplot(data = metricas[estatistica == input$estatistica], 
-                                            ggplot2::aes(x = mes, y = valor, color = tipo)) + ggplot2::geom_line() + ggplot2::theme_light()
-                        grafico_mensal <- plotly::ggplotly(grafico_mensal)
-                        grafico_mensal
+                        plot <- plotly::plot_ly() %>%
+                          # Adiciona serie observada (azul)
+                          plotly::add_trace(
+                            data = metricas[estatistica == input$estatistica & tipo == "observado"],
+                            x = ~mes,
+                            y = ~valor,
+                            type = 'scatter',
+                            mode = 'lines+markers',
+                            name = 'Observado',
+                            line = list(color = '#0000FF'),
+                            marker = list(color = '#0000FF')
+                          ) %>%
+                          # Adiciona serie simulada (vermelho)
+                          plotly::add_trace(
+                            data = metricas[estatistica == input$estatistica & tipo == "simulado"],
+                            x = ~mes,
+                            y = ~valor,
+                            type = 'scatter',
+                            mode = 'lines+markers',
+                            name = 'Simulado',
+                            line = list(color = '#FF0000'),
+                            marker = list(color = '#FF0000')
+                          ) %>%
+                          # Configuracoes do layout
+                          plotly::layout(
+                            xaxis = list(
+                              title = "<b>Mes</b>",
+                              showline = TRUE,
+                              dtick = 1  # Linhas de grade a cada 1 mes
+                              # range = c(0.5, 12.5),  # Para melhor visualizacao dos pontos
+                              # tickvals = 1:12,
+                              # ticktext = month.abb[1:12]
+                            ),
+                            yaxis = list(
+                              title = paste0("<b>", tools::toTitleCase(input$estatistica), "</b>"),
+                              showline = TRUE
+                            ),
+                            showlegend = TRUE,
+                            legend = list(orientation = 'h', x = 0.5, y = 1.1),
+                            margin = list(l = 60, r = 40, b = 60, t = 40)
+                          )
+
+                        plot
                     }
                 }
             }
@@ -1167,7 +1555,11 @@ executa_visualizador_calibracao_pmur <- function(){
             } else if (input$funcao_objetivo == "kge") {
                 funcao_objetivo <- calcula_kge
                 fnscale = -1
-            }
+            } else if (input$funcao_objetivo == "rmse") {
+                funcao_objetivo <- calcula_rmse
+                fnscale = 1
+            } 
+
 
             area <- area()
             Ebin <- input$Ebin
@@ -1283,6 +1675,499 @@ executa_visualizador_calibracao_pmur <- function(){
             })
         })
 
+        ## ----------------Validacao------------------------
+
+        precipitacao_prevista <- shiny::reactive({
+            arquivo_previsao_prec <- input$arquivo_previsao_prec$datapath
+            if (!is.null(arquivo_previsao_prec)) {
+                precipitacao_prevista <- le_precipitacao_prevista(arquivo_previsao_prec)
+                data.table::setnames(precipitacao_prevista, "nome", "posto")
+                postos_plu <- postos_plu()
+                postos_plu <- postos_plu[postos_plu$nome %in% input$sub_bacia]
+                precipitacao_prevista <- ponderacao_espacial_previsao(precipitacao_prevista, postos_plu)
+                return(precipitacao_prevista)
+            } else {
+                precipitacao_prevista <- precipitacao_posto()
+                return(precipitacao_prevista)
+            }
+        })
+
+        evapotranspiracao_prevista <- shiny::reactive({
+            arquivo_previsao_etp <- input$arquivo_previsao_etp$datapath
+            if (!is.null(arquivo_previsao_etp)) {
+                evapotranspiracao_prevista <- le_precipitacao_prevista(arquivo_previsao_etp)
+                return(evapotranspiracao_prevista)
+            } else {
+                return(evapotranspiracao_posto())
+            }
+        })
+
+        # Armazenar resultados em reactiveValues
+        resultados <- shiny::reactiveValues(
+            previsao = NULL,
+            simulacao_semanal = NULL,
+            resultados = NULL,
+            assimilacao = NULL,
+            funcao_objetivo = NULL,
+            otimizacao = NULL,
+            precipitacao = NULL
+        )
+
+        shiny::observeEvent(input$botao_validacao,{
+            parametros <- parametros_posto()
+            parametros$valor[parametros$parametro == "Str"] <- input$str
+            parametros$valor[parametros$parametro == "K2t"] <- input$k2t
+            parametros$valor[parametros$parametro == "Crec"] <- input$crec
+            parametros$valor[parametros$parametro == "Capc"] <- input$capc
+            parametros$valor[parametros$parametro == "K_kt"] <- input$k_kt
+            parametros$valor[parametros$parametro == "H1"] <- input$h1
+            parametros$valor[parametros$parametro == "K2t2"] <- input$k2t2
+            parametros$valor[parametros$parametro == "Lambda"] <- input$lambda
+            parametros$valor[parametros$parametro == "H"] <- input$h
+            parametros$valor[parametros$parametro == "K1t"] <- input$k1t
+            parametros$valor[parametros$parametro == "K3t"] <- input$k3t
+            parametros$valor[parametros$parametro == "Pcof"] <- input$pcof
+            parametros$valor[parametros$parametro == "Ecof"] <- input$ecof
+            parametros$valor[parametros$parametro == "Ecof2"] <- input$ecof2
+            parametros$valor[parametros$parametro == "Area"] <- area()
+            parametros$valor[parametros$parametro == "Ktmin"] <- input$kt_min
+            parametros$valor[parametros$parametro == "Ktmax"] <- input$kt_max
+            if (nrow(parametros[parametros$parametro == "Pmur"]) == 0){
+                parametros <- data.table::rbindlist(list(parametros, data.table::data.table(nome = parametros[, unique(nome)], 
+                            parametro = "Pmur", valor = input$pmur, limite_inferior = input$limite_inferior_pmur, limite_superior = input$limite_superior_pmur)))
+            } else {
+                parametros$valor[parametros$parametro == "Pmur"] <- input$pmur
+                parametros$limite_inferior[parametros$parametro == "Pmur"] <- input$limite_inferior_pmur
+                parametros$limite_superior[parametros$parametro == "Pmur"] <- input$limite_superior_pmur
+            }
+
+            kt <- cria_kt(input$kt_max, input$kt_min, input$alfa, input$beta)
+            parametros$valor[parametros$parametro %in% paste0("Kt", 2:-60)] <- kt
+
+            if (input$discretizacao_ebin == "unico") {
+                limite_inferior_ebin <- input$limite_inferior_ebin_0
+                limite_superior_ebin <- input$limite_superior_ebin_0
+            } else {
+                limite_inferior_ebin <- vapply(
+                    X = 1:12,
+                    FUN = function(i) input[[paste0("limite_inferior_ebin_", i)]],
+                    FUN.VALUE = numeric(1)
+                )
+                limite_superior_ebin <- vapply(
+                    X = 1:12,
+                    FUN = function(i) input[[paste0("limite_superior_ebin_", i)]],
+                    FUN.VALUE = numeric(1)
+                )
+            }
+
+            if (input$discretizacao_prec == "unico") {
+                limite_inferior_prec <- input$limite_inferior_prec_0
+                limite_superior_prec <- input$limite_superior_prec_0
+            } else {
+                limite_inferior_prec <- vapply(
+                    X = 1:12,
+                    FUN = function(i) input[[paste0("limite_inferior_prec_", i)]],
+                    FUN.VALUE = numeric(1)
+                )
+                limite_superior_prec <- vapply(
+                    X = 1:12,
+                    FUN = function(i) input[[paste0("limite_superior_prec_", i)]],
+                    FUN.VALUE = numeric(1)
+                )
+            }
+
+            inicializacao <- cria_inicializacao(nome  = unique(parametros$nome),
+                              Ebin = input$Ebin_validacao,
+                              Supin = input$Supin_validacao,
+                              Tuin = input$Tuin_validacao,
+                              limite_inferior_ebin = limite_inferior_ebin,
+                              limite_superior_ebin = limite_superior_ebin,
+                              limite_inferior_prec = limite_inferior_prec,
+                              limite_superior_prec = limite_superior_prec)
+
+            data_inicio_objetivo <- input$periodo_validacao[1]
+            data_fim_objetivo <- input$periodo_validacao[2]
+            kt_max <- input$kt_max
+            kt_min <- input$kt_min
+            data_inicio_simulacao <- input$periodo_simulacao_validacao[1] 
+            data_fim_simulacao <- input$periodo_simulacao_validacao[2]
+            data_inicio_simulacao <- data_inicio_simulacao
+            data_fim_simulacao <- data_fim_simulacao
+
+            vazao <- vazao_posto()
+            evapotranspiracao <- evapotranspiracao_posto()
+            precipitacao_observada <- precipitacao_posto()
+            postos_plu <- postos_plu()
+
+            datas_rodadas <- cria_datas(data_inicio_simulacao, data_fim_simulacao, input$numero_dias_previsao)
+
+            precipitacao_prevista <- precipitacao_prevista()
+            precipitacao_observada <- ponderacao_espacial(precipitacao_observada, postos_plu)
+
+            evapotranspiracao_observada <- data.table::data.table(evapotranspiracao)
+            colnames(evapotranspiracao_observada)[2] <- "posto"
+
+            vazao_observada <- vazao
+
+            if (is.null(input$arquivo_previsao_prec$datapath)) {
+                precipitacao_prevista <- ponderacao_espacial(precipitacao_prevista, postos_plu)
+                precipitacao_prevista <- transforma_historico_previsao(precipitacao_prevista, datas_rodadas)
+            }
+
+            evapotranspiracao_prevista <- evapotranspiracao_prevista()
+            if (is.null(input$arquivo_previsao_etp$datapath)) {
+                colnames(evapotranspiracao_prevista)[2] <- "nome"
+                evapotranspiracao_prevista <- transforma_historico_previsao(evapotranspiracao_prevista, datas_rodadas)
+            }
+            # Disable the run button
+            shiny::updateActionButton(session, "botao_validacao", label = "Validando...aguarde")
+            disable_button(TRUE)
+            shinyjs::disable("botao_validacao")
+            
+            # Execute the long-running function asynchronously
+            par <- future::future({
+                saida <- rodada_encadeada_pmur_etp(parametros,
+                    inicializacao, precipitacao_observada, precipitacao_prevista,
+                    evapotranspiracao_observada,
+                    evapotranspiracao_prevista, vazao_observada,
+                    postos_plu, datas_rodadas, unique(parametros$nome))
+            }, seed = TRUE)
+            
+            obs_r <- shiny::observeEvent(future::resolved(par), {
+                if (future::resolved(par)) {
+                    disable_button(FALSE)
+                    shinyjs::enable("botao_validacao")
+                    shiny::updateActionButton(session, "botao_validacao", label = "Executa validacao")
+
+                    previsao <- data.table::as.data.table(future::value(par)$previsao)
+                    assimilacao <- data.table::as.data.table(future::value(par)$assimilacao)
+                    funcao_objetivo <- data.table::as.data.table(future::value(par)$funcao_objetivo)
+                    precipitacao <- data.table::as.data.table(future::value(par)$precipitacao)
+                    otimizacao <- data.table::as.data.table(future::value(par)$otimizacao)
+
+                    resultados$previsao <- as.data.table(previsao)
+                    resultados$assimilacao <- as.data.table(assimilacao)
+                    resultados$funcao_objetivo <- as.data.table(funcao_objetivo)
+                    resultados$precipitacao <- as.data.table(precipitacao)
+                    resultados$otimizacao <- as.data.table(otimizacao)
+                }
+                
+            }, once = TRUE)             
+        })
+
+        # Tabela reativa conforme selecao
+        tabela_completa <- shiny::reactive({
+            shiny::req(resultados$previsao)
+            data_inicio_objetivo <- input$periodo_validacao[1]
+            data_fim_objetivo <- input$periodo_validacao[2]
+            previsao <- data.table::copy(resultados$previsao[data_caso >= data_inicio_objetivo &
+                                data_caso <= data_fim_objetivo & variavel == "Qcalc"])
+            previsao[, valor := mean(valor), by = c("data_caso", "data_previsao", "nome")]
+            previsao <- previsao[cenario == previsao[, unique(cenario)][1]]
+            vazao_observada <- data.table::copy(vazao_posto())
+            sub_bacias <- unique(previsao$nome)
+            avaliacoes <- lapply(sub_bacias, function(sb) {
+                obs <- vazao_observada
+                analisa_previsoes(previsao, obs)
+            })
+            resultados$simulacao_semanal <- rbindlist(lapply(avaliacoes, `[[`, "simulacao_semanal"))
+            resultados$resultado  <- rbindlist(lapply(avaliacoes, `[[`, "resultado"))
+            dt <- data.table::copy(resultados$resultado)
+        })
+
+        tabela_sel <- shiny::reactive({
+            shiny::req(resultados$previsao)
+            dt <- data.table::copy(tabela_completa())
+            dt <- dt[discretizacao == input$discretizacao]
+            # Filtra metrica
+            dt <- dt[horizonte == input$horizonte]
+        })
+        
+        output$tabela_metricas <- shiny::renderTable({
+            shiny::req(resultados$previsao)
+            tabela_sel()
+        })
+
+        # Grafico com dygraphs
+        grafico_xts <- shiny::reactive({
+            shiny::req(resultados$previsao)
+            # --- 1) Merge previsao + observacao (como antes) ---
+            dtp <- data.table::copy(resultados$previsao)[variavel == "Qcalc"][, horizonte := as.integer(data_previsao - data_caso)]
+            dtp[, vazao_prevista := mean(valor), by = c("data_caso", "data_previsao", "nome")]
+            dtp <- dtp[cenario == dtp[, unique(cenario)][1]]
+            obs <- data.table::copy(vazao_posto())[, vazao_observada := valor]
+            m <- merge(
+                dtp, obs,
+                by.x = c("data_previsao","nome"),
+                by.y = c("data","posto"),
+                all.x = TRUE
+            )
+
+            # --- 2) Defino o tamanho da janela em dias ---
+            tamanho <- switch(
+                input$discretizacao,
+                diario  = 1,
+                semanal = 7,
+                mensal  = 30
+            )
+
+            # --- 3) Para cada linha, calcule o horizonte em que ela cai ---
+            #  horizon_calc = 1 se horizonte [1,tamanho],
+            #                2 se horizonte [tamanho+1,2*tamanho], etc.
+            m[, horizon_calc := floor(horizonte / tamanho) + 1]
+
+            # --- 4) Filtra apenas o horizonte escolhido ---
+            if (input$discretizacao == "diaria") {
+                # diario: filtra exatamente o horizonte (0,1,2,...)
+                m_sel <- m[horizonte == input$horizonte]
+            } else {
+                # semanal ou mensal: usa a janela que agrupa horizonte=0..tamanho-1 em horizon_calc=1, etc.
+                m_sel <- m[horizon_calc == input$horizonte]
+            }
+
+            # --- 5) (Opcional) Agregue por data_caso se quiser medias ---
+            resumo <- m_sel[
+            , .(
+                vazao_observada  = mean(vazao_observada, na.rm = TRUE),
+                vazao_prevista = mean(vazao_prevista, na.rm = TRUE),
+                n         = .N
+            ),
+            by = .(data_caso)
+            ]
+            xts::xts(resumo[, .(data_caso, vazao_prevista, vazao_observada)], order.by = resumo$data_caso)
+        })
+
+        # Funcao auxiliar: salva o dygraph como um html temporario
+        save_dygraph_html <- function(widget, html_file) {
+            htmlwidgets::saveWidget(widget, html_file, selfcontained = TRUE)
+        }
+
+        grafico_dy_widget <- shiny::reactive({
+            shiny::req(resultados$previsao)
+            dygraphs::dygraph(grafico_xts(), main = input$sub_bacia) %>%
+                dygraphs::dyHighlight(
+                highlightCircleSize = 5,
+                highlightSeriesBackgroundAlpha = 0.2,
+                hideOnMouseOut = FALSE,
+                highlightSeriesOpts = list(strokeWidth = 2)
+                ) %>% 
+                dygraphs::dyAxis("y", label = "Vazao (m3/s)", independentTicks = TRUE) %>%
+                dygraphs::dySeries("vazao_observada", color = "#0000FF")  %>%
+                dygraphs::dySeries("vazao_prevista",  color = "#FF0000")  %>%
+                dygraphs::dyRangeSelector()
+        })
+
+        output$grafico_dy <- dygraphs::renderDygraph({
+            grafico_dy_widget()
+        })
+
+
+        # reactive com o data.table filtrado
+        cdf_data <- shiny::reactive({
+            shiny::req(resultados$previsao)
+            previsao <- data.table::copy(resultados$previsao[variavel == "Qcalc"])
+            previsao[, valor := mean(valor), by = c("data_caso", "data_previsao", "nome")]
+            previsao <- previsao[cenario == previsao[, unique(cenario)][1]]
+            observacao <- data.table::copy(vazao_posto())
+            if (input$discretizacao == "diaria") {
+                previsao <- merge(
+                    previsao, observacao,
+                    by.x = c("data_previsao", "nome"),
+                    by.y = c("data", "posto"),
+                    all.x = TRUE
+                )
+                previsao[, horizonte := as.integer(data_previsao - data_caso)]
+                previsao[, discretizacao := "diaria"]
+                data.table::setnames(previsao, "valor.x", "previsao")
+                data.table::setnames(previsao, "valor.y", "observacao")
+            } else if (input$discretizacao == "semanal") {
+                previsao <- agrega_semanal(previsao, observacao)
+            } 
+            else if (input$discretizacao == "mensal") {
+                previsao <- agrega_mensal(previsao, observacao)
+            }
+
+            previsao <- previsao[
+                discretizacao == input$discretizacao &
+                horizonte     == input$horizonte
+            ]
+            previsao
+        })
+        
+        output$cdf_plot <- plotly::renderPlotly({
+            shiny::req(resultados$previsao)
+            dt <- cdf_data()
+            # constroi as ECDFs
+            ecdf_obs  <- ecdf(dt$observacao)
+            ecdf_pred <- ecdf(dt$previsao)
+            
+            # vetor de cortes em x
+            xs <- sort(unique(c(dt$observacao, dt$previsao)))
+            
+            # avalia ECDFs nos pontos xs
+            y_obs  <- ecdf_obs(xs)
+            y_pred <- ecdf_pred(xs)
+            
+            # plota com plotly
+            plotly::plot_ly(x = ~xs) %>%
+            plotly::add_lines(
+                y = ~y_obs, name = "Observado",
+                hoverinfo = "x+y", line = list(shape = "hv")
+            ) %>%
+            plotly::add_lines(
+                y = ~y_pred, name = "Previsto",
+                hoverinfo = "x+y", line = list(shape = "hv", dash = "dash")
+            ) %>%
+            plotly::layout(
+                title = paste0("CDF - ", input$discretizacao, " (h=", input$horizonte, ")"),
+                xaxis = list(title = "Vazao"),
+                yaxis = list(title = "Prob. Acumulada", range = c(0,1))
+            )
+        })
+
+        # Selecionar / limpar todos os casos selecionado para validacao
+        shiny::observeEvent(input$btn_all, {
+            shiny::req(resultados$previsao, input$ano_validacao)
+
+            # filtra apenas os casos do ano selecionado
+            casos_ano <- resultados$previsao[
+                lubridate::year(data_caso) == input$ano_validacao,
+                unique(data_caso)
+            ]
+            
+            # atualiza o selectize com esses casos
+            shiny::updateSelectizeInput(
+                session,
+                "sel_casos_validacao",
+                choices  = as.character(casos_ano),   # opcional: atualizar choices tambem
+                selected = as.character(casos_ano)
+            )
+        })
+        shiny::observeEvent(input$btn_none, {
+            shiny::req(resultados$previsao)
+            shiny::updateSelectizeInput(session, "sel_casos_validacao", selected = character(0))
+        })
+
+        # 3.1) Apos clicar em "Carregar anos", exibe seletor de anos
+        output$ano_validacao <- shiny::renderUI({
+            anos <- NULL
+            if (!is.null(resultados$previsao)) {
+            anos <- sort(unique(year(resultados$previsao$data_caso)))
+            }
+            shiny::selectInput(
+            "ano_validacao",
+            "Selecione o ano:",
+            choices  = anos,
+            selected = if (length(anos)) anos[1] else NULL
+            )
+        })
+
+        # 3.2) Apos selecionar ano, exibe seletor de casos apenas desse ano
+        output$sel_casos_validacao <- shiny::renderUI({
+            casos_choices <- NULL
+            if (!is.null(resultados$previsao) && !is.null(input$ano_validacao)) {
+            anosel <- as.integer(input$ano_validacao)
+            casos_choices <- resultados$previsao[
+                year(data_caso) == anosel,
+                unique(data_caso)
+            ]
+            casos_choices <- format(casos_choices, "%Y-%m-%d")
+            }
+            shiny::selectizeInput(
+            "sel_casos_validacao",
+            "Rodadas de validacao:",
+            choices  = casos_choices,
+            selected = casos_choices,
+            multiple = TRUE,
+            options  = list(
+                placeholder = "Selecione datas...",
+                plugins     = list("remove_button"),
+                maxItems    = NULL
+            )
+            )
+        })
+
+         # 3.3) seleciona variaveis
+        output$variavel_validacao <- shiny::renderUI({
+            variaveis <- NULL
+            if (!is.null(resultados$previsao)) {
+                variaveis <- sort(unique(resultados$previsao$variavel))
+            }
+            shiny::selectizeInput(
+            "variavel_validacao",
+            "Selecione as variaveis:",
+            choices  = variaveis,
+            multiple = TRUE,
+            selected = if (!is.null(resultados$previsao)) "Qcalc" else NULL,
+            options  = list(
+                placeholder = "Selecione variaveis...",
+                plugins     = list("remove_button"),
+                maxItems    = NULL
+            )
+            )
+        })
+
+        # Prepara o objeto xts reativo para grafico de validacao por ano
+        ts_data <- shiny::reactive({
+            shiny::req(input$sel_casos_validacao)       # precisa de ao menos 1
+            
+            # filtra previsoes pelo vetor de strings
+            sim <- data.table::copy(resultados$previsao[data_caso %in% input$sel_casos_validacao 
+                                & variavel %in% input$variavel_validacao])
+            sim[, valor := mean(valor), by = c("data_caso", "data_previsao", "nome", "variavel")]
+            sim <- sim[cenario == sim[, unique(cenario)][1]]
+            sim[, cenario := paste0(variavel, "_", data_caso)]
+            observada <- data.table::copy(vazao_posto())
+            anosel <- as.integer(input$ano_validacao)
+            casos_choices <- resultados$previsao[
+                year(data_caso) == anosel,
+                unique(data_caso)
+            ]
+            datas_completa <- resultados$previsao[data_caso %in% casos_choices, unique(data_previsao)]
+            observada <- observada[data %in% datas_completa]
+            setnames(observada, c("valor"), c("vazao_observada"))
+            # wide: cada cenario vira coluna
+            wide_sim <- data.table::dcast(
+                sim,
+                data_previsao ~ cenario,
+                value.var = "valor"
+            )
+            
+            # merge com observada
+            wide_all <- merge(
+                x = wide_sim,
+                y = observada[, .(data, vazao_observada)],
+                by.x = "data_previsao", by.y = "data",
+                all = TRUE
+            )
+            
+            # monta xts
+            z <- xts::xts(
+            x       = wide_all[, setdiff(names(wide_all), "data_previsao"), with = FALSE],
+            order.by = wide_all$data_previsao
+            )
+            
+            # reordena para garantir observada primeiro
+            cols <- colnames(z)
+            cols <- c("vazao_observada", setdiff(cols, "vazao_observada"))
+            z[, cols]
+        })
+
+        grafico_validacao_ano <- shiny::reactive({
+          shiny::req(resultados$previsao)
+          z <- ts_data()
+          dygraphs::dygraph(z, main = "Validacao") %>%
+            dygraphs::dyAxis("y", label = "Vazao (m3/s)") %>%
+            dygraphs::dyOptions(strokeWidth = 1) %>%
+            dygraphs::dyUnzoom() %>%
+            dygraphs::dySeries("vazao_observada", color = "#0000FF", strokeWidth = 3)  %>%
+            dygraphs::dyLegend(show = "follow")
+        })
+
+        output$validacao_ano <- dygraphs::renderDygraph({
+            grafico_validacao_ano()
+        })
+
         parametros_exportacao <- shiny::reactive({
             parametros <- parametros_posto()
 
@@ -1332,8 +2217,8 @@ executa_visualizador_calibracao_pmur <- function(){
             parametros$limite_superior[parametros$parametro == "Ecof2"] <- input$limite_superior_ecof2
 
             parametros$valor[parametros$parametro == "Area"] <- area()
-            parametros$valor[parametros$parametro == "ktMin"] <- input$kt_min
-            parametros$valor[parametros$parametro == "ktMax"] <- input$kt_max
+            parametros$valor[parametros$parametro == "Ktmin"] <- input$kt_min
+            parametros$valor[parametros$parametro == "Ktmax"] <- input$kt_max
             if (nrow(parametros[parametros$parametro == "Pmur"]) == 0){
                 parametros <- data.table::rbindlist(list(parametros, data.table::data.table(nome = parametros[, unique(nome)], 
                             parametro = "Pmur", valor = input$pmur, limite_inferior = input$limite_inferior_pmur, limite_superior = input$limite_superior_pmur)))
@@ -1462,6 +2347,128 @@ executa_visualizador_calibracao_pmur <- function(){
             content = function(file) {
                 utils::write.table(saida(), file, quote = FALSE, row.names = FALSE, sep = ";")
             }
+        )
+
+        output$download_simulacao_validacao <- shiny::downloadHandler(
+            filename = function() {
+                paste0("simulacao_validacao_", input$sub_bacia, ".csv")
+            },
+            content = function(file) {
+                utils::write.table(resultados$previsao, file, quote = FALSE, row.names = FALSE, sep = ";")
+            }
+        )
+
+        output$download_assimilacao_validacao <- shiny::downloadHandler(
+            filename = function() {
+                paste0("assimilacao_validacao_", input$sub_bacia, ".csv")
+            },
+            content = function(file) {
+                utils::write.table(resultados$assimilacao, file, quote = FALSE, row.names = FALSE, sep = ";")
+            }
+        )
+
+        output$download_precipitacao_validacao <- shiny::downloadHandler(
+            filename = function() {
+                paste0("precipitacao_validacao_", input$sub_bacia, ".csv")
+            },
+            content = function(file) {
+                utils::write.table(resultados$precipitacao, file, quote = FALSE, row.names = FALSE, sep = ";")
+            }
+        )
+
+        output$download_funcao_objetivo_validacao <- shiny::downloadHandler(
+            filename = function() {
+                paste0("funcao_objetivo_validacao", input$sub_bacia, ".csv")
+            },
+            content = function(file) {
+                utils::write.table(resultados$funcao_objetivo, file, quote = FALSE, row.names = FALSE, sep = ";")
+            }
+        )
+
+        output$download_otimizacao_validacao <- shiny::downloadHandler(
+            filename = function() {
+                paste0("otimizacao_validacao_", input$sub_bacia, ".csv")
+            },
+            content = function(file) {
+                utils::write.table(resultados$otimizacao, file, quote = FALSE, row.names = FALSE, sep = ";")
+            }
+        )
+
+        output$download_metricas_validacao <- shiny::downloadHandler(
+            filename = function() {
+                paste0("metricas_validacao_", input$sub_bacia, ".csv")
+            },
+            content = function(file) {
+                utils::write.table(resultados$resultado, file, quote = FALSE, row.names = FALSE, sep = ";")
+            }
+        )
+
+        # Handler para PNG
+        output$download_grafico_validacao <- shiny::downloadHandler(
+            filename = function() {
+                paste0("grafico_validacao_", input$sub_bacia, ".png")
+            },
+            content = function(file) {
+                # 1) gera o widget novamente
+                widget <- grafico_dy_widget()
+
+                # 2) salva um HTML self-contained num arquivo temporario
+                tmp_html <- tempfile(fileext = ".html")
+                htmlwidgets::saveWidget(widget, tmp_html, selfcontained = FALSE)
+
+                # 3) captura screenshot via webshot
+                webshot2::webshot(
+                    url       = tmp_html,
+                    file      = file,
+                    vwidth    = 1600,
+                    vheight   = 600
+                )
+            },
+            contentType = "image/png"
+        )
+
+        output$download_grafico_validacao_ano <- shiny::downloadHandler(
+            filename = function() {
+                paste0("grafico_validacao_ano", input$sub_bacia, ".png")
+            },
+            content = function(file) {
+                # 1) gera o widget novamente
+                widget <- grafico_validacao_ano()
+
+                # 2) salva um HTML self-contained num arquivo temporario
+                tmp_html <- tempfile(fileext = ".html")
+                htmlwidgets::saveWidget(widget, tmp_html, selfcontained = FALSE)
+
+                # 3) captura screenshot via webshot
+                webshot2::webshot(
+                    url       = tmp_html,
+                    file      = file,
+                    vwidth    = 1600,
+                    vheight   = 600
+                )
+            },
+            contentType = "image/png"
+        )
+
+        output$download_zoom_png <- shiny::downloadHandler(
+          filename = function() {
+            paste0("grafico_calibracao_", input$sub_bacia, ".png")
+          },
+          content = function(file) {
+            # Usa o mesmo grafico ja renderizado na UI
+            widget <- grafico_zoom()
+
+            tmp_html <- tempfile(fileext = ".html")
+            htmlwidgets::saveWidget(widget, tmp_html, selfcontained = FALSE)
+
+            webshot2::webshot(
+              url = tmp_html,
+              file = file,
+              vwidth = 1600,
+              vheight = 600,
+            )
+          },
+          contentType = "image/png"
         )
     }
 

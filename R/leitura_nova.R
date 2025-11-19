@@ -199,6 +199,10 @@ le_historico_verificado <- function(arq) {
     }
     dat[, data := as.Date(data, format = "%d/%m/%Y")]
     
+    # Identificar as colunas a serem convertidas (todas, exceto 'data')
+    cols_to_convert <- setdiff(names(dat), "data")
+    dat[, (cols_to_convert) := lapply(.SD, as.numeric), .SDcols = cols_to_convert]
+    
     if (any(duplicated(dat[, data]))) {
          stop(paste0("a data ", dat[duplicated(data), data], ", esta duplicada no arquivo ", arq, ".\n"))
     }
@@ -301,6 +305,8 @@ le_precipitacao_prevista <- function(arq) {
         " do caso de ", teste_completo$data_rodada, "\n"))
     }
 
+    valida_previsao_prec(dat)
+
     dat
 }
 
@@ -323,16 +329,61 @@ le_inicializacao <- function(arq) {
         stop("o arquivo 'inicializacao.csv' nao existe.")
     }
     dat <- data.table::fread(arq)
-
-    if (any(colnames(dat) != c("nome", "variavel", "valor"))) {
-        stop("o arquivo deve possuir as seguintes colunas 'nome', 'variavel', 'valor'")
+    
+    if (!any(colnames(dat) %in% c("nome", "variavel", "valor", "mes"))) {
+        stop("o arquivo deve possuir as seguintes colunas 'nome', 'variavel', 'valor', 'mes'")
     }
     dat[, valor := as.numeric(valor)]
     
+    if (!"mes" %in% names(dat)) {
+        dat[, mes := 0L]
+    }
+
+    # 2) Definir o conjunto de meses válidos (por exemplo, 1:12)
+    meses_validos <- 1:12
+
+    # 3) Separar em dois subsets: aquele que veio explícito (mes != 0) e o que precisa expandir (mes == 0)
+    variaveis <- c("limite_inferior_ebin", "limite_superior_ebin", "limite_superior_prec",
+                   "limite_inferior_prec")
+    dt_explicit <- dat[mes != 0 & variavel %in% variaveis]
+    dt_to_expand <- dat[mes == 0 & variavel %in% variaveis]
+    dt_outros <- dat[!variavel %in% variaveis]
+
+    # 4) Se houver valores explícitos, verificar se cada (nome, variavel) tem todos os meses
+    if (nrow(dt_explicit) > 0) {
+        checagem <- dt_explicit[, .(
+            meses_presentes = sort(unique(mes))
+        ), by = .(nome, variavel)]
+        
+        invalido <- checagem[!all(meses_presentes[[1]] %in% meses_validos) |
+                            length(meses_presentes[[1]]) != length(meses_validos),
+                            .(nome, variavel)]
+        
+        if (nrow(invalido) > 0) {
+    #        stop("Parâmetros faltando para os seguintes combos nome+variavel:\n",
+     #           paste0(invalido[, paste0(nome, "/", variavel)], collapse = ", "))
+        }
+    }
+
+    # 5) Expandir os casos mes == 0 para todos os meses
+    if (nrow(dt_to_expand) > 0) {
+        # cria cartesian join de (nome,variavel) × meses_validos
+        expansao <- dt_to_expand[
+            , .(mes = meses_validos)
+            , by = .(nome, variavel, valor)  # mantém 'valor' replicado
+        ]
+    } else {
+        expansao <- NULL
+    }
+
+    # 6) Concatenar tudo e ordenar
+    dat <- rbindlist(list(dt_explicit, expansao, dt_outros), use.names = TRUE)
+    setorder(dat, nome, variavel, mes)
+
     missing_ajusta_precipitacao <- dat[!nome %in% dat[variavel == "ajusta_precipitacao", unique(nome)], 
-                                    .(nome = unique(nome), variavel = "ajusta_precipitacao", valor = 0)]
+                                    .(nome = unique(nome), variavel = "ajusta_precipitacao", valor = 0, mes = 0)]
     dat <- rbind(dat, missing_ajusta_precipitacao)
-    
+   
     if (any(dat$valor < 0)) {
         stop(paste0("a sub-bacia ", dat[valor < 0, nome], " possui valor negativo para a variavel ",
         dat[valor < 0, variavel], " no arquivo ", arq, ".\n"))
@@ -364,7 +415,7 @@ le_inicializacao <- function(arq) {
         'limite_inferior_prec', 'funcao_objetivo', 'ajusta_precipitacao' na coluna 'variavel'")
     }
 
-    if (any(duplicated(dat[, .(variavel, nome)]))) {
+    if (any(duplicated(dat[, .(variavel, nome, mes)]))) {
         stop("o arquivo ", arq, " possui valores duplicados para a sub-bacia ",
         dat[duplicated(dat[, .(variavel, nome)]), nome], 
         " para a variavel ", dat[duplicated(dat[, .(variavel, nome)]), variavel])
@@ -662,7 +713,7 @@ le_arq_entrada_novo <- function(pasta_entrada) {
             stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% vazao_observada$posto, nome], " no arquivo ", arquivos[arquivo == "VAZAO_OBSERVADA", nome_arquivo], ".\n"))
         }
         lapply(sub_bacias$nome, function(nome_subbacia) {
-            data_inicio <- datas_rodadas[, min(data)] - inicializacao[nome == nome_subbacia & variavel == "numero_dias_assimilacao", valor] + 1
+            data_inicio <- datas_rodadas[, min(data)] - inicializacao[nome == nome_subbacia & variavel == "numero_dias_assimilacao", unique(valor)] + 1
             data_fim <- datas_rodadas[, max(data)] - 1
             if (vazao_observada[, min(data)] > data_inicio)
             stop(stop(paste0("O historico de vazao da sub-bacia ", nome_subbacia, " deve comecar na data ", data_inicio)))
@@ -691,7 +742,7 @@ le_arq_entrada_novo <- function(pasta_entrada) {
             stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% evapotranspiracao_observada$posto, nome], " no arquivo ", arquivos[arquivo == "EVAPOTRANSPIRACAO_OBSERVADA", nome_arquivo], ".\n"))
         }
         lapply(sub_bacias$nome, function(nome_subbacia) {
-            data_inicio <- datas_rodadas[, min(data)] - inicializacao[nome == nome_subbacia & variavel == "numero_dias_assimilacao", valor] + 1
+            data_inicio <- datas_rodadas[, min(data)] - inicializacao[nome == nome_subbacia & variavel == "numero_dias_assimilacao", unique(valor)] + 1
             data_fim <- datas_rodadas[, max(data)] - 1
             if (evapotranspiracao_observada[, min(data)] > data_inicio)
             stop(stop(paste0("O historico de vazao da sub-bacia ", nome_subbacia, " deve comecar na data ", data_inicio)))
@@ -717,7 +768,7 @@ le_arq_entrada_novo <- function(pasta_entrada) {
         lapply(sub_bacias$nome, function(nome_subbacia) {
             kt <- parametros[nome == nome_subbacia & substr(parametro, 1, 2) == "Kt", valor]
             ktMin <- sum(kt[4:63] > 0)
-            data_inicio <- datas_rodadas[, min(data)] - inicializacao[nome == nome_subbacia & variavel == "numero_dias_assimilacao", valor] + 1
+            data_inicio <- datas_rodadas[, min(data)] - inicializacao[nome == nome_subbacia & variavel == "numero_dias_assimilacao", unique(valor)] + 1
             data_fim <- datas_rodadas[, max(data)]
             if (precipitacao_observada[, min(data)] > (data_inicio - ktMin))
                 stop(paste0("O historico de precipitacao verificada da sub-bacia ", nome_subbacia, " deve comecar na data ", data_inicio - ktMin))
@@ -767,7 +818,7 @@ le_arq_entrada_novo <- function(pasta_entrada) {
             datas_rodadas[, numero_dias_previsao := (numero_dias_previsao - 2)]
             evapotranspiracao_prevista <- data.table::copy(evapotranspiracao_observada)
             colnames(evapotranspiracao_prevista)[2] <- "nome"
-            evapotranspiracao_prevista <- transforma_historico_previsao(evapotranspiracao_prevista, datas_rodadas)
+            evapotranspiracao_prevista <- transforma_historico_previsao(evapotranspiracao_prevista, datas_rodadas, dia_inicial = 0)
             datas_rodadas[, numero_dias_previsao := (numero_dias_previsao + 2)]
         }
     }

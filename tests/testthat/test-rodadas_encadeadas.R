@@ -25,7 +25,12 @@ test_that("testa rodadas encadeadas", {
     "limite_inferior_ebin", "limite_superior_ebin", "limite_superior_prec", "limite_inferior_prec",
     "ajusta_precipitacao"), 2),
     valor = c(218.71, 46.69, 0.2891, 31, 0.8, 1.2, 2, 0.5, 0, 441.67, 256.98, 0.3141, 31, 0.8, 1.2, 2, 0.5, 0))
-    
+    variaveis <- c("limite_inferior_ebin", "limite_superior_ebin", "limite_superior_prec",
+                   "limite_inferior_prec")
+    inicializacao <- data.table::rbindlist(list(inicializacao, 
+        inicializacao[variavel %in% variaveis, .(mes = 1:12), by = .(nome, valor, variavel)]), fill = TRUE)
+    inicializacao[is.na(mes), mes := 0]
+
     saida <- rodada_encadeada_oficial(parametros[nome %in% sub_bacias],
     inicializacao, precipitacao_observada, precipitacao_prevista, evapotranspiracao_nc, vazao_observada,
     postos_plu, datas_rodadas, sub_bacias)
@@ -190,7 +195,8 @@ test_that("testa rodada com serie temporal etp", {
     "limite_inferior_ebin", "limite_superior_ebin", "limite_superior_prec", "limite_inferior_prec",
     "ajusta_precipitacao"), 2),
     valor = c(218.71, 46.69, 0.2891, 31, 0.8, 1.2, 2, 0.5, 0, 441.67, 256.98, 0.3141, 31, 0.8, 1.2, 2, 0.5, 0))
-    
+    inicializacao[, mes := 5]
+
     saida <- rodada_encadeada_etp(parametros[nome %in% sub_bacias],
     inicializacao, precipitacao_observada, precipitacao_prevista, evapotranspiracao_observada, evapotranspiracao_prevista, vazao_observada,
     postos_plu, datas_rodadas, sub_bacias)
@@ -205,17 +211,18 @@ test_that("testa rodada com aprimoramentos", {
   
   entrada <- le_arq_entrada_novo(pasta_entrada)
 
- #parametros <- entrada$parametros
- # inicializacao <- entrada$inicializacao
- # precipitacao_observada <- entrada$precipitacao_observada
- #     precipitacao_prevista <- entrada$precipitacao_prevista
- #     evapotranspiracao_observada <- entrada$evapotranspiracao_observada
- #     evapotranspiracao_prevista <- entrada$evapotranspiracao_prevista
- #       vazao_observada <- entrada$vazao_observada
- #       postos_plu <- entrada$postos_plu
- #       datas_rodadas <- entrada$datas_rodadas
- #     numero_cenarios <- length(unique(entrada$precipitacao_prevista[, cenario]))
- #     sub_bacias <- entrada$sub_bacias$nome
+#  parametros <- entrada$parametros
+#  inicializacao <- entrada$inicializacao
+#  precipitacao_observada <- entrada$precipitacao_observada
+#      precipitacao_prevista <- entrada$precipitacao_prevista
+#      evapotranspiracao_nc <- entrada$evapotranspiracao_nc
+#      evapotranspiracao_observada <- entrada$evapotranspiracao_observada
+#      evapotranspiracao_prevista <- entrada$evapotranspiracao_prevista
+#        vazao_observada <- entrada$vazao_observada
+#        postos_plu <- entrada$postos_plu
+#        datas_rodadas <- entrada$datas_rodadas
+#      numero_cenarios <- length(unique(entrada$precipitacao_prevista[, cenario]))
+#      sub_bacias <- entrada$sub_bacias$nome
 
 
   saida <- rodada_encadeada_pmur_etp(entrada$parametros,

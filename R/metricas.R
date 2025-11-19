@@ -163,3 +163,156 @@ calcula_kge <- function(simulacao, observacao, pesos = rep(1 /length(observacao)
 
     kge
 }
+
+#' Analise das previsoes
+#' 
+#' Calcula diversas metricas de avaliacao para series diaria, podendo fazer acumulados semanais, mensais,
+#' sazonais, e anuais
+#' 
+#' 
+#' @param simulacao data table com a previsao contendo as seguintes colunas:
+#'     \itemize{
+#'     \item{data_caso}{data da rodada}
+#'     \item{data_previsao}{data da previsao}
+#'     \item{cenario}{nome do cenario}
+#'     \item{nome}{nome da sub-bacia}
+#'     \item{variavel}{nome da variavel}
+#'     \item{valor}{valor da variavel}
+#'     }
+#' @param observacao data table com o historico de vazao com as colunas:
+#'     \itemize{
+#'     \item{data}{data da observacao}
+#'     \item{posto}{nome do posto}
+#'     \item{valor}{valor da variavel}
+#'     }
+#' @param semanal booleano indicando se a analise deve ser feita em acumulados semanais
+#' @param mensal booleano indicando se a analise deve ser feita em acumulados semanais
+#' @param anual booleano indicando se a analise deve ser feita em acumulados semanais
+#' 
+#'
+#' @return saida lista contendo data table resultado com as colunas:
+#' \itemize{
+#'     \item{nome}{nome da sub-bacia}
+#'     \item{metrica}{nome da metrica}
+#'     \item{valor}{valor da metrica}
+#'     \item{dia_previsao}{horizonte da previsao}
+#'     }
+#' e data table resultado semanal com as colunas:
+#' \itemize{
+#'     \item{nome}{nome da sub-bacia}
+#'     \item{metrica}{nome da metrica}
+#'     \item{valor}{valor da metrica}
+#'     \item{numero_semana}{horizonte semanal da previsao}
+#'     }
+#' @export
+
+analisa_previsoes <- function(simulacao, observacao, semanal = TRUE, mensal = TRUE, anual = FALSE){
+    colnames(simulacao)[2] <- "data"
+    simulacao[, horizonte := as.numeric(data - data_caso)]
+    resultado <- data.table::data.table()
+    dia_maximo <- max(simulacao[, horizonte])
+    dia_minimo <- min(simulacao[, horizonte])
+    numero_dias <- length(unique(simulacao[, horizonte]))
+    for (idia in 0:dia_maximo){
+        obs <- observacao[data %in% simulacao[horizonte == idia, data], valor]
+        prev <- simulacao[horizonte == idia, valor][1:length(obs)]
+        PBIAS <- smapOnsR::calcula_pbias(prev, obs)
+        resultado <- rbind(resultado, PBIAS)
+        NSE <- smapOnsR::calcula_nse(prev, obs)
+        resultado <- rbind(resultado, NSE)
+        MAPE <- smapOnsR::calcula_mape(prev, obs)
+        resultado <- rbind(resultado, MAPE)
+        DM <- smapOnsR::calcula_dm(prev, obs)
+        resultado <- rbind(resultado, DM)
+        KGE <- smapOnsR::calcula_kge(prev, obs)
+        resultado <- rbind(resultado, KGE)
+        RMSE <- smapOnsR::calcula_rmse(prev, obs)
+        resultado <- rbind(resultado, RMSE)
+    }
+    nomes_metr <- c("PBIAS", "NSE", "MAPE", "DM", "KGE", "RMSE")
+    resultado[, metrica := rep(nomes_metr, numero_dias)]
+    resultado[, horizonte := rep(dia_minimo:dia_maximo, each = 6)]
+    resultado[, nome := rep(unique(simulacao[, nome]), numero_dias * 6)]
+    resultado[, discretizacao := 'diaria']
+    colnames(resultado)[1] <- "valor"
+    data.table::setcolorder(resultado, c("nome", "metrica", "valor", "discretizacao", "horizonte"))
+
+    resultado_semanal <- data.table::data.table()
+    simulacao_semanal <- data.table::data.table()
+    if (semanal) {
+        simulacao_semanal <- agrega_semanal(simulacao, observacao)
+
+        resultado_semanal <- simulacao_semanal[
+        , .(
+            metrica = nomes_metr,
+            valor   = c(
+                smapOnsR::calcula_pbias(previsao, observacao),
+                smapOnsR::calcula_nse(previsao, observacao),
+                smapOnsR::calcula_mape(previsao, observacao),
+                smapOnsR::calcula_dm(previsao, observacao),
+                smapOnsR::calcula_kge(previsao, observacao),
+                smapOnsR::calcula_rmse(previsao, observacao)
+            )
+            ),
+        by = .(horizonte = horizonte)
+        ]
+        resultado_semanal[, nome := rep(unique(simulacao[, nome]), ceiling(dia_maximo / 7) * 6)]
+        resultado_semanal[, discretizacao := 'semanal']
+        data.table::setcolorder(resultado_semanal, c("nome", "metrica", "valor", "discretizacao", "horizonte"))
+    }
+
+    resultado_mensal <- data.table::data.table()
+    if (mensal) {
+        colnames(simulacao)[2] <- "data_previsao"
+        blocos_mensais <- agrega_mensal(simulacao, observacao)
+
+        resultado_mensal <- blocos_mensais[
+        , .(
+            metrica = nomes_metr,
+            valor   = c(
+                smapOnsR::calcula_pbias(previsao, observacao),
+                smapOnsR::calcula_nse(previsao, observacao),
+                smapOnsR::calcula_mape(previsao, observacao),
+                smapOnsR::calcula_dm(previsao, observacao),
+                smapOnsR::calcula_kge(previsao, observacao),
+                smapOnsR::calcula_rmse(previsao, observacao)
+            )
+            ),
+        by = .(horizonte = horizonte)
+        ]
+
+        resultado_mensal[, nome := simulacao[, unique(nome)]]
+        resultado_mensal[, discretizacao := 'mensal']
+        # 7) Reordena colunas
+        data.table::setcolorder(resultado_mensal,
+            c("nome", "metrica", "valor", "discretizacao", "horizonte")
+        )
+    }
+    resultado <- data.table::rbindlist(list(resultado, resultado_semanal, resultado_mensal),
+     use.names = TRUE, fill = TRUE)
+    
+    saida <- list(resultado = resultado, simulacao_semanal = simulacao_semanal)
+    saida
+}
+
+#' Calcula RMSE
+#'
+#' Realiza o calculo da raiz do erro quadratico medio entre duas amostras
+#'
+#' @param simulacao vetor com os valores da serie simulada
+#' @param observacao vetor com os valores da serie observada
+#' @param pesos vetor de pesos a serem utilizados para cada data (default: pesos iguais)
+#'
+#' @examples
+#' observacao <- 1:30
+#' simulacao <- observacao + rnorm(30, 0, 1)
+#' rmse <- calcula_rmse(simulacao, observacao)
+#'
+#' @return erro quadratico medio (RMSE)
+#'
+#' @export
+
+calcula_rmse <- function(simulacao, observacao, pesos = rep(1 / length(observacao), length(observacao))) {
+  rmse <- sqrt(sum(((simulacao - observacao)^2) * pesos))
+  rmse
+}

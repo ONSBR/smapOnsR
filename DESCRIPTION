@@ -1,6 +1,6 @@
 Package: smapOnsR
 Title: SMAP/ONS
-Version: 1.3.2
+Version: 1.4.0
 Authors@R: 
     person("Felipe", "Treistman", , "felipe.treistman@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-9948-8680"))
@@ -30,6 +30,8 @@ Imports:
     optimParallel,
     doParallel,
     parallel,
+    htmlwidgets,
+    webshot2,
     zoo
 Remotes: ONSBR/funcaoSmapCpp@v1.2.2
 LazyData: true

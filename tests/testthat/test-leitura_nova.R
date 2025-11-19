@@ -126,6 +126,83 @@ test_that("testa inicializacao.csv", {
     expect_error(le_inicializacao(arq))
 })
 
+# Helper: monta um data.table completo de inicializacao com valores padrão válidos
+monta_dt_inicial <- function(nome, mes = NULL, valor_base = 1) {
+  vars <- data.table::data.table(
+    variavel = c("Ebin", "Supin", "Tuin", "numero_dias_assimilacao",
+                 "limite_inferior_ebin", "limite_superior_ebin",
+                 "limite_inferior_prec", "limite_superior_prec",
+                 "funcao_objetivo", "ajusta_precipitacao"),
+    valor = c(0.5, 0.5, 50, 2, 0.8, 1.2, 0.5, 2, 0, 1)
+  )
+  dt <- data.table::data.table(
+    nome = nome,
+    variavel = vars$variavel,
+    valor = vars$valor
+  )
+  if (!is.null(mes)) dt[, mes := mes]
+  dt
+}
+
+# 1) Expansão quando mes ausente (NULL) -> mes = 0 internamente -> expande 1:12
+
+test_that("Expande mes ausente para todos os meses mantendo validações globais", {
+  # Cria CSV sem coluna mes
+  tmp <- tempfile(fileext = ".csv")
+  dt_input <- monta_dt_inicial("B1")
+  data.table::fwrite(dt_input, tmp)
+
+  res <- le_inicializacao(tmp)
+  # Deve conter 10 variáveis x 12 meses
+  expect_equal(nrow(res), 4 * 12 + 6)
+  # Verifica cobertura de meses 1:12 em cada variável
+  meses_res <- res[variavel == "limite_superior_ebin", sort(unique(mes)), by = variavel]
+  expect_true(all(meses_res$V1 == 1:12))
+  # Verifica que valor de ajusta_precipitacao ==1 para todos os meses
+  expect_true(all(res[variavel == "ajusta_precipitacao"]$valor == 1))
+})
+
+# 2) Preserva mes explícito sem duplicar e sem expansion
+
+test_that("Preserva mes explícito quando fornecido para todas variáveis", {
+  tmp <- tempfile(fileext = ".csv")
+  # Meses distintos para teste: 1,2,3
+  dt_input <- monta_dt_inicial("B2", mes = 1)
+  dt_input2 <- monta_dt_inicial("B2", mes = 2)
+  dt_input3 <- monta_dt_inicial("B2", mes = 3)
+  dt_all <- rbind(dt_input, dt_input2, dt_input3)
+  data.table::fwrite(dt_all, tmp)
+
+  res <- le_inicializacao(tmp)
+  # Deve manter 30 linhas (10 variáveis x3 meses)
+  expect_equal(nrow(res), 10 * 3)
+  # Valores de 'mes' devem ser exatamente os fornecidos
+  expect_setequal(res$mes, c(1,2,3))
+})
+
+# 3) Erro para cobertura parcial de meses explícitos
+
+test_that("Erro se meses explícitos não cobrem 1:12", {
+  tmp <- tempfile(fileext = ".csv")
+  dt_input1 <- monta_dt_inicial("B3", mes = 1)
+  dt_input2 <- monta_dt_inicial("B3", mes = 2)
+  # falta demais meses
+  dt_partial <- dt_input1[variavel == "Ebin" | variavel == "Tuin" | variavel == "Supin" | variavel == "numero_dias_assimilacao"]
+  # dt_partial apenas 4 variáveis x 2 meses
+  data.table::fwrite(dt_partial, tmp)
+
+  expect_error(
+    le_inicializacao(tmp)
+  )
+})
+
+# 5) Arquivo inexistente gera erro imediatamente
+
+test_that("Erro ao chamar com arquivo inexistente", {
+  expect_error(le_inicializacao("inexistente.csv"), regexp = "nao existe")
+})
+
+
 test_that("testa parametros.csv", {
     arq <- system.file("extdata", "validacao_arq_entrada_novo", "CN17", "CT17.1", "Arq_Entrada", "parametros.csv", package = "smapOnsR")
     expect_error(le_parametros(arq))

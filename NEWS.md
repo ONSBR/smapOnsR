@@ -1,3 +1,15 @@
+# smapOnsR 1.4.0
+
+## Major changes
+
+* Inclusao do modulo de validacao na interface de calibracao
+
+* Melhorias da interface de calibracao
+
+* Melhorias da interface de visualizacao de previsoes
+
+* Possibilidade de sazonalizacao dos limites de ebin e prec na assimilacao
+
 # smapOnsR 1.3.2
 
 ## Minor changes
