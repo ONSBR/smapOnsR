@@ -71,89 +71,119 @@ totaliza_previsao <- function(previsao, vazao_observada, configuracao) {
     previsao <- previsao[data_previsao >= (data_rodada - 90)]
     data.table::setorder(previsao, "data_rodada", "nome", "cenario", "data_previsao")
 
-    #distribui incrementais
-    # Inicializa uma lista para acumular os data.tables
-    resultados <- vector("list", length(configuracao$posto))
+    # --- Otimizacao 1: distribuicao vetorizada via merge ---
+    cfg_lookup <- configuracao[, .(posto, nome_real, sub_bacia_agrupada, fator)]
+    previsao_totalizada <- merge(
+        previsao, cfg_lookup,
+        by.x = "nome", by.y = "sub_bacia_agrupada",
+        allow.cartesian = TRUE
+    )
+    previsao_totalizada[, valor := valor * fator]
+    previsao_totalizada[, nome := nome_real]
+    previsao_totalizada[, c("nome_real", "fator") := NULL]
 
-    # Loop otimizado
-    for (i in seq_along(configuracao$posto)) {
-        posto_total <- configuracao$posto[i]
-        sub_bacia_agrupada <- configuracao[posto == posto_total, sub_bacia_agrupada]
-        fator <- configuracao[posto == posto_total, fator]
-        nome_real <- configuracao[posto == posto_total, nome_real]
-
-        # Copia e faz os ajustes no data.table
-        previsao_totalizada_subbacia <- data.table::copy(previsao[nome == sub_bacia_agrupada])
-        previsao_totalizada_subbacia[, valor := valor * fator]
-        previsao_totalizada_subbacia[, nome := nome_real]
-        previsao_totalizada_subbacia[, posto := posto_total]
-
-        # Armazena o resultado em uma lista
-        resultados[[i]] <- previsao_totalizada_subbacia
+    # --- Regressao (flag_regressao == 1) ---
+    postos_regredidos <- configuracao[regressao > 0 & flag_regressao == 1, nome_real]
+    for (nome_regredido in postos_regredidos) {
+        posto_reg <- configuracao[nome_real == nome_regredido, posto_regredido]
+        nome_base <- configuracao[posto == posto_reg, nome_real]
+        regressao <- configuracao[nome_real == nome_regredido, regressao]
+        incremental_regredida <- previsao_totalizada[posto == posto_reg, valor]
+        previsao_totalizada[nome == nome_regredido, valor := incremental_regredida * regressao]
     }
 
-    # Junta todos os data.tables de uma vez
-    previsao_totalizada <- data.table::rbindlist(resultados)
     data.table::setnames(previsao_totalizada, "valor", "previsao_incremental")
     data.table::setorder(previsao_totalizada, "data_rodada", "nome", "cenario", "data_previsao")
+
+    # --- Otimizacao 2: setkey para lookups binarios ---
+    data.table::setkey(previsao_totalizada, nome)
+
+    # --- Otimizacao 3: lookup da configuracao por posto -> nome_real (hash O(1)) ---
+    cfg_nome_by_posto <- setNames(configuracao$nome_real, as.character(configuracao$posto))
 
     # propaga postos flu
     if(nrow(configuracao[bacia_smap == "posto_flu"]) > 0) {
         configuracao_postos_plu <- configuracao[bacia_smap == "posto_flu"]
         ordem <- ordem_afluencia(configuracao_postos_plu$posto, configuracao_postos_plu$posto_jusante)
+
+        # Vetores nomeados para lookups rapidos
+        plu_tv <- setNames(configuracao_postos_plu$tv, configuracao_postos_plu$nome_real)
+        plu_n <- setNames(configuracao_postos_plu$n, configuracao_postos_plu$nome_real)
+        plu_c1 <- setNames(configuracao_postos_plu$c1, configuracao_postos_plu$nome_real)
+        plu_c2 <- setNames(configuracao_postos_plu$c2, configuracao_postos_plu$nome_real)
+        plu_c3 <- setNames(configuracao_postos_plu$c3, configuracao_postos_plu$nome_real)
+
         for (indice_ordem in 1:max(ordem)) {
             indice_configuracao <- which(ordem == indice_ordem)
             for (indice_usina in indice_configuracao) {
-                nome_montante <- configuracao_postos_plu[indice_usina, nome_real]
-                nome_jusante <- configuracao[posto == configuracao_postos_plu[indice_usina, posto_jusante], nome_real]
-                jusante <- previsao_totalizada[nome == nome_jusante]
-                montante <- previsao_totalizada[nome == nome_montante]
-                if (configuracao_postos_plu[nome_real == nome_montante, n] == 0){
-                    tv <- configuracao_postos_plu[nome_real == nome_montante, tv]
-                    propagada <- funcaoSmapCpp::propaga_tv_cpp(montante[, previsao_incremental], jusante[, previsao_incremental], tv)
-                    previsao_totalizada[nome == nome_jusante, previsao_incremental := propagada]
+                nome_montante <- configuracao_postos_plu$nome_real[indice_usina]
+                nome_jusante <- cfg_nome_by_posto[as.character(configuracao_postos_plu$posto_jusante[indice_usina])]
+                jusante <- previsao_totalizada[.(nome_jusante)]
+                montante <- previsao_totalizada[.(nome_montante)]
+                if (plu_n[nome_montante] == 0){
+                    propagada <- funcaoSmapCpp::propaga_tv_cpp(montante[, previsao_incremental], jusante[, previsao_incremental], plu_tv[nome_montante])
+                    previsao_totalizada[.(nome_jusante), previsao_incremental := propagada]
                 } else {
-                    n <- configuracao_postos_plu[nome_real == nome_montante, n]
-                    coeficientes <- c(0, 0, 0)
-                    coeficientes[1] <- configuracao_postos_plu[nome_real == nome_montante, c1]
-                    coeficientes[2] <- configuracao_postos_plu[nome_real == nome_montante, c2]
-                    coeficientes[3] <- configuracao_postos_plu[nome_real == nome_montante, c3]
-                    propagada <- funcaoSmapCpp::propaga_muskingum_cpp(montante[, previsao_incremental], jusante[, previsao_incremental], n, coeficientes)
-                    previsao_totalizada[nome == nome_jusante, previsao_incremental := propagada]
+                    coeficientes <- c(plu_c1[nome_montante], plu_c2[nome_montante], plu_c3[nome_montante])
+                    propagada <- funcaoSmapCpp::propaga_muskingum_cpp(montante[, previsao_incremental], jusante[, previsao_incremental], plu_n[nome_montante], coeficientes)
+                    previsao_totalizada[.(nome_jusante), previsao_incremental := propagada]
                 }
             }
         }
     }
 
-    
+
     # propaga subbacias
     configuracao_sem_postos_plu <- configuracao[!bacia_smap == "posto_flu"]
     previsao_totalizada[, previsao_total := previsao_incremental]
     previsao_totalizada[, previsao_total_sem_tv := previsao_incremental]
     ordem <- ordem_afluencia(configuracao_sem_postos_plu$posto, configuracao_sem_postos_plu$posto_jusante)
+
+    # Vetores nomeados para lookups rapidos
+    sem_tv <- setNames(configuracao_sem_postos_plu$tv, configuracao_sem_postos_plu$nome_real)
+    sem_n <- setNames(configuracao_sem_postos_plu$n, configuracao_sem_postos_plu$nome_real)
+    sem_c1 <- setNames(configuracao_sem_postos_plu$c1, configuracao_sem_postos_plu$nome_real)
+    sem_c2 <- setNames(configuracao_sem_postos_plu$c2, configuracao_sem_postos_plu$nome_real)
+    sem_c3 <- setNames(configuracao_sem_postos_plu$c3, configuracao_sem_postos_plu$nome_real)
+    nomes_reg_flag0 <- configuracao[regressao > 0 & flag_regressao == 0, nome_real]
+    reg_posto_regredido <- setNames(
+        as.character(configuracao[regressao > 0 & flag_regressao == 0, posto_regredido]),
+        configuracao[regressao > 0 & flag_regressao == 0, nome_real]
+    )
+    reg_regressao <- setNames(
+        configuracao[regressao > 0 & flag_regressao == 0, regressao],
+        configuracao[regressao > 0 & flag_regressao == 0, nome_real]
+    )
+
     for (indice_ordem in 1:max(ordem)) {
         indice_configuracao <- which(ordem == indice_ordem)
         for (indice_usina in indice_configuracao) {
-            nome_montante <- configuracao_sem_postos_plu[indice_usina, nome_real]
-            nome_jusante <- configuracao[posto == configuracao_sem_postos_plu[indice_usina, posto_jusante], nome_real]
+            nome_montante <- configuracao_sem_postos_plu$nome_real[indice_usina]
+            nome_jusante <- cfg_nome_by_posto[as.character(configuracao_sem_postos_plu$posto_jusante[indice_usina])]
+            if(nome_montante %in% nomes_reg_flag0) {
+                nome_base <- cfg_nome_by_posto[reg_posto_regredido[nome_montante]]
+                reg_val <- reg_regressao[nome_montante]
+
+                previsao_totalizada[.(nome_montante), previsao_incremental :=
+                            previsao_totalizada[.(nome_base), previsao_total] * reg_val]
+                previsao_totalizada[.(nome_montante), previsao_total := previsao_total +
+                            previsao_totalizada[.(nome_base), previsao_total] * reg_val]
+                previsao_totalizada[.(nome_montante), previsao_total_sem_tv := previsao_total_sem_tv +
+                            previsao_totalizada[.(nome_base), previsao_total_sem_tv] * reg_val]
+            }
             if (length(nome_jusante) != 0) {
-                jusante <- previsao_totalizada[nome == nome_jusante]
-                montante <- previsao_totalizada[nome == nome_montante]
-                if (configuracao_sem_postos_plu[nome_real == nome_montante, n] == 0){
-                    tv <- configuracao_sem_postos_plu[nome_real == nome_montante, tv]
-                    propagada <- funcaoSmapCpp::propaga_tv_cpp(montante[, previsao_total], jusante[, previsao_total], tv)
-                    previsao_totalizada[nome == nome_jusante, previsao_total := propagada]
-                    previsao_totalizada[nome == nome_jusante, previsao_total_sem_tv := 
+                jusante <- previsao_totalizada[.(nome_jusante)]
+                montante <- previsao_totalizada[.(nome_montante)]
+                if (sem_n[nome_montante] == 0){
+                    propagada <- funcaoSmapCpp::propaga_tv_cpp(montante[, previsao_total], jusante[, previsao_total], sem_tv[nome_montante])
+                    previsao_totalizada[.(nome_jusante), previsao_total := propagada]
+                    previsao_totalizada[.(nome_jusante), previsao_total_sem_tv :=
                                         montante[, previsao_total_sem_tv] + jusante[, previsao_total_sem_tv]]
                 } else {
-                    n <- configuracao_sem_postos_plu[nome_real == nome_montante, n]
-                    coeficientes <- c(0, 0, 0)
-                    coeficientes[1] <- configuracao_sem_postos_plu[nome_real == nome_montante, c1]
-                    coeficientes[2] <- configuracao_sem_postos_plu[nome_real == nome_montante, c2]
-                    coeficientes[3] <- configuracao_sem_postos_plu[nome_real == nome_montante, c3]
-                    propagada <- funcaoSmapCpp::propaga_muskingum_cpp(montante[, previsao_total], jusante[, previsao_total], n, coeficientes)
-                    previsao_totalizada[nome == nome_jusante, previsao_total := propagada]
-                    previsao_totalizada[nome == nome_jusante, previsao_total_sem_tv := 
+                    coeficientes <- c(sem_c1[nome_montante], sem_c2[nome_montante], sem_c3[nome_montante])
+                    propagada <- funcaoSmapCpp::propaga_muskingum_cpp(montante[, previsao_total], jusante[, previsao_total], sem_n[nome_montante], coeficientes)
+                    previsao_totalizada[.(nome_jusante), previsao_total := propagada]
+                    previsao_totalizada[.(nome_jusante), previsao_total_sem_tv :=
                                     montante[, previsao_total_sem_tv] + jusante[, previsao_total_sem_tv]]
                 }
             }
@@ -166,17 +196,17 @@ totaliza_previsao <- function(previsao, vazao_observada, configuracao) {
     for (indice_ordem in 1:max(ordem)) {
         indice_configuracao <- which(ordem == indice_ordem)
         for (indice_usina in indice_configuracao) {
-            nome_montante <- configuracao_sem_postos_plu[indice_usina, nome_real]
-            nome_jusante <- configuracao[posto == configuracao_sem_postos_plu[indice_usina, posto_jusante], nome_real]
+            nome_montante <- configuracao_sem_postos_plu$nome_real[indice_usina]
+            nome_jusante <- cfg_nome_by_posto[as.character(configuracao_sem_postos_plu$posto_jusante[indice_usina])]
             if (length(nome_jusante) != 0) {
-                jusante <- previsao_totalizada[nome == nome_jusante, previsao_inc_tv]
-                montante <- previsao_totalizada[nome == nome_montante, previsao_total]
+                jusante <- previsao_totalizada[.(nome_jusante), previsao_inc_tv]
+                montante <- previsao_totalizada[.(nome_montante), previsao_total]
 
-                previsao_totalizada[nome == nome_jusante, 
+                previsao_totalizada[.(nome_jusante),
                             previsao_inc_tv := jusante - montante]
             }
         }
     }
-    
+
     previsao_totalizada
 }
