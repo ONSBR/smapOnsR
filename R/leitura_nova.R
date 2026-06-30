@@ -768,7 +768,7 @@ le_arq_entrada_novo <- function(pasta_entrada) {
         lapply(sub_bacias$nome, function(nome_subbacia) {
             kt <- parametros[nome == nome_subbacia & substr(parametro, 1, 2) == "Kt", valor]
             ktMin <- sum(kt[4:63] > 0)
-            data_inicio <- datas_rodadas[, min(data)] - inicializacao[nome == nome_subbacia & variavel == "numero_dias_assimilacao", unique(valor)] + 1
+            data_inicio <- datas_rodadas[, min(data)] - inicializacao[nome == nome_subbacia & variavel == "numero_dias_assimilacao", unique(valor)]
             data_fim <- datas_rodadas[, max(data)]
             if (precipitacao_observada[, min(data)] > (data_inicio - ktMin))
                 stop(paste0("O historico de precipitacao verificada da sub-bacia ", nome_subbacia, " deve comecar na data ", data_inicio - ktMin))
