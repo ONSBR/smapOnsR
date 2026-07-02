@@ -184,9 +184,11 @@ completa_previsao <- function(precipitacao_prevista, datas_rodadas, numero_dias 
     result_list <- list()
     for (i in seq_len(nrow(datas_rodadas))) {
         current_data_rodada <- datas_rodadas[i, ]
+        data_inicial <- current_data_rodada$data + 1
+        data_final <- current_data_rodada[, data] + 
+                      current_data_rodada[, numero_dias_previsao] - 1
         if (any(precipitacao_prevista[data_rodada == current_data_rodada$data, 
-                                      as.numeric(max(data_previsao) - (current_data_rodada$data + 
-                                                                      current_data_rodada$numero_dias_previsao - 1 + 
+                                      as.numeric(max(data_previsao) - (data_final + 
                                                                       numero_dias)), by = .(nome, cenario)]$V1 <= 
                 0)) {
           mean_values <- precipitacao_prevista[, .(mean_valor = mean(valor)), 
@@ -194,8 +196,8 @@ completa_previsao <- function(precipitacao_prevista, datas_rodadas, numero_dias 
           unique_combinations <- unique(precipitacao_prevista[data_rodada == 
                                                                 current_data_rodada$data, .(nome, data_rodada, 
                                                                                             cenario)])
-          datas <- seq.Date(current_data_rodada$data + 1, 
-                            current_data_rodada$data + current_data_rodada$numero_dias_previsao + 
+          datas <- seq.Date(data_inicial, 
+                            data_final +
                               numero_dias, by = 1)
           all_combinations <- data.table::CJ(nome = unique(unique_combinations$nome), 
                                             cenario = unique(unique_combinations$cenario), data_previsao = datas)

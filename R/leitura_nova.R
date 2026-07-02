@@ -811,7 +811,16 @@ le_arq_entrada_novo <- function(pasta_entrada) {
             if (!all(sub_bacias$nome %in% evapotranspiracao_prevista$nome)) {
                 stop(paste0("Falta a sub-bacia ", sub_bacias[!nome %in% evapotranspiracao_prevista$nome, nome], " no arquivo ", arquivos[arquivo == "EVAPOTRANSPIRACAO_PREVISTA", nome_arquivo], ".\n"))
             }
-            valida_previsao_etp(evapotranspiracao_prevista, precipitacao_prevista)
+            evapotranspiracao_prevista <- completa_previsao(evapotranspiracao_prevista, datas_rodadas, numero_dias = 0)
+            limites_previsao <- datas_rodadas[, .(data_rodada = data,
+                data_limite = data + numero_dias_previsao - 1)]
+            precipitacao_prevista_horizonte <- precipitacao_prevista[limites_previsao,
+                on = "data_rodada"][data_previsao <= data_limite,
+                .(data_rodada, data_previsao, cenario, nome, valor)]
+            evapotranspiracao_prevista_horizonte <- evapotranspiracao_prevista[limites_previsao,
+                on = "data_rodada"][data_previsao <= data_limite,
+                .(data_rodada, data_previsao, cenario, nome, valor)]
+            valida_previsao_etp(evapotranspiracao_prevista_horizonte, precipitacao_prevista_horizonte)
         } else {
             warning("nao existe arquivo de previsao de evapotranspiracao, serao utilizados dados historicos")
             
