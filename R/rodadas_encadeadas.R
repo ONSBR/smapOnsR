@@ -1062,13 +1062,16 @@ rodada_encadeada_pmur_etp <- function(parametros, inicializacao, precipitacao_ob
             matriz_precipitacao <- cbind(matriz_precipitacao, matriz_precipitacao_previsao)
             previsao_evapotranspiracao_rodada <- evapotranspiracao_prevista[nome == sub_bacia & data_rodada == dataRodada & data_previsao < (dataRodada + numero_dias_previsao)]
             evapotranspiracao <- data.table::data.table(evapotranspiracao_observada[posto == sub_bacia &
-            data <= dataRodada & data >= (dataRodada - numero_dias_assimilacao)])
+            data < dataRodada & data >= (dataRodada - numero_dias_assimilacao)])
             data.table::setnames(evapotranspiracao, "posto", "nome")
             evapotranspiracao[, data_rodada := dataRodada]
             evapotranspiracao <- combina_observacao_previsao(evapotranspiracao, previsao_evapotranspiracao_rodada)
             
-            matriz_evapotranspiracao_planicie <- matrix(evapotranspiracao[, valor] * vetor_modelo[77], nrow = numero_cenarios, ncol = nrow(evapotranspiracao), byrow = TRUE)
-            matriz_evapotranspiracao <- matrix(evapotranspiracao[, valor] * vetor_modelo[76], nrow = numero_cenarios, ncol = nrow(evapotranspiracao), byrow = TRUE)
+            matriz_evapotranspiracao_planicie <- matrix(evapotranspiracao[cenario %in% precipitacao[, unique(cenario)], valor] * vetor_modelo[77], 
+                                    nrow = numero_cenarios, ncol = (numero_dias_previsao + numero_dias_assimilacao), byrow = TRUE)
+            matriz_evapotranspiracao <- matrix(evapotranspiracao[cenario %in% precipitacao[, unique(cenario)], valor] * vetor_modelo[76], 
+                                    nrow = numero_cenarios, ncol = (numero_dias_previsao + numero_dias_assimilacao), byrow = TRUE)
+
             if (numero_cenarios == 1) {
                 matriz_evapotranspiracao_planicie[, 1:numero_dias_assimilacao] <- matriz_evapotranspiracao_planicie[, 1:numero_dias_assimilacao] *
                                                                             ajuste$ajuste$par[(numero_dias_assimilacao + 1):(numero_dias_assimilacao * 2)]

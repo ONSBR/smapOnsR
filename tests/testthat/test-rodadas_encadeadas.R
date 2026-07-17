@@ -235,7 +235,7 @@ test_that("testa rodada com aprimoramentos", {
 
   if (secao$R.version$os == "mingw32") {
     expect_equal(round(saida$previsao[nome == "stoantjari" & variavel == "Qcalc" & 
-                  cenario == "ecmwf_7", valor][35], 2), 1359.85)
+                  cenario == "ecmwf_7", valor][35], 2), 1352.18)
     expect_equal(round(saida$funcao_objetivo[, funcao_objetivo], 7),
                       c(0.1985781, 0.0874264, 0.0006976, 0.4497266, 0.2600375,
                       0.7954830, 0.0425972, 0.2157436, 0.0807382, 0.0774346,
@@ -243,7 +243,7 @@ test_that("testa rodada com aprimoramentos", {
                       0.1392731, 0.1794551, 0.1521796, 0.1845175, 0.0144009, 0.0623383))
   } else {
     expect_true(abs(round(saida$previsao[nome == "stoantjari" & variavel == "Qcalc" & 
-                  cenario == "ecmwf_7", valor][35], 2) - 1359.85) < 1359.85 * 0.01)
+                  cenario == "ecmwf_7", valor][35], 2) - 1352.18) < 1352.18 * 0.01)
   }
 
 })
