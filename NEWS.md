@@ -1,3 +1,19 @@
+# smapOnsR 1.4.1
+
+## Minor changes
+
+* Otimizacao da funcao de totalizao
+
+* Completa previsao de etp com a media quando seu horizonte e menor que o horizonte de estudo, mantendo compatibilidade de comportamento com previsao de precipitacao
+
+## Bug fixes
+
+* Correcao da validacao de previsoes de etp
+
+* Correcao da construcao da matriz com dados previstos de etp:
+- em casos com dado observado de etp para o mesmo dia da dataRodada, esse valor entrava na matriz de etp prevista;
+- formatacao da matriz usava valor errado para numero de colunas, repetindo desnecessariamente as colunas.
+
 # smapOnsR 1.4.0
 
 ## Major changes
