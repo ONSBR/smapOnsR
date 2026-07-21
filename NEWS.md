@@ -2,7 +2,7 @@
 
 ## Minor changes
 
-* Otimizacao da funcao de totalizao
+* Otimizacao da funcao de totalizacao
 
 * Completa previsao de etp com a media quando seu horizonte e menor que o horizonte de estudo, mantendo compatibilidade de comportamento com previsao de precipitacao
 
