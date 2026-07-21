@@ -8,7 +8,7 @@
 
 ## Bug fixes
 
-* Correcao da validacao de dados observados de precipitacao que se inciava um dia paos a data real necessaria
+* Correcao da validacao de dados observados de precipitacao que se iniciava um dia apos a data real necessaria
 
 * Correcao da validacao de previsoes de etp:
 - validacao cruzada com previsao de precipitacao realizada apenas com os dias previstos que constam em cada data_rodada
